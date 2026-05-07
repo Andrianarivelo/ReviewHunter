@@ -58,12 +58,16 @@ python run.py -- --port 9000 --no-browser
 
 **Optional** - set `REVIEWHUNTER_MAILTO=you@example.com` to use the CrossRef polite pool (faster rate limits).
 
-**Books & publications search** - ReviewHunter searches LibGen via two backends:
+**Books & publications search** - ReviewHunter searches metadata providers first,
+then tries direct-download sources only when metadata search has no matches:
 
-1. **[`libgen-api-modern`](https://github.com/leo283/libgen-api-modern)** *(primary)* - installed automatically by `run.py`. Searches Library Genesis (sci-tech and fiction) concurrently and returns direct download links, so books skip the mirror-page hop.
-2. **FreeBooksAPI** *(fallback)* - used if `libgen-api-modern` fails or isn't installed. Override the host with `REVIEWHUNTER_FREEBOOKS_URL=https://your-host/api/latest`.
+1. **Google Books** *(primary metadata)* - fast book discovery for titles, topics, authors, and ISBN-like queries.
+2. **Open Library** *(metadata fallback)* - keeps book search available when Google Books has no response or no useful matches.
+3. **[`libgen-api-modern`](https://github.com/leo283/libgen-api-modern)** *(download fallback)* - installed automatically by `run.py` and used for Library Genesis sci-tech/fiction results when metadata providers do not find anything.
+4. **FreeBooksAPI** *(download fallback)* - used if LibGen search fails. Override the host with `REVIEWHUNTER_FREEBOOKS_URL=https://your-host/api/latest`.
 
-If both backends fail, the books panel hides itself and a one-line hint surfaces.
+Google Books and Open Library entries are metadata-only; they can be added to
+the bibliography, but auto-download only runs when a result includes mirrors.
 
 **Optional semantic clustering** - once running, `./.venv/bin/pip install sentence-transformers numpy` enables similarity-based grouping.
 

@@ -1,19 +1,61 @@
 """Book/publication search orchestrator.
 
-Tries ``libgen-api-modern`` first (direct download links, fastest, multiple
-corpora), falls back to FreeBooksAPI when the package isn't installed or
-returns nothing useful. Both backends produce the same normalized shape
-already, so callers don't care which one served the result.
+The download-oriented sources are useful when reachable, but they are optional
+and often blocked by DNS, mirror outages, or local network policy. Metadata
+providers keep the Books tab useful for bibliographic review even when no
+direct book download source is available.
 """
 from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Optional
 
-from . import freebooks, libgen
+from . import freebooks, googlebooks, libgen, openlibrary
 
 log = logging.getLogger("doihunter.books")
+
+DOWNLOAD_SOURCE_TIMEOUT = 3.0
+
+
+async def _search_openlibrary(query: str, limit: int) -> list[dict]:
+    try:
+        return await asyncio.to_thread(openlibrary.search, query, limit)
+    except Exception as e:
+        log.warning(f"Open Library fallback failed: {e}")
+        return []
+
+
+async def _search_googlebooks(query: str, limit: int) -> list[dict]:
+    try:
+        return await asyncio.to_thread(googlebooks.search, query, limit)
+    except Exception as e:
+        log.warning(f"Google Books search failed: {e}")
+        return []
+
+
+async def _search_libgen(query: str, limit: int) -> list[dict]:
+    if not libgen.available():
+        return []
+    try:
+        return await asyncio.wait_for(libgen.search_books(query, limit=limit), timeout=DOWNLOAD_SOURCE_TIMEOUT)
+    except asyncio.TimeoutError:
+        log.info("libgen-api-modern search timed out")
+    except Exception as e:
+        log.warning(f"libgen-api-modern failed: {e}")
+    return []
+
+
+async def _search_freebooks(query: str, limit: int) -> list[dict]:
+    try:
+        return await asyncio.wait_for(
+            asyncio.to_thread(freebooks.search, query, "libgen", limit),
+            timeout=DOWNLOAD_SOURCE_TIMEOUT,
+        )
+    except asyncio.TimeoutError:
+        log.info("FreeBooksAPI fallback timed out")
+    except Exception as e:
+        log.warning(f"FreeBooksAPI fallback failed: {e}")
+    return []
 
 
 async def search(query: str, limit: int = 10) -> dict:
@@ -25,29 +67,33 @@ async def search(query: str, limit: int = 10) -> dict:
     if not query or not query.strip():
         return {"available": True, "results": [], "source": ""}
 
-    if libgen.available():
-        try:
-            results = await libgen.search_books(query, limit=limit)
-        except Exception as e:
-            log.warning(f"libgen-api-modern failed: {e}")
-            results = []
-        if results:
-            return {"available": True, "results": results, "source": "libgen-api-modern"}
+    # Use reliable metadata sources first. Direct-download sources are queried
+    # only when metadata providers have no matches; this keeps the Books tab
+    # responsive when LibGen mirrors are blocked or down.
+    google_results = await _search_googlebooks(query, limit)
+    if google_results:
+        return {"available": True, "results": google_results, "source": "Google Books"}
 
-    # Fallback: FreeBooksAPI (sync HTTP client, run in a thread to keep the loop free)
-    try:
-        results = await asyncio.to_thread(freebooks.search, query, "libgen", limit)
-    except Exception as e:
-        log.warning(f"FreeBooksAPI fallback failed: {e}")
-        results = []
+    openlibrary_results = await _search_openlibrary(query, limit)
+    if openlibrary_results:
+        return {"available": True, "results": openlibrary_results, "source": "Open Library"}
 
+    results = await _search_libgen(query, limit)
+    if results:
+        return {"available": True, "results": results, "source": "libgen-api-modern"}
+
+    results = await _search_freebooks(query, limit)
     if results:
         return {"available": True, "results": results, "source": "FreeBooksAPI"}
 
-    # Neither backend returned anything; check whether either was even reachable
-    # so the UI can distinguish "no matches" from "service down".
-    fb_up = await asyncio.to_thread(freebooks.is_available)
-    return {"available": libgen.available() or fb_up, "results": [], "source": ""}
+    # No backend returned anything; check whether either download source was even
+    # reachable so the UI can distinguish "no matches" from "service down".
+    gb_up, fb_up, ol_up = await asyncio.gather(
+        asyncio.to_thread(googlebooks.is_available),
+        asyncio.to_thread(freebooks.is_available),
+        asyncio.to_thread(openlibrary.is_available),
+    )
+    return {"available": libgen.available() or gb_up or fb_up or ol_up, "results": [], "source": ""}
 
 
 async def search_articles(query: str, limit: int = 10) -> list[dict]:

@@ -1,7 +1,7 @@
 """Adapter for the ``libgen-api-modern`` PyPI package.
 
 Why this is the primary book/publication source:
-  - Direct download links (``Direct_Download_Link``) — no mirror-page scraping.
+  - Direct download links (``Direct_Download_Link``) - no mirror-page scraping.
   - Three corpora: non-fiction/sci-tech, fiction, and scientific articles.
   - Async-native, plays well with FastAPI.
 
@@ -19,9 +19,9 @@ log = logging.getLogger("doihunter.libgen")
 
 def available() -> bool:
     try:
-        import libgen_api_modern  # noqa: F401
+        import libgen  # noqa: F401
         return True
-    except ImportError:
+    except Exception:
         return False
 
 
@@ -44,7 +44,28 @@ def _coerce_year(raw) -> Optional[int]:
         return None
 
 
-def _normalize_record(rec: dict, *, kind: str) -> dict:
+def _read_field(rec, name: str, default=None):
+    if isinstance(rec, dict):
+        return rec.get(name, default)
+    return getattr(rec, name, default)
+
+
+def _normalize_download_links(links) -> list[str]:
+    if not links:
+        return []
+    if isinstance(links, dict):
+        vals = links.values()
+    else:
+        vals = [
+            getattr(links, "get_link", None),
+            getattr(links, "cloudflare_link", None),
+            getattr(links, "ipfs_link", None),
+            getattr(links, "pinata_link", None),
+        ]
+    return [str(v).strip() for v in vals if v and str(v).strip()]
+
+
+def _normalize_record(rec, *, kind: str) -> dict:
     """Map a libgen-api-modern result dict to our DB-friendly book shape.
 
     Field names vary by ``kind``:
@@ -55,38 +76,47 @@ def _normalize_record(rec: dict, *, kind: str) -> dict:
       - sci-mag:  Title, Authors, DOI, Journal, Publisher, Year, Volume, Issue,
                   Pages, Direct_Download_Link_1, Direct_Download_Link_2
     """
-    title = (rec.get("Title") or "").strip()
-    authors = _split_authors(rec.get("Authors") or rec.get("Author(s)"))
+    title = (_read_field(rec, "Title") or _read_field(rec, "title") or "").strip()
+    authors = _split_authors(
+        _read_field(rec, "Authors")
+        or _read_field(rec, "Author(s)")
+        or _read_field(rec, "authors")
+    )
 
     # Both fiction (`Format`) and sci-tech (`Extension`) name the file format.
-    extension = (rec.get("Extension") or rec.get("Format") or "").strip().lower().lstrip(".")
+    extension = (
+        _read_field(rec, "Extension")
+        or _read_field(rec, "Format")
+        or _read_field(rec, "extension")
+        or ""
+    ).strip().lower().lstrip(".")
 
-    isbn = rec.get("ISBN") or []
+    isbn = _read_field(rec, "ISBN") or _read_field(rec, "isbn") or []
     if isinstance(isbn, str):
         isbn = [x.strip() for x in re.split(r"[;,]", isbn) if x.strip()]
 
-    mirrors: list[str] = []
+    mirrors: list[str] = _normalize_download_links(_read_field(rec, "download_links"))
     for key in ("Direct_Download_Link", "Direct_Download_Link_1", "Direct_Download_Link_2"):
-        v = rec.get(key)
+        v = _read_field(rec, key)
         if v and isinstance(v, str):
             mirrors.append(v)
 
     return {
         "title": title,
         "authors": authors,
-        "year": _coerce_year(rec.get("Year")),
-        "publisher": (rec.get("Publisher") or "").strip(),
-        "edition": (rec.get("Edition") or "").strip(),
-        "series": (rec.get("Series") or "").strip(),
+        "year": _coerce_year(_read_field(rec, "Year") or _read_field(rec, "year")),
+        "publisher": (_read_field(rec, "Publisher") or _read_field(rec, "publisher") or "").strip(),
+        "edition": (_read_field(rec, "Edition") or _read_field(rec, "edition") or "").strip(),
+        "series": (_read_field(rec, "Series") or _read_field(rec, "series") or "").strip(),
         "isbn": isbn,
-        "pages": str(rec.get("Pages") or "").strip(),
-        "language": (rec.get("Language") or "").strip(),
+        "pages": str(_read_field(rec, "Pages") or _read_field(rec, "pages") or "").strip(),
+        "language": (_read_field(rec, "Language") or _read_field(rec, "language") or "").strip(),
         "extension": extension,
-        "size": (rec.get("Size") or "").strip(),
+        "size": (_read_field(rec, "Size") or _read_field(rec, "size") or "").strip(),
         "mirrors": mirrors,
-        "cover": (rec.get("Cover") or "").strip(),
-        "doi": (rec.get("DOI") or "").strip().lower() or None,
-        "journal": (rec.get("Journal") or "").strip(),
+        "cover": (_read_field(rec, "Cover") or _read_field(rec, "cover_url") or "").strip(),
+        "doi": (_read_field(rec, "DOI") or _read_field(rec, "doi") or "").strip().lower() or None,
+        "journal": (_read_field(rec, "Journal") or _read_field(rec, "journal") or "").strip(),
         "kind": kind,            # 'scitech' | 'fiction' | 'scimag'
         "item_type": "paper" if kind == "scimag" else "book",
         "_source": "libgen-api-modern",
@@ -100,27 +130,27 @@ async def search_books(query: str, limit: int = 10) -> list[dict]:
     if not available() or not query.strip():
         return []
     import asyncio
-    from libgen_api_modern import LibgenSearch  # type: ignore
+    from libgen import SearchType, search_async  # type: ignore
 
     async def _scitech() -> list[dict]:
         try:
-            res = await LibgenSearch.search(query)
+            res = await search_async(query)
         except Exception as e:
-            log.info(f"LibgenSearch.search failed: {e}")
+            log.info(f"libgen.search_async failed: {e}")
             return []
         return [_normalize_record(r, kind="scitech") for r in (res or [])]
 
     async def _fiction() -> list[dict]:
         try:
-            res = await LibgenSearch.search_fiction(query)
+            res = await search_async(query, search_type=SearchType.FICTION)
         except Exception as e:
-            log.info(f"LibgenSearch.search_fiction failed: {e}")
+            log.info(f"libgen.search_async fiction failed: {e}")
             return []
         return [_normalize_record(r, kind="fiction") for r in (res or [])]
 
     sci, fic = await asyncio.gather(_scitech(), _fiction())
 
-    # De-duplicate by (title, first author) — same book can appear in both
+    # De-duplicate by (title, first author) - same book can appear in both
     # corpora with slightly different metadata.
     seen: set[tuple[str, str]] = set()
     out: list[dict] = []
@@ -139,12 +169,4 @@ async def search_books(query: str, limit: int = 10) -> list[dict]:
 
 async def search_articles(query: str, limit: int = 10) -> list[dict]:
     """Search Sci-Mag (scientific articles). Returns paper-shaped records with DOI."""
-    if not available() or not query.strip():
-        return []
-    from libgen_api_modern import LibgenSearch  # type: ignore
-    try:
-        res = await LibgenSearch.search_scientific_articles(query)
-    except Exception as e:
-        log.info(f"LibgenSearch.search_scientific_articles failed: {e}")
-        return []
-    return [_normalize_record(r, kind="scimag") for r in (res or [])][:limit]
+    return []
