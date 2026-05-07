@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en" x-data="app()" x-init="init()" :class="dark ? 'dark' : ''">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ReviewHunter - Discover</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='80'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+            serif: ['"Source Serif 4"', 'Georgia', 'serif'],
+          },
+          colors: {
+            ink: {
+              50:  '#f8f9fb',
+              100: '#eef0f4',
+              200: '#dde1ea',
+              300: '#bcc3d2',
+              400: '#8b94a9',
+              500: '#5d6479',
+              600: '#3f4458',
+              700: '#272b3c',
+              800: '#181b29',
+              900: '#0f111c',
+              950: '#080a13',
+            },
+            accent: {
+              50:  '#edf7ff',
+              100: '#d9ecff',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+            },
+          },
+          boxShadow: {
+            soft: '0 1px 2px rgba(15,17,28,.04), 0 10px 28px rgba(15,17,28,.08)',
+            pop:  '0 18px 48px rgba(15,17,28,.20)',
+          },
+        },
+      },
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <script defer src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js"></script>
+</head>
+
+<body class="font-sans bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-100 antialiased">
+
+  <header class="topbar h-14 flex items-center gap-3 px-4 sticky top-0 z-30">
+    <button @click="selectVirtual('discover')" class="brand-lockup flex items-center gap-2 pr-2">
+      <span class="brand-mark">R</span>
+      <span class="font-serif text-lg font-semibold tracking-tight">ReviewHunter</span>
+    </button>
+
+    <div class="flex-1 max-w-3xl mx-auto relative flex items-center gap-2">
+      <div class="relative flex-1">
+        <input
+          x-ref="search"
+          x-model.debounce.180ms="searchQuery"
+          @keydown.enter="runTopSearch()"
+          @keydown.escape="searchQuery=''; $refs.search.blur()"
+          type="text"
+          :placeholder="virtual === 'discover' ? 'Search title, DOI, author, or book' : 'Filter this library view, then press Enter to search online'"
+          class="search-input w-full h-10 px-3 pl-10 pr-12 rounded-lg text-sm outline-none transition" />
+        <svg class="absolute left-3 top-2.5 w-5 h-5 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <kbd class="absolute right-2 top-2 text-[10px] px-1.5 py-0.5 rounded bg-white/70 dark:bg-ink-800 text-ink-400 hidden md:block">Ctrl K</kbd>
+      </div>
+      <button @click="runTopSearch()"
+              class="h-10 px-4 inline-flex items-center gap-2 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold shadow-soft transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        Search
+      </button>
+    </div>
+
+    <button @click="openAdd=true" class="h-10 px-3 inline-flex items-center gap-1.5 rounded-lg bg-ink-900 hover:bg-ink-800 dark:bg-white dark:text-ink-950 dark:hover:bg-ink-100 text-white text-sm font-semibold shadow-soft transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Add
+    </button>
+
+    <button @click="dark=!dark; localStorage.dhDark=dark" :title="dark?'Light mode':'Dark mode'" class="h-10 w-10 inline-flex items-center justify-center rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800 transition">
+      <svg x-show="!dark" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg x-show="dark" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    </button>
+  </header>
+
+  <main class="grid grid-cols-[280px_minmax(420px,1fr)_minmax(320px,500px)] h-[calc(100vh-3.5rem)]">
+
+    <aside class="sidebar border-r border-ink-200 dark:border-ink-800 flex flex-col overflow-hidden">
+      <div class="px-3 py-3 border-b border-ink-100 dark:border-ink-800/70 space-y-1">
+        <button @click="selectVirtual('discover')"
+                :class="virtual==='discover' ? 'nav-active' : 'nav-idle'"
+                class="nav-row w-full">
+          <span class="nav-dot bg-accent-500"></span><span>Discover</span>
+          <span class="ml-auto text-[11px] text-ink-400" x-text="modalTotal ? modalTotal : ''"></span>
+        </button>
+      </div>
+
+      <div class="px-3 py-3 border-b border-ink-100 dark:border-ink-800/70">
+        <div class="rail-label">Library</div>
+        <div class="mt-2 space-y-1">
+          <button @click="selectVirtual('all')" :class="virtual==='all' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+            <span class="nav-icon">A</span><span>All Papers</span>
+            <span class="ml-auto text-xs text-ink-400" x-text="stats.items"></span>
+          </button>
+          <button @click="selectVirtual('recent')" :class="virtual==='recent' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+            <span class="nav-icon">N</span><span>Recently Added</span>
+          </button>
+          <button @click="selectVirtual('starred')" :class="virtual==='starred' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+            <span class="nav-icon">S</span><span>Starred</span>
+            <span class="ml-auto text-xs text-ink-400" x-text="stats.starred"></span>
+          </button>
+          <button @click="selectVirtual('failed')" :class="virtual==='failed' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+            <span class="nav-icon">!</span><span>Needs Attention</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="px-3 py-3 flex items-center">
+        <div class="rail-label">Folders</div>
+        <button @click="newCollection()" title="New folder" class="ml-auto icon-btn">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-2 pb-3 space-y-1">
+        <template x-for="c in collections" :key="c.id">
+          <div @dragover.prevent="dragOver=c.id" @dragleave="dragOver=null" @drop.prevent="onDropToCollection(c.id, $event)"
+               :class="dragOver===c.id ? 'ring-2 ring-accent-400' : ''"
+               class="group rounded-lg transition">
+            <div :class="virtual==='collection' && selectedCollectionId===c.id ? 'nav-active' : 'nav-idle'" class="nav-row">
+              <button @click="selectCollection(c.id)" class="min-w-0 flex-1 flex items-center gap-2 text-left">
+                <span class="w-2.5 h-2.5 rounded-full" :style="`background:${c.color || '#0ea5e9'}`"></span>
+                <span x-text="c.name" class="truncate"></span>
+              </button>
+              <span class="text-xs text-ink-400" x-text="c.count"></span>
+              <button @click.stop="renameCollectionPrompt(c)" class="row-tool" title="Rename">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4h-7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              </button>
+              <button @click.stop="deleteCollectionConfirm(c)" class="row-tool hover:text-rose-500" title="Delete">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>
+              </button>
+            </div>
+          </div>
+        </template>
+        <template x-if="collections.length === 0">
+          <div class="empty-note px-3 py-2">No folders yet.</div>
+        </template>
+
+        <div class="pt-4">
+          <button @click="showAuthors=!showAuthors" class="rail-toggle">
+            <svg class="w-3 h-3 transition" :class="showAuthors?'rotate-90':''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+            Authors <span x-text="`(${facets.authors.length})`"></span>
+          </button>
+          <div x-show="showAuthors" class="mt-1 space-y-1">
+            <template x-for="a in facets.authors.slice(0, authorLimit)" :key="a.name">
+              <button @click="selectAuthor(a.name)"
+                      @contextmenu.prevent="openAuthorContext(a, $event)"
+                      :class="virtual==='author' && selectedAuthor===a.name ? 'nav-active' : 'nav-idle'"
+                      class="nav-row w-full">
+                <span class="nav-icon">P</span>
+                <span class="truncate" x-text="shortAuthor(a.name)"></span>
+                <span class="ml-auto text-xs text-ink-400" x-text="a.count"></span>
+              </button>
+            </template>
+            <button x-show="facets.authors.length > authorLimit" @click="authorLimit += 20" class="show-more">Show more...</button>
+            <div x-show="facets.authors.length===0" class="empty-note px-3 py-1">No authors yet.</div>
+          </div>
+        </div>
+
+        <div class="pt-4">
+          <button @click="showSubjects=!showSubjects" class="rail-toggle">
+            <svg class="w-3 h-3 transition" :class="showSubjects?'rotate-90':''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+            Subjects <span x-text="`(${facets.subjects.length})`"></span>
+          </button>
+          <div x-show="showSubjects" class="mt-1 space-y-1">
+            <template x-for="s in facets.subjects.slice(0, subjectLimit)" :key="s.name">
+              <button @click="selectSubject(s.name)"
+                      :class="virtual==='subject' && selectedSubject===s.name ? 'nav-active' : 'nav-idle'"
+                      class="nav-row w-full">
+                <span class="nav-icon">#</span>
+                <span class="truncate" x-text="s.name"></span>
+                <span class="ml-auto text-xs text-ink-400" x-text="s.count"></span>
+              </button>
+            </template>
+            <button x-show="facets.subjects.length > subjectLimit" @click="subjectLimit += 20" class="show-more">Show more...</button>
+            <div x-show="facets.subjects.length===0" class="empty-note px-3 py-1">No subjects yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-3 py-3 border-t border-ink-100 dark:border-ink-800/70 text-[11px] text-ink-400 leading-snug">
+        <div x-text="`${stats.items} items · ${stats.downloaded} on disk`"></div>
+        <div class="truncate" :title="stats.library_path" x-text="stats.library_path || ''"></div>
+      </div>
+    </aside>
+
+    <section class="overflow-hidden flex flex-col bg-ink-50 dark:bg-ink-950">
+      <template x-if="virtual === 'discover'">
+        <div class="flex-1 min-h-0 flex flex-col">
+          <div class="discover-head px-6 py-5">
+            <div class="flex items-end gap-4">
+              <div>
+                <div class="rail-label">Home</div>
+                <h1 class="font-serif text-3xl leading-tight mt-1">Find literature</h1>
+              </div>
+              <div class="ml-auto flex rounded-lg p-1 bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800">
+                <template x-for="tab in [
+                  {k:'article', label:'Articles'},
+                  {k:'author', label:'Authors'},
+                  {k:'book', label:'Books'},
+                ]" :key="tab.k">
+                  <button @click="setSearchKind(tab.k)"
+                          :class="searchKind===tab.k ? 'bg-ink-900 text-white dark:bg-white dark:text-ink-950 shadow-soft' : 'text-ink-500 hover:text-ink-900 dark:hover:text-white'"
+                          class="h-8 px-3 rounded-md text-xs font-semibold transition"
+                          x-text="tab.label"></button>
+                </template>
+              </div>
+            </div>
+
+            <div class="mt-5 relative">
+              <input x-ref="discoverInput" x-model="modalQuery" @keydown.enter="runSearch(true)"
+                     :placeholder="modalPlaceholder()"
+                     class="discover-input w-full h-14 pl-12 pr-28 rounded-xl text-base outline-none transition" />
+              <svg class="absolute left-4 top-4 w-6 h-6 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <button @click="runSearch(true)" class="absolute right-2 top-2 h-10 px-5 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold shadow-soft">Search</button>
+            </div>
+          </div>
+
+          <div x-show="modalResults.length > 0" class="px-6 py-3 flex items-center gap-3 border-y border-ink-200 dark:border-ink-800 bg-white/80 dark:bg-ink-900/80 backdrop-blur">
+            <input type="checkbox" :checked="allSelected()" @change="toggleSelectAll($event.target.checked)" class="rounded">
+            <span class="text-xs text-ink-500" x-text="`${selectedCount()} selected · showing ${modalResults.length} of ${modalTotal || modalResults.length}`"></span>
+            <span x-show="modalSource" class="text-xs text-ink-400">via <span class="font-medium" x-text="modalSource"></span></span>
+            <select x-model="modalBulkCollectionId" class="ml-auto h-8 text-xs bg-ink-100 dark:bg-ink-800 rounded-md px-2 outline-none">
+              <option value="">No folder</option>
+              <option value="__new__" x-text="suggestedNewFolder()"></option>
+              <template x-for="c in collections"><option :value="c.id" x-text="c.name"></option></template>
+            </select>
+            <label class="text-xs flex items-center gap-1.5">
+              <input type="checkbox" x-model="autoDownload" class="rounded">Auto-download
+            </label>
+            <button @click="addSelected()" :disabled="selectedCount()===0 || modalSubmitting" class="action-primary h-8 px-3 text-xs">Add selected</button>
+            <button @click="addAll()" :disabled="modalResults.length===0 || modalSubmitting" class="action-secondary h-8 px-3 text-xs">
+              Add all <span x-show="modalTotal>0" x-text="`(${Math.min(modalTotal, addAllCap)})`"></span>
+            </button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-5">
+            <template x-if="modalLoading && modalResults.length===0">
+              <div class="result-empty">Searching...</div>
+            </template>
+            <template x-if="!modalLoading && modalResults.length===0 && modalAttempted">
+              <div class="result-empty" x-text="modalUnavailable ? 'Books search is unavailable.' : 'No results.'"></div>
+            </template>
+            <template x-if="!modalLoading && modalResults.length===0 && !modalAttempted">
+              <div class="result-empty">
+                <div class="text-base font-semibold text-ink-700 dark:text-ink-200">Start with a DOI, title, author, or book.</div>
+                <div class="mt-2 flex flex-wrap justify-center gap-2">
+                  <button @click="searchKind='author'; modalQuery='Andry Andrianarivelo'; runSearch(true)" class="query-chip">Author catalogue</button>
+                  <button @click="searchKind='article'; modalQuery='VTA dopamine neuron social interaction'; runSearch(true)" class="query-chip">Paper topic</button>
+                  <button @click="searchKind='article'; modalQuery='10.1038/s41593-021-00972-9'; runSearch(true)" class="query-chip">Exact DOI</button>
+                </div>
+              </div>
+            </template>
+
+            <ul class="space-y-2">
+              <template x-for="(r, i) in modalResults" :key="resultKey(r, i)">
+                <li @click="r._selected = !r._selected"
+                    @contextmenu.prevent="openResultContext(r, $event)"
+                    :class="r._selected ? 'result-row-selected' : 'result-row'"
+                    class="result-item cursor-pointer">
+                  <input type="checkbox" :checked="r._selected" @click.stop="r._selected = !r._selected" class="mt-1 rounded">
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold leading-snug" x-text="r.title || '(untitled)'"></div>
+                    <div class="mt-1 text-xs text-ink-500 flex flex-wrap gap-x-2 gap-y-1">
+                      <span x-text="formatAuthors(r.authors)"></span>
+                      <span x-show="r.year" class="text-ink-400">· <span x-text="r.year"></span></span>
+                      <span x-show="r.journal || r.publisher" class="italic">· <span x-text="r.journal || r.publisher"></span></span>
+                      <span x-show="r.doi" class="text-ink-400" x-text="r.doi"></span>
+                      <span x-show="r.extension" class="type-pill" x-text="r.extension"></span>
+                    </div>
+                  </div>
+                  <button @click.stop="addOne(r)" class="mini-add">Add</button>
+                </li>
+              </template>
+            </ul>
+
+            <div x-show="modalResults.length < modalTotal && modalResults.length < addAllCap" class="pt-4 text-center">
+              <button @click="runSearch(false)" class="action-secondary h-9 px-4 text-sm">Load more</button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <template x-if="virtual !== 'discover'">
+        <div class="flex-1 min-h-0 flex flex-col">
+          <div class="h-11 px-4 flex items-center text-xs text-ink-500 border-b border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900">
+            <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="paneTitle()"></div>
+            <div class="ml-auto flex items-center gap-3" x-show="filteredItems.length > 0">
+              <span x-text="`${filteredItems.length} item${filteredItems.length===1?'':'s'}`"></span>
+              <span class="text-ink-300">·</span>
+              <select x-model="sortBy" @change="sortItems()" class="bg-transparent text-xs outline-none">
+                <option value="added">Date added</option>
+                <option value="year">Year</option>
+                <option value="title">Title</option>
+              </select>
+            </div>
+          </div>
+
+          <div @dragover.prevent="dropping=true" @dragleave="dropping=false" @drop.prevent="onDropFile($event)"
+               class="flex-1 overflow-y-auto relative" :class="dropping ? 'ring-2 ring-accent-500 ring-inset' : ''">
+            <div x-show="dropping" class="pointer-events-none absolute inset-0 bg-accent-500/10 backdrop-blur-sm flex items-center justify-center text-accent-700 font-semibold z-10">
+              Drop a .txt of DOIs/titles or PDFs here
+            </div>
+
+            <template x-if="filteredItems.length === 0 && !loading">
+              <div class="h-full grid place-items-center p-12 text-center">
+                <div class="result-empty compact">
+                  <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="searchQuery ? 'No local matches.' : 'No papers in this view.'"></div>
+                  <button x-show="searchQuery" @click="runTopSearch()" class="mt-3 action-primary h-9 px-4 text-sm">Search online</button>
+                </div>
+              </div>
+            </template>
+
+            <ul class="paper-list">
+              <template x-for="it in filteredItems" :key="it.id">
+                <li @click="selectItem(it)"
+                    @contextmenu.prevent="openItemContext(it, $event)"
+                    :draggable="true" @dragstart="onDragItem(it, $event)"
+                    :class="selectedItem && selectedItem.id===it.id ? 'paper-row-active' : 'paper-row'"
+                    class="paper-item cursor-pointer transition">
+                  <button @click.stop="toggleStar(it)" class="text-base leading-none" :title="it.starred?'Unstar':'Star'">
+                    <span x-show="it.starred" class="text-amber-400">★</span>
+                    <span x-show="!it.starred" class="text-ink-300 hover:text-amber-400">☆</span>
+                  </button>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-semibold text-sm truncate flex items-center gap-1.5">
+                      <span x-show="it.item_type==='book'" class="type-pill">book</span>
+                      <span x-text="it.title || '(untitled)'"></span>
+                    </div>
+                    <div class="mt-0.5 text-xs text-ink-500 truncate flex items-center gap-2">
+                      <span x-text="formatAuthors(it.authors)"></span>
+                      <span x-show="it.year" class="text-ink-400">·</span>
+                      <span x-text="it.year || ''" class="text-ink-400"></span>
+                      <span x-show="it.journal" class="text-ink-400">·</span>
+                      <span class="italic truncate" x-text="it.journal || it.publisher || ''"></span>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span :class="statusClass(it.status)" class="w-1.5 h-1.5 rounded-full"></span>
+                    <span x-text="statusLabel(it.status)" class="text-ink-400"></span>
+                  </div>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </div>
+      </template>
+    </section>
+
+    <aside class="detail-pane border-l border-ink-200 dark:border-ink-800 overflow-y-auto">
+      <template x-if="!selectedItem">
+        <div class="h-full grid place-items-center text-center p-8">
+          <div class="result-empty compact">
+            <div class="font-semibold text-ink-700 dark:text-ink-200">Select an item</div>
+            <div class="text-xs text-ink-400 mt-1">Metadata and preview appear here.</div>
+          </div>
+        </div>
+      </template>
+
+      <template x-if="selectedItem">
+        <div class="p-5 space-y-4">
+          <div>
+            <h2 class="font-serif text-xl leading-snug" x-text="selectedItem.title"></h2>
+            <div class="mt-1 text-sm text-ink-500" x-text="formatAuthors(selectedItem.authors)"></div>
+            <div class="mt-0.5 text-xs text-ink-400">
+              <span x-text="selectedItem.journal || ''"></span>
+              <span x-show="selectedItem.year">· <span x-text="selectedItem.year"></span></span>
+              <span x-show="selectedItem.volume">· vol. <span x-text="selectedItem.volume"></span></span>
+              <span x-show="selectedItem.issue">(<span x-text="selectedItem.issue"></span>)</span>
+              <span x-show="selectedItem.pages">, <span x-text="selectedItem.pages"></span></span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button @click="downloadItem(selectedItem)" :disabled="!selectedItem.doi || selectedItem.status==='downloading'" class="action-primary h-8 px-3 text-xs">
+              <span x-show="selectedItem.status!=='downloading' && selectedItem.status!=='downloaded'">Download</span>
+              <span x-show="selectedItem.status==='downloading'">Downloading</span>
+              <span x-show="selectedItem.status==='downloaded'">Downloaded</span>
+            </button>
+            <a x-show="selectedItem.file_path" :href="`/api/items/${selectedItem.id}/file`" target="_blank" class="action-secondary h-8 px-3 text-xs inline-flex items-center">Open PDF</a>
+            <button @click="openItemFolder(selectedItem)" class="action-secondary h-8 px-3 text-xs">Open Folder</button>
+            <button @click="toggleStar(selectedItem)" class="action-secondary h-8 px-3 text-xs">
+              <span x-show="selectedItem.starred">Starred</span>
+              <span x-show="!selectedItem.starred">Star</span>
+            </button>
+            <button @click="deleteItem(selectedItem)" class="action-danger h-8 px-3 text-xs">Delete</button>
+          </div>
+
+          <div x-show="selectedItem.doi" class="text-xs">
+            <span class="text-ink-400">DOI: </span>
+            <a :href="`https://doi.org/${selectedItem.doi}`" target="_blank" class="text-accent-600 hover:underline" x-text="selectedItem.doi"></a>
+          </div>
+
+          <div x-show="selectedItem.subjects && selectedItem.subjects.length" class="flex flex-wrap gap-1.5">
+            <template x-for="s in (selectedItem.subjects || [])">
+              <span class="chip" x-text="s"></span>
+            </template>
+          </div>
+
+          <div x-show="selectedItem.keywords && selectedItem.keywords.length" class="flex flex-wrap gap-1.5">
+            <template x-for="k in (selectedItem.keywords || [])">
+              <span class="chip accent-chip" x-text="k"></span>
+            </template>
+          </div>
+
+          <div x-show="selectedItem.abstract" class="text-sm leading-relaxed text-ink-700 dark:text-ink-300 font-serif">
+            <div class="rail-label font-sans mb-1">Abstract</div>
+            <p x-text="selectedItem.abstract"></p>
+          </div>
+
+          <div>
+            <div class="rail-label mb-2">Folders</div>
+            <div class="flex flex-wrap gap-1.5">
+              <template x-for="cid in (selectedItem.collections || [])">
+                <span class="chip inline-flex items-center gap-1">
+                  <span x-text="collectionName(cid)"></span>
+                  <button @click="unassign(selectedItem.id, cid)" class="text-ink-400 hover:text-rose-500">×</button>
+                </span>
+              </template>
+              <button @click="openFolderChooser('item', selectedItem)" class="chip hover:border-accent-400">+ Add to folder</button>
+            </div>
+          </div>
+
+          <div x-show="selectedItem.file_path" class="pt-2">
+            <div class="rail-label mb-2">Preview</div>
+            <template x-if="isPreviewable(selectedItem)">
+              <iframe :src="`/api/items/${selectedItem.id}/file`" class="w-full h-[420px] rounded-lg border border-ink-200 dark:border-ink-800 bg-ink-100 dark:bg-ink-950"></iframe>
+            </template>
+            <template x-if="!isPreviewable(selectedItem)">
+              <div class="rounded-lg border border-ink-200 dark:border-ink-800 bg-ink-50 dark:bg-ink-950 p-6 text-sm text-ink-500 text-center">
+                Inline preview is not available for <span class="uppercase font-semibold" x-text="selectedItem.extension || 'this format'"></span>.
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+    </aside>
+  </main>
+
+  <div x-show="openAdd" x-transition.opacity @keydown.escape.window="openAdd=false" class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm" style="display:none">
+    <div @click.outside="openAdd=false" class="dialog w-[min(640px,92vw)] p-5">
+      <div class="flex items-baseline justify-between">
+        <h3 class="font-serif text-lg font-semibold">Add papers</h3>
+        <button @click="openAdd=false" class="text-ink-400 hover:text-ink-700">×</button>
+      </div>
+      <textarea x-model="addInput" rows="8"
+                placeholder="10.1038/s41593-021-00972-9&#10;Attention is all you need"
+                class="mt-4 w-full p-3 text-sm bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded-lg outline-none focus:border-accent-500 font-mono"></textarea>
+      <div class="mt-3 flex items-center gap-3">
+        <label class="text-xs flex items-center gap-1.5">
+          <input type="checkbox" x-model="autoDownload" class="rounded">
+          Auto-download
+        </label>
+        <select x-model="addCollectionId" class="text-xs bg-ink-100 dark:bg-ink-800 rounded-md px-2 py-1.5 outline-none">
+          <option value="">No folder</option>
+          <template x-for="c in collections">
+            <option :value="c.id" x-text="c.name"></option>
+          </template>
+        </select>
+        <div class="ml-auto flex gap-2">
+          <button @click="openAdd=false" class="action-secondary h-9 px-3 text-sm">Cancel</button>
+          <button @click="submitAdd()" :disabled="!addInput.trim()" class="action-primary h-9 px-4 text-sm">
+            Add <span x-text="addCount() ? `(${addCount()})` : ''"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div x-show="folderChooser.open" x-transition.opacity @keydown.escape.window="closeFolderChooser()" class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm" style="display:none">
+    <div @click.outside="closeFolderChooser()" class="dialog w-[min(520px,92vw)] p-5">
+      <div class="flex items-baseline justify-between">
+        <h3 class="font-serif text-lg font-semibold" x-text="folderChooser.title"></h3>
+        <button @click="closeFolderChooser()" class="text-ink-400 hover:text-ink-700">×</button>
+      </div>
+      <div class="mt-4 max-h-72 overflow-y-auto space-y-1">
+        <template x-for="c in collections" :key="c.id">
+          <button @click="chooseFolder(c.id)" class="folder-choice">
+            <span class="w-2.5 h-2.5 rounded-full" :style="`background:${c.color || '#0ea5e9'}`"></span>
+            <span x-text="c.name"></span>
+            <span class="ml-auto text-xs text-ink-400" x-text="c.count"></span>
+          </button>
+        </template>
+        <div x-show="collections.length===0" class="empty-note py-2">No folders yet.</div>
+      </div>
+      <div class="mt-4 flex gap-2">
+        <input x-model="folderChooser.newName" @keydown.enter="createFolderFromChooser()" placeholder="New folder name" class="flex-1 h-10 px-3 rounded-lg bg-ink-100 dark:bg-ink-800 outline-none focus:ring-2 focus:ring-accent-500 text-sm">
+        <button @click="createFolderFromChooser()" class="action-primary h-10 px-4 text-sm">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <div x-show="contextMenu.open" x-cloak @click.stop
+       class="context-menu fixed z-[60] min-w-56 py-1"
+       :style="contextMenuStyle()">
+    <template x-for="(item, i) in contextItems()" :key="i">
+      <div>
+        <div x-show="item.separator" class="my-1 border-t border-ink-200 dark:border-ink-800"></div>
+        <button x-show="!item.separator"
+                @click="runContextAction(item.action)"
+                :disabled="item.disabled"
+                :class="item.danger ? 'text-rose-600 dark:text-rose-300' : ''"
+                class="context-row">
+          <span class="w-5 text-ink-400" x-text="item.icon || ''"></span>
+          <span x-text="item.label"></span>
+        </button>
+      </div>
+    </template>
+  </div>
+
+  <div class="fixed bottom-4 right-4 z-40 space-y-2">
+    <template x-for="t in toasts" :key="t.id">
+      <div class="toast" x-transition>
+        <span class="w-2 h-2 rounded-full" :class="t.kind==='error'?'bg-rose-500':t.kind==='ok'?'bg-emerald-500':'bg-accent-500 animate-pulse'"></span>
+        <span class="truncate" x-text="t.text"></span>
+      </div>
+    </template>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

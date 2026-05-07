@@ -3,26 +3,44 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "doi-hunter"
+name = "review-hunter"
 version = "1.1.1"
-description = "DOI-based paper downloader via Sci-Hub"
+description = "Local bibliographic review app with DOI metadata, author search, and source-tested downloads"
 authors = [
-    { name = "Mehmood Ul Haq", email = "mehmoodulhaq1040@gmail.com" }
+    { name = "Andry Andrianarivelo" }
 ]
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = { text = "MIT" }
 dependencies = [
     "requests>=2.25.1",
     "beautifulsoup4>=4.9.3"
 ]
-keywords = ["doi", "scihub", "research", "papers", "downloader"]
+keywords = ["doi", "pubmed", "crossref", "research", "papers", "bibliography", "review", "library"]
+
+[project.optional-dependencies]
+web = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "pydantic>=2.5",
+    "libgen-api-modern>=0.1.18",
+]
+embeddings = [
+    "sentence-transformers>=2.5",
+    "numpy>=1.24",
+]
 
 [project.urls]
-Homepage = "https://github.com/mehmoodulhaq570/DoiHunter"
-Documentation = "https://github.com/mehmoodulhaq570/DoiHunter#readme"
-Source = "https://github.com/mehmoodulhaq570/DoiHunter"
-BugTracker = "https://github.com/mehmoodulhaq570/DoiHunter/issues"
+Homepage = "https://github.com/Andrianarivelo/ReviewHunter"
+Documentation = "https://github.com/Andrianarivelo/ReviewHunter#readme"
+Source = "https://github.com/Andrianarivelo/ReviewHunter"
+BugTracker = "https://github.com/Andrianarivelo/ReviewHunter/issues"
 
 [project.scripts]
+review-hunter = "doi_hunter.__main__:main"
+review-hunter-web = "doi_hunter_web.__main__:main"
 doi-hunter = "doi_hunter.__main__:main"
+doi-hunter-web = "doi_hunter_web.__main__:main"
+
+[tool.setuptools.package-data]
+doi_hunter_web = ["static/*.html", "static/*.css", "static/*.js"]

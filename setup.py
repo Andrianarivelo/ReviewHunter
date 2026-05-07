@@ -5,18 +5,17 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="doi_hunter",  # Name of the package
+    name="review_hunter",  # Name of the package
     version="1.1.1",  # Version of the package
-    author="Mehmood Ul Haq",  # Author name
-    author_email="mehmoodulhaq1040@gmail.com",  # Author email
-    description="A Python tool for downloading scientific papers using Crossref and SciHub",  # Short description
+    author="Andry Andrianarivelo",  # Author name
+    description="A local bibliographic review app with DOI metadata and source-tested downloads",  # Short description
     long_description=long_description,  # Long description from README.md
     long_description_content_type="text/markdown",  # Markdown format for long description
-    url="https://github.com/mehmoodulhaq570/DoiHunter",  # URL to the project
+    url="https://github.com/Andrianarivelo/ReviewHunter",  # URL to the project
     project_urls={
-        "Documentation": "https://github.com/mehmoodulhaq570/DoiHunter#readme",
-        "Source": "https://github.com/mehmoodulhaq570/DoiHunter",
-        "Bug Tracker": "https://github.com/mehmoodulhaq570/DoiHunter/issues",
+        "Documentation": "https://github.com/Andrianarivelo/ReviewHunter#readme",
+        "Source": "https://github.com/Andrianarivelo/ReviewHunter",
+        "Bug Tracker": "https://github.com/Andrianarivelo/ReviewHunter/issues",
     },
     packages=find_packages(),  # Automatically find all packages
     classifiers=[
@@ -24,14 +23,16 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',  # Minimum required Python version
+    python_requires='>=3.10',  # Minimum required Python version
     install_requires=[
         "requests>=2.25.1",
         "beautifulsoup4>=4.9.3"
     ],
     entry_points={
         'console_scripts': [
-            'doi-hunter=doi_hunter.__main__:main',  # CLI command
+            'review-hunter=doi_hunter.__main__:main',
+            'review-hunter-web=doi_hunter_web.__main__:main',
+            'doi-hunter=doi_hunter.__main__:main',  # backwards-compatible CLI command
         ],
     },
     include_package_data=True,  # Include additional files from MANIFEST.in

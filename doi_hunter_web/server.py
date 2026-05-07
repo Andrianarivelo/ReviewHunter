@@ -1,0 +1,482 @@
+"""FastAPI server. Single process, single SQLite file, fans out job progress via WebSocket."""
+from __future__ import annotations
+
+import asyncio
+import json
+import logging
+import re
+from pathlib import Path
+from typing import Any, Optional
+
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+
+from . import books, library
+from .config import library_root, papers_dir
+
+log = logging.getLogger("doihunter.server")
+
+app = FastAPI(title="ReviewHunter", version="0.1.0")
+
+# ----------- WebSocket fanout -----------
+
+class JobBus:
+    def __init__(self) -> None:
+        self._subs: set[asyncio.Queue] = set()
+        self._loop: Optional[asyncio.AbstractEventLoop] = None
+
+    def bind_loop(self, loop: asyncio.AbstractEventLoop) -> None:
+        self._loop = loop
+
+    async def subscribe(self) -> asyncio.Queue:
+        q: asyncio.Queue = asyncio.Queue(maxsize=256)
+        self._subs.add(q)
+        return q
+
+    def unsubscribe(self, q: asyncio.Queue) -> None:
+        self._subs.discard(q)
+
+    def publish(self, event: str, data: dict) -> None:
+        """Thread-safe: callable from worker threads."""
+        msg = {"event": event, **data}
+        if self._loop is None:
+            return
+        for q in list(self._subs):
+            try:
+                self._loop.call_soon_threadsafe(q.put_nowait, msg)
+            except asyncio.QueueFull:
+                pass
+
+
+bus = JobBus()
+
+
+@app.on_event("startup")
+async def _startup() -> None:
+    bus.bind_loop(asyncio.get_running_loop())
+    # First-run nicety: if the user has the legacy ./downloads/ folder, adopt those PDFs.
+    legacy = Path.cwd() / "downloads"
+    if legacy.exists() and library.stats()["items"] == 0:
+        result = library.import_pdf_folder(legacy)
+        log.info(f"first-run import from {legacy}: {result}")
+
+
+# ----------- Models -----------
+
+class CollectionIn(BaseModel):
+    name: str
+    parent_id: Optional[int] = None
+    color: Optional[str] = None
+
+
+class CollectionPatch(BaseModel):
+    name: Optional[str] = None
+
+
+class AddIn(BaseModel):
+    queries: list[str]
+    auto_download: bool = True
+    collection_id: Optional[int] = None
+
+
+class BookIn(BaseModel):
+    publications: list[dict]      # FreeBooksAPI publications (already-normalized client-side)
+    auto_download: bool = True
+    collection_id: Optional[int] = None
+
+
+class ExportIn(BaseModel):
+    destination: str
+
+
+class BulkActionIn(BaseModel):
+    author: Optional[str] = None
+    subject: Optional[str] = None
+    item_ids: Optional[list[int]] = None
+    collection_id: Optional[int] = None
+    collection_name: Optional[str] = None
+    destination: Optional[str] = None
+
+
+class ItemPatch(BaseModel):
+    title: Optional[str] = None
+    authors: Optional[list[str]] = None
+    year: Optional[int] = None
+    journal: Optional[str] = None
+    abstract: Optional[str] = None
+    keywords: Optional[list[str]] = None
+    starred: Optional[bool] = None
+    notes: Optional[str] = None
+
+
+# ----------- API: stats / health -----------
+
+@app.get("/api/stats")
+def api_stats() -> dict:
+    return {**library.stats(), "library_path": str(library_root())}
+
+
+@app.get("/api/health")
+def api_health() -> dict:
+    return {"ok": True}
+
+
+# ----------- API: collections -----------
+
+@app.get("/api/collections")
+def api_collections() -> list[dict]:
+    return library.list_collections()
+
+
+@app.post("/api/collections")
+def api_create_collection(body: CollectionIn) -> dict:
+    if not body.name.strip():
+        raise HTTPException(400, "name required")
+    return library.create_collection(body.name, body.parent_id, body.color)
+
+
+@app.patch("/api/collections/{cid}")
+def api_patch_collection(cid: int, body: CollectionPatch) -> dict:
+    if body.name is not None:
+        library.rename_collection(cid, body.name)
+    return {"ok": True}
+
+
+@app.delete("/api/collections/{cid}")
+def api_delete_collection(cid: int) -> dict:
+    library.delete_collection(cid)
+    return {"ok": True}
+
+
+# ----------- API: items -----------
+
+@app.get("/api/items")
+def api_items(
+    collection_id: Optional[int] = None,
+    starred: bool = False,
+    q: Optional[str] = None,
+    status: Optional[str] = None,
+    author: Optional[str] = None,
+    subject: Optional[str] = None,
+    limit: int = 500,
+) -> list[dict]:
+    return library.list_items(
+        collection_id=collection_id, starred=starred, query=q, status=status,
+        author=author, subject=subject, limit=limit,
+    )
+
+
+@app.get("/api/facets")
+def api_facets() -> dict:
+    """Authors and subjects with counts — used by the left rail's auto-organization."""
+    return library.facets()
+
+
+@app.get("/api/items/{item_id}")
+def api_get_item(item_id: int) -> dict:
+    item = library.get_item(item_id)
+    if not item:
+        raise HTTPException(404, "not found")
+    return item
+
+
+@app.patch("/api/items/{item_id}")
+def api_patch_item(item_id: int, patch: ItemPatch) -> dict:
+    payload: dict[str, Any] = {k: v for k, v in patch.dict().items() if v is not None}
+    if "starred" in payload:
+        payload["starred"] = 1 if payload["starred"] else 0
+    item = library.update_item(item_id, payload)
+    if not item:
+        raise HTTPException(404, "not found")
+    return item
+
+
+@app.delete("/api/items/{item_id}")
+def api_delete_item(item_id: int, delete_file: bool = False) -> dict:
+    library.delete_item(item_id, delete_file=delete_file)
+    return {"ok": True}
+
+
+@app.post("/api/items/{item_id}/collections/{cid}")
+def api_assign(item_id: int, cid: int) -> dict:
+    library.assign_to_collection(item_id, cid)
+    return {"ok": True}
+
+
+@app.delete("/api/items/{item_id}/collections/{cid}")
+def api_unassign(item_id: int, cid: int) -> dict:
+    library.remove_from_collection(item_id, cid)
+    return {"ok": True}
+
+
+_MIME_BY_EXT = {
+    "pdf":  "application/pdf",
+    "epub": "application/epub+zip",
+    "mobi": "application/x-mobipocket-ebook",
+    "azw3": "application/vnd.amazon.ebook",
+    "djvu": "image/vnd.djvu",
+    "fb2":  "application/x-fictionbook+xml",
+    "rtf":  "application/rtf",
+    "cbz":  "application/x-cbz",
+    "cbr":  "application/x-cbr",
+}
+
+
+@app.get("/api/items/{item_id}/file")
+def api_get_file(item_id: int):
+    item = library.get_item(item_id)
+    if not item or not item.get("file_path"):
+        raise HTTPException(404, "file not found")
+    p = Path(item["file_path"])
+    if not p.exists():
+        raise HTTPException(404, "file missing on disk")
+    ext = p.suffix.lstrip(".").lower()
+    media = _MIME_BY_EXT.get(ext, "application/octet-stream")
+    # `inline` lets the browser render the file (PDFs especially) in an iframe.
+    return FileResponse(
+        str(p),
+        media_type=media,
+        headers={"Content-Disposition": f'inline; filename="{p.name}"'},
+    )
+
+
+@app.post("/api/items/{item_id}/download")
+async def api_download(item_id: int) -> dict:
+    asyncio.create_task(_run_download(item_id))
+    return {"queued": item_id}
+
+
+@app.post("/api/items/{item_id}/open-folder")
+def api_open_item_folder(item_id: int) -> dict:
+    try:
+        return library.open_item_folder(item_id)
+    except ValueError as e:
+        raise HTTPException(404, str(e))
+
+
+@app.post("/api/items/{item_id}/export-file")
+def api_export_item_file(item_id: int, body: ExportIn) -> dict:
+    if not body.destination.strip():
+        raise HTTPException(400, "destination required")
+    try:
+        return library.export_item_file(item_id, body.destination)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
+@app.post("/api/bulk/assign")
+def api_bulk_assign(body: BulkActionIn) -> dict:
+    cid = body.collection_id
+    if cid is None:
+        if not body.collection_name or not body.collection_name.strip():
+            raise HTTPException(400, "collection_id or collection_name required")
+        cid = library.create_collection(body.collection_name)["id"]
+    try:
+        result = library.assign_matching_to_collection(
+            cid,
+            author=body.author,
+            subject=body.subject,
+            item_ids=body.item_ids,
+        )
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+    return {"ok": True, **result}
+
+
+@app.post("/api/bulk/export-pdfs")
+def api_bulk_export_pdfs(body: BulkActionIn) -> dict:
+    if not body.destination or not body.destination.strip():
+        raise HTTPException(400, "destination required")
+    return library.export_matching_pdfs(
+        body.destination,
+        author=body.author,
+        subject=body.subject,
+        item_ids=body.item_ids,
+    )
+
+
+@app.get("/api/export/list")
+def api_export_list(
+    author: Optional[str] = None,
+    subject: Optional[str] = None,
+) -> Response:
+    csv_text = library.export_matching_list_csv(author=author, subject=subject)
+    label = author or subject or "library"
+    safe = re.sub(r"[^A-Za-z0-9_.-]+", "_", label).strip("_") or "library"
+    return Response(
+        csv_text,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{safe}_reviewhunter.csv"'},
+    )
+
+
+# ----------- API: search & add -----------
+
+@app.get("/api/search")
+async def api_search(
+    q: str,
+    kind: str = "article",
+    rows: int = 25,
+    offset: int = 0,
+) -> dict:
+    """Unified discovery endpoint.
+
+    kind:
+      - 'article'  CrossRef bibliographic search (default)
+      - 'author'   CrossRef author search — returns the researcher's whole catalogue
+      - 'book'     LibGen via libgen-api-modern (with FreeBooksAPI fallback)
+
+    Returns ``{kind, query, total, results, source?}``.
+    """
+    from . import metadata
+    if not q or not q.strip():
+        return {"kind": kind, "query": q, "total": 0, "results": []}
+
+    if kind == "book":
+        res = await books.search(q, limit=rows)
+        return {"kind": kind, "query": q,
+                "total": len(res["results"]), "results": res["results"],
+                "source": res["source"], "available": res["available"]}
+
+    if kind == "article" and metadata.looks_like_doi(q):
+        m = metadata.fetch_doi(q)
+        return {"kind": kind, "query": q,
+                "total": 1 if m else 0, "results": [m] if m else []}
+
+    mode = "author" if kind == "author" else "bibliographic"
+    page = metadata.search_paged(q, rows=rows, offset=offset, mode=mode)
+    return {"kind": kind, "query": q, **page}
+
+
+@app.post("/api/add")
+async def api_add(body: AddIn) -> dict:
+    if not body.queries:
+        raise HTTPException(400, "queries required")
+    asyncio.create_task(_run_add_batch(body.queries, body.collection_id, body.auto_download))
+    return {"queued": len(body.queries)}
+
+
+@app.post("/api/import/folder")
+def api_import_folder(folder: str) -> dict:
+    return library.import_pdf_folder(folder)
+
+
+# ----------- API: books (FreeBooksAPI) -----------
+
+@app.get("/api/books/search")
+async def api_books_search(q: str, limit: int = 10) -> dict:
+    """Search books/publications. Tries libgen-api-modern first, falls back to
+    FreeBooksAPI. Returns {available, results, source}; the UI hides the panel
+    when neither backend is reachable."""
+    return await books.search(q, limit=limit)
+
+
+@app.get("/api/articles/search")
+async def api_articles_search(q: str, limit: int = 10) -> list[dict]:
+    """Sci-Mag scientific article search via libgen-api-modern. Each result
+    carries a DOI plus direct download links."""
+    return await books.search_articles(q, limit=limit)
+
+
+@app.post("/api/books/add")
+async def api_books_add(body: BookIn) -> dict:
+    if not body.publications:
+        raise HTTPException(400, "publications required")
+    asyncio.create_task(_run_add_books(body.publications, body.collection_id, body.auto_download))
+    return {"queued": len(body.publications)}
+
+
+# ----------- WebSocket -----------
+
+@app.websocket("/ws/jobs")
+async def ws_jobs(ws: WebSocket) -> None:
+    await ws.accept()
+    q = await bus.subscribe()
+    try:
+        await ws.send_text(json.dumps({"event": "hello"}))
+        while True:
+            msg = await q.get()
+            await ws.send_text(json.dumps(msg, default=str))
+    except WebSocketDisconnect:
+        pass
+    finally:
+        bus.unsubscribe(q)
+
+
+# ----------- Background helpers -----------
+
+def _on_progress(stage: str, data: dict) -> None:
+    bus.publish(stage, data)
+
+
+async def _run_download(item_id: int) -> None:
+    loop = asyncio.get_running_loop()
+    try:
+        item = await loop.run_in_executor(None, lambda: library.download_item(item_id, progress=_on_progress))
+        bus.publish("item_changed", {"id": item_id, "status": item["status"] if item else "unknown"})
+    except Exception as e:
+        bus.publish("failed", {"id": item_id, "error": str(e)})
+
+
+async def _run_add_books(pubs: list[dict], collection_id: Optional[int], auto_download: bool) -> None:
+    loop = asyncio.get_running_loop()
+    bus.publish("batch_start", {"total": len(pubs)})
+    for i, p in enumerate(pubs, start=1):
+        bus.publish("batch_progress", {"index": i, "total": len(pubs), "query": p.get("title", "")})
+        try:
+            item = await loop.run_in_executor(None, lambda p=p: library.add_book(p))
+        except Exception as e:
+            bus.publish("failed", {"query": p.get("title", ""), "error": str(e)})
+            continue
+        if collection_id:
+            await loop.run_in_executor(
+                None, lambda i=item["id"], c=collection_id: library.assign_to_collection(i, c)
+            )
+        bus.publish("item_added", {"id": item["id"], "title": item["title"]})
+        if auto_download and item.get("mirrors"):
+            await loop.run_in_executor(
+                None, lambda i=item["id"]: library.download_item(i, progress=_on_progress)
+            )
+            bus.publish("item_changed", {"id": item["id"]})
+    bus.publish("batch_done", {"total": len(pubs)})
+
+
+async def _run_add_batch(queries: list[str], collection_id: Optional[int], auto_download: bool) -> None:
+    loop = asyncio.get_running_loop()
+    bus.publish("batch_start", {"total": len(queries)})
+    for i, q in enumerate(queries, start=1):
+        bus.publish("batch_progress", {"index": i, "total": len(queries), "query": q})
+        try:
+            item = await loop.run_in_executor(None, lambda q=q: library.add_from_query(q))
+        except Exception as e:
+            bus.publish("failed", {"query": q, "error": str(e)})
+            continue
+        if collection_id:
+            await loop.run_in_executor(
+                None, lambda i=item["id"], c=collection_id: library.assign_to_collection(i, c)
+            )
+        bus.publish("item_added", {"id": item["id"], "title": item["title"]})
+        if auto_download and item.get("doi"):
+            await loop.run_in_executor(
+                None, lambda i=item["id"]: library.download_item(i, progress=_on_progress)
+            )
+            bus.publish("item_changed", {"id": item["id"]})
+    bus.publish("batch_done", {"total": len(queries)})
+
+
+# ----------- Static UI -----------
+
+_static_dir = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
+
+
+@app.get("/")
+def index():
+    return FileResponse(str(_static_dir / "index.html"))
+
+
+@app.exception_handler(404)
+async def _404(request, exc):
+    return JSONResponse({"error": "not found"}, status_code=404)

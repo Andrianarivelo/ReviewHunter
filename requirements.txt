@@ -1,3 +1,10 @@
-requests
-beautifulsoup4
+requests>=2.25.1
+beautifulsoup4>=4.9.3
+fastapi>=0.110
+uvicorn[standard]>=0.27
+pydantic>=2.5
+libgen-api-modern>=0.1.18
 
+# Optional - uncomment for semantic clustering & similarity:
+# sentence-transformers>=2.5
+# numpy>=1.24

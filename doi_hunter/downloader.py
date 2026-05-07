@@ -72,9 +72,9 @@ def process_papers(file_path, batch_size):
     total_count = 0
     downloaded_count = 0
 
-    print("\n[INFO] Welcome to DoiHunter!")
+    print("\n[INFO] Welcome to ReviewHunter!")
     print("This tool helps you download research papers from Sci-Hub using DOIs or titles.")
-    print("For more information and the source code, visit: https://github.com/mehmoodulhaq570\n")
+    print("For more information and the source code, visit: https://github.com/Andrianarivelo/ReviewHunter\n")
 
     print("[INFO] Starting the download process...\n")
     start_time = time.time()
@@ -143,4 +143,4 @@ def process_papers(file_path, batch_size):
         #with open(failed_file, 'r') as file:
             # print(file.read())
     #print(f"\n[INFO] Download process completed in {time.time() - start_time:.2f} seconds.")
-    print("[INFO] Thank you for using DoiHunter!")
+    print("[INFO] Thank you for using ReviewHunter!")

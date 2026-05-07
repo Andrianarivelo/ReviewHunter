@@ -3,7 +3,7 @@ import argparse
 from .downloader import process_papers
 
 def main():
-    parser = argparse.ArgumentParser(description="DoiHunter CLI")
+    parser = argparse.ArgumentParser(description="ReviewHunter CLI")
     parser.add_argument("file_path", help="Path to the input file with DOIs or titles")
     parser.add_argument("--batch_size", type=int, default=10, help="Number of papers to process per batch")
     args = parser.parse_args()
