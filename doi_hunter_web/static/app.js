@@ -556,6 +556,7 @@ function app() {
       await Promise.all([this.loadCollections(), this.loadFacets(), this.loadItems()]);
     },
     async bulkAssignAuthor(author, options) {
+      if (!author) return;
       const r = await fetch('/api/bulk/assign', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -568,6 +569,13 @@ function app() {
         this.toast('Could not add author list to folder', 'error');
       }
     },
+    async createFolderForSelectedAuthor() {
+      if (!this.selectedAuthor) return;
+      const name = prompt('New folder name:', this.selectedAuthor);
+      if (!name) return;
+      await this.bulkAssignAuthor(this.selectedAuthor, { collection_name: name });
+      await Promise.all([this.loadCollections(), this.loadItems()]);
+    },
     async bulkAssignItems(itemIds, options) {
       const r = await fetch('/api/bulk/assign', {
         method: 'POST',
@@ -577,6 +585,7 @@ function app() {
       if (!r.ok) this.toast('Could not add items to folder', 'error');
     },
     async exportAuthorPdfs(author) {
+      if (!author) return;
       const dest = prompt(`Export downloaded PDFs by ${this.shortAuthor(author)} to folder path:`);
       if (!dest) return;
       const r = await fetch('/api/bulk/export-pdfs', {
@@ -592,6 +601,7 @@ function app() {
       }
     },
     exportAuthorList(author) {
+      if (!author) return;
       window.open(`/api/export/list?author=${encodeURIComponent(author)}`, '_blank');
     },
 
@@ -654,10 +664,9 @@ function app() {
       ];
     },
     async runContextAction(action) {
-      const type = this.contextMenu.type;
       const target = this.contextMenu.target;
       this.closeContextMenu();
-      if (!target) return;
+      if (!target || action === undefined) return;
 
       if (action === 'item-open-file') return this.openItemFile(target);
       if (action === 'item-open-folder') return this.openItemFolder(target);

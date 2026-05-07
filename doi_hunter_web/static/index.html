@@ -303,6 +303,12 @@
         <div class="flex-1 min-h-0 flex flex-col">
           <div class="h-11 px-4 flex items-center text-xs text-ink-500 border-b border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900">
             <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="paneTitle()"></div>
+            <div x-show="virtual === 'author'" class="ml-4 flex items-center gap-2">
+              <button @click="openFolderChooser('author', {name: selectedAuthor})" class="action-secondary h-7 px-2.5 text-xs">Add to folder</button>
+              <button @click="createFolderForSelectedAuthor()" class="action-secondary h-7 px-2.5 text-xs">Create folder</button>
+              <button @click="exportAuthorPdfs(selectedAuthor)" class="action-secondary h-7 px-2.5 text-xs">Export PDFs</button>
+              <button @click="exportAuthorList(selectedAuthor)" class="action-secondary h-7 px-2.5 text-xs">Export list</button>
+            </div>
             <div class="ml-auto flex items-center gap-3" x-show="filteredItems.length > 0">
               <span x-text="`${filteredItems.length} item${filteredItems.length===1?'':'s'}`"></span>
               <span class="text-ink-300">·</span>
@@ -515,8 +521,8 @@
       <div>
         <div x-show="item.separator" class="my-1 border-t border-ink-200 dark:border-ink-800"></div>
         <button x-show="!item.separator"
-                @click="runContextAction(item.action)"
-                :disabled="item.disabled"
+                @click.stop="runContextAction(item.action)"
+                :disabled="item.disabled === true"
                 :class="item.danger ? 'text-rose-600 dark:text-rose-300' : ''"
                 class="context-row">
           <span class="w-5 text-ink-400" x-text="item.icon || ''"></span>
