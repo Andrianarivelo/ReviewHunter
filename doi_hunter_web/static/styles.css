@@ -246,61 +246,72 @@ iframe { color-scheme: light dark; }
     rgba(8,10,19,.96);
 }
 .graph-canvas {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   min-height: 28rem;
+  pointer-events: none;
 }
 .graph-edge {
   stroke: rgba(93,100,121,.44);
   stroke-linecap: round;
 }
 .dark .graph-edge { stroke: rgba(139,148,169,.42); }
-.graph-node-fill {
-  fill: rgba(255,255,255,.96);
-  stroke: rgba(14,165,233,.32);
-  stroke-width: 1.2;
-  filter: url(#nodeGlow);
-  transition: fill .16s ease, stroke .16s ease, stroke-width .16s ease;
+.graph-node-layer {
+  position: absolute;
+  inset: 0;
+  min-height: 28rem;
 }
-.dark .graph-node-fill {
-  fill: rgba(24,27,41,.98);
-  stroke: rgba(56,189,248,.34);
+.graph-node-card {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .15rem;
+  padding: .55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(14,165,233,.28);
+  color: rgb(39,43,60);
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 14px 34px rgba(15,17,28,.14);
+  transition: background .16s ease, border-color .16s ease, color .16s ease, transform .16s ease, box-shadow .16s ease;
 }
-.graph-node-ring {
-  fill: transparent;
-  stroke: rgba(14,165,233,.11);
-  stroke-width: 1;
+.graph-node-card:hover,
+.graph-node-card.selected,
+.graph-node-card.focused {
+  transform: translate(-50%, -50%) scale(1.04);
+  border-color: #0284c7;
+  background: rgba(237,247,255,.98);
+  box-shadow: 0 18px 42px rgba(14,165,233,.18);
 }
-.graph-node:hover .graph-node-fill,
-.graph-node.selected .graph-node-fill,
-.graph-node.focused .graph-node-fill {
-  fill: rgba(237,247,255,.98);
-  stroke: #0284c7;
-  stroke-width: 2;
+.dark .graph-node-card {
+  color: rgb(238,240,244);
+  border-color: rgba(56,189,248,.30);
+  background: rgba(24,27,41,.96);
+  box-shadow: 0 16px 38px rgba(0,0,0,.34);
 }
-.dark .graph-node:hover .graph-node-fill,
-.dark .graph-node.selected .graph-node-fill,
-.dark .graph-node.focused .graph-node-fill {
-  fill: rgba(14,165,233,.20);
-  stroke: #38bdf8;
+.dark .graph-node-card:hover,
+.dark .graph-node-card.selected,
+.dark .graph-node-card.focused {
+  border-color: #38bdf8;
+  background: rgba(14,165,233,.20);
 }
-.graph-node.selected .graph-node-ring,
-.graph-node.focused .graph-node-ring {
-  stroke: rgba(14,165,233,.36);
-  stroke-width: 2;
+.graph-node-card-title {
+  max-width: 92%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .72rem;
+  font-weight: 850;
+  line-height: 1rem;
 }
-.graph-node-label {
-  pointer-events: none;
-  font-size: 11px;
+.graph-node-card-count {
+  font-size: .58rem;
   font-weight: 800;
-  fill: rgb(39,43,60);
-}
-.dark .graph-node-label { fill: rgb(238,240,244); }
-.graph-node-count {
-  pointer-events: none;
-  font-size: 9px;
-  font-weight: 700;
-  fill: rgb(139,148,169);
+  color: rgb(139,148,169);
 }
 .graph-legend {
   position: absolute;

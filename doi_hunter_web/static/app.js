@@ -351,11 +351,31 @@ function app() {
       if (!selected) return 0.38;
       return edge.source === selected.id || edge.target === selected.id ? 0.74 : 0.12;
     },
-    graphNodeClass(node) {
+    graphEdgesMarkup() {
+      const esc = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      })[ch]);
+      return (this.graph.edges || []).map(edge => (
+        `<line x1="${edge.x1}" y1="${edge.y1}" x2="${edge.x2}" y2="${edge.y2}" ` +
+        `stroke-width="${this.graphEdgeWidth(edge)}" opacity="${this.graphEdgeOpacity(edge)}" ` +
+        `class="graph-edge"><title>${esc(edge.source)} - ${esc(edge.target)} (${edge.weight})</title></line>`
+      )).join('');
+    },
+    graphNodeCardClass(node) {
       const selected = this.graph.selectedNode;
-      if (selected && selected.id === node.id) return 'graph-node selected';
-      if (node.focused) return 'graph-node focused';
-      return 'graph-node';
+      if (selected && selected.id === node.id) return 'graph-node-card selected';
+      if (node.focused) return 'graph-node-card focused';
+      return 'graph-node-card';
+    },
+    graphNodeCardStyle(node) {
+      const size = Math.max(74, Math.min(132, (node.r || 28) * 2.35));
+      const x = ((node.x || 0) / 920) * 100;
+      const y = ((node.y || 0) / 620) * 100;
+      return `left:${x}%; top:${y}%; width:${size}px; height:${size}px;`;
     },
     selectGraphNode(node) {
       this.graph.selectedNode = node;

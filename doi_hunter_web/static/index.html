@@ -368,35 +368,22 @@
               </div>
             </template>
 
-            <svg x-show="graph.nodes.length>0" :viewBox="graph.viewBox" class="graph-canvas">
-              <defs>
-                <filter id="nodeGlow" x="-40%" y="-40%" width="180%" height="180%">
-                  <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#0f111c" flood-opacity=".16"/>
-                </filter>
-              </defs>
-              <g>
-                <template x-for="edge in graph.edges" :key="`${edge.source}-${edge.target}`">
-                  <line :x1="edge.x1" :y1="edge.y1" :x2="edge.x2" :y2="edge.y2"
-                        :stroke-width="graphEdgeWidth(edge)"
-                        :opacity="graphEdgeOpacity(edge)"
-                        class="graph-edge"></line>
-                </template>
-              </g>
-              <g>
-                <template x-for="node in graph.nodes" :key="node.id">
-                  <g :class="graphNodeClass(node)"
-                     @click="selectGraphNode(node)"
-                     @dblclick="enterGraphNode(node)"
-                     class="cursor-pointer">
-                    <title x-text="node.label"></title>
-                    <circle :cx="node.x" :cy="node.y" :r="node.r" class="graph-node-fill"></circle>
-                    <circle :cx="node.x" :cy="node.y" :r="node.r + 7" class="graph-node-ring"></circle>
-                    <text :x="node.x" :y="node.y - 2" text-anchor="middle" class="graph-node-label" x-text="graphNodeLabel(node)"></text>
-                    <text :x="node.x" :y="node.y + 14" text-anchor="middle" class="graph-node-count" x-text="`${node.count} item${node.count===1?'':'s'}`"></text>
-                  </g>
-                </template>
-              </g>
+            <svg x-show="graph.nodes.length>0" :viewBox="graph.viewBox" class="graph-canvas" aria-hidden="true">
+              <g x-html="graphEdgesMarkup()"></g>
             </svg>
+
+            <div x-show="graph.nodes.length>0" class="graph-node-layer">
+              <template x-for="node in graph.nodes" :key="node.id">
+                <button :class="graphNodeCardClass(node)"
+                        :style="graphNodeCardStyle(node)"
+                        :title="node.label"
+                        @click="selectGraphNode(node)"
+                        @dblclick="enterGraphNode(node)">
+                  <span class="graph-node-card-title" x-text="graphNodeLabel(node)"></span>
+                  <span class="graph-node-card-count" x-text="`${node.count} item${node.count===1?'':'s'}`"></span>
+                </button>
+              </template>
+            </div>
 
             <div x-show="graph.nodes.length>0" class="graph-legend">
               <span class="inline-flex items-center gap-1.5"><span class="legend-dot primary"></span> Selected node</span>
