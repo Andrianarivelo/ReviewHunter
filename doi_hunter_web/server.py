@@ -174,6 +174,25 @@ def api_facets() -> dict:
     return library.facets()
 
 
+@app.get("/api/subject-graph")
+def api_subject_graph(
+    collection_id: Optional[int] = None,
+    author: Optional[str] = None,
+    subject: Optional[str] = None,
+    focus: Optional[str] = None,
+    depth: int = 1,
+    limit: int = 48,
+) -> dict:
+    return library.subject_graph(
+        collection_id=collection_id,
+        author=author,
+        subject=subject,
+        focus=focus,
+        depth=depth,
+        limit=limit,
+    )
+
+
 @app.get("/api/items/{item_id}")
 def api_get_item(item_id: int) -> dict:
     item = library.get_item(item_id)

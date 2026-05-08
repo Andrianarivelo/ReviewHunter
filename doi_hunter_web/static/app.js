@@ -11,6 +11,18 @@ function app() {
     selectedAuthor: null,
     selectedSubject: null,
     facets: { authors: [], subjects: [] },
+    graph: {
+      loading: false,
+      nodes: [],
+      edges: [],
+      selectedNode: null,
+      scope: { label: 'All subjects', items: 0 },
+      request: {},
+      focus: '',
+      depth: 1,
+      limit: 48,
+      viewBox: '0 0 920 620',
+    },
     showAuthors: true,
     showSubjects: true,
     authorLimit: 12,
@@ -82,7 +94,7 @@ function app() {
       if (r.ok) this.facets = await r.json();
     },
     async loadItems() {
-      if (this.virtual === 'discover') return;
+      if (this.virtual === 'discover' || this.virtual === 'graph') return;
       this.loading = true;
       try {
         const params = new URLSearchParams();
@@ -102,6 +114,74 @@ function app() {
         this.loading = false;
       }
     },
+    async loadSubjectGraph(extra = {}) {
+      this.graph.loading = true;
+      try {
+        this.graph.request = { ...(this.graph.request || {}), ...extra };
+        if (Object.prototype.hasOwnProperty.call(extra, 'focus')) this.graph.focus = extra.focus || '';
+        const params = new URLSearchParams({
+          depth: this.graph.depth,
+          limit: this.graph.limit,
+        });
+        const req = this.graph.request || {};
+        if (req.collection_id) params.set('collection_id', req.collection_id);
+        if (req.author) params.set('author', req.author);
+        if (req.subject) params.set('subject', req.subject);
+        if (this.graph.focus) params.set('focus', this.graph.focus);
+        const r = await fetch(`/api/subject-graph?${params}`);
+        if (!r.ok) throw new Error('graph failed');
+        const data = await r.json();
+        this.layoutGraph(data);
+      } catch (e) {
+        this.toast(e.message || 'Could not load concept map', 'error');
+      } finally {
+        this.graph.loading = false;
+      }
+    },
+    layoutGraph(data) {
+      const width = 920;
+      const height = 620;
+      const cx = width / 2;
+      const cy = height / 2;
+      const rawNodes = [...(data.nodes || [])];
+      const maxCount = Math.max(1, ...rawNodes.map(n => n.count || 1));
+      const focusId = rawNodes.find(n => n.focused)?.id || rawNodes[0]?.id || '';
+      const nodes = rawNodes.map(n => ({
+        ...n,
+        r: 20 + Math.sqrt((n.count || 1) / maxCount) * 26,
+        x: cx,
+        y: cy,
+      }));
+      nodes.sort((a, b) => (a.id === focusId ? -1 : b.id === focusId ? 1 : (b.count || 0) - (a.count || 0)));
+      nodes.forEach((node, i) => {
+        if (i === 0) {
+          node.x = cx;
+          node.y = cy;
+          return;
+        }
+        const index = i - 1;
+        const ring = Math.floor(index / 14);
+        const perRing = ring === 0 ? Math.min(14, nodes.length - 1) : 18;
+        const slot = ring === 0 ? index : index - 14 - ((ring - 1) * 18);
+        const radius = 150 + ring * 115;
+        const angle = (-Math.PI / 2) + (slot / Math.max(1, perRing)) * Math.PI * 2 + ring * 0.22;
+        node.x = cx + Math.cos(angle) * radius;
+        node.y = cy + Math.sin(angle) * radius;
+      });
+      const byId = new Map(nodes.map(n => [n.id, n]));
+      const edges = (data.edges || [])
+        .filter(e => byId.has(e.source) && byId.has(e.target))
+        .map(e => {
+          const a = byId.get(e.source);
+          const b = byId.get(e.target);
+          return { ...e, x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+        });
+      const selectedId = this.graph.selectedNode?.id;
+      this.graph.nodes = nodes;
+      this.graph.edges = edges;
+      this.graph.scope = data.scope || { label: 'All subjects', items: 0 };
+      this.graph.selectedNode = nodes.find(n => n.id === selectedId) || nodes.find(n => n.focused) || nodes[0] || null;
+    },
 
     selectVirtual(v) {
       this.virtual = v;
@@ -113,7 +193,36 @@ function app() {
         this.$nextTick(() => this.$refs.discoverInput && this.$refs.discoverInput.focus());
         return;
       }
+      if (v === 'graph') {
+        this.openGraph();
+        return;
+      }
       this.loadItems();
+    },
+    openGraph(scope = {}) {
+      this.virtual = 'graph';
+      this.selectedCollectionId = null;
+      this.selectedAuthor = null;
+      this.selectedSubject = null;
+      this.searchQuery = '';
+      this.selectedItem = null;
+      this.closeContextMenu();
+      this.graph.request = { ...scope };
+      this.graph.focus = scope.focus || scope.subject || '';
+      this.loadSubjectGraph();
+    },
+    openGraphFromCurrent() {
+      if (this.virtual === 'collection' && this.selectedCollectionId) {
+        const c = this.collections.find(x => x.id === this.selectedCollectionId);
+        return this.openGraph({ collection_id: this.selectedCollectionId, label: c?.name || 'Folder' });
+      }
+      if (this.virtual === 'author' && this.selectedAuthor) {
+        return this.openGraph({ author: this.selectedAuthor, label: this.shortAuthor(this.selectedAuthor) });
+      }
+      if (this.virtual === 'subject' && this.selectedSubject) {
+        return this.openGraph({ subject: this.selectedSubject, focus: this.selectedSubject, label: this.selectedSubject });
+      }
+      return this.openGraph();
     },
     selectCollection(id) {
       this.virtual = 'collection';
@@ -216,6 +325,54 @@ function app() {
         needs_metadata: 'bg-amber-500',
         metadata_only: 'bg-ink-300',
       })[s] || 'bg-ink-300';
+    },
+    graphNodeLabel(node) {
+      const label = node?.label || '';
+      return label.length > 24 ? `${label.slice(0, 22)}...` : label;
+    },
+    graphEdgeWidth(edge) {
+      return Math.min(7, 1.1 + Math.sqrt(edge.weight || 1));
+    },
+    graphEdgeOpacity(edge) {
+      const selected = this.graph.selectedNode;
+      if (!selected) return 0.38;
+      return edge.source === selected.id || edge.target === selected.id ? 0.74 : 0.12;
+    },
+    graphNodeClass(node) {
+      const selected = this.graph.selectedNode;
+      if (selected && selected.id === node.id) return 'graph-node selected';
+      if (node.focused) return 'graph-node focused';
+      return 'graph-node';
+    },
+    selectGraphNode(node) {
+      this.graph.selectedNode = node;
+      this.selectedItem = null;
+    },
+    async enterGraphNode(node = this.graph.selectedNode) {
+      if (!node) return;
+      this.graph.focus = node.label;
+      await this.loadSubjectGraph({ focus: node.label });
+    },
+    async resetGraphFocus() {
+      const req = this.graph.request || {};
+      this.graph.focus = req.subject || '';
+      await this.loadSubjectGraph({ focus: this.graph.focus });
+    },
+    searchGraphNode(node = this.graph.selectedNode) {
+      if (!node) return;
+      this.selectVirtual('discover');
+      this.searchKind = 'article';
+      this.modalQuery = node.label;
+      this.runSearch(true);
+    },
+    openGraphNodeSubject(node = this.graph.selectedNode) {
+      if (!node) return;
+      this.selectSubject(node.label);
+    },
+    async selectGraphItem(item) {
+      if (!item || !item.id) return;
+      this.graph.selectedNode = null;
+      await this.selectItem(item);
     },
 
     runTopSearch() {
@@ -509,10 +666,12 @@ function app() {
     openFolderChooser(mode, target) {
       const title = mode === 'author'
         ? `Add ${this.shortAuthor(target.name)} papers to folder`
+        : mode === 'subject'
+          ? `Add ${target.name} papers to folder`
         : mode === 'result'
           ? 'Add result to folder'
           : 'Add item to folder';
-      const newName = mode === 'author' ? target.name : '';
+      const newName = (mode === 'author' || mode === 'subject') ? target.name : '';
       this.folderChooser = { open: true, mode, target, title, newName };
     },
     closeFolderChooser() {
@@ -526,6 +685,8 @@ function app() {
         this.toast('Added to folder', 'ok');
       } else if (fc.mode === 'author') {
         await this.bulkAssignAuthor(fc.target.name, { collection_id: cid });
+      } else if (fc.mode === 'subject') {
+        await this.bulkAssignSubject(fc.target.name, { collection_id: cid });
       } else if (fc.mode === 'result') {
         await this._submitItems([fc.target], cid);
       }
@@ -541,6 +702,8 @@ function app() {
         this.toast('Folder created and item added', 'ok');
       } else if (fc.mode === 'author') {
         await this.bulkAssignAuthor(fc.target.name, { collection_name: name });
+      } else if (fc.mode === 'subject') {
+        await this.bulkAssignSubject(fc.target.name, { collection_name: name });
       } else if (fc.mode === 'result') {
         const r = await fetch('/api/collections', {
           method: 'POST',
@@ -569,11 +732,32 @@ function app() {
         this.toast('Could not add author list to folder', 'error');
       }
     },
+    async bulkAssignSubject(subject, options) {
+      if (!subject) return;
+      const r = await fetch('/api/bulk/assign', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ subject, ...options }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        this.toast(`Added ${data.count} item${data.count === 1 ? '' : 's'} to folder`, 'ok');
+      } else {
+        this.toast('Could not add subject list to folder', 'error');
+      }
+    },
     async createFolderForSelectedAuthor() {
       if (!this.selectedAuthor) return;
       const name = prompt('New folder name:', this.selectedAuthor);
       if (!name) return;
       await this.bulkAssignAuthor(this.selectedAuthor, { collection_name: name });
+      await Promise.all([this.loadCollections(), this.loadItems()]);
+    },
+    async createFolderForSelectedSubject() {
+      if (!this.selectedSubject) return;
+      const name = prompt('New folder name:', this.selectedSubject);
+      if (!name) return;
+      await this.bulkAssignSubject(this.selectedSubject, { collection_name: name });
       await Promise.all([this.loadCollections(), this.loadItems()]);
     },
     async bulkAssignItems(itemIds, options) {
@@ -604,20 +788,46 @@ function app() {
       if (!author) return;
       window.open(`/api/export/list?author=${encodeURIComponent(author)}`, '_blank');
     },
+    async exportSubjectPdfs(subject) {
+      if (!subject) return;
+      const dest = prompt(`Export downloaded PDFs for ${subject} to folder path:`);
+      if (!dest) return;
+      const r = await fetch('/api/bulk/export-pdfs', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ subject, destination: dest }),
+      });
+      if (r.ok) {
+        const data = await r.json();
+        this.toast(`Exported ${data.exported} PDF${data.exported === 1 ? '' : 's'} (${data.skipped} skipped)`, 'ok');
+      } else {
+        this.toast('PDF export failed', 'error');
+      }
+    },
+    exportSubjectList(subject) {
+      if (!subject) return;
+      window.open(`/api/export/list?subject=${encodeURIComponent(subject)}`, '_blank');
+    },
 
     openItemContext(it, e) {
       this.selectItem(it);
       this.openContext('item', it, e);
     },
+    openCollectionContext(collection, e) {
+      this.openContext('collection', collection, e);
+    },
     openAuthorContext(author, e) {
       this.openContext('author', author, e);
+    },
+    openSubjectContext(subject, e) {
+      this.openContext('subject', subject, e);
     },
     openResultContext(result, e) {
       this.openContext('result', result, e);
     },
     openContext(type, target, e) {
       const width = 244;
-      const height = type === 'author' ? 250 : 320;
+      const height = ['author', 'subject'].includes(type) ? 300 : type === 'collection' ? 210 : 320;
       const x = Math.min(e.clientX, window.innerWidth - width - 12);
       const y = Math.min(e.clientY, window.innerHeight - height - 12);
       this.contextMenu = { open: true, x: Math.max(8, x), y: Math.max(8, y), type, target };
@@ -630,15 +840,38 @@ function app() {
     },
     contextItems() {
       const t = this.contextMenu.target || {};
+      if (this.contextMenu.type === 'collection') {
+        return [
+          { icon: 'O', label: 'Open folder', action: 'collection-open' },
+          { icon: 'M', label: 'Open concept map', action: 'collection-graph' },
+          { separator: true },
+          { icon: 'R', label: 'Rename folder', action: 'collection-rename' },
+          { icon: '!', label: 'Delete folder', action: 'collection-delete', danger: true },
+        ];
+      }
       if (this.contextMenu.type === 'author') {
         return [
           { icon: 'O', label: 'Open author list', action: 'author-open' },
+          { icon: 'M', label: 'Open concept map', action: 'author-graph' },
           { separator: true },
           { icon: '+', label: 'Add to folder...', action: 'author-folder' },
           { icon: 'N', label: 'Create folder and add', action: 'author-new-folder' },
           { separator: true },
           { icon: 'P', label: 'Export PDFs to...', action: 'author-export-pdfs' },
           { icon: 'L', label: 'Export list', action: 'author-export-list' },
+        ];
+      }
+      if (this.contextMenu.type === 'subject') {
+        return [
+          { icon: 'O', label: 'Open subject list', action: 'subject-open' },
+          { icon: 'M', label: 'Open concept map', action: 'subject-graph' },
+          { icon: 'Q', label: 'Search online', action: 'subject-search' },
+          { separator: true },
+          { icon: '+', label: 'Add to folder...', action: 'subject-folder' },
+          { icon: 'N', label: 'Create folder and add', action: 'subject-new-folder' },
+          { separator: true },
+          { icon: 'P', label: 'Export PDFs to...', action: 'subject-export-pdfs' },
+          { icon: 'L', label: 'Export list', action: 'subject-export-list' },
         ];
       }
       if (this.contextMenu.type === 'result') {
@@ -685,7 +918,13 @@ function app() {
       if (action === 'item-star') return this.toggleStar(target);
       if (action === 'item-delete') return this.deleteItem(target);
 
+      if (action === 'collection-open') return this.selectCollection(target.id);
+      if (action === 'collection-graph') return this.openGraph({ collection_id: target.id, label: target.name });
+      if (action === 'collection-rename') return this.renameCollectionPrompt(target);
+      if (action === 'collection-delete') return this.deleteCollectionConfirm(target);
+
       if (action === 'author-open') return this.selectAuthor(target.name);
+      if (action === 'author-graph') return this.openGraph({ author: target.name, label: this.shortAuthor(target.name) });
       if (action === 'author-folder') return this.openFolderChooser('author', target);
       if (action === 'author-new-folder') {
         const name = prompt('New folder name:', target.name);
@@ -697,6 +936,26 @@ function app() {
       }
       if (action === 'author-export-pdfs') return this.exportAuthorPdfs(target.name);
       if (action === 'author-export-list') return this.exportAuthorList(target.name);
+
+      if (action === 'subject-open') return this.selectSubject(target.name);
+      if (action === 'subject-graph') return this.openGraph({ subject: target.name, focus: target.name, label: target.name });
+      if (action === 'subject-search') {
+        this.searchKind = 'article';
+        this.modalQuery = target.name;
+        this.selectVirtual('discover');
+        return this.runSearch(true);
+      }
+      if (action === 'subject-folder') return this.openFolderChooser('subject', target);
+      if (action === 'subject-new-folder') {
+        const name = prompt('New folder name:', target.name);
+        if (name) {
+          await this.bulkAssignSubject(target.name, { collection_name: name });
+          await this.loadCollections();
+        }
+        return;
+      }
+      if (action === 'subject-export-pdfs') return this.exportSubjectPdfs(target.name);
+      if (action === 'subject-export-list') return this.exportSubjectList(target.name);
 
       if (action === 'result-add') return this.addOne(target);
       if (action === 'result-folder') return this.openFolderChooser('result', target);

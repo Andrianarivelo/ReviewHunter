@@ -16,6 +16,8 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+from collections import Counter, defaultdict
+from itertools import combinations
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -259,6 +261,199 @@ def list_subjects(limit: int = 200) -> list[dict]:
 
 def facets() -> dict:
     return {"authors": list_authors(), "subjects": list_subjects()}
+
+
+# ---------------- Subject graph ----------------
+
+_GRAPH_STOP_TERMS = {
+    "article",
+    "case reports",
+    "clinical trial",
+    "comparative study",
+    "editorial",
+    "english abstract",
+    "evaluation study",
+    "historical article",
+    "journal article",
+    "letter",
+    "meta-analysis",
+    "multicenter study",
+    "observational study",
+    "practice guideline",
+    "published erratum",
+    "randomized controlled trial",
+    "research support, american recovery and reinvestment act",
+    "research support, n.i.h., extramural",
+    "research support, n.i.h., intramural",
+    "research support, non-u.s. gov't",
+    "research support, u.s. gov't, non-p.h.s.",
+    "review",
+    "systematic review",
+    "validation study",
+}
+
+
+def _graph_key(label: str) -> str:
+    return re.sub(r"\s+", " ", label.strip().casefold())
+
+
+def _graph_terms(item: dict) -> list[tuple[str, str]]:
+    labels: dict[str, str] = {}
+    for field in ("subjects", "keywords"):
+        values = item.get(field) or []
+        if isinstance(values, str):
+            try:
+                values = json.loads(values)
+            except (json.JSONDecodeError, TypeError):
+                values = [values]
+        for raw in values:
+            label = re.sub(r"\s+", " ", str(raw or "").strip())
+            key = _graph_key(label)
+            if not key or key in _GRAPH_STOP_TERMS:
+                continue
+            if len(key) < 2 or key.isnumeric():
+                continue
+            labels.setdefault(key, label)
+    return sorted(labels.items(), key=lambda kv: kv[1].casefold())
+
+
+def subject_graph(
+    *,
+    collection_id: Optional[int] = None,
+    author: Optional[str] = None,
+    subject: Optional[str] = None,
+    focus: Optional[str] = None,
+    depth: int = 1,
+    limit: int = 48,
+) -> dict:
+    """Build a local subject/keyword co-occurrence graph.
+
+    Nodes are subjects and extracted keywords. Edges mean two terms appear on
+    the same library item; edge weight is the number of shared items.
+    """
+    limit = max(12, min(limit, 90))
+    depth = max(1, min(depth, 2))
+    items = list_items(collection_id=collection_id, author=author, subject=subject, limit=10000)
+
+    label_by_key: dict[str, str] = {}
+    term_items: dict[str, list[dict]] = defaultdict(list)
+    counts: Counter[str] = Counter()
+    edges: Counter[tuple[str, str]] = Counter()
+
+    for item in items:
+        terms = _graph_terms(item)
+        if not terms:
+            continue
+        keys = sorted({key for key, _label in terms})[:24]
+        for key, label in terms:
+            label_by_key.setdefault(key, label)
+        for key in keys:
+            counts[key] += 1
+            term_items[key].append(item)
+        for a, b in combinations(keys, 2):
+            edges[(a, b)] += 1
+
+    focus_key = _graph_key(focus or subject or "")
+    selected: set[str]
+    if focus_key and focus_key in counts:
+        selected = {focus_key}
+        frontier = {focus_key}
+        for _ in range(depth):
+            next_frontier: set[str] = set()
+            ranked_neighbors: list[tuple[int, int, str]] = []
+            for (a, b), weight in edges.items():
+                neighbor = ""
+                if a in frontier and b not in selected:
+                    neighbor = b
+                elif b in frontier and a not in selected:
+                    neighbor = a
+                if neighbor:
+                    ranked_neighbors.append((weight, counts[neighbor], neighbor))
+            for _weight, _count, neighbor in sorted(ranked_neighbors, reverse=True):
+                if len(selected) >= limit:
+                    break
+                selected.add(neighbor)
+                next_frontier.add(neighbor)
+            if not next_frontier or len(selected) >= limit:
+                break
+            frontier = next_frontier
+    else:
+        selected = {key for key, _count in counts.most_common(limit)}
+
+    def sample_items(key: str) -> list[dict]:
+        sample = sorted(
+            term_items.get(key, []),
+            key=lambda it: ((it.get("year") or 0), it.get("added_at") or ""),
+            reverse=True,
+        )[:8]
+        return [
+            {
+                "id": it["id"],
+                "title": it.get("title") or "(untitled)",
+                "year": it.get("year"),
+                "journal": it.get("journal") or it.get("publisher") or "",
+                "authors": it.get("authors") or [],
+                "status": it.get("status") or "",
+            }
+            for it in sample
+        ]
+
+    def related_terms(key: str) -> list[dict]:
+        related = []
+        for (a, b), weight in edges.items():
+            other = b if a == key else a if b == key else ""
+            if other:
+                related.append({"id": other, "label": label_by_key.get(other, other), "weight": weight})
+        related.sort(key=lambda r: (-r["weight"], r["label"].casefold()))
+        return related[:8]
+
+    node_payload = []
+    for key in selected:
+        node_payload.append(
+            {
+                "id": key,
+                "label": label_by_key.get(key, key),
+                "count": counts[key],
+                "focused": key == focus_key,
+                "items": sample_items(key),
+                "related": related_terms(key),
+            }
+        )
+    node_payload.sort(key=lambda n: (not n["focused"], -n["count"], n["label"].casefold()))
+
+    edge_payload = [
+        {
+            "source": a,
+            "target": b,
+            "weight": weight,
+        }
+        for (a, b), weight in edges.items()
+        if a in selected and b in selected
+    ]
+    edge_payload.sort(key=lambda e: -e["weight"])
+
+    scope_parts = []
+    if collection_id is not None:
+        collection = next((c for c in list_collections() if c["id"] == collection_id), None)
+        scope_parts.append(collection["name"] if collection else "Folder")
+    if author:
+        scope_parts.append(author)
+    if subject:
+        scope_parts.append(subject)
+
+    return {
+        "scope": {
+            "collection_id": collection_id,
+            "author": author,
+            "subject": subject,
+            "focus": focus or subject or "",
+            "label": " / ".join(scope_parts) if scope_parts else "All subjects",
+            "items": len(items),
+        },
+        "nodes": node_payload,
+        "edges": edge_payload[:180],
+        "total_terms": len(counts),
+    }
 
 
 # ---------------- Collections ----------------
