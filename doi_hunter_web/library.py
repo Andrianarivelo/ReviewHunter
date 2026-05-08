@@ -17,6 +17,7 @@ import sqlite3
 import subprocess
 import sys
 from collections import Counter, defaultdict
+from datetime import datetime
 from itertools import combinations
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -26,6 +27,7 @@ import requests
 from doi_hunter.netinfo import get_headers
 from doi_hunter.utils import sanitize_filename
 
+from . import config
 from .config import papers_dir
 from .db import get_conn, row_to_dict, rows_to_dicts, tx
 from .metadata import (
@@ -628,6 +630,157 @@ def export_matching_list_csv(
             "file_path": item.get("file_path") or "",
         })
     return out.getvalue()
+
+
+# ---------------- Storage / backup ----------------
+
+def _library_csv_text(items: list[dict]) -> str:
+    out = io.StringIO()
+    writer = csv.DictWriter(
+        out,
+        fieldnames=[
+            "id", "title", "authors", "year", "journal", "publisher", "doi",
+            "status", "item_type", "file_path", "subjects", "keywords", "notes",
+        ],
+    )
+    writer.writeheader()
+    for item in items:
+        writer.writerow({
+            "id": item.get("id") or "",
+            "title": item.get("title") or "",
+            "authors": "; ".join(item.get("authors") or []),
+            "year": item.get("year") or "",
+            "journal": item.get("journal") or "",
+            "publisher": item.get("publisher") or "",
+            "doi": item.get("doi") or "",
+            "status": item.get("status") or "",
+            "item_type": item.get("item_type") or "paper",
+            "file_path": item.get("file_path") or "",
+            "subjects": "; ".join(item.get("subjects") or []),
+            "keywords": "; ".join(item.get("keywords") or []),
+            "notes": item.get("notes") or "",
+        })
+    return out.getvalue()
+
+
+def _backup_sqlite_database(target: Path) -> None:
+    source = get_conn()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    backup = sqlite3.connect(str(target))
+    try:
+        source.backup(backup)
+    finally:
+        backup.close()
+
+
+def export_full_library(destination: str | Path) -> dict:
+    """Export DB snapshot, CSV, manifest, and downloaded files to a folder."""
+    root = Path(destination).expanduser().resolve()
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    export_root = root / "ReviewHunter" / "backups" / f"ReviewHunter-export-{timestamp}"
+    files_root = export_root / "files"
+    export_root.mkdir(parents=True, exist_ok=True)
+    files_root.mkdir(parents=True, exist_ok=True)
+
+    items = list_items(limit=100000)
+    _backup_sqlite_database(export_root / "library.db")
+    (export_root / "library.csv").write_text(_library_csv_text(items), encoding="utf-8")
+
+    copied = 0
+    skipped = 0
+    exported_files: list[str] = []
+    for item in items:
+        src_raw = item.get("file_path")
+        if not src_raw:
+            skipped += 1
+            continue
+        src = Path(src_raw)
+        if not src.exists() or not src.is_file():
+            skipped += 1
+            continue
+        target = _unique_target(files_root, src)
+        shutil.copy2(src, target)
+        copied += 1
+        exported_files.append(str(target))
+
+    manifest = {
+        "app": "ReviewHunter",
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+        "library_root": str(config.library_root()),
+        "papers_dir": str(papers_dir()),
+        "db_path": str(config.db_path()),
+        "items": len(items),
+        "downloaded_files_copied": copied,
+        "files_skipped": skipped,
+        "files_dir": str(files_root),
+    }
+    (export_root / "manifest.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+    return {
+        "ok": True,
+        "path": str(export_root),
+        "items": len(items),
+        "files": copied,
+        "skipped": skipped,
+        "db": str(export_root / "library.db"),
+        "csv": str(export_root / "library.csv"),
+    }
+
+
+def configure_papers_directory(destination: str | Path, *, migrate_existing: bool = True) -> dict:
+    """Set the primary download folder and optionally copy existing files there."""
+    dest = Path(destination).expanduser().resolve()
+    dest.mkdir(parents=True, exist_ok=True)
+    old_dir = papers_dir()
+
+    copied = 0
+    skipped = 0
+    if migrate_existing:
+        items = list_items(limit=100000)
+        for item in items:
+            src_raw = item.get("file_path")
+            if not src_raw:
+                continue
+            src = Path(src_raw)
+            if not src.exists() or not src.is_file():
+                skipped += 1
+                continue
+            try:
+                if src.resolve().parent == dest:
+                    continue
+            except OSError:
+                pass
+            target = _unique_target(dest, src)
+            shutil.copy2(src, target)
+            get_conn().execute(
+                "UPDATE items SET file_path=?, file_size=?, updated_at=datetime('now') WHERE id=?",
+                (str(target), target.stat().st_size, item["id"]),
+            )
+            copied += 1
+
+    config.set_papers_dir(dest)
+    return {
+        "ok": True,
+        "old_path": str(old_dir),
+        "path": str(dest),
+        "migrated": copied,
+        "skipped": skipped,
+    }
+
+
+def google_drive_status() -> dict:
+    candidates = config.google_drive_candidates()
+    primary = config.default_google_drive_root()
+    return {
+        "library_root": str(config.library_root()),
+        "db_path": str(config.db_path()),
+        "papers_dir": str(papers_dir()),
+        "google_drive_candidates": [str(p) for p in candidates],
+        "default_google_drive": str(primary) if primary else "",
+        "using_google_drive_for_papers": any(
+            str(papers_dir()).casefold().startswith(str(candidate).casefold())
+            for candidate in candidates
+        ),
+    }
 
 
 # ---------------- Pipelines ----------------

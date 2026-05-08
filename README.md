@@ -21,10 +21,13 @@ It ships with **ReviewHunter Web**, a Zotero-style local library app with folder
 ### Web app (`doi_hunter_web`)
 - **Zotero-style three-pane UI** - collections, items, metadata + PDF preview.
 - **Smart search bar** - paste a DOI, type a title, or filter the local library; CrossRef matches show inline.
+- **Pertinence ordering** - discovery results are ranked by title/query coverage plus source relevance scores.
 - **Auto-rename** - files are saved as `Author - Year - Title.pdf` from CrossRef metadata.
 - **Auto-categorize** - folder suggestions from CrossRef subjects + extracted keywords.
+- **Concept map** - explore connected subjects and keywords as an interactive node graph.
 - **Folders & drag-drop** - create your own; drag papers from the list onto a folder to assign.
 - **Batch import** - drop a `.txt` of DOIs/titles onto the window, or paste them in the Add dialog.
+- **Google Drive sync-folder support** - export a full backup to Drive or set the download folder to a local Google Drive Desktop path.
 - **Live progress** - every download streams its status over WebSocket; toasts surface failures.
 - **Local & private** - SQLite + your filesystem under `~/ReviewHunter/`. No login, no cloud.
 - **Light & dark mode**, refined typography (Inter + Source Serif), zero build step.
@@ -50,6 +53,14 @@ The first launch creates a local `.venv/` next to the project and installs depen
 ReviewHunter then starts on `http://127.0.0.1:8765` and your browser opens automatically.
 
 The library lives at `~/ReviewHunter/` (override with `REVIEWHUNTER_HOME=...`). Renamed PDFs go in `~/ReviewHunter/papers/`; the catalog is `~/ReviewHunter/library.db` (SQLite).
+
+Google Drive support targets the local Google Drive Desktop sync folder. In the
+left rail, **Export DB** writes a timestamped backup under
+`Google Drive/ReviewHunter/backups/` when Drive is detected, including
+`library.db`, `library.csv`, a manifest, and downloaded files. **Use Drive**
+sets future downloads to `Google Drive/ReviewHunter/papers/` and copies existing
+downloaded files there. If Drive is not auto-detected, use **Export to...** or
+**Folder...** and paste the mounted Drive path.
 
 Pass arguments to the app after `--`:
 ```bash

@@ -167,6 +167,30 @@ iframe { color-scheme: light dark; }
 }
 .show-more:hover { color: rgb(39,43,60); }
 .empty-note { font-size: .75rem; color: rgb(139,148,169); }
+.storage-action {
+  min-height: 1.85rem;
+  padding: 0 .45rem;
+  border-radius: .45rem;
+  font-size: .68rem;
+  font-weight: 800;
+  color: rgb(63,68,88);
+  background: rgba(238,240,244,.86);
+}
+.storage-action:hover:not(:disabled) {
+  color: white;
+  background: #0284c7;
+}
+.storage-action:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.dark .storage-action {
+  color: rgb(221,225,234);
+  background: rgba(39,43,60,.82);
+}
+.dark .storage-action:hover:not(:disabled) {
+  background: #0369a1;
+}
 
 .discover-head {
   background:

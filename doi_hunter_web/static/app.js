@@ -35,6 +35,7 @@ function app() {
     modalTotal: 0,
     modalOffset: 0,
     modalRows: 25,
+    modalSort: 'pertinence',
     modalLoading: false,
     modalAttempted: false,
     modalSubmitting: false,
@@ -46,6 +47,14 @@ function app() {
     sortBy: 'added',
     loading: false,
     stats: { items: 0, downloaded: 0, starred: 0, library_path: '' },
+    storage: {
+      loading: false,
+      library_root: '',
+      papers_dir: '',
+      default_google_drive: '',
+      google_drive_candidates: [],
+      using_google_drive_for_papers: false,
+    },
     toasts: [],
     openAdd: false,
     addInput: '',
@@ -59,7 +68,7 @@ function app() {
     folderChooser: { open: false, mode: '', target: null, title: '', newName: '' },
 
     async init() {
-      await Promise.all([this.loadStats(), this.loadCollections(), this.loadFacets()]);
+      await Promise.all([this.loadStats(), this.loadCollections(), this.loadFacets(), this.loadStorage()]);
       this.connectWS();
       this.$nextTick(() => this.$refs.discoverInput && this.$refs.discoverInput.focus());
       addEventListener('click', () => this.closeContextMenu());
@@ -84,6 +93,10 @@ function app() {
     async loadStats() {
       const r = await fetch('/api/stats');
       if (r.ok) this.stats = await r.json();
+    },
+    async loadStorage() {
+      const r = await fetch('/api/storage');
+      if (r.ok) this.storage = { ...this.storage, ...(await r.json()) };
     },
     async loadCollections() {
       const r = await fetch('/api/collections');
@@ -388,6 +401,7 @@ function app() {
     async setSearchKind(k) {
       if (this.searchKind === k) return;
       this.searchKind = k;
+      this.modalSort = k === 'author' ? 'newest' : 'pertinence';
       this.modalResults = [];
       this.modalTotal = 0;
       this.modalOffset = 0;
@@ -425,6 +439,7 @@ function app() {
           kind: this.searchKind,
           rows: this.modalRows,
           offset: this.modalOffset,
+          sort: this.modalSort,
         });
         const r = await fetch(`/api/search?${params}`);
         if (!r.ok) {
@@ -441,6 +456,9 @@ function app() {
       } finally {
         this.modalLoading = false;
       }
+    },
+    async changeModalSort() {
+      if (this.modalAttempted && this.modalQuery.trim()) await this.runSearch(true);
     },
     selectedCount() {
       return this.modalResults.filter(r => r._selected).length;
@@ -807,6 +825,55 @@ function app() {
     exportSubjectList(subject) {
       if (!subject) return;
       window.open(`/api/export/list?subject=${encodeURIComponent(subject)}`, '_blank');
+    },
+    async exportLibraryToDrive(customDestination = '') {
+      this.storage.loading = true;
+      try {
+        const r = await fetch('/api/storage/export-google-drive', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ destination: customDestination || null }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.detail || 'Google Drive export failed');
+        this.toast(`Exported ${data.items} records and ${data.files} files`, 'ok', 5000);
+        await this.loadStorage();
+      } catch (e) {
+        this.toast(e.message || 'Google Drive export failed', 'error', 6000);
+      } finally {
+        this.storage.loading = false;
+      }
+    },
+    async exportLibraryToCustomFolder() {
+      const dest = prompt('Export full library to folder path:');
+      if (!dest) return;
+      await this.exportLibraryToDrive(dest);
+    },
+    async useGoogleDriveForDownloads(customDestination = '') {
+      this.storage.loading = true;
+      try {
+        const r = await fetch('/api/storage/use-google-drive', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ destination: customDestination || null, migrate_existing: true }),
+        });
+        const data = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(data.detail || 'Could not use Google Drive for downloads');
+        this.toast(`Download folder set (${data.migrated} existing files copied)`, 'ok', 5500);
+        await Promise.all([this.loadStorage(), this.loadStats(), this.loadItems()]);
+      } catch (e) {
+        this.toast(e.message || 'Could not use Google Drive for downloads', 'error', 6500);
+      } finally {
+        this.storage.loading = false;
+      }
+    },
+    async setCustomDownloadFolder() {
+      const suggestion = this.storage.default_google_drive
+        ? `${this.storage.default_google_drive}/ReviewHunter/papers`
+        : (this.stats.papers_path || '');
+      const dest = prompt('Primary download folder path:', suggestion);
+      if (!dest) return;
+      await this.useGoogleDriveForDownloads(dest);
     },
 
     openItemContext(it, e) {

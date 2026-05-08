@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import books, library
-from .config import library_root, papers_dir
+from .config import default_google_drive_root, library_root, papers_dir
 
 log = logging.getLogger("doihunter.server")
 
@@ -100,6 +100,11 @@ class BulkActionIn(BaseModel):
     destination: Optional[str] = None
 
 
+class StoragePathIn(BaseModel):
+    destination: Optional[str] = None
+    migrate_existing: bool = True
+
+
 class ItemPatch(BaseModel):
     title: Optional[str] = None
     authors: Optional[list[str]] = None
@@ -115,7 +120,7 @@ class ItemPatch(BaseModel):
 
 @app.get("/api/stats")
 def api_stats() -> dict:
-    return {**library.stats(), "library_path": str(library_root())}
+    return {**library.stats(), "library_path": str(library_root()), "papers_path": str(papers_dir())}
 
 
 @app.get("/api/health")
@@ -331,6 +336,38 @@ def api_export_list(
     )
 
 
+# ----------- API: storage / Google Drive sync folders -----------
+
+@app.get("/api/storage")
+def api_storage() -> dict:
+    return library.google_drive_status()
+
+
+@app.post("/api/storage/export-google-drive")
+def api_export_google_drive(body: Optional[StoragePathIn] = None) -> dict:
+    destination = (body.destination if body else None) or ""
+    if not destination.strip():
+        drive = default_google_drive_root()
+        if not drive:
+            raise HTTPException(400, "Google Drive sync folder not found")
+        destination = str(drive)
+    return library.export_full_library(destination)
+
+
+@app.post("/api/storage/use-google-drive")
+def api_use_google_drive(body: Optional[StoragePathIn] = None) -> dict:
+    destination = (body.destination if body else None) or ""
+    if not destination.strip():
+        drive = default_google_drive_root()
+        if not drive:
+            raise HTTPException(400, "Google Drive sync folder not found")
+        destination = str(drive / "ReviewHunter" / "papers")
+    return library.configure_papers_directory(
+        destination,
+        migrate_existing=body.migrate_existing if body else True,
+    )
+
+
 # ----------- API: search & add -----------
 
 @app.get("/api/search")
@@ -339,6 +376,7 @@ async def api_search(
     kind: str = "article",
     rows: int = 25,
     offset: int = 0,
+    sort: Optional[str] = None,
 ) -> dict:
     """Unified discovery endpoint.
 
@@ -355,8 +393,10 @@ async def api_search(
 
     if kind == "book":
         res = await books.search(q, limit=rows)
+        result_sort = sort or "pertinence"
+        results = metadata.sort_results(res["results"], q, result_sort)
         return {"kind": kind, "query": q,
-                "total": len(res["results"]), "results": res["results"],
+                "total": len(results), "results": results,
                 "source": res["source"], "available": res["available"]}
 
     if kind == "article" and metadata.looks_like_doi(q):
@@ -365,7 +405,8 @@ async def api_search(
                 "total": 1 if m else 0, "results": [m] if m else []}
 
     mode = "author" if kind == "author" else "bibliographic"
-    page = metadata.search_paged(q, rows=rows, offset=offset, mode=mode)
+    result_sort = sort or ("newest" if kind == "author" else "pertinence")
+    page = metadata.search_paged(q, rows=rows, offset=offset, mode=mode, result_sort=result_sort)
     return {"kind": kind, "query": q, **page}
 
 

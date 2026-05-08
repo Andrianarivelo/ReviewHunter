@@ -207,6 +207,20 @@
       <div class="px-3 py-3 border-t border-ink-100 dark:border-ink-800/70 text-[11px] text-ink-400 leading-snug">
         <div x-text="`${stats.items} items · ${stats.downloaded} on disk`"></div>
         <div class="truncate" :title="stats.library_path" x-text="stats.library_path || ''"></div>
+        <div class="mt-2 rounded-lg border border-ink-200/80 dark:border-ink-800 bg-white/55 dark:bg-ink-900/45 p-2 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="nav-dot" :class="storage.using_google_drive_for_papers ? 'bg-emerald-500' : 'bg-ink-300'"></span>
+            <span class="font-semibold text-ink-600 dark:text-ink-300">Storage</span>
+          </div>
+          <div class="truncate" :title="storage.papers_dir || stats.papers_path" x-text="storage.papers_dir || stats.papers_path || ''"></div>
+          <div x-show="!storage.default_google_drive" class="text-[10px] text-ink-400">Drive not detected; use Folder...</div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button @click="exportLibraryToDrive()" :disabled="storage.loading || !storage.default_google_drive" class="storage-action" title="Export full backup to detected Google Drive">Export DB</button>
+            <button @click="useGoogleDriveForDownloads()" :disabled="storage.loading || !storage.default_google_drive" class="storage-action" title="Set downloads to detected Google Drive">Use Drive</button>
+            <button @click="exportLibraryToCustomFolder()" :disabled="storage.loading" class="storage-action">Export to...</button>
+            <button @click="setCustomDownloadFolder()" :disabled="storage.loading" class="storage-action">Folder...</button>
+          </div>
+        </div>
       </div>
     </aside>
 
@@ -231,6 +245,14 @@
                           x-text="tab.label"></button>
                 </template>
               </div>
+              <select x-model="modalSort"
+                      @change="changeModalSort()"
+                      class="h-10 text-xs font-semibold bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800 rounded-lg px-3 outline-none">
+                <option value="pertinence">Pertinence</option>
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="title">Title</option>
+              </select>
             </div>
 
             <div class="mt-5 relative">
@@ -271,9 +293,9 @@
               <div class="result-empty">
                 <div class="text-base font-semibold text-ink-700 dark:text-ink-200">Start with a DOI, title, author, or book.</div>
                 <div class="mt-2 flex flex-wrap justify-center gap-2">
-                  <button @click="searchKind='author'; modalQuery='Andry Andrianarivelo'; runSearch(true)" class="query-chip">Author catalogue</button>
-                  <button @click="searchKind='article'; modalQuery='VTA dopamine neuron social interaction'; runSearch(true)" class="query-chip">Paper topic</button>
-                  <button @click="searchKind='article'; modalQuery='10.1038/s41593-021-00972-9'; runSearch(true)" class="query-chip">Exact DOI</button>
+                  <button @click="searchKind='author'; modalSort='newest'; modalQuery='Andry Andrianarivelo'; runSearch(true)" class="query-chip">Author catalogue</button>
+                  <button @click="searchKind='article'; modalSort='pertinence'; modalQuery='VTA dopamine neuron social interaction'; runSearch(true)" class="query-chip">Paper topic</button>
+                  <button @click="searchKind='article'; modalSort='pertinence'; modalQuery='10.1038/s41593-021-00972-9'; runSearch(true)" class="query-chip">Exact DOI</button>
                 </div>
               </div>
             </template>

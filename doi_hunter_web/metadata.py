@@ -60,7 +60,101 @@ def _clean_text(s: Optional[str]) -> str:
     return s
 
 
-def _normalize_work(work: dict) -> dict:
+def _query_tokens(query: str) -> list[str]:
+    return [
+        t
+        for t in WORD_RE.findall(_ascii_lower(query))
+        if t not in _STOP and len(t) > 2
+    ]
+
+
+def _contains_token(text: str, token: str) -> bool:
+    return re.search(rf"\b{re.escape(token)}\b", text) is not None
+
+
+def relevance_score(item: dict, query: str, raw_score: float | int | None = None) -> float:
+    """Stable local relevance score used to order discovery results."""
+    q_norm = _ascii_lower(query)
+    tokens = _query_tokens(query)
+    if not q_norm or not tokens:
+        return float(raw_score or 0)
+
+    title = _ascii_lower(item.get("title") or "")
+    abstract = _ascii_lower(item.get("abstract") or "")
+    journal = _ascii_lower(item.get("journal") or item.get("publisher") or "")
+    authors = _ascii_lower(" ".join(item.get("authors") or []))
+    subjects = _ascii_lower(" ".join(item.get("subjects") or []))
+    doi = _ascii_lower(item.get("doi") or "")
+
+    score = 0.0
+    if raw_score:
+        # CrossRef scores are not normalized; log-like damping keeps them useful
+        # without letting them overpower exact title/query matches.
+        try:
+            score += min(24.0, float(raw_score) ** 0.5)
+        except (TypeError, ValueError):
+            pass
+
+    if q_norm and q_norm in title:
+        score += 60
+    elif q_norm and q_norm in abstract:
+        score += 18
+    if q_norm and q_norm in journal:
+        score += 8
+    if q_norm and q_norm in authors:
+        score += 8
+    if q_norm and q_norm in doi:
+        score += 80
+
+    matched_any = 0
+    matched_title = 0
+    for token in tokens:
+        found = False
+        if _contains_token(title, token):
+            score += 10
+            matched_title += 1
+            found = True
+        if _contains_token(abstract, token):
+            score += 2
+            found = True
+        if _contains_token(subjects, token):
+            score += 4
+            found = True
+        if _contains_token(journal, token):
+            score += 2
+            found = True
+        if _contains_token(authors, token):
+            score += 2
+            found = True
+        if found:
+            matched_any += 1
+
+    coverage = matched_any / max(1, len(tokens))
+    title_coverage = matched_title / max(1, len(tokens))
+    score += coverage * 22 + title_coverage * 24
+    return round(score, 4)
+
+
+def sort_results(results: list[dict], query: str, result_sort: str = "pertinence") -> list[dict]:
+    result_sort = (result_sort or "pertinence").lower()
+    out = []
+    for item in results:
+        item = dict(item)
+        if "relevance_score" not in item:
+            item["relevance_score"] = relevance_score(item, query)
+        out.append(item)
+    if result_sort in {"pertinence", "relevance", "best"}:
+        return sorted(out, key=lambda x: (x.get("relevance_score") or 0, x.get("year") or 0), reverse=True)
+    if result_sort == "newest":
+        return sorted(out, key=lambda x: (x.get("year") or 0, x.get("relevance_score") or 0), reverse=True)
+    if result_sort == "oldest":
+        return sorted(out, key=lambda x: (x.get("year") or 9999, -(x.get("relevance_score") or 0)))
+    if result_sort == "title":
+        return sorted(out, key=lambda x: (x.get("title") or "").casefold())
+    return out
+
+
+def _normalize_work(work: dict, *, query: str = "") -> dict:
     """Map a CrossRef work object to our DB shape."""
     title_list = work.get("title") or []
     title = _clean_text(title_list[0]) if title_list else ""
@@ -86,7 +180,7 @@ def _normalize_work(work: dict) -> dict:
     container = work.get("container-title") or []
     journal = container[0] if container else ""
 
-    return {
+    item = {
         "doi": (work.get("DOI") or "").lower() or None,
         "title": title,
         "authors": authors,
@@ -99,6 +193,8 @@ def _normalize_work(work: dict) -> dict:
         "abstract": _clean_text(work.get("abstract")),
         "subjects": list(work.get("subject") or []),
     }
+    item["relevance_score"] = relevance_score(item, query, work.get("score"))
+    return item
 
 
 def _pubmed_author_name(name: str) -> str:
@@ -227,7 +323,7 @@ def _author_matches_query(author: dict, family: str, given_query: list[str]) -> 
     return not query_initials or author_initials.startswith(query_initials[: len(author_initials)])
 
 
-def search_crossref_author_exact(query: str, rows: int = 25, offset: int = 0) -> dict:
+def search_crossref_author_exact(query: str, rows: int = 25, offset: int = 0, result_sort: str = "newest") -> dict:
     """CrossRef fallback that only keeps works with the requested person in authors."""
     family, given = _parse_author_query(query)
     if not family:
@@ -274,11 +370,12 @@ def search_crossref_author_exact(query: str, rows: int = 25, offset: int = 0) ->
             if not key or key in seen:
                 continue
             seen.add(key)
-            filtered.append(_normalize_work(w))
+            filtered.append(_normalize_work(w, query=query))
 
         if scanned >= raw_total:
             break
 
+    filtered = sort_results(filtered, query, result_sort)
     return {
         "results": filtered[offset: offset + rows],
         "total": len(filtered),
@@ -288,11 +385,11 @@ def search_crossref_author_exact(query: str, rows: int = 25, offset: int = 0) ->
 
 def search_crossref(query: str, rows: int = 8) -> list[dict]:
     """Return up to `rows` CrossRef matches for a free-text query (title-ish)."""
-    return search_paged(query, rows=rows, mode="bibliographic")["results"]
+    return search_paged(query, rows=rows, mode="bibliographic", result_sort="pertinence")["results"]
 
 
 def search_paged(query: str, rows: int = 25, offset: int = 0,
-                 mode: str = "bibliographic") -> dict:
+                 mode: str = "bibliographic", result_sort: str = "pertinence") -> dict:
     """Paged CrossRef search.
 
     mode: 'bibliographic' (title/author/venue), 'author' (query.author —
@@ -305,14 +402,21 @@ def search_paged(query: str, rows: int = 25, offset: int = 0,
     if mode == "author":
         pubmed = search_pubmed_author(query, rows=rows, offset=offset)
         if pubmed and pubmed.get("total", 0) > 0:
+            pubmed["results"] = sort_results(pubmed["results"], query, result_sort)
             return pubmed
-        return search_crossref_author_exact(query, rows=rows, offset=offset)
+        return search_crossref_author_exact(query, rows=rows, offset=offset, result_sort=result_sort)
 
     params: dict = {"rows": rows, "offset": offset}
     if mode == "title":
         params["query.title"] = query
     else:
         params["query.bibliographic"] = query
+    if result_sort == "newest":
+        params["sort"] = "published"
+        params["order"] = "desc"
+    elif result_sort == "oldest":
+        params["sort"] = "published"
+        params["order"] = "asc"
     if _mailto():
         params["mailto"] = _mailto()
     try:
@@ -320,8 +424,9 @@ def search_paged(query: str, rows: int = 25, offset: int = 0,
         r.raise_for_status()
         msg = r.json().get("message", {})
         items = msg.get("items", [])
+        results = [_normalize_work(w, query=query) for w in items if (w.get("title") or [""])[0]]
         return {
-            "results": [_normalize_work(w) for w in items if (w.get("title") or [""])[0]],
+            "results": sort_results(results, query, result_sort),
             "total": int(msg.get("total-results", 0) or 0),
         }
     except Exception:
