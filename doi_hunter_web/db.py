@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS collections (
     color TEXT,
     icon TEXT,
     sort_order INTEGER DEFAULT 0,
+    drive_folder_id TEXT,
+    drive_web_link TEXT,
     created_at TEXT DEFAULT (datetime('now'))
 );
 
@@ -45,7 +47,10 @@ CREATE TABLE IF NOT EXISTS items (
     item_type TEXT DEFAULT 'paper',  -- 'paper' | 'book'
     isbn TEXT,                       -- JSON array (books)
     extension TEXT,                  -- 'pdf' | 'epub' | 'mobi' | 'djvu' | ...
-    mirrors TEXT                     -- JSON array of LibGen-style download URLs
+    mirrors TEXT,                    -- JSON array of LibGen-style download URLs
+    drive_file_id TEXT,
+    drive_folder_id TEXT,
+    drive_web_link TEXT
 );
 
 CREATE TABLE IF NOT EXISTS item_collections (
@@ -90,22 +95,39 @@ END;
 _local = threading.local()
 
 
-_MIGRATIONS = [
+_ITEM_MIGRATIONS = [
     # Each entry: (column_name, type, default_sql_or_None)
     ("item_type", "TEXT", "'paper'"),
     ("isbn", "TEXT", None),
     ("extension", "TEXT", None),
     ("mirrors", "TEXT", None),
+    ("drive_file_id", "TEXT", None),
+    ("drive_folder_id", "TEXT", None),
+    ("drive_web_link", "TEXT", None),
+]
+
+_COLLECTION_MIGRATIONS = [
+    ("drive_folder_id", "TEXT", None),
+    ("drive_web_link", "TEXT", None),
 ]
 
 
 def _migrate(conn: sqlite3.Connection) -> None:
     """Add new columns to existing libraries. Idempotent: skips columns that exist."""
-    cols = {row[1] for row in conn.execute("PRAGMA table_info(items)").fetchall()}
-    for name, typ, default in _MIGRATIONS:
-        if name in cols:
+    item_cols = {row[1] for row in conn.execute("PRAGMA table_info(items)").fetchall()}
+    for name, typ, default in _ITEM_MIGRATIONS:
+        if name in item_cols:
             continue
         sql = f"ALTER TABLE items ADD COLUMN {name} {typ}"
+        if default is not None:
+            sql += f" DEFAULT {default}"
+        conn.execute(sql)
+
+    collection_cols = {row[1] for row in conn.execute("PRAGMA table_info(collections)").fetchall()}
+    for name, typ, default in _COLLECTION_MIGRATIONS:
+        if name in collection_cols:
+            continue
+        sql = f"ALTER TABLE collections ADD COLUMN {name} {typ}"
         if default is not None:
             sql += f" DEFAULT {default}"
         conn.execute(sql)

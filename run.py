@@ -30,7 +30,10 @@ REQS = ROOT / "requirements.txt"
 MIN_PY = (3, 10)
 SENTINEL = "REVIEWHUNTER_BOOTSTRAPPED"
 
-REQUIRED_MODULES = ("fastapi", "uvicorn", "requests", "bs4", "pydantic", "libgen")
+REQUIRED_MODULES = (
+    "fastapi", "uvicorn", "requests", "bs4", "pydantic", "libgen",
+    "googleapiclient", "google_auth_oauthlib", "google.auth",
+)
 
 
 def _venv_python() -> Path:

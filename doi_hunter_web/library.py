@@ -16,6 +16,8 @@ import shutil
 import sqlite3
 import subprocess
 import sys
+import tempfile
+import zipfile
 from collections import Counter, defaultdict
 from datetime import datetime
 from itertools import combinations
@@ -33,7 +35,9 @@ from .db import get_conn, row_to_dict, rows_to_dicts, tx
 from .metadata import (
     extract_keywords,
     fetch_doi,
+    fetch_url_metadata,
     looks_like_doi,
+    looks_like_url,
     search_crossref,
     suggest_collections,
 )
@@ -105,6 +109,7 @@ _ITEM_COLS = [
     "issue", "pages", "abstract", "subjects", "keywords", "file_path",
     "file_size", "status", "error_msg", "source_query",
     "item_type", "isbn", "extension", "mirrors",
+    "drive_file_id", "drive_folder_id", "drive_web_link",
 ]
 
 
@@ -409,14 +414,99 @@ def subject_graph(
         related.sort(key=lambda r: (-r["weight"], r["label"].casefold()))
         return related[:8]
 
+    # Reference year for momentum: latest year in the entire dataset, falling back to
+    # the system clock. Using the dataset anchor keeps "recent" stable across reloads
+    # and avoids a corpus that ages out of the window over time.
+    all_years = [it.get("year") for it in items if isinstance(it.get("year"), int)]
+    anchor_year = max(all_years) if all_years else datetime.now().year
+
+    def node_stats(key: str) -> dict:
+        bucket = term_items.get(key, [])
+        years = [it.get("year") for it in bucket if isinstance(it.get("year"), int)]
+        author_counter: Counter[str] = Counter()
+        journal_counter: Counter[str] = Counter()
+        for it in bucket:
+            authors = it.get("authors") or []
+            # Weight first author more (lead-author signal)
+            for idx, raw in enumerate(authors[:5]):
+                name = str(raw or "").strip()
+                if name:
+                    author_counter[name] += 3 if idx == 0 else 1
+            journal = (it.get("journal") or it.get("publisher") or "").strip()
+            if journal:
+                journal_counter[journal] += 1
+        recent = sum(1 for y in years if anchor_year - y <= 5)
+        momentum = recent / len(years) if years else 0.0
+        return {
+            "year_min": min(years) if years else None,
+            "year_max": max(years) if years else None,
+            "top_authors": [name for name, _ in author_counter.most_common(3)],
+            "top_journal": journal_counter.most_common(1)[0][0] if journal_counter else "",
+            "momentum": round(momentum, 2),
+        }
+
+    # Edges restricted to the rendered subgraph.
+    selected_edges: dict[tuple[str, str], int] = {
+        (a, b): w for (a, b), w in edges.items() if a in selected and b in selected
+    }
+    edge_recent: dict[tuple[str, str], Optional[int]] = {}
+    for (a, b) in selected_edges:
+        shared = {it["id"] for it in term_items.get(a, [])} & {it["id"] for it in term_items.get(b, [])}
+        years = [
+            it.get("year") for it in term_items.get(a, [])
+            if it["id"] in shared and isinstance(it.get("year"), int)
+        ]
+        edge_recent[(a, b)] = max(years) if years else None
+
+    # Degree (unique neighbours) per node within the rendered subgraph.
+    degree: Counter[str] = Counter()
+    adjacency: dict[str, list[tuple[str, int]]] = defaultdict(list)
+    for (a, b), w in selected_edges.items():
+        degree[a] += 1
+        degree[b] += 1
+        adjacency[a].append((b, w))
+        adjacency[b].append((a, w))
+
+    # Community detection via weighted label propagation. Cheap, deterministic,
+    # and gives stable color groupings that reveal thematic clusters.
+    label_of: dict[str, int] = {key: i for i, key in enumerate(sorted(selected))}
+    for _ in range(10):
+        changed = False
+        for key in sorted(selected):
+            neighbours = adjacency.get(key) or []
+            if not neighbours:
+                continue
+            tally: Counter[int] = Counter()
+            for nb, w in neighbours:
+                tally[label_of[nb]] += w
+            best = max(tally.items(), key=lambda kv: (kv[1], -kv[0]))[0]
+            if label_of[key] != best:
+                label_of[key] = best
+                changed = True
+        if not changed:
+            break
+    # Remap to compact 0..N-1 ordered by community size (largest = 0).
+    cluster_sizes: Counter[int] = Counter(label_of.values())
+    order = [c for c, _ in cluster_sizes.most_common()]
+    remap = {old: new for new, old in enumerate(order)}
+    community_of = {key: remap[lab] for key, lab in label_of.items()}
+
     node_payload = []
     for key in selected:
+        stats = node_stats(key)
         node_payload.append(
             {
                 "id": key,
                 "label": label_by_key.get(key, key),
                 "count": counts[key],
                 "focused": key == focus_key,
+                "degree": degree.get(key, 0),
+                "community": community_of.get(key, 0),
+                "year_min": stats["year_min"],
+                "year_max": stats["year_max"],
+                "top_authors": stats["top_authors"],
+                "top_journal": stats["top_journal"],
+                "momentum": stats["momentum"],
                 "items": sample_items(key),
                 "related": related_terms(key),
             }
@@ -428,9 +518,9 @@ def subject_graph(
             "source": a,
             "target": b,
             "weight": weight,
+            "recent": edge_recent.get((a, b)),
         }
-        for (a, b), weight in edges.items()
-        if a in selected and b in selected
+        for (a, b), weight in selected_edges.items()
     ]
     edge_payload.sort(key=lambda e: -e["weight"])
 
@@ -453,8 +543,10 @@ def subject_graph(
             "items": len(items),
         },
         "nodes": node_payload,
-        "edges": edge_payload[:180],
+        "edges": edge_payload[:240],
         "total_terms": len(counts),
+        "anchor_year": anchor_year,
+        "communities": len({n["community"] for n in node_payload}),
     }
 
 
@@ -463,10 +555,151 @@ def subject_graph(
 def list_collections() -> list[dict]:
     rows = get_conn().execute(
         "SELECT c.id, c.name, c.parent_id, c.color, c.icon, c.sort_order, "
+        "  c.drive_folder_id, c.drive_web_link, "
         "  (SELECT COUNT(*) FROM item_collections ic WHERE ic.collection_id = c.id) AS count "
         "FROM collections c ORDER BY c.sort_order, c.name"
     ).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_collection(cid: int) -> Optional[dict]:
+    row = get_conn().execute(
+        "SELECT id, name, parent_id, color, icon, sort_order, drive_folder_id, drive_web_link "
+        "FROM collections WHERE id=?",
+        (cid,),
+    ).fetchone()
+    return dict(row) if row else None
+
+
+_DRIVE_FOLDER_UNSAFE_RE = re.compile(r'[\\/*?:"<>|\r\n\t]')
+
+
+def _drive_collection_name(name: str) -> str:
+    safe = _DRIVE_FOLDER_UNSAFE_RE.sub(" ", name or "").strip().rstrip(". ")
+    safe = re.sub(r"\s+", " ", safe)
+    return safe or "Untitled folder"
+
+
+def ensure_collection_drive_folder(collection_id: int, *, suppress_errors: bool = True) -> Optional[dict]:
+    """Create the matching Google Drive folder when Drive is connected."""
+    collection = get_collection(collection_id)
+    if not collection:
+        raise ValueError("collection not found")
+    if collection.get("drive_folder_id"):
+        return {
+            "id": collection["drive_folder_id"],
+            "name": collection["name"],
+            "webViewLink": collection.get("drive_web_link") or "",
+        }
+    try:
+        from . import drive_api
+        folder = drive_api.ensure_named_subfolder(_drive_collection_name(collection["name"]))
+    except Exception as exc:
+        if not suppress_errors:
+            raise
+        log.info(f"Drive folder sync skipped for collection {collection_id}: {exc}")
+        return None
+    get_conn().execute(
+        "UPDATE collections SET drive_folder_id=?, drive_web_link=? WHERE id=?",
+        (folder.get("id") or "", folder.get("webViewLink") or "", collection_id),
+    )
+    return folder
+
+
+def sync_item_to_collection_drive(item_id: int, collection_id: int, *, force: bool = False) -> Optional[dict]:
+    """Upload an already-downloaded item into the collection's Drive folder."""
+    try:
+        from . import drive_api
+        if not force and not drive_api.auto_upload_enabled():
+            return None
+    except Exception:
+        return None
+    item = get_item(item_id)
+    if not item or not item.get("file_path"):
+        return None
+    src = Path(item["file_path"])
+    if not src.exists() or not src.is_file():
+        return None
+    folder = ensure_collection_drive_folder(collection_id, suppress_errors=not force)
+    if not folder:
+        return None
+    try:
+        uploaded = drive_api.upload_file(src, folder_id=folder["id"], item_id=item_id)
+    except Exception as exc:
+        log.warning(f"Drive upload failed for item {item_id} in collection {collection_id}: {exc}")
+        return None
+    get_conn().execute(
+        "UPDATE items SET drive_file_id=?, drive_folder_id=?, drive_web_link=?, updated_at=datetime('now') WHERE id=?",
+        (
+            uploaded.get("id") or "",
+            folder.get("id") or "",
+            uploaded.get("webViewLink") or uploaded.get("webContentLink") or "",
+            item_id,
+        ),
+    )
+    return uploaded
+
+
+def sync_collection_to_drive(collection_id: int, *, force: bool = False) -> dict:
+    folder = ensure_collection_drive_folder(collection_id, suppress_errors=not force)
+    if not folder:
+        return {"ok": False, "synced": 0, "skipped": 0, "folder": None}
+    synced = 0
+    skipped = 0
+    for item in list_items(collection_id=collection_id, limit=10000):
+        if sync_item_to_collection_drive(item["id"], collection_id, force=force):
+            synced += 1
+        else:
+            skipped += 1
+    return {"ok": True, "synced": synced, "skipped": skipped, "folder": folder}
+
+
+def upload_collection_to_drive(collection_id: int) -> dict:
+    """Manual folder sync: upload local PDFs to the matching Drive folder."""
+    collection = get_collection(collection_id)
+    if not collection:
+        raise ValueError("collection not found")
+    folder = ensure_collection_drive_folder(collection_id, suppress_errors=False)
+    if not folder:
+        raise ValueError("Google Drive folder is unavailable")
+
+    uploaded = 0
+    skipped = 0
+    files: list[dict] = []
+    from . import drive_api
+    for item in list_items(collection_id=collection_id, limit=10000):
+        src_raw = item.get("file_path")
+        if not src_raw:
+            skipped += 1
+            continue
+        src = Path(src_raw)
+        if not src.exists() or src.suffix.lower() != ".pdf":
+            skipped += 1
+            continue
+        drive_file = drive_api.upload_file(src, folder_id=folder["id"], item_id=item["id"])
+        get_conn().execute(
+            "UPDATE items SET drive_file_id=?, drive_folder_id=?, drive_web_link=?, updated_at=datetime('now') WHERE id=?",
+            (
+                drive_file.get("id") or "",
+                folder.get("id") or "",
+                drive_file.get("webViewLink") or drive_file.get("webContentLink") or "",
+                item["id"],
+            ),
+        )
+        uploaded += 1
+        files.append(drive_file)
+    return {"ok": True, "uploaded": uploaded, "skipped": skipped, "folder": folder, "files": files}
+
+
+def sync_all_collection_folders_to_drive() -> dict:
+    synced = 0
+    skipped = 0
+    for collection in list_collections():
+        if ensure_collection_drive_folder(collection["id"]):
+            synced += 1
+        else:
+            skipped += 1
+    return {"ok": True, "synced": synced, "skipped": skipped}
 
 
 def create_collection(name: str, parent_id: Optional[int] = None, color: Optional[str] = None) -> dict:
@@ -474,11 +707,27 @@ def create_collection(name: str, parent_id: Optional[int] = None, color: Optiona
         "INSERT INTO collections (name, parent_id, color) VALUES (?, ?, ?)",
         (name.strip(), parent_id, color),
     )
-    return {"id": cur.lastrowid, "name": name, "parent_id": parent_id, "color": color, "count": 0}
+    cid = cur.lastrowid
+    ensure_collection_drive_folder(cid)
+    collection = get_collection(cid) or {"id": cid, "name": name, "parent_id": parent_id, "color": color}
+    return {**collection, "count": 0}
 
 
 def rename_collection(cid: int, name: str) -> None:
-    get_conn().execute("UPDATE collections SET name=? WHERE id=?", (name.strip(), cid))
+    clean = name.strip()
+    get_conn().execute("UPDATE collections SET name=? WHERE id=?", (clean, cid))
+    collection = get_collection(cid)
+    if not collection or not collection.get("drive_folder_id"):
+        return
+    try:
+        from . import drive_api
+        folder = drive_api.rename_file(collection["drive_folder_id"], _drive_collection_name(clean))
+        get_conn().execute(
+            "UPDATE collections SET drive_web_link=? WHERE id=?",
+            (folder.get("webViewLink") or collection.get("drive_web_link") or "", cid),
+        )
+    except Exception as exc:
+        log.info(f"Drive folder rename skipped for collection {cid}: {exc}")
 
 
 def delete_collection(cid: int) -> None:
@@ -503,6 +752,7 @@ def remove_from_collection(item_id: int, collection_id: int) -> None:
 
 def _matching_items(
     *,
+    collection_id: Optional[int] = None,
     author: Optional[str] = None,
     subject: Optional[str] = None,
     item_ids: Optional[list[int]] = None,
@@ -510,6 +760,8 @@ def _matching_items(
 ) -> list[dict]:
     if item_ids:
         return [item for item in (get_item(i) for i in item_ids) if item]
+    if collection_id is not None:
+        return list_items(collection_id=collection_id, limit=limit)
     return list_items(author=author, subject=subject, limit=limit)
 
 
@@ -579,11 +831,12 @@ def assign_matching_to_collection(
 def export_matching_pdfs(
     destination: str | Path,
     *,
+    collection_id: Optional[int] = None,
     author: Optional[str] = None,
     subject: Optional[str] = None,
     item_ids: Optional[list[int]] = None,
 ) -> dict:
-    items = _matching_items(author=author, subject=subject, item_ids=item_ids)
+    items = _matching_items(collection_id=collection_id, author=author, subject=subject, item_ids=item_ids)
     dest = Path(destination).expanduser()
     dest.mkdir(parents=True, exist_ok=True)
     exported = 0
@@ -605,6 +858,82 @@ def export_matching_pdfs(
     return {"exported": exported, "skipped": skipped, "path": str(dest), "files": files}
 
 
+def collection_pdf_stats(collection_id: int) -> dict:
+    collection = get_collection(collection_id)
+    if not collection:
+        raise ValueError("collection not found")
+    available = 0
+    skipped = 0
+    for item in list_items(collection_id=collection_id, limit=10000):
+        src_raw = item.get("file_path")
+        if not src_raw:
+            skipped += 1
+            continue
+        src = Path(src_raw)
+        if src.exists() and src.suffix.lower() == ".pdf":
+            available += 1
+        else:
+            skipped += 1
+    return {"collection": collection, "available": available, "skipped": skipped}
+
+
+def create_collection_zip(collection_id: int) -> dict:
+    """Build a temporary ZIP containing all downloaded PDFs in a collection."""
+    collection = get_collection(collection_id)
+    if not collection:
+        raise ValueError("collection not found")
+
+    fd, raw_path = tempfile.mkstemp(prefix=f"reviewhunter-folder-{collection_id}-", suffix=".zip")
+    os.close(fd)
+    zip_path = Path(raw_path)
+    added = 0
+    skipped = 0
+    names: set[str] = set()
+
+    def unique_archive_name(name: str) -> str:
+        clean = sanitize_filename(name) or "paper.pdf"
+        if clean not in names:
+            names.add(clean)
+            return clean
+        stem = Path(clean).stem
+        suffix = Path(clean).suffix or ".pdf"
+        for i in range(2, 10000):
+            candidate = f"{stem} ({i}){suffix}"
+            if candidate not in names:
+                names.add(candidate)
+                return candidate
+        raise FileExistsError(f"too many filename collisions for {clean}")
+
+    try:
+        with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+            for item in list_items(collection_id=collection_id, limit=10000):
+                src_raw = item.get("file_path")
+                if not src_raw:
+                    skipped += 1
+                    continue
+                src = Path(src_raw)
+                if not src.exists() or src.suffix.lower() != ".pdf":
+                    skipped += 1
+                    continue
+                zf.write(src, unique_archive_name(src.name))
+                added += 1
+    except Exception:
+        try:
+            zip_path.unlink()
+        except OSError:
+            pass
+        raise
+
+    filename = sanitize_filename(f"{collection['name']} PDFs.zip") or f"collection-{collection_id}.zip"
+    return {
+        "path": str(zip_path),
+        "filename": filename,
+        "added": added,
+        "skipped": skipped,
+        "collection": collection,
+    }
+
+
 def export_matching_list_csv(
     *,
     author: Optional[str] = None,
@@ -615,7 +944,7 @@ def export_matching_list_csv(
     out = io.StringIO()
     writer = csv.DictWriter(
         out,
-        fieldnames=["title", "authors", "year", "journal", "publisher", "doi", "status", "file_path"],
+        fieldnames=["title", "authors", "year", "journal", "publisher", "doi", "status", "file_path", "drive_web_link"],
     )
     writer.writeheader()
     for item in items:
@@ -628,6 +957,7 @@ def export_matching_list_csv(
             "doi": item.get("doi") or "",
             "status": item.get("status") or "",
             "file_path": item.get("file_path") or "",
+            "drive_web_link": item.get("drive_web_link") or "",
         })
     return out.getvalue()
 
@@ -640,7 +970,7 @@ def _library_csv_text(items: list[dict]) -> str:
         out,
         fieldnames=[
             "id", "title", "authors", "year", "journal", "publisher", "doi",
-            "status", "item_type", "file_path", "subjects", "keywords", "notes",
+            "status", "item_type", "file_path", "drive_web_link", "subjects", "keywords", "notes",
         ],
     )
     writer.writeheader()
@@ -656,6 +986,7 @@ def _library_csv_text(items: list[dict]) -> str:
             "status": item.get("status") or "",
             "item_type": item.get("item_type") or "paper",
             "file_path": item.get("file_path") or "",
+            "drive_web_link": item.get("drive_web_link") or "",
             "subjects": "; ".join(item.get("subjects") or []),
             "keywords": "; ".join(item.get("keywords") or []),
             "notes": item.get("notes") or "",
@@ -767,6 +1098,77 @@ def configure_papers_directory(destination: str | Path, *, migrate_existing: boo
     }
 
 
+def upload_item_to_drive(item_id: int) -> dict:
+    item = get_item(item_id)
+    if not item:
+        raise ValueError("item not found")
+    src_raw = item.get("file_path")
+    if not src_raw:
+        raise ValueError("item has no downloaded file")
+    src = Path(src_raw)
+    if not src.exists() or not src.is_file():
+        raise ValueError("downloaded file is missing")
+    from . import drive_api
+    author_folder = drive_api.ensure_author_subfolder(item.get("authors") or [])
+    uploaded = drive_api.upload_file(
+        src,
+        folder_id=author_folder["id"],
+        existing_file_id=item.get("drive_file_id") or "",
+        item_id=item_id,
+    )
+    get_conn().execute(
+        "UPDATE items SET drive_file_id=?, drive_folder_id=?, drive_web_link=?, updated_at=datetime('now') WHERE id=?",
+        (
+            uploaded.get("id") or "",
+            (uploaded.get("parents") or [""])[0],
+            uploaded.get("webViewLink") or uploaded.get("webContentLink") or "",
+            item_id,
+        ),
+    )
+    return {"ok": True, "item": get_item(item_id), "drive": uploaded}
+
+
+def upload_downloaded_items_to_drive(limit: int = 100000) -> dict:
+    items = [
+        item for item in list_items(limit=limit)
+        if item.get("file_path") and Path(item["file_path"]).exists()
+    ]
+    from . import drive_api
+    # Cache author subfolder IDs within this session to avoid redundant API calls.
+    author_folder_cache: dict[str, str] = {}
+    uploaded = 0
+    failed = 0
+    errors: list[dict] = []
+    for item in items:
+        try:
+            author_name = drive_api._author_subfolder_name(item.get("authors") or [])
+            if author_name not in author_folder_cache:
+                folder = drive_api.ensure_author_subfolder(item.get("authors") or [])
+                author_folder_cache[author_name] = folder["id"]
+            folder_id = author_folder_cache[author_name]
+            src = Path(item["file_path"])
+            drive_uploaded = drive_api.upload_file(
+                src,
+                folder_id=folder_id,
+                existing_file_id=item.get("drive_file_id") or "",
+                item_id=item["id"],
+            )
+            get_conn().execute(
+                "UPDATE items SET drive_file_id=?, drive_folder_id=?, drive_web_link=?, updated_at=datetime('now') WHERE id=?",
+                (
+                    drive_uploaded.get("id") or "",
+                    (drive_uploaded.get("parents") or [""])[0],
+                    drive_uploaded.get("webViewLink") or drive_uploaded.get("webContentLink") or "",
+                    item["id"],
+                ),
+            )
+            uploaded += 1
+        except Exception as exc:
+            failed += 1
+            errors.append({"id": item.get("id"), "title": item.get("title"), "error": str(exc)})
+    return {"ok": failed == 0, "uploaded": uploaded, "failed": failed, "errors": errors[:25]}
+
+
 def google_drive_status() -> dict:
     candidates = config.google_drive_candidates()
     primary = config.default_google_drive_root()
@@ -791,6 +1193,8 @@ def add_from_query(query: str, *, auto_categorize: bool = True) -> dict:
     meta: Optional[dict] = None
     if looks_like_doi(query):
         meta = fetch_doi(query)
+    if meta is None and looks_like_url(query):
+        meta = fetch_url_metadata(query)
     if meta is None:
         candidates = search_crossref(query, rows=1)
         if candidates:
@@ -896,6 +1300,45 @@ def _download_url_to_target(
         raise
 
 
+def _maybe_upload_download_to_drive(
+    item_id: int,
+    path: Path,
+    existing_file_id: str = "",
+    *,
+    progress: Optional[Callable[[str, dict], None]] = None,
+) -> None:
+    try:
+        from . import drive_api
+        if not drive_api.auto_upload_enabled():
+            return
+        if progress:
+            progress("drive_uploading", {"id": item_id})
+        item = get_item(item_id)
+        authors = item.get("authors") or [] if item else []
+        author_folder = drive_api.ensure_author_subfolder(authors)
+        uploaded = drive_api.upload_file(
+            path,
+            folder_id=author_folder["id"],
+            existing_file_id=existing_file_id or "",
+            item_id=item_id,
+        )
+        get_conn().execute(
+            "UPDATE items SET drive_file_id=?, drive_folder_id=?, drive_web_link=?, updated_at=datetime('now') WHERE id=?",
+            (
+                uploaded.get("id") or "",
+                (uploaded.get("parents") or [""])[0],
+                uploaded.get("webViewLink") or uploaded.get("webContentLink") or "",
+                item_id,
+            ),
+        )
+        if progress:
+            progress("drive_uploaded", {"id": item_id, "link": uploaded.get("webViewLink") or ""})
+    except Exception as exc:
+        log.warning(f"Google Drive upload failed for item {item_id}: {exc}")
+        if progress:
+            progress("drive_failed", {"id": item_id, "error": str(exc)})
+
+
 def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None]] = None) -> dict:
     """Stream a paper (publisher/Sci-Hub/SciDB) or a book (LibGen mirrors) to disk."""
     item = get_item(item_id)
@@ -933,7 +1376,7 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
         no_source_msg = "no working LibGen mirror"
     else:
         source_options = ((r.source, r.url) for r in iter_pdf_urls(item["doi"]))
-        no_source_msg = "no source (Publisher + Sci-Hub + SciDB)"
+        no_source_msg = "no source (Figshare + Publisher + Sci-Hub + SciDB)"
 
     target = papers_dir() / build_filename(item)
     if target.exists():
@@ -965,6 +1408,12 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
         )
         if progress:
             progress("done", {"id": item_id, "path": str(target), "size": size})
+        _maybe_upload_download_to_drive(
+            item_id,
+            target,
+            item.get("drive_file_id") or "",
+            progress=progress,
+        )
         return get_item(item_id)
 
     if attempted == 0:

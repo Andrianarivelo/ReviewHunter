@@ -37,6 +37,17 @@ def _write_settings(settings: dict) -> None:
     p.write_text(json.dumps(settings, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
+def read_settings() -> dict:
+    return _read_settings()
+
+
+def update_settings(**updates) -> dict:
+    settings = _read_settings()
+    settings.update(updates)
+    _write_settings(settings)
+    return settings
+
+
 def set_papers_dir(path: str | Path) -> Path:
     p = Path(path).expanduser().resolve()
     p.mkdir(parents=True, exist_ok=True)
@@ -59,6 +70,14 @@ def papers_dir() -> Path:
 
 def settings_path() -> Path:
     return library_root() / "settings.json"
+
+
+def google_drive_token_path() -> Path:
+    return library_root() / "google_drive_token.json"
+
+
+def google_drive_client_config_path() -> Path:
+    return library_root() / "google_oauth_client.json"
 
 
 def google_drive_candidates() -> list[Path]:
