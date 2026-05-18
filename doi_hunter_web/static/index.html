@@ -68,7 +68,7 @@
           @keydown.enter="runTopSearch()"
           @keydown.escape="searchQuery=''; $refs.search.blur()"
           type="text"
-          :placeholder="virtual === 'discover' ? 'Search title, DOI, author, or book' : 'Filter this library view, then press Enter to search online'"
+          :placeholder="virtual === 'discover' ? 'Search title, author, or book; paste DOI/link to add' : 'Filter this library view, then press Enter to search online'"
           class="search-input w-full h-10 px-3 pl-10 pr-12 rounded-lg text-sm outline-none transition" />
         <svg class="absolute left-3 top-2.5 w-5 h-5 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <kbd class="absolute right-2 top-2 text-[10px] px-1.5 py-0.5 rounded bg-white/70 dark:bg-ink-800 text-ink-400 hidden md:block">Ctrl K</kbd>
@@ -76,13 +76,17 @@
       <button @click="runTopSearch()"
               class="h-10 px-4 inline-flex items-center gap-2 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold shadow-soft transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        Search
+        <span x-text="topQueryLooksAddable() ? 'Add' : 'Search'"></span>
       </button>
     </div>
 
     <button @click="openAdd=true" class="h-10 px-3 inline-flex items-center gap-1.5 rounded-lg bg-ink-900 hover:bg-ink-800 dark:bg-white dark:text-ink-950 dark:hover:bg-ink-100 text-white text-sm font-semibold shadow-soft transition">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       Add
+    </button>
+
+    <button @click="openSettingsDialog()" title="Settings" class="h-10 w-10 inline-flex items-center justify-center rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800 transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.94a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 10 3.01V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.88A1.7 1.7 0 0 0 20.96 10H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg>
     </button>
 
     <button @click="dark=!dark; localStorage.dhDark=dark" :title="dark?'Light mode':'Dark mode'" class="h-10 w-10 inline-flex items-center justify-center rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800 transition">
@@ -212,13 +216,16 @@
             <span class="nav-dot" :class="storage.using_google_drive_for_papers ? 'bg-emerald-500' : 'bg-ink-300'"></span>
             <span class="font-semibold text-ink-600 dark:text-ink-300">Storage</span>
           </div>
+          <div x-show="googleDrive.connected" class="truncate text-[10px] text-emerald-600 dark:text-emerald-300" :title="googleDrive.user?.emailAddress || ''">
+            Drive API: <span x-text="googleDrive.folder_path || googleDrive.folder_name || 'connected'"></span>
+          </div>
           <div class="truncate" :title="storage.papers_dir || stats.papers_path" x-text="storage.papers_dir || stats.papers_path || ''"></div>
-          <div x-show="!storage.default_google_drive" class="text-[10px] text-ink-400">Drive not detected; use Folder...</div>
+          <div x-show="!storage.default_google_drive" class="text-[10px] text-ink-400">Drive not detected; open Settings</div>
           <div class="grid grid-cols-2 gap-1.5">
             <button @click="exportLibraryToDrive()" :disabled="storage.loading || !storage.default_google_drive" class="storage-action" title="Export full backup to detected Google Drive">Export DB</button>
             <button @click="useGoogleDriveForDownloads()" :disabled="storage.loading || !storage.default_google_drive" class="storage-action" title="Set downloads to detected Google Drive">Use Drive</button>
             <button @click="exportLibraryToCustomFolder()" :disabled="storage.loading" class="storage-action">Export to...</button>
-            <button @click="setCustomDownloadFolder()" :disabled="storage.loading" class="storage-action">Folder...</button>
+            <button @click="openSettingsDialog()" :disabled="storage.loading" class="storage-action">Settings</button>
           </div>
         </div>
       </div>
@@ -253,6 +260,16 @@
                 <option value="oldest">Oldest</option>
                 <option value="title">Title</option>
               </select>
+              <label x-show="searchKind !== 'author'"
+                     class="h-10 px-3 inline-flex items-center gap-2 rounded-lg bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800 text-xs font-semibold text-ink-600 dark:text-ink-300">
+                <input type="checkbox" x-model="modalExact" @change="changeModalExact()" class="rounded">
+                Exact wording
+              </label>
+              <label x-show="searchKind !== 'author'"
+                     class="h-10 px-3 inline-flex items-center gap-2 rounded-lg bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800 text-xs font-semibold text-ink-600 dark:text-ink-300">
+                <input type="checkbox" x-model="modalTitleContains" @change="changeModalTitleContains()" class="rounded">
+                Title has all words
+              </label>
             </div>
 
             <div class="mt-5 relative">
@@ -293,26 +310,26 @@
               <div class="result-empty">
                 <div class="text-base font-semibold text-ink-700 dark:text-ink-200">Start with a DOI, title, author, or book.</div>
                 <div class="mt-2 flex flex-wrap justify-center gap-2">
-                  <button @click="searchKind='author'; modalSort='newest'; modalQuery='Andry Andrianarivelo'; runSearch(true)" class="query-chip">Author catalogue</button>
-                  <button @click="searchKind='article'; modalSort='pertinence'; modalQuery='VTA dopamine neuron social interaction'; runSearch(true)" class="query-chip">Paper topic</button>
-                  <button @click="searchKind='article'; modalSort='pertinence'; modalQuery='10.1038/s41593-021-00972-9'; runSearch(true)" class="query-chip">Exact DOI</button>
+                  <button @click="searchKind='author'; modalSort='newest'; modalExact=false; modalTitleContains=false; modalQuery='Andry Andrianarivelo'; runSearch(true)" class="query-chip">Author catalogue</button>
+                  <button @click="searchKind='article'; modalSort='pertinence'; modalExact=false; modalTitleContains=false; modalQuery='VTA dopamine neuron social interaction'; runSearch(true)" class="query-chip">Paper topic</button>
+                  <button @click="searchKind='article'; modalSort='pertinence'; modalExact=false; modalTitleContains=false; modalQuery='10.1038/s41593-021-00972-9'; runSearch(true)" class="query-chip">Exact DOI</button>
                 </div>
               </div>
             </template>
 
             <ul class="space-y-2">
               <template x-for="(r, i) in modalResults" :key="resultKey(r, i)">
-                <li @click="r._selected = !r._selected"
+                <li @click="selectResult(r)"
                     @contextmenu.prevent="openResultContext(r, $event)"
-                    :class="r._selected ? 'result-row-selected' : 'result-row'"
+                    :class="isSelectedResult(r) ? 'result-row-selected' : 'result-row'"
                     class="result-item cursor-pointer">
                   <input type="checkbox" :checked="r._selected" @click.stop="r._selected = !r._selected" class="mt-1 rounded">
                   <div class="flex-1 min-w-0">
                     <div class="text-sm font-semibold leading-snug" x-text="r.title || '(untitled)'"></div>
                     <div class="mt-1 text-xs text-ink-500 flex flex-wrap gap-x-2 gap-y-1">
                       <span x-text="formatAuthors(r.authors)"></span>
-                      <span x-show="r.year" class="text-ink-400">· <span x-text="r.year"></span></span>
-                      <span x-show="r.journal || r.publisher" class="italic">· <span x-text="r.journal || r.publisher"></span></span>
+                      <span x-show="r.year" class="text-ink-400">&middot; <span x-text="r.year"></span></span>
+                      <span x-show="r.journal || r.publisher" class="italic">&middot; <span x-text="r.journal || r.publisher"></span></span>
                       <span x-show="r.doi" class="text-ink-400" x-text="r.doi"></span>
                       <span x-show="r.extension" class="type-pill" x-text="r.extension"></span>
                     </div>
@@ -339,8 +356,16 @@
             <div class="text-xs text-ink-500 min-w-0 truncate">
               <span x-text="graph.scope.label"></span>
               <span x-show="graph.scope.items"> · <span x-text="`${graph.scope.items} item${graph.scope.items===1?'':'s'}`"></span></span>
+              <span x-show="graph.communities"> · <span x-text="`${graph.communities} cluster${graph.communities===1?'':'s'}`"></span></span>
             </div>
-            <div class="ml-auto flex items-center gap-2">
+            <div class="ml-auto flex items-center gap-2 flex-wrap justify-end">
+              <input x-model="graph.search" type="search" placeholder="Highlight..."
+                     class="h-8 bg-ink-100 dark:bg-ink-800 rounded-md px-2.5 outline-none text-xs w-32" />
+              <label class="text-xs text-ink-500 flex items-center gap-1.5" :title="`Hide edges thinner than this (max weight ${graph.maxWeight})`">
+                Edges &ge;
+                <input type="range" min="1" :max="graph.maxWeight || 1" x-model.number="graph.minWeight" class="w-20 accent-accent-500" />
+                <span class="font-mono w-3 text-right" x-text="graph.minWeight"></span>
+              </label>
               <label class="text-xs text-ink-500 flex items-center gap-1.5">
                 Depth
                 <select x-model.number="graph.depth" @change="loadSubjectGraph()" class="h-8 bg-ink-100 dark:bg-ink-800 rounded-md px-2 outline-none">
@@ -348,7 +373,18 @@
                   <option :value="2">2</option>
                 </select>
               </label>
-              <button @click="resetGraphFocus()" class="action-secondary h-8 px-3 text-xs">Reset</button>
+              <label class="text-xs text-ink-500 flex items-center gap-1.5">
+                Density
+                <select x-model.number="graph.limit" @change="loadSubjectGraph()" class="h-8 bg-ink-100 dark:bg-ink-800 rounded-md px-2 outline-none">
+                  <option :value="30">30</option>
+                  <option :value="48">48</option>
+                  <option :value="60">60</option>
+                  <option :value="90">90</option>
+                </select>
+              </label>
+              <button @click="graphRelayout()" class="action-secondary h-8 px-3 text-xs" title="Re-run the force simulation">Re-layout</button>
+              <button @click="graphResetView()" class="action-secondary h-8 px-3 text-xs" title="Reset zoom and pan">Recenter</button>
+              <button @click="resetGraphFocus()" class="action-secondary h-8 px-3 text-xs">Reset focus</button>
               <button @click="openGraph()" class="action-secondary h-8 px-3 text-xs">Whole library</button>
             </div>
           </div>
@@ -368,27 +404,45 @@
               </div>
             </template>
 
-            <svg x-show="graph.nodes.length>0" :viewBox="graph.viewBox" class="graph-canvas" aria-hidden="true">
-              <g x-html="graphEdgesMarkup()"></g>
-            </svg>
-
-            <div x-show="graph.nodes.length>0" class="graph-node-layer">
-              <template x-for="node in graph.nodes" :key="node.id">
-                <button :class="graphNodeCardClass(node)"
-                        :style="graphNodeCardStyle(node)"
-                        :title="node.label"
-                        @click="selectGraphNode(node)"
-                        @dblclick="enterGraphNode(node)">
-                  <span class="graph-node-card-title" x-text="graphNodeLabel(node)"></span>
-                  <span class="graph-node-card-count" x-text="`${node.count} item${node.count===1?'':'s'}`"></span>
-                </button>
-              </template>
+            <div x-show="graph.nodes.length>0" class="graph-stage-wrapper"
+                 @wheel.prevent="onGraphWheel($event)"
+                 @mousedown="onGraphPanStart($event)"
+                 @mousemove="onGraphPanMove($event)"
+                 @mouseup="onGraphPanEnd($event)"
+                 @mouseleave="onGraphPanEnd($event)">
+              <div class="graph-stage" :style="`transform:${graphTransform()}; width:${graph.width}px; height:${graph.height}px;`" :data-tick="graph.tick">
+                <svg :viewBox="`0 0 ${graph.width} ${graph.height}`" class="graph-canvas" aria-hidden="true" preserveAspectRatio="none">
+                  <g x-html="graphEdgesMarkup()"></g>
+                </svg>
+                <div class="graph-node-layer">
+                  <template x-for="node in graph.nodes" :key="node.id">
+                    <button :class="graphNodeCardClass(node)"
+                            :style="graphNodeCardStyle(node)"
+                            :title="`${node.label} · ${node.count} item${node.count===1?'':'s'}${graphYearLabel(node) ? ' · ' + graphYearLabel(node) : ''}${graphTopAuthor(node) ? ' · ' + graphTopAuthor(node) : ''}`"
+                            @mousedown="onNodeDragStart(node, $event)"
+                            @click.stop="selectGraphNode(node)"
+                            @dblclick.stop="enterGraphNode(node)"
+                            @mouseenter="onNodeHover(node)"
+                            @mouseleave="onNodeHoverEnd()">
+                      <span class="node-dot"></span>
+                      <span class="node-title" x-text="node.label"></span>
+                    </button>
+                  </template>
+                </div>
+              </div>
             </div>
 
             <div x-show="graph.nodes.length>0" class="graph-legend">
               <span class="inline-flex items-center gap-1.5"><span class="legend-dot primary"></span> Selected node</span>
-              <span class="inline-flex items-center gap-1.5"><span class="legend-dot muted"></span> Local subject or keyword</span>
-              <span>Double-click a node to enter its ramifications.</span>
+              <span class="inline-flex items-center gap-1.5"><span class="legend-dot warm"></span> Warm edge = recent shared item</span>
+              <span class="inline-flex items-center gap-1.5"><span class="legend-dot muted"></span> Card hue = thematic cluster</span>
+              <span class="text-ink-400">Drag to pan · scroll to zoom · drag a node to reposition · double-click to enter ramifications</span>
+            </div>
+
+            <div x-show="graph.nodes.length>0" class="graph-zoom-pad">
+              <button @click="graphZoomBy(1.18)" class="zoom-btn" title="Zoom in">+</button>
+              <button @click="graphZoomBy(1/1.18)" class="zoom-btn" title="Zoom out">&minus;</button>
+              <button @click="graphResetView()" class="zoom-btn small" title="Reset view">&#x2316;</button>
             </div>
           </div>
         </div>
@@ -479,11 +533,45 @@
       <template x-if="virtual === 'graph' && graph.selectedNode">
         <div class="p-5 space-y-5">
           <div>
-            <div class="rail-label">Node</div>
+            <div class="rail-label flex items-center gap-2">
+              <span class="cluster-swatch" :style="`background:${graphCommunityColor(graph.selectedNode.community, 1)}`"></span>
+              <span x-text="`Node · cluster ${(graph.selectedNode.community ?? 0) + 1}`"></span>
+            </div>
             <h2 class="font-serif text-2xl leading-tight mt-1" x-text="graph.selectedNode.label"></h2>
             <div class="mt-2 text-sm text-ink-500">
               <span x-text="`${graph.selectedNode.count} linked item${graph.selectedNode.count===1?'':'s'}`"></span>
               <span x-show="graph.scope.label"> in <span x-text="graph.scope.label"></span></span>
+            </div>
+          </div>
+
+          <div class="node-stat-grid">
+            <div class="node-stat" x-show="graphYearLabel(graph.selectedNode)">
+              <div class="rail-label">Years</div>
+              <div class="node-stat-value" x-text="graphYearLabel(graph.selectedNode)"></div>
+            </div>
+            <div class="node-stat" x-show="graph.selectedNode.degree">
+              <div class="rail-label">Connections</div>
+              <div class="node-stat-value" x-text="graph.selectedNode.degree"></div>
+            </div>
+            <div class="node-stat" x-show="graph.selectedNode.momentum != null">
+              <div class="rail-label">Momentum</div>
+              <div class="node-stat-value flex items-center gap-2">
+                <span x-text="graphMomentumLabel(graph.selectedNode)"></span>
+                <span class="text-xs text-ink-400" x-text="`${Math.round((graph.selectedNode.momentum||0)*100)}%`"></span>
+              </div>
+            </div>
+            <div class="node-stat" x-show="graph.selectedNode.top_journal">
+              <div class="rail-label">Top venue</div>
+              <div class="node-stat-value italic" x-text="graph.selectedNode.top_journal"></div>
+            </div>
+          </div>
+
+          <div x-show="(graph.selectedNode.top_authors || []).length">
+            <div class="rail-label mb-2">Recurring authors</div>
+            <div class="flex flex-wrap gap-1.5">
+              <template x-for="a in (graph.selectedNode.top_authors || [])" :key="a">
+                <button @click="selectAuthor(a)" class="chip hover:border-accent-400" x-text="shortAuthor(a)"></button>
+              </template>
             </div>
           </div>
 
@@ -494,12 +582,13 @@
           </div>
 
           <div x-show="graph.selectedNode.related && graph.selectedNode.related.length">
-            <div class="rail-label mb-2">Connected Subjects</div>
+            <div class="rail-label mb-2">Connected subjects · co-occurrence</div>
             <div class="flex flex-wrap gap-1.5">
               <template x-for="rel in graph.selectedNode.related" :key="rel.id">
                 <button @click="selectGraphNode(graph.nodes.find(n => n.id === rel.id) || {id: rel.id, label: rel.label, count: rel.weight})"
                         @dblclick="enterGraphNode(graph.nodes.find(n => n.id === rel.id) || {label: rel.label})"
-                        class="chip hover:border-accent-400">
+                        class="chip hover:border-accent-400"
+                        :style="`--node-accent:${graphCommunityColor((graph.nodes.find(n => n.id === rel.id) || {}).community, 1)}; border-color: color-mix(in srgb, var(--node-accent) 35%, transparent);`">
                   <span x-text="rel.label"></span>
                   <span class="text-ink-400" x-text="` ${rel.weight}`"></span>
                 </button>
@@ -508,7 +597,7 @@
           </div>
 
           <div>
-            <div class="rail-label mb-2">Representative Items</div>
+            <div class="rail-label mb-2">Representative items</div>
             <div class="space-y-2">
               <template x-for="paper in (graph.selectedNode.items || [])" :key="paper.id">
                 <button @click="selectGraphItem(paper)" class="graph-paper-link">
@@ -516,6 +605,7 @@
                   <span class="text-xs text-ink-500">
                     <span x-text="formatAuthors(paper.authors)"></span>
                     <span x-show="paper.year"> &middot; <span x-text="paper.year"></span></span>
+                    <span x-show="paper.journal" class="italic"> &middot; <span x-text="paper.journal"></span></span>
                   </span>
                 </button>
               </template>
@@ -525,7 +615,58 @@
         </div>
       </template>
 
-      <template x-if="!(virtual === 'graph' && graph.selectedNode) && !selectedItem">
+      <template x-if="selectedResult && !(virtual === 'graph' && graph.selectedNode) && !selectedItem">
+        <div class="p-5 space-y-4">
+          <div>
+            <div class="rail-label">Search result</div>
+            <h2 class="font-serif text-xl leading-snug mt-1" x-text="selectedResult.title"></h2>
+            <div class="mt-1 text-sm text-ink-500" x-text="formatAuthors(selectedResult.authors)"></div>
+            <div class="mt-0.5 text-xs text-ink-400">
+              <span x-text="selectedResult.journal || selectedResult.publisher || ''"></span>
+              <span x-show="selectedResult.year">&middot; <span x-text="selectedResult.year"></span></span>
+              <span x-show="selectedResult.volume">&middot; vol. <span x-text="selectedResult.volume"></span></span>
+              <span x-show="selectedResult.issue">(<span x-text="selectedResult.issue"></span>)</span>
+              <span x-show="selectedResult.pages">, <span x-text="selectedResult.pages"></span></span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button @click="addResultAndSelect(selectedResult)" class="action-primary h-8 px-3 text-xs">Add to library</button>
+            <a x-show="resultWebsiteUrl(selectedResult)"
+               :href="resultWebsiteUrl(selectedResult)"
+               target="_blank"
+               class="action-secondary h-8 px-3 text-xs inline-flex items-center">Open website</a>
+            <a x-show="selectedResult.pdf_url"
+               :href="selectedResult.pdf_url"
+               target="_blank"
+               class="action-secondary h-8 px-3 text-xs inline-flex items-center">Open PDF source</a>
+          </div>
+
+          <div x-show="selectedResult.doi" class="text-xs">
+            <span class="text-ink-400">DOI: </span>
+            <a :href="`https://doi.org/${selectedResult.doi}`" target="_blank" class="text-accent-600 hover:underline" x-text="selectedResult.doi"></a>
+          </div>
+
+          <div x-show="selectedResult.subjects && selectedResult.subjects.length" class="flex flex-wrap gap-1.5">
+            <template x-for="s in (selectedResult.subjects || [])">
+              <span class="chip" x-text="s"></span>
+            </template>
+          </div>
+
+          <div x-show="selectedResult.keywords && selectedResult.keywords.length" class="flex flex-wrap gap-1.5">
+            <template x-for="k in (selectedResult.keywords || [])">
+              <span class="chip accent-chip" x-text="k"></span>
+            </template>
+          </div>
+
+          <div x-show="selectedResult.abstract" class="text-sm leading-relaxed text-ink-700 dark:text-ink-300 font-serif">
+            <div class="rail-label font-sans mb-1">Abstract</div>
+            <p x-text="selectedResult.abstract"></p>
+          </div>
+        </div>
+      </template>
+
+      <template x-if="!(virtual === 'graph' && graph.selectedNode) && !selectedItem && !selectedResult">
         <div class="h-full grid place-items-center text-center p-8">
           <div class="result-empty compact">
             <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="virtual === 'graph' ? 'Select a node' : 'Select an item'"></div>
@@ -541,8 +682,8 @@
             <div class="mt-1 text-sm text-ink-500" x-text="formatAuthors(selectedItem.authors)"></div>
             <div class="mt-0.5 text-xs text-ink-400">
               <span x-text="selectedItem.journal || ''"></span>
-              <span x-show="selectedItem.year">· <span x-text="selectedItem.year"></span></span>
-              <span x-show="selectedItem.volume">· vol. <span x-text="selectedItem.volume"></span></span>
+              <span x-show="selectedItem.year">&middot; <span x-text="selectedItem.year"></span></span>
+              <span x-show="selectedItem.volume">&middot; vol. <span x-text="selectedItem.volume"></span></span>
               <span x-show="selectedItem.issue">(<span x-text="selectedItem.issue"></span>)</span>
               <span x-show="selectedItem.pages">, <span x-text="selectedItem.pages"></span></span>
             </div>
@@ -555,6 +696,9 @@
               <span x-show="selectedItem.status==='downloaded'">Downloaded</span>
             </button>
             <a x-show="selectedItem.file_path" :href="`/api/items/${selectedItem.id}/file`" target="_blank" class="action-secondary h-8 px-3 text-xs inline-flex items-center">Open PDF</a>
+            <a x-show="resultWebsiteUrl(selectedItem)" :href="resultWebsiteUrl(selectedItem)" target="_blank" class="action-secondary h-8 px-3 text-xs inline-flex items-center">Open website</a>
+            <button x-show="selectedItem.file_path && !selectedItem.drive_web_link" @click="uploadItemToDrive(selectedItem)" class="action-secondary h-8 px-3 text-xs">Upload Drive</button>
+            <a x-show="selectedItem.drive_web_link" :href="selectedItem.drive_web_link" target="_blank" class="action-secondary h-8 px-3 text-xs inline-flex items-center">Open Drive</a>
             <button @click="openItemFolder(selectedItem)" class="action-secondary h-8 px-3 text-xs">Open Folder</button>
             <button @click="toggleStar(selectedItem)" class="action-secondary h-8 px-3 text-xs">
               <span x-show="selectedItem.starred">Starred</span>
@@ -591,7 +735,7 @@
               <template x-for="cid in (selectedItem.collections || [])">
                 <span class="chip inline-flex items-center gap-1">
                   <span x-text="collectionName(cid)"></span>
-                  <button @click="unassign(selectedItem.id, cid)" class="text-ink-400 hover:text-rose-500">×</button>
+                  <button @click="unassign(selectedItem.id, cid)" class="text-ink-400 hover:text-rose-500">&times;</button>
                 </span>
               </template>
               <button @click="openFolderChooser('item', selectedItem)" class="chip hover:border-accent-400">+ Add to folder</button>
@@ -618,10 +762,10 @@
     <div @click.outside="openAdd=false" class="dialog w-[min(640px,92vw)] p-5">
       <div class="flex items-baseline justify-between">
         <h3 class="font-serif text-lg font-semibold">Add papers</h3>
-        <button @click="openAdd=false" class="text-ink-400 hover:text-ink-700">×</button>
+        <button @click="openAdd=false" class="text-ink-400 hover:text-ink-700">&times;</button>
       </div>
       <textarea x-model="addInput" rows="8"
-                placeholder="10.1038/s41593-021-00972-9&#10;Attention is all you need"
+                placeholder="10.1038/s41593-021-00972-9&#10;https://doi.org/10.1038/s41593-021-00972-9&#10;Attention is all you need"
                 class="mt-4 w-full p-3 text-sm bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded-lg outline-none focus:border-accent-500 font-mono"></textarea>
       <div class="mt-3 flex items-center gap-3">
         <label class="text-xs flex items-center gap-1.5">
@@ -644,11 +788,228 @@
     </div>
   </div>
 
+  <div x-show="openSettings" x-transition.opacity @keydown.escape.window="closeSettingsDialog()" class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm" style="display:none">
+    <div @click.outside="closeSettingsDialog()" class="dialog settings-dialog w-[min(780px,94vw)] p-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="rail-label">Settings</div>
+          <h3 class="font-serif text-xl font-semibold mt-1">Storage</h3>
+        </div>
+        <button @click="closeSettingsDialog()" class="text-ink-400 hover:text-ink-700 dark:hover:text-white">x</button>
+      </div>
+
+      <section class="settings-card mt-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div class="settings-title">Google Drive API</div>
+            <div class="settings-subtitle">
+              <span x-show="googleDrive.connected" x-text="googleDrive.user?.emailAddress || 'Connected'"></span>
+              <span x-show="!googleDrive.connected && googleDrive.token_exists && googleDrive.error">OAuth authorized; Drive API blocked</span>
+              <span x-show="!googleDrive.connected && !(googleDrive.token_exists && googleDrive.error)" x-text="googleDrive.client_configured ? 'Ready to connect' : 'OAuth client required'"></span>
+            </div>
+          </div>
+          <span class="settings-status" :class="googleDrive.connected ? 'is-on' : ''" x-text="googleDrive.connected ? 'Connected' : 'Not connected'"></span>
+        </div>
+
+        <div class="mt-4 grid lg:grid-cols-[1.1fr_.9fr] gap-4">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-ink-500 dark:text-ink-400">OAuth client JSON</label>
+              <div class="settings-path-row mt-1.5">
+                <input x-model="settings.googleClientSecretPath"
+                       placeholder="client_secret_*.json"
+                       class="settings-path-input">
+                <button @click="pickGoogleClientSecret()"
+                        :disabled="settings.picking || googleDrive.loading"
+                        class="action-secondary h-10 px-3 text-sm"
+                        x-text="settings.picking === 'google-client' ? 'Choosing...' : 'Browse...'"></button>
+                <button @click="connectGoogleDriveApi()"
+                        :disabled="googleDrive.loading || (!settings.googleClientSecretPath.trim() && !googleDrive.client_configured)"
+                        class="action-primary h-10 px-4 text-sm"
+                        x-text="googleDrive.connected ? 'Reconnect' : 'Connect'"></button>
+              </div>
+              <div x-show="googleDrive.client_configured && googleDrive.oauth_message"
+                   class="mt-2 rounded-lg border px-3 py-2 text-xs"
+                   :class="googleDrive.oauth_redirect_ready ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200' : 'border-amber-400/40 bg-amber-500/10 text-amber-800 dark:text-amber-100'">
+                <div class="font-semibold" x-text="googleDrive.oauth_message"></div>
+                <div x-show="googleDrive.oauth_redirect_uri && googleDrive.client_type === 'web'" class="mt-1">
+                  Redirect URI: <code class="select-all" x-text="googleDrive.oauth_redirect_uri"></code>
+                </div>
+                <div x-show="googleDrive.scopes && googleDrive.scopes.length" class="mt-1">
+                  Scope: <code class="select-all" x-text="googleDrive.scopes.join(' ')"></code>
+                </div>
+              </div>
+              <div x-show="googleDrive.error"
+                   class="mt-2 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs text-rose-800 dark:text-rose-100">
+                <div class="font-semibold" x-text="googleDrive.error"></div>
+                <a x-show="googleDrive.drive_api_url"
+                   :href="googleDrive.drive_api_url"
+                   target="_blank"
+                   class="mt-1 inline-flex font-semibold underline">Open Drive API settings</a>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-ink-500 dark:text-ink-400">Drive folder</label>
+              <div class="settings-path-row mt-1.5">
+                <input x-model="settings.driveFolderPath"
+                       placeholder="ReviewHunter"
+                       class="settings-path-input">
+                <button @click="saveGoogleDriveFolder()"
+                        :disabled="googleDrive.loading || !googleDrive.connected || (!settings.driveFolderPath.trim() && !settings.driveFolderId)"
+                        class="action-primary h-10 px-4 text-sm">Save folder</button>
+              </div>
+              <label class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-ink-600 dark:text-ink-300">
+                <input type="checkbox" x-model="settings.driveAutoUpload" class="rounded">
+                Auto-upload downloaded files
+              </label>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button @click="uploadDownloadedToDriveApi()"
+                      :disabled="googleDrive.loading || !googleDrive.connected || !googleDrive.folder_id"
+                      class="action-secondary h-9 px-3 text-sm">Upload existing files</button>
+              <button @click="exportLibraryToDriveApi()"
+                      :disabled="googleDrive.loading || !googleDrive.connected || !googleDrive.folder_id"
+                      class="action-secondary h-9 px-3 text-sm">Export DB to Drive</button>
+              <button x-show="googleDrive.connected"
+                      @click="disconnectGoogleDriveApi()"
+                      :disabled="googleDrive.loading"
+                      class="action-danger h-9 px-3 text-sm">Disconnect</button>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="settings-path-row">
+              <input x-model="settings.driveFolderSearch"
+                     @keydown.enter="searchGoogleDriveFolders()"
+                     placeholder="Find Drive folder"
+                     class="settings-path-input">
+              <button @click="searchGoogleDriveFolders()"
+                      :disabled="googleDrive.loading || !googleDrive.connected"
+                      class="action-secondary h-10 px-3 text-sm">Search</button>
+            </div>
+            <div class="max-h-40 overflow-y-auto space-y-1.5">
+              <template x-for="folder in googleDrive.folders" :key="folder.id">
+                <button @click="selectGoogleDriveFolder(folder)" class="drive-choice" :title="folder.id">
+                  <span class="nav-dot bg-accent-500"></span>
+                  <span class="truncate" x-text="folder.name"></span>
+                  <span x-show="settings.driveFolderId === folder.id" class="ml-auto text-xs text-accent-600 font-bold">Selected</span>
+                </button>
+              </template>
+              <div x-show="googleDrive.connected && googleDrive.folders.length === 0" class="empty-note py-2">
+                Search or create a folder path.
+              </div>
+            </div>
+            <div class="rounded-lg bg-ink-100/70 dark:bg-ink-950/70 border border-ink-200/80 dark:border-ink-800 p-3 text-xs text-ink-500 dark:text-ink-400 space-y-2">
+              <div class="flex justify-between gap-3">
+                <span>Selected</span>
+                <span class="truncate text-right" :title="googleDrive.folder_id" x-text="googleDrive.folder_path || googleDrive.folder_name || 'None'"></span>
+              </div>
+              <div class="flex justify-between gap-3" x-show="googleDrive.quota?.usage">
+                <span>Drive usage</span>
+                <span x-text="formatBytes(googleDrive.quota?.usage)"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="mt-5 grid md:grid-cols-2 gap-4">
+        <section class="settings-card">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="settings-title">Local sync folder</div>
+              <div class="settings-subtitle" x-text="storage.using_google_drive_for_papers ? 'Connected for downloads' : 'Downloads use local storage'"></div>
+            </div>
+            <span class="settings-status" :class="storage.using_google_drive_for_papers ? 'is-on' : ''" x-text="storage.using_google_drive_for_papers ? 'Connected' : 'Local'"></span>
+          </div>
+
+          <div class="mt-4">
+            <div class="rail-label mb-2">Detected folders</div>
+            <div class="space-y-1.5 max-h-32 overflow-y-auto">
+              <template x-for="path in storage.google_drive_candidates" :key="path">
+                <button @click="selectDriveCandidate(path)" class="drive-choice" :title="path">
+                  <span class="nav-dot bg-emerald-500"></span>
+                  <span class="truncate" x-text="path"></span>
+                </button>
+              </template>
+              <div x-show="storage.google_drive_candidates.length === 0" class="empty-note py-2">
+                No synced Drive folder detected.
+              </div>
+            </div>
+          </div>
+
+          <label class="block mt-4 text-xs font-bold text-ink-500 dark:text-ink-400">Download folder</label>
+          <div class="settings-path-row mt-1.5">
+            <input x-model="settings.downloadPath"
+                   placeholder="C:\Users\you\Google Drive\ReviewHunter\papers"
+                   class="settings-path-input">
+            <button @click="pickStorageFolder('download')"
+                    :disabled="settings.picking || storage.loading"
+                    class="action-secondary h-10 px-3 text-sm"
+                    x-text="settings.picking === 'download' ? 'Choosing...' : 'Browse...'"></button>
+          </div>
+
+          <label class="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-ink-600 dark:text-ink-300">
+            <input type="checkbox" x-model="settings.migrateExisting" class="rounded">
+            Copy existing downloaded PDFs
+          </label>
+
+          <div class="mt-4 flex flex-wrap justify-end gap-2">
+            <button x-show="storage.default_google_drive"
+                    @click="selectDriveCandidate(storage.default_google_drive)"
+                    class="action-secondary h-9 px-3 text-sm">Use detected Drive</button>
+            <button @click="saveStorageSettings()"
+                    :disabled="storage.loading || !settings.downloadPath.trim()"
+                    class="action-primary h-9 px-4 text-sm">Save storage</button>
+          </div>
+        </section>
+
+        <section class="settings-card">
+          <div class="settings-title">Database export</div>
+          <div class="settings-subtitle">Backups include records, CSV, and downloaded files</div>
+
+          <label class="block mt-4 text-xs font-bold text-ink-500 dark:text-ink-400">Export folder</label>
+          <div class="settings-path-row mt-1.5">
+            <input x-model="settings.exportRoot"
+                   placeholder="C:\Users\you\Google Drive"
+                   class="settings-path-input">
+            <button @click="pickStorageFolder('export')"
+                    :disabled="settings.picking || storage.loading"
+                    class="action-secondary h-10 px-3 text-sm"
+                    x-text="settings.picking === 'export' ? 'Choosing...' : 'Browse...'"></button>
+          </div>
+
+          <div class="mt-4 rounded-lg bg-ink-100/70 dark:bg-ink-950/70 border border-ink-200/80 dark:border-ink-800 p-3 text-xs text-ink-500 dark:text-ink-400 space-y-2">
+            <div class="flex justify-between gap-3">
+              <span>Library</span>
+              <span class="truncate text-right" :title="storage.library_root || stats.library_path" x-text="storage.library_root || stats.library_path || ''"></span>
+            </div>
+            <div class="flex justify-between gap-3">
+              <span>Papers</span>
+              <span class="truncate text-right" :title="storage.papers_dir || stats.papers_path" x-text="storage.papers_dir || stats.papers_path || ''"></span>
+            </div>
+          </div>
+
+          <div class="mt-4 flex flex-wrap justify-end gap-2">
+            <button @click="settings.exportRoot = settings.downloadPath"
+                    :disabled="!settings.downloadPath"
+                    class="action-secondary h-9 px-3 text-sm">Use download folder</button>
+            <button @click="exportLibraryFromSettings()"
+                    :disabled="storage.loading || !settings.exportRoot.trim()"
+                    class="action-primary h-9 px-4 text-sm">Export now</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
   <div x-show="folderChooser.open" x-transition.opacity @keydown.escape.window="closeFolderChooser()" class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm" style="display:none">
     <div @click.outside="closeFolderChooser()" class="dialog w-[min(520px,92vw)] p-5">
       <div class="flex items-baseline justify-between">
         <h3 class="font-serif text-lg font-semibold" x-text="folderChooser.title"></h3>
-        <button @click="closeFolderChooser()" class="text-ink-400 hover:text-ink-700">×</button>
+        <button @click="closeFolderChooser()" class="text-ink-400 hover:text-ink-700">&times;</button>
       </div>
       <div class="mt-4 max-h-72 overflow-y-auto space-y-1">
         <template x-for="c in collections" :key="c.id">

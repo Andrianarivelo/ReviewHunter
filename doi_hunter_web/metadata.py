@@ -8,10 +8,12 @@ import re
 import time
 import unicodedata
 from collections import Counter
+from html import unescape
 from typing import Optional
-from urllib.parse import quote
+from urllib.parse import quote, unquote, urlparse
 
 import requests
+from bs4 import BeautifulSoup
 
 CROSSREF_API = "https://api.crossref.org"
 PUBMED_API = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
@@ -33,6 +35,8 @@ toward towards via we our its their from also however thus
 JATS_RE = re.compile(r"</?jats:[^>]+>", re.IGNORECASE)
 WHITESPACE_RE = re.compile(r"\s+")
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z\-]{2,}")
+DOI_RE = re.compile(r"\b(10\.\d{4,9}/[-._;()/:A-Z0-9]+)", re.IGNORECASE)
+URL_RE = re.compile(r"^https?://", re.IGNORECASE)
 
 
 def _mailto() -> Optional[str]:
@@ -55,9 +59,97 @@ def _ascii_lower(s: str) -> str:
 def _clean_text(s: Optional[str]) -> str:
     if not s:
         return ""
+    s = unescape(s)
     s = JATS_RE.sub(" ", s)
+    s = re.sub(r"<[^>]+>", " ", s)
     s = WHITESPACE_RE.sub(" ", s).strip()
     return s
+
+
+def _trim_doi(s: str) -> str:
+    doi = (s or "").strip().strip("<>\"'")
+    doi = re.sub(r"[\s?#].*$", "", doi)
+    return doi.rstrip(".,;:)]}").lower()
+
+
+def extract_doi(text: str) -> Optional[str]:
+    """Return a normalized DOI from raw DOI text, DOI URLs, or embedded text."""
+    raw = unquote((text or "").strip())
+    if not raw:
+        return None
+
+    lowered = raw.lower()
+    for prefix in ("doi:", "doi "):
+        if lowered.startswith(prefix):
+            raw = raw[len(prefix):].strip()
+            break
+
+    parsed = urlparse(raw)
+    if parsed.netloc and parsed.netloc.lower() in {"doi.org", "dx.doi.org"}:
+        doi = _trim_doi(parsed.path.lstrip("/"))
+        return doi if DOI_RE.match(doi) else None
+
+    m = DOI_RE.search(raw)
+    return _trim_doi(m.group(1)) if m else None
+
+
+def looks_like_url(s: str) -> bool:
+    return bool(URL_RE.match((s or "").strip()))
+
+
+def _meta_content(soup: BeautifulSoup, names: tuple[str, ...]) -> str:
+    wanted = {n.lower() for n in names}
+    for tag in soup.find_all("meta"):
+        key = (tag.get("name") or tag.get("property") or "").strip().lower()
+        if key in wanted:
+            content = (tag.get("content") or "").strip()
+            if content:
+                return content
+    return ""
+
+
+def fetch_url_metadata(url: str) -> Optional[dict]:
+    """Resolve a publisher/landing-page URL to CrossRef metadata when possible."""
+    if not looks_like_url(url):
+        return None
+
+    doi = extract_doi(url)
+    if doi:
+        return fetch_doi(doi)
+
+    try:
+        headers = {**_headers(), "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"}
+        r = requests.get(url, headers=headers, timeout=15, allow_redirects=True)
+        if r.status_code >= 400:
+            return None
+        content_type = (r.headers.get("content-type") or "").lower()
+        if content_type and "html" not in content_type and "xml" not in content_type:
+            return None
+    except Exception:
+        return None
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    doi = extract_doi(_meta_content(soup, (
+        "citation_doi",
+        "dc.identifier",
+        "dc.identifier.doi",
+        "dc.doi",
+        "prism.doi",
+        "doi",
+    )))
+    if doi:
+        meta = fetch_doi(doi)
+        if meta:
+            return meta
+
+    title = _meta_content(soup, ("citation_title", "og:title", "twitter:title"))
+    if not title and soup.title and soup.title.string:
+        title = soup.title.string.strip()
+    if title:
+        candidates = search_crossref(_clean_text(title), rows=1)
+        if candidates:
+            return candidates[0]
+    return None
 
 
 def _query_tokens(query: str) -> list[str]:
@@ -72,10 +164,56 @@ def _contains_token(text: str, token: str) -> bool:
     return re.search(rf"\b{re.escape(token)}\b", text) is not None
 
 
+def strip_exact_quotes(query: str) -> str:
+    q = (query or "").strip()
+    if len(q) >= 2 and q[0] == q[-1] and q[0] in {'"', "'"}:
+        return q[1:-1].strip()
+    return q
+
+
+def is_exact_query(query: str) -> bool:
+    q = (query or "").strip()
+    return len(q) >= 2 and q[0] == q[-1] and q[0] in {'"', "'"}
+
+
+def exact_phrase_matches(item: dict, query: str) -> bool:
+    phrase = _ascii_lower(strip_exact_quotes(query))
+    if not phrase:
+        return True
+    haystack = _ascii_lower(" ".join([
+        item.get("title") or "",
+        item.get("abstract") or "",
+        item.get("journal") or "",
+        item.get("publisher") or "",
+        item.get("doi") or "",
+        " ".join(item.get("authors") or []),
+        " ".join(item.get("subjects") or []),
+        " ".join(item.get("keywords") or []),
+    ]))
+    return phrase in haystack
+
+
+def filter_exact_results(results: list[dict], query: str) -> list[dict]:
+    return [r for r in results if exact_phrase_matches(r, query)]
+
+
+def title_contains_all_words(item: dict, query: str) -> bool:
+    tokens = _query_tokens(strip_exact_quotes(query))
+    if not tokens:
+        return True
+    title = _ascii_lower(item.get("title") or "")
+    return all(_contains_token(title, token) for token in tokens)
+
+
+def filter_title_contains_results(results: list[dict], query: str) -> list[dict]:
+    return [r for r in results if title_contains_all_words(r, query)]
+
+
 def relevance_score(item: dict, query: str, raw_score: float | int | None = None) -> float:
     """Stable local relevance score used to order discovery results."""
-    q_norm = _ascii_lower(query)
-    tokens = _query_tokens(query)
+    clean_query = strip_exact_quotes(query)
+    q_norm = _ascii_lower(clean_query)
+    tokens = _query_tokens(clean_query)
     if not q_norm or not tokens:
         return float(raw_score or 0)
 
@@ -192,7 +330,15 @@ def _normalize_work(work: dict, *, query: str = "") -> dict:
         "pages": work.get("page") or "",
         "abstract": _clean_text(work.get("abstract")),
         "subjects": list(work.get("subject") or []),
+        "url": work.get("URL") or "",
+        "landing_url": work.get("URL") or "",
     }
+    for link in work.get("link") or []:
+        url = link.get("URL") or link.get("url") or ""
+        content_type = (link.get("content-type") or link.get("content_type") or "").lower()
+        if url and ("pdf" in content_type or url.lower().split("?", 1)[0].endswith(".pdf")):
+            item["pdf_url"] = url
+            break
     item["relevance_score"] = relevance_score(item, query, work.get("score"))
     return item
 
@@ -389,7 +535,8 @@ def search_crossref(query: str, rows: int = 8) -> list[dict]:
 
 
 def search_paged(query: str, rows: int = 25, offset: int = 0,
-                 mode: str = "bibliographic", result_sort: str = "pertinence") -> dict:
+                 mode: str = "bibliographic", result_sort: str = "pertinence",
+                 exact: bool = False, title_contains: bool = False) -> dict:
     """Paged CrossRef search.
 
     mode: 'bibliographic' (title/author/venue), 'author' (query.author —
@@ -399,18 +546,89 @@ def search_paged(query: str, rows: int = 25, offset: int = 0,
 
     Returns ``{"results": [...], "total": int}``.
     """
+    exact = exact or is_exact_query(query)
+    clean_query = strip_exact_quotes(query) if exact else query
+
     if mode == "author":
-        pubmed = search_pubmed_author(query, rows=rows, offset=offset)
+        pubmed = search_pubmed_author(clean_query, rows=rows, offset=offset)
         if pubmed and pubmed.get("total", 0) > 0:
-            pubmed["results"] = sort_results(pubmed["results"], query, result_sort)
+            pubmed["results"] = sort_results(pubmed["results"], clean_query, result_sort)
             return pubmed
-        return search_crossref_author_exact(query, rows=rows, offset=offset, result_sort=result_sort)
+        return search_crossref_author_exact(clean_query, rows=rows, offset=offset, result_sort=result_sort)
+
+    def apply_query_params(params: dict, page_rows: int, page_offset: int) -> dict:
+        params.update({"rows": page_rows, "offset": page_offset})
+        if mode == "title":
+            params["query.title"] = clean_query
+        else:
+            params["query.bibliographic"] = clean_query
+        if result_sort == "newest":
+            params["sort"] = "published"
+            params["order"] = "desc"
+        elif result_sort == "oldest":
+            params["sort"] = "published"
+            params["order"] = "asc"
+        if _mailto():
+            params["mailto"] = _mailto()
+        return params
+
+    if exact or title_contains:
+        scan_limit = int(
+            os.environ.get("REVIEWHUNTER_FILTER_SCAN_LIMIT")
+            or os.environ.get("REVIEWHUNTER_EXACT_SCAN_LIMIT")
+            or os.environ.get("DOIHUNTER_EXACT_SCAN_LIMIT", "500")
+            or "500"
+        )
+        scan_limit = max(rows, min(scan_limit, 1000))
+        page_size = 100
+        filtered: list[dict] = []
+        raw_total = 0
+        scanned = 0
+        try:
+            while scanned < scan_limit and len(filtered) < offset + rows:
+                params = apply_query_params({}, min(page_size, scan_limit - scanned), scanned)
+                r = requests.get(f"{CROSSREF_API}/works", params=params, headers=_headers(), timeout=20)
+                r.raise_for_status()
+                msg = r.json().get("message", {})
+                raw_total = int(msg.get("total-results", 0) or 0)
+                items = msg.get("items", [])
+                if not items:
+                    break
+                scanned += len(items)
+                page_results = [
+                    _normalize_work(w, query=clean_query)
+                    for w in items
+                    if (w.get("title") or [""])[0]
+                ]
+                if exact:
+                    page_results = filter_exact_results(page_results, clean_query)
+                if title_contains:
+                    page_results = filter_title_contains_results(page_results, clean_query)
+                filtered.extend(page_results)
+                if scanned >= raw_total:
+                    break
+            filtered = sort_results(filtered, clean_query, result_sort)
+            if exact and title_contains:
+                source = "CrossRef exact wording + title contains"
+            elif title_contains:
+                source = "CrossRef title contains"
+            else:
+                source = "CrossRef exact wording"
+            return {
+                "results": filtered[offset: offset + rows],
+                "total": len(filtered),
+                "source": source,
+                "scanned": min(scanned, raw_total or scanned),
+            }
+        except Exception:
+            source = "CrossRef title contains" if title_contains else "CrossRef exact wording"
+            return {"results": [], "total": 0, "source": source}
 
     params: dict = {"rows": rows, "offset": offset}
     if mode == "title":
-        params["query.title"] = query
+        params["query.title"] = clean_query
     else:
-        params["query.bibliographic"] = query
+        params["query.bibliographic"] = clean_query
     if result_sort == "newest":
         params["sort"] = "published"
         params["order"] = "desc"
@@ -424,9 +642,9 @@ def search_paged(query: str, rows: int = 25, offset: int = 0,
         r.raise_for_status()
         msg = r.json().get("message", {})
         items = msg.get("items", [])
-        results = [_normalize_work(w, query=query) for w in items if (w.get("title") or [""])[0]]
+        results = [_normalize_work(w, query=clean_query) for w in items if (w.get("title") or [""])[0]]
         return {
-            "results": sort_results(results, query, result_sort),
+            "results": sort_results(results, clean_query, result_sort),
             "total": int(msg.get("total-results", 0) or 0),
         }
     except Exception:
@@ -435,10 +653,8 @@ def search_paged(query: str, rows: int = 25, offset: int = 0,
 
 def fetch_doi(doi: str) -> Optional[dict]:
     """Fetch a single work by DOI. Returns normalized dict or None."""
-    doi = doi.strip().lower()
-    if doi.startswith("https://doi.org/"):
-        doi = doi[len("https://doi.org/"):]
-    elif doi.startswith("doi.org/"):
+    doi = extract_doi(doi) or doi.strip().lower()
+    if doi.startswith("doi.org/"):
         doi = doi[len("doi.org/"):]
     try:
         r = requests.get(f"{CROSSREF_API}/works/{quote(doi, safe='/')}",
@@ -451,10 +667,7 @@ def fetch_doi(doi: str) -> Optional[dict]:
 
 
 def looks_like_doi(s: str) -> bool:
-    s = s.strip().lower()
-    if s.startswith("https://doi.org/") or s.startswith("doi.org/"):
-        return True
-    return bool(re.match(r"^10\.\d{4,9}/\S+$", s))
+    return extract_doi(s) is not None
 
 
 # ---------- Categorization ----------

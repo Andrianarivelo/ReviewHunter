@@ -9,3 +9,7 @@ venv/
 *.egg-info/
 dist/
 build/
+client_secret*.json
+credentials*.json
+google_oauth_client.json
+google_drive_token.json

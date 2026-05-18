@@ -23,6 +23,9 @@ web = [
     "fastapi>=0.110",
     "uvicorn[standard]>=0.27",
     "pydantic>=2.5",
+    "google-api-python-client>=2.0",
+    "google-auth>=2.0",
+    "google-auth-oauthlib>=1.2",
     "libgen-api-modern @ https://files.pythonhosted.org/packages/5c/44/70be9e0e536dc80d5d7412c8deb2193c4e103ad00b2c518b963f0b1c6ccf/libgen_api_modern-0.2.1-py3-none-any.whl",
 ]
 embeddings = [

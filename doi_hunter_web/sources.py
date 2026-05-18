@@ -35,6 +35,7 @@ ANNAS_BASES = [
 
 _PDF_RX = re.compile(r"\.pdf(?:[/?#~]|$)", re.IGNORECASE)
 _PDF_URLISH_RX = re.compile(r"""(?i)(?:(?:https?:)?//|/)[^'"<>\s]+?\.pdf(?:[#?~][^'"<>\s]*)?""")
+_FIGSHARE_ARTICLE_ID_RX = re.compile(r"(?:^|[./_-])(\d{5,})(?:\.v\d+)?$", re.IGNORECASE)
 
 
 @dataclass
@@ -206,6 +207,49 @@ def _publisher_pdf(doi: str) -> Optional[Resolved]:
     return next(iter(_publisher_pdf_candidates(doi)), None)
 
 
+# ---------------- Figshare / institutional Figshare repositories --------
+
+def _figshare_article_id_from_doi(doi: str) -> str:
+    match = _FIGSHARE_ARTICLE_ID_RX.search((doi or "").strip())
+    return match.group(1) if match else ""
+
+
+def _figshare_candidates(doi: str) -> list[Resolved]:
+    article_id = _figshare_article_id_from_doi(doi)
+    if not article_id:
+        return []
+    try:
+        r = requests.get(
+            f"https://api.figshare.com/v2/articles/{quote(article_id, safe='')}",
+            headers=get_headers(),
+            timeout=20,
+        )
+        if r.status_code != 200:
+            return []
+        data = r.json()
+    except Exception as e:
+        log.debug(f"Figshare API lookup failed for {doi}: {e}")
+        return []
+
+    resolved: list[Resolved] = []
+    seen: set[str] = set()
+    for f in data.get("files") or []:
+        url = (f.get("download_url") or "").strip()
+        name = (f.get("name") or "").lower()
+        mimetype = (f.get("mimetype") or "").lower()
+        if not url or url in seen:
+            continue
+        if "pdf" not in mimetype and not name.endswith(".pdf"):
+            continue
+        seen.add(url)
+        resolved.append(Resolved(url=url, source="Figshare API PDF"))
+    return resolved
+
+
+def _figshare_pdf(doi: str) -> Optional[Resolved]:
+    return next(iter(_figshare_candidates(doi)), None)
+
+
 # ---------------- Sci-Hub ----------------
 
 def _scihub_candidates(doi: str) -> list[Resolved]:
@@ -327,8 +371,9 @@ def _scidb(doi: str) -> Optional[Resolved]:
 
 # ---------------- Public API ----------------
 
-DEFAULT_RESOLVERS: list[Callable[[str], Optional[Resolved]]] = [_publisher_pdf, _scihub, _scidb]
+DEFAULT_RESOLVERS: list[Callable[[str], Optional[Resolved]]] = [_figshare_pdf, _publisher_pdf, _scihub, _scidb]
 DEFAULT_OPTION_RESOLVERS: list[Callable[[str], Iterable[Resolved]]] = [
+    _figshare_candidates,
     _publisher_pdf_candidates,
     _scihub_candidates,
     _scidb_candidates,
