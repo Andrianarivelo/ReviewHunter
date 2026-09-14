@@ -1,0 +1,178 @@
+# Installer tests on clean machines, previous launch method (python run.py) vs the new installer.
+#
+# Every job starts from a fresh container / runner and writes one JSON result
+# (platform, scenario, method, success, seconds, python) uploaded as an artifact; they are
+# aggregated by benchmarks/benchmark_installer.py into CSV files and figures.
+#
+#   scenario "python"  distribution image + python3 only (what a desktop user typically has)
+#   scenario "bare"    distribution image with no Python at all (installer only)
+name: installer
+
+on:
+  push:
+    branches: [main]
+    paths: ["installer/**", "install.sh", "Install-ReviewHunter.bat", "requirements.txt", "run.py",
+            ".github/workflows/installer.yml"]
+  workflow_dispatch:
+
+jobs:
+  linux:
+    name: ${{ matrix.image }} / ${{ matrix.method }} / ${{ matrix.scenario }}
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ["ubuntu:22.04", "ubuntu:24.04", "debian:12", "fedora:41"]
+        method: [legacy, installer]
+        scenario: [python]
+        include:
+          - {image: "ubuntu:24.04", method: installer, scenario: bare}
+          - {image: "debian:12", method: installer, scenario: bare}
+          - {image: "fedora:41", method: installer, scenario: bare}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Baseline system (curl, and python3 for the "python" scenario)
+        shell: bash
+        run: |
+          if command -v apt-get >/dev/null; then
+            apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl ca-certificates procps >/dev/null
+            if [ "${{ matrix.scenario }}" = python ]; then DEBIAN_FRONTEND=noninteractive apt-get install -y -qq python3 >/dev/null; fi
+          else
+            dnf install -y -q curl procps-ng >/dev/null
+            if [ "${{ matrix.scenario }}" = python ]; then dnf install -y -q python3 >/dev/null; fi
+          fi
+
+      - name: Install and start (${{ matrix.method }})
+        id: run
+        shell: bash
+        run: |
+          set +e
+          start=$(date +%s)
+          ok=false
+          if [ "${{ matrix.method }}" = legacy ]; then
+            # Previous documented method: python3 run.py (bootstraps .venv, then serves on 8765)
+            python3 run.py -- --no-browser --no-https > legacy.log 2>&1 &
+            pid=$!
+            for i in $(seq 1 600); do
+              if curl -fsS http://127.0.0.1:8765/connector/ping >/dev/null 2>&1; then ok=true; break; fi
+              kill -0 $pid 2>/dev/null || break
+              sleep 1
+            done
+            tail -20 legacy.log
+            kill $pid 2>/dev/null
+          else
+            bash install.sh --cli --yes --no-launch && ok=true
+            # the installer self-test already started the app; also check the files it promised
+            test -f "$HOME/.local/share/reviewhunter/install.json" || ok=false
+            test -f "$HOME/.local/share/applications/reviewhunter.desktop" || ok=false
+            "$HOME/.local/share/reviewhunter/.venv/bin/python" -c "import doi_hunter_web.server" || ok=false
+          fi
+          seconds=$(( $(date +%s) - start ))
+          py=$(python3 -c 'import platform; print(platform.python_version())' 2>/dev/null || echo none)
+          mkdir -p result
+          printf '{"platform":"%s","scenario":"%s","method":"%s","success":%s,"seconds":%s,"python":"%s","run_id":"%s"}\n' \
+            "${{ matrix.image }}" "${{ matrix.scenario }}" "${{ matrix.method }}" "$ok" "$seconds" "$py" "${{ github.run_id }}" \
+            | tee result/result.json
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
+      - name: Uninstall keeps the library and removes the program
+        if: matrix.method == 'installer' && steps.run.outputs.ok == 'true'
+        shell: bash
+        run: |
+          mkdir -p "$HOME/ReviewHunter" && echo keep > "$HOME/ReviewHunter/marker.txt"
+          python3 installer/reviewhunter_installer.py --uninstall --yes
+          test ! -d "$HOME/.local/share/reviewhunter"
+          test ! -f "$HOME/.local/share/applications/reviewhunter.desktop"
+          test -f "$HOME/ReviewHunter/marker.txt"
+
+      - name: Artifact name
+        id: name
+        shell: bash
+        run: echo "v=result-$(echo '${{ matrix.image }}-${{ matrix.method }}-${{ matrix.scenario }}' | tr ':/' '--')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ${{ steps.name.outputs.v }}
+          path: result/result.json
+          if-no-files-found: ignore
+
+  linux-gui:
+    name: Linux graphical installer screenshots
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Virtual display, Tk and screenshot tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb python3-tk python3-venv imagemagick >/dev/null
+      - name: Run the window with auto-start and capture it
+        run: |
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1100x800x24 & sleep 2
+          RH_INSTALLER_AUTOSTART=1 python3 installer/reviewhunter_installer.py --target /tmp/rhgui --no-shortcuts --no-launch &
+          sleep 12; import -window root gui-linux-progress.png
+          for i in $(seq 1 300); do [ -f /tmp/rhgui/install.json ] && break; sleep 1; done
+          sleep 3; import -window root gui-linux-done.png
+          test -f /tmp/rhgui/install.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gui-linux-screenshots
+          path: gui-linux-*.png
+
+  windows:
+    name: windows / ${{ matrix.method }}
+    runs-on: windows-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        method: [legacy, installer]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install and start (${{ matrix.method }})
+        id: run
+        shell: pwsh
+        run: |
+          $start = Get-Date; $ok = $false
+          if ("${{ matrix.method }}" -eq "legacy") {
+            $p = Start-Process python -ArgumentList "run.py","--","--no-browser","--no-https" -PassThru -RedirectStandardOutput legacy.log -RedirectStandardError legacy.err
+            for ($i = 0; $i -lt 600; $i++) {
+              try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/connector/ping -TimeoutSec 2 | Out-Null; $ok = $true; break } catch {}
+              if ($p.HasExited) { break }
+              Start-Sleep 1
+            }
+            Get-Content legacy.err -Tail 20 -ErrorAction SilentlyContinue
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
+          } else {
+            cmd /c "Install-ReviewHunter.bat --yes --no-launch"
+            $rc = $LASTEXITCODE
+            $target = "$env:LOCALAPPDATA\Programs\ReviewHunter"
+            $ok = ($rc -eq 0) -and (Test-Path "$target\install.json") -and `
+                  (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\ReviewHunter.lnk")
+          }
+          $seconds = [int]((Get-Date) - $start).TotalSeconds
+          $py = (python -c "import platform; print(platform.python_version())")
+          New-Item -ItemType Directory -Force result | Out-Null
+          $json = @{ platform = "windows-latest"; scenario = "python"; method = "${{ matrix.method }}"; success = $ok; seconds = $seconds; python = "$py"; run_id = "${{ github.run_id }}" } | ConvertTo-Json -Compress
+          Set-Content -Path result/result.json -Value $json -Encoding utf8NoBOM
+          $json
+          "ok=$($ok.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+      - name: Uninstall keeps the library and removes the program
+        if: matrix.method == 'installer' && steps.run.outputs.ok == 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force "$env:USERPROFILE\ReviewHunter" | Out-Null
+          Set-Content "$env:USERPROFILE\ReviewHunter\marker.txt" keep
+          python installer/reviewhunter_installer.py --uninstall --yes
+          if (Test-Path "$env:LOCALAPPDATA\Programs\ReviewHunter") { throw "program folder still present" }
+          if (-not (Test-Path "$env:USERPROFILE\ReviewHunter\marker.txt")) { throw "library was touched" }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-windows-${{ matrix.method }}-python
+          path: result/result.json
+          if-no-files-found: ignore

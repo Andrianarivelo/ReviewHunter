@@ -48,6 +48,32 @@ article page: it downloads the PDF with your own access and attaches it to the e
 `benchmarks/benchmark_v1_v2.py` compares v1 and v2 (PDF availability, API latency, feature coverage); results and
 figures are in `benchmarks/results/`.
 
+## Easy install (Windows and Linux)
+
+Download **ReviewHunter.zip** from the [latest release](https://github.com/Andrianarivelo/ReviewHunter/releases/latest), unzip it, then:
+
+| System | One click | What happens |
+|---|---|---|
+| **Windows 10/11** | double-click `Install-ReviewHunter.bat` | finds Python 3.10+ (offers to install Python 3.12 with winget if missing), then opens the setup window |
+| **Linux** (Ubuntu, Debian, Fedora, openSUSE, Arch) | `bash install.sh` | installs `python3-venv` / `python3-tk` with your confirmation if missing, then opens the setup window (terminal mode without a display) |
+
+The setup window shows each step with a progress bar: system check, file copy, private Python environment,
+dependencies, optional semantic clustering, a **self-test that really starts the app**, shortcuts
+(Desktop + Start menu / applications menu). Nothing needs administrator rights: the program goes to
+`%LOCALAPPDATA%\Programs\ReviewHunter` (Windows) or `~/.local/share/reviewhunter` (Linux), and your library
+in `~/ReviewHunter` is never touched, not even by the uninstaller.
+
+```bash
+bash install.sh --cli --yes                                        # unattended install (servers, scripts)
+python installer/reviewhunter_installer.py --uninstall             # remove program + shortcuts, keep library
+python installer/reviewhunter_installer.py --help                  # all options
+```
+
+`Install-ReviewHunter.bat` and `install.sh` also work on their own (downloaded without the zip): they fetch the
+latest release. While the repository is private this needs the [GitHub CLI](https://cli.github.com/) signed in
+(`gh auth login`); otherwise download the zip from the Releases page while signed in to GitHub.
+Setup log: `%TEMP%\reviewhunter-install.log` or `/tmp/reviewhunter-install.log`.
+
 ## Launching the Web App - no install required
 
 You only need Python 3.10+. From the project folder:

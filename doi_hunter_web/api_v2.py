@@ -22,6 +22,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Upload
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel
 
+from . import __version__
 from . import catalog, config, duplicates, formats, fulltext, gdrive, identifiers, zotero_import
 from .csl import item_to_csl
 from .db import get_conn
@@ -1139,7 +1140,7 @@ def system_info(request: Request) -> dict:
 
     root = Path(__file__).resolve().parents[1]
     return {
-        "version": "2.0.0",
+        "version": __version__,
         "library_root": str(config.library_root()),
         "papers_dir": str(config.papers_dir()),
         "extension_dir": str(root / "browser_extension"),

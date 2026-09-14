@@ -15,13 +15,14 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from . import __version__
 from . import api_v2, books, catalog, config, connector, gdrive, library
 from .config import default_google_drive_root, library_root, papers_dir
 from .security import LocalOriginGuard, NoStoreApi
 
 log = logging.getLogger("doihunter.server")
 
-app = FastAPI(title="ReviewHunter", version="2.0.0")
+app = FastAPI(title="ReviewHunter", version=__version__)
 
 # Loopback-only hardening: rejects foreign Host headers and cross-site writes (see security.py).
 _trusted_ports = {config.PORT, int(config.get_settings().get("https_port") or 8766)}

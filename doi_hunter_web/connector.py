@@ -35,14 +35,14 @@ from typing import Any, Optional
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
-from . import catalog, identifiers
+from . import __version__, catalog, identifiers
 from .db import get_conn
 
 log = logging.getLogger("doihunter.connector")
 
 router = APIRouter(prefix="/connector", tags=["connector"])
 
-APP_VERSION = "2.0.0"
+APP_VERSION = __version__
 MAX_ATTACHMENT_BYTES = 200 * 1024 * 1024
 # Seconds to wait after a connector save before the server looks for a legal open-access copy.
 # The extension tries the publisher PDF with the user's session first; if that upload lands

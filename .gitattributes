@@ -1,0 +1,11 @@
+# Line endings that must survive checkouts on any OS and the release zip
+*.sh        text eol=lf
+*.bat       text eol=crlf
+
+# Kept in the repository but left out of `git archive` (the release zip)
+downloads/            export-ignore
+build/                export-ignore
+doi_hunter.egg-info/  export-ignore
+benchmarks/results/   export-ignore
+.github/              export-ignore
+travis.yml            export-ignore

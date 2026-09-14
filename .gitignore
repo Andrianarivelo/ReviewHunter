@@ -9,7 +9,7 @@ venv/
 *.egg-info/
 dist/
 build/
-
+secret/
 # local project memory
 PROJECT_MEMORY.md
 # local certificates / secrets
