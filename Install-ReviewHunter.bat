@@ -54,7 +54,7 @@ set "DL=%TEMP%\ReviewHunterSetup"
 echo   Downloading the latest ReviewHunter release...
 if exist "%DL%" rmdir /s /q "%DL%"
 mkdir "%DL%"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol='Tls12'; Invoke-WebRequest -UseBasicParsing $env:ZIP_URL -OutFile (Join-Path $env:DL 'ReviewHunter.zip'); Expand-Archive -Force (Join-Path $env:DL 'ReviewHunter.zip') $env:DL"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ProgressPreference='SilentlyContinue'; [Net.ServicePointManager]::SecurityProtocol='Tls12'; try { Invoke-WebRequest -UseBasicParsing $env:ZIP_URL -OutFile (Join-Path $env:DL 'ReviewHunter.zip') -ErrorAction Stop; Expand-Archive -Force (Join-Path $env:DL 'ReviewHunter.zip') $env:DL -ErrorAction Stop } catch { exit 1 }"
 if not errorlevel 1 goto :downloaded
 rem Private repository: the public URL answers 404; the GitHub CLI downloads with the user's login.
 where gh >nul 2>nul
