@@ -19,7 +19,7 @@ from typing import Any, Optional
 
 import requests
 from fastapi import APIRouter, File, Form, HTTPException, Query, Request, UploadFile
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel
 
 from . import catalog, config, duplicates, formats, fulltext, gdrive, identifiers, zotero_import
@@ -229,15 +229,18 @@ def list_items(
     limit: int = 5000,
     offset: int = 0,
     full: bool = False,
-) -> list[dict]:
+) -> JSONResponse:
     """Item list. Compact by default (no abstract/mirrors); pass full=true for complete records."""
     conds = json.loads(conditions) if conditions else None
-    return catalog.query_items(
+    items = catalog.query_items(
         collection_id=collection_id, include_subcollections=include_sub, unfiled=unfiled, starred=starred,
         trash=trash, status=status, author=author, subject=subject, tags=tag, item_type=item_type, q=q, mode=mode,
         saved_search_id=saved_search_id, conditions=conds, match=match, has_notes=has_notes, sort=sort,
         direction=direction, limit=min(limit, 20000), offset=offset, compact=not full,
     )
+    # Items are plain JSON-safe dicts: skip FastAPI's generic jsonable_encoder, which profiling showed
+    # costs ~9x more than json.dumps for large lists (98 ms vs 11 ms for 2000 items).
+    return JSONResponse(items)
 
 
 @router.post("/items")

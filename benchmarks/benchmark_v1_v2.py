@@ -31,8 +31,8 @@ APP_PYTHON = r"D:\Apps\ReviewHunter\.venv\Scripts\python.exe"
 WORK_DIR = r"C:\Users\andry\AppData\Local\Temp\claude\rh-bench"       # throw-away libraries
 OUT_DIR = r"D:\Apps\ReviewHunter\benchmarks\results"
 
-RUN_PDF = True
-RUN_LATENCY = True
+RUN_PDF = __import__("os").environ.get("RH_BENCH_PDF", "1") == "1"          # env overrides for partial reruns
+RUN_LATENCY = __import__("os").environ.get("RH_BENCH_LATENCY", "1") == "1"
 SEED = 42
 N_DOIS = 60                        # random DOI sample size (OpenAlex sample API)
 DOI_FROM_YEAR = 2010
@@ -240,12 +240,21 @@ def run_pdf_benchmark() -> None:
     by_source = long[long.success].groupby(["version", "source"]).size().rename("count").reset_index()
     by_source.to_csv(OUT / "A_pdf_sources.csv", index=False)
     print(summary.to_string(index=False))
+    plot_pdf_figure()
 
-    # Figure A
+
+def plot_pdf_figure() -> None:
+    """Figure A from the saved CSVs (so styling can be changed without re-querying publishers)."""
+    from matplotlib.ticker import MaxNLocator
+
+    summary = pd.read_csv(OUT / "A_pdf_availability_summary.csv")
+    by_source = pd.read_csv(OUT / "A_pdf_sources.csv")
+    p_mcnemar = float(summary.mcnemar_exact_p.iloc[0])
+    n = int(summary.n.iloc[0])
     fig, axes = plt.subplots(1, 2, figsize=(6.4, 2.4), gridspec_kw={"width_ratios": [1, 1.5]})
     ax = axes[0]
     for i, row in summary.iterrows():
-        ax.bar(i, row.rate * 100, width=BAR_WIDTH * 1.6, color=COLORS[row.version])
+        ax.bar(i, row.rate * 100, width=BAR_WIDTH, color=COLORS[row.version])
         ax.errorbar(i, row.rate * 100, yerr=[[100 * (row.rate - row.ci95_low)], [100 * (row.ci95_high - row.rate)]],
                     color="black", lw=0.7, capsize=2)
         ax.text(i, row.ci95_high * 100 + 3, f"{row.successes}/{row.n}", ha="center", fontsize=7)
@@ -266,6 +275,7 @@ def run_pdf_benchmark() -> None:
         ax.barh(y + (j - 0.5) * BAR_WIDTH, vals, height=BAR_WIDTH, color=COLORS[v], label=v)
     ax.set_yticks(y, [s[:34] for s in pivot.index], fontsize=6.5)
     ax.set_xlabel("PDFs obtained per source")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.legend(fontsize=7, loc="lower right")
     ax.set_title("Source of the successful PDF", fontsize=8, loc="left")
     fig.tight_layout()
@@ -389,6 +399,60 @@ def run_latency_benchmark() -> None:
     save_fig(fig, "B_api_latency")
 
 
+ITERATIONS = [  # (file prefix, label, colour) - archived runs of the v2 optimisation loop, then the current run
+    ("iter1_", "v2 it.1 per-item queries", "#bae6fd"),
+    ("iter2_", "v2 it.2 batched tags/counts", "#38bdf8"),
+    ("", "v2 it.3 + column select, direct JSON", COLORS["v2"]),
+]
+
+
+def plot_iterations() -> None:
+    """D. Version history of v2 latency against v1 (medians with IQR/2 error bars, thin bars, log scale).
+
+    it.1: decoration with 2 queries per item (N+1). it.2: grouped tag/count queries + compact payload.
+    it.3: SELECT of list columns only + JSONResponse instead of FastAPI's jsonable_encoder (profiled).
+    """
+    frames = []
+    for prefix, label, _col in ITERATIONS:
+        f = OUT / f"{prefix}B_latency_summary.csv"
+        if not f.exists():
+            return
+        d = pd.read_csv(f)
+        d["iteration"] = label
+        frames.append(d)
+    allruns = pd.concat(frames)
+    allruns.to_csv(OUT / "D_latency_iterations.csv", index=False)
+    current = frames[-1]
+    sizes = sorted(current.library_size.unique())
+    fig, axes = plt.subplots(1, len(sizes), figsize=(7.4, 2.5), sharey=True)
+    series = [("v1 (current run)", current, "v1_median_ms", "v1_iqr_ms", COLORS["v1"])]
+    series += [(label, fr, "v2_median_ms", "v2_iqr_ms", col) for (prefix, label, col), fr in zip(ITERATIONS, frames)]
+    width = 0.8 / len(series)
+    for ax, n in zip(np.atleast_1d(axes), sizes):
+        eps = current[current.library_size == n].endpoint.tolist()
+        x = np.arange(len(eps))
+        for k, (label, fr, med, iqr, col) in enumerate(series):
+            sub = fr[fr.library_size == n].set_index("endpoint").loc[eps]
+            ax.bar(x + (k - (len(series) - 1) / 2) * width, sub[med], width=width * 0.9, color=col, label=label,
+                   yerr=sub[iqr] / 2, error_kw={"lw": 0.4, "capsize": 1})
+        cur = current[current.library_size == n].set_index("endpoint").loc[eps]
+        top = max(fr[fr.library_size == n][["v1_median_ms", "v2_median_ms"]].to_numpy().max() for fr in frames)
+        for i, ep in enumerate(eps):
+            ax.text(i, top * 2.2, f"x{cur.loc[ep, 'ratio_v2_over_v1']:.2f}\n{stars(cur.loc[ep, 'p_holm'])}",
+                    ha="center", fontsize=5.6)
+        ax.set_yscale("log")
+        ax.set_ylim(top=top * 6)
+        ax.set_xticks(x, eps, rotation=25, ha="right", fontsize=6.5)
+        ax.set_title(f"library of {n} items", fontsize=7.5)
+    np.atleast_1d(axes)[0].set_ylabel("Median latency (ms, log)")
+    fig.legend(*np.atleast_1d(axes)[0].get_legend_handles_labels(), loc="lower center", ncol=4, fontsize=6.3,
+               bbox_to_anchor=(0.5, -0.12))
+    fig.suptitle("D. v2 optimisation history (labels: latest v2/v1 median ratio, Holm-corrected Mann-Whitney)",
+                 fontsize=8, x=0.01, ha="left")
+    fig.tight_layout()
+    save_fig(fig, "D_latency_iterations")
+
+
 # ------------------------------------------------------------------ C. feature coverage
 FEATURES = [
     # (feature, v1, v2, zotero7)
@@ -456,6 +520,9 @@ if __name__ == "__main__":
     run_feature_matrix()
     if RUN_LATENCY:
         run_latency_benchmark()
+    plot_iterations()
     if RUN_PDF:
         run_pdf_benchmark()
+    elif os.environ.get("RH_BENCH_PDF") == "plot":
+        plot_pdf_figure()
     print(f"results in {OUT}")

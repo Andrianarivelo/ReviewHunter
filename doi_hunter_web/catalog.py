@@ -1294,7 +1294,9 @@ def query_items(
         "deleted": "i.deleted_at",
     }.get(sort, "i.added_at")
     direction = "ASC" if direction.lower() == "asc" else "DESC"
-    sql = (f"SELECT i.* FROM items i WHERE {' AND '.join(where)} ORDER BY {order} {direction}, i.id DESC "
+    # Compact lists skip large text columns entirely (less I/O and JSON decoding than SELECT *).
+    select = "i.*" if not compact else ", ".join(f"i.{c}" for c in _LIST_COLUMNS)
+    sql = (f"SELECT {select} FROM items i WHERE {' AND '.join(where)} ORDER BY {order} {direction}, i.id DESC "
            f"LIMIT ? OFFSET ?")
     try:
         rows = conn.execute(sql, [*params, limit, offset]).fetchall()
@@ -1310,6 +1312,12 @@ def query_items(
     items = rows_to_dicts(rows)
     return decorate_many(items, compact=compact)
 
+
+# Columns needed by list views (items table, tag selector, duplicates, trash). Everything else is loaded
+# by the item pane through GET /api/items/{id}.
+_LIST_COLUMNS = ("id", "doi", "title", "authors", "creators", "year", "date", "journal", "publisher", "status",
+                 "starred", "added_at", "updated_at", "item_type", "extension", "citation_key", "file_path",
+                 "deleted_at", "error_msg", "volume", "pages", "url")
 
 # Columns the list views never display; dropped from list payloads (the item pane loads the full item).
 _HEAVY_LIST_COLUMNS = ("abstract", "mirrors", "source_query", "subjects", "fields")

@@ -1,0 +1,34 @@
+feature,v1,v2,zotero7
+"Online discovery (CrossRef, authors, books)",1,1,0
+Concept map of subjects,1,1,0
+Automatic PDF finding (publisher),1,1,1
+Legal open-access PDF finding (OpenAlex / Europe PMC),0,1,1
+Zotero item types + typed field editor,0,1,1
+Creators with roles,0,1,1
+Nested collections,0,1,1
+Tags with colors + tag selector,0,1,1
+Rich-text notes (child + standalone),0,1,1
+"Multiple attachments, links, snapshots",0,1,1
+Built-in PDF reader with annotations,0,1,1
+Full-text PDF search,0,1,1
+Advanced + saved searches,0,1,1
+Duplicate detection and merge,0,1,1
+Trash with restore,0,1,1
+Related items,0,1,1
+CSL citations and bibliographies,0,1,1
+Citation style installer,0,1,1
+Import BibTeX / RIS / CSL-JSON,0,1,1
+Export BibTeX / BibLaTeX / RIS / CSL-JSON / CSV,0,1,1
+Word bibliography sources export,0,1,0
+Add by DOI / ISBN / PMID / arXiv,0,1,1
+Retrieve metadata from PDF,0,1,1
+Citation keys (Better BibTeX style),0,1,1
+Migrate a Zotero library,0,1,0
+Browser connector,0,1,1
+Word citation add-in,0,1,1
+Google Drive storage + backups,0,1,0
+Verified automatic backups with restore,0,1,0
+Localhost CSRF / DNS-rebinding guard,0,1,1
+Cloud sync across devices (native),0,0,1
+Group libraries,0,0,1
+RSS feeds,0,0,1
