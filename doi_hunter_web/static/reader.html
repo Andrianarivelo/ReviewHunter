@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reader - ReviewHunter</title>
+  <!-- Apply the theme before first paint to avoid a light flash in dark mode. -->
+  <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('dhDark');
+        var dark = stored === null ? matchMedia('(prefers-color-scheme: dark)').matches : stored === 'true';
+        if (dark) document.documentElement.classList.add('dark');
+        if (localStorage.getItem('rhReaderInvert') === 'true') document.documentElement.classList.add('invert-pages');
+      } catch (e) { /* storage unavailable: keep defaults */ }
+    })();
+  </script>
+  <link rel="stylesheet" href="/static/vendor/pdfjs/pdf_viewer.css">
+  <link rel="stylesheet" href="/static/reader/reader.css">
+  <script src="/static/vendor/pdfjs/pdf.min.js"></script>
+</head>
+<body>
+  <div id="app" class="rh-app">
+
+    <!-- ============================== Toolbar ============================== -->
+    <header class="rh-toolbar" role="toolbar" aria-label="Reader toolbar">
+      <div class="rh-tb-group rh-tb-left">
+        <a class="rh-btn" href="/" title="Back to library" aria-label="Back to library" data-icon="back"></a>
+        <button class="rh-btn" id="btn-left-sidebar" title="Toggle thumbnails and outline" aria-label="Toggle left sidebar" data-icon="sidebarLeft"></button>
+        <div class="rh-doc-meta" id="doc-meta">
+          <div class="rh-doc-title" id="doc-title">Loading document</div>
+          <div class="rh-doc-sub" id="doc-sub"></div>
+        </div>
+      </div>
+
+      <div class="rh-tb-group rh-tb-center">
+        <button class="rh-btn" id="btn-prev" title="Previous page" aria-label="Previous page" data-icon="chevUp"></button>
+        <div class="rh-page-box">
+          <input id="page-input" class="rh-input rh-page-input" type="text" inputmode="numeric" value="1" aria-label="Page number">
+          <span class="rh-page-total" id="page-total">/ 0</span>
+        </div>
+        <button class="rh-btn" id="btn-next" title="Next page" aria-label="Next page" data-icon="chevDown"></button>
+        <span class="rh-sep"></span>
+        <button class="rh-btn" id="btn-zoom-out" title="Zoom out (Ctrl -)" aria-label="Zoom out" data-icon="minus"></button>
+        <select id="zoom-select" class="rh-select" aria-label="Zoom">
+          <option value="auto">Automatic</option>
+          <option value="page-fit">Page fit</option>
+          <option value="page-width">Page width</option>
+          <option value="0.5">50%</option>
+          <option value="0.75">75%</option>
+          <option value="1">100%</option>
+          <option value="1.25">125%</option>
+          <option value="1.5">150%</option>
+          <option value="2">200%</option>
+          <option value="3">300%</option>
+          <option value="4">400%</option>
+          <option value="custom" id="zoom-custom" hidden>100%</option>
+        </select>
+        <button class="rh-btn" id="btn-zoom-in" title="Zoom in (Ctrl +)" aria-label="Zoom in" data-icon="plus"></button>
+        <span class="rh-sep"></span>
+        <div class="rh-seg" role="radiogroup" aria-label="Annotation tool">
+          <button class="rh-btn rh-tool is-active" data-tool="select" title="Select text (V)" aria-label="Select tool" data-icon="cursor"></button>
+          <button class="rh-btn rh-tool" data-tool="highlight" title="Highlight (H)" aria-label="Highlight tool" data-icon="highlighter"></button>
+          <button class="rh-btn rh-tool" data-tool="underline" title="Underline (U)" aria-label="Underline tool" data-icon="underline"></button>
+          <button class="rh-btn rh-tool" data-tool="note" title="Sticky note (N)" aria-label="Note tool" data-icon="note"></button>
+        </div>
+        <div class="rh-color-picker">
+          <button class="rh-btn rh-color-btn" id="btn-color" title="Annotation color" aria-label="Annotation color" aria-haspopup="true">
+            <span class="rh-swatch" id="color-swatch"></span><span class="rh-caret" data-icon="caret"></span>
+          </button>
+          <div class="rh-menu rh-color-menu" id="color-menu" hidden></div>
+        </div>
+      </div>
+
+      <div class="rh-tb-group rh-tb-right">
+        <button class="rh-btn" id="btn-find" title="Find in document (Ctrl F)" aria-label="Find in document" data-icon="search"></button>
+        <button class="rh-btn" id="btn-open-external" title="Open in system PDF app" aria-label="Open externally" data-icon="external"></button>
+        <div class="rh-theme-picker">
+          <button class="rh-btn" id="btn-theme" title="Theme" aria-label="Theme" aria-haspopup="true" data-icon="moon"></button>
+          <div class="rh-menu rh-theme-menu" id="theme-menu" hidden>
+            <button class="rh-menu-item" data-theme="light"><span data-icon="sun"></span>Light</button>
+            <button class="rh-menu-item" data-theme="dark"><span data-icon="moon"></span>Dark</button>
+            <div class="rh-menu-sep"></div>
+            <label class="rh-menu-item rh-check"><input type="checkbox" id="invert-toggle"> Invert page colors</label>
+          </div>
+        </div>
+        <button class="rh-btn" id="btn-right-sidebar" title="Toggle annotations" aria-label="Toggle annotations sidebar" data-icon="sidebarRight"></button>
+      </div>
+      <div class="rh-progress" id="progress"><div class="rh-progress-bar" id="progress-bar"></div></div>
+    </header>
+
+    <!-- ============================== Body ============================== -->
+    <div class="rh-body">
+      <aside class="rh-sidebar rh-sidebar-left" id="sidebar-left" aria-label="Thumbnails and outline">
+        <div class="rh-tabs" role="tablist">
+          <button class="rh-tab is-active" data-tab="thumbs" role="tab">Thumbnails</button>
+          <button class="rh-tab" data-tab="outline" role="tab">Outline</button>
+        </div>
+        <div class="rh-tab-panel" id="panel-thumbs"></div>
+        <div class="rh-tab-panel" id="panel-outline" hidden></div>
+      </aside>
+
+      <main class="rh-main">
+        <!-- Find bar floats over the top right of the document area. -->
+        <div class="rh-findbar" id="findbar" hidden>
+          <span class="rh-find-icon" data-icon="search"></span>
+          <input id="find-input" class="rh-find-input" type="search" placeholder="Find in document" aria-label="Find in document" autocomplete="off">
+          <span class="rh-find-count" id="find-count"></span>
+          <button class="rh-btn rh-btn-sm" id="find-prev" title="Previous match (Shift Enter)" aria-label="Previous match" data-icon="chevUp"></button>
+          <button class="rh-btn rh-btn-sm" id="find-next" title="Next match (Enter)" aria-label="Next match" data-icon="chevDown"></button>
+          <button class="rh-btn rh-btn-sm" id="find-close" title="Close (Escape)" aria-label="Close find bar" data-icon="close"></button>
+        </div>
+        <div class="rh-viewer" id="viewer" tabindex="0">
+          <div class="rh-pages" id="pages"></div>
+        </div>
+        <div class="rh-state" id="state" hidden></div>
+      </main>
+
+      <aside class="rh-sidebar rh-sidebar-right" id="sidebar-right" aria-label="Annotations">
+        <div class="rh-ann-head">
+          <div class="rh-ann-head-row">
+            <span class="rh-ann-title">Annotations <span class="rh-ann-total" id="ann-total">0</span></span>
+            <span class="rh-grow"></span>
+            <button class="rh-btn rh-btn-sm" id="btn-copy-md" title="Copy annotations as Markdown" aria-label="Copy annotations as Markdown" data-icon="copy"></button>
+            <button class="rh-btn rh-btn-sm rh-btn-text" id="btn-to-note" title="Create a note in ReviewHunter from all annotations"><span data-icon="notePlus"></span>Add note</button>
+          </div>
+          <input id="ann-search" class="rh-input rh-ann-search" type="search" placeholder="Search annotations" aria-label="Search annotations" autocomplete="off">
+          <div class="rh-ann-filters" id="ann-filters" aria-label="Filter by color"></div>
+        </div>
+        <div class="rh-ann-list" id="ann-list"></div>
+      </aside>
+    </div>
+
+    <div class="rh-toasts" id="toasts" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="/static/reader/reader.js"></script>
+</body>
+</html>

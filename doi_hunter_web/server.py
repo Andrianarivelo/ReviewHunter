@@ -537,6 +537,20 @@ _addin_dir.mkdir(exist_ok=True)
 app.mount("/addin", StaticFiles(directory=str(_addin_dir), html=True), name="addin")
 
 
+_FAVICON_SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" '
+    'y2="1"><stop offset="0" stop-color="#0284c7"/><stop offset="1" stop-color="#14b8a6"/></linearGradient></defs>'
+    '<rect width="64" height="64" rx="14" fill="url(#g)"/><text x="32" y="45" font-family="Arial" font-weight="800" '
+    'font-size="38" text-anchor="middle" fill="white">R</text></svg>'
+)
+
+
+@app.get("/favicon.ico")
+def favicon() -> Response:
+    """Browsers request /favicon.ico on every page (reader, reports); serve the brand mark."""
+    return Response(_FAVICON_SVG, media_type="image/svg+xml", headers={"Cache-Control": "max-age=86400"})
+
+
 @app.get("/reader")
 def reader_page():
     return FileResponse(str(_static_dir / "reader.html"))
