@@ -135,7 +135,7 @@ def _fetch_page(url: str, label: str = "") -> Optional[requests.Response]:
     try:
         return requests.get(url, headers=get_headers(), timeout=20, allow_redirects=True)
     except requests.exceptions.SSLError as e:
-        _note(f"{label}: HTTPS certificate not trusted (a web filter or proxy is probably intercepting this site)")
+        _note(f"{label}: HTTPS certificate not trusted (self-signed by the site, or intercepted by a web filter / proxy)")
         log.debug(f"GET {url} SSL error: {e}")
     except requests.exceptions.ConnectionError as e:
         text = str(e)
@@ -422,6 +422,7 @@ def _scidb_candidates(doi: str) -> list[Resolved]:
                 _add_candidate(candidates, seen, score, href, page.url)
 
         candidates.sort(key=lambda t: -t[0])
+        found_before = len(resolved)
 
         for _, url in candidates:
             if _PDF_RX.search(url):
@@ -447,6 +448,8 @@ def _scidb_candidates(doi: str) -> list[Resolved]:
                 if clean_url and clean_url not in seen_urls:
                     seen_urls.add(clean_url)
                     resolved.append(Resolved(url=clean_url, source="Anna's Archive (SciDB)"))
+        if len(resolved) == found_before:
+            _note(f"SciDB ({host}): page reached, but no PDF link found (article missing or page layout changed)")
     return resolved
 
 
