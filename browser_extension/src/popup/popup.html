@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=380">
+  <title>ReviewHunter</title>
+  <link rel="stylesheet" href="../ui/common.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- SVG symbols reused across the popup (no external icon fonts: MV3 forbids remote code). -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-gear" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.54 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 8.96 4.54 1.7 1.7 0 0 0 10 3v-.09a2 2 0 1 1 4 0V3a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9c.26.6.86 1 1.51 1H21a2 2 0 1 1 0 4h-.09c-.65 0-1.25.4-1.51 1Z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3 7.5A1.5 1.5 0 0 1 4.5 6h4.3l2 2.2h8.7A1.5 1.5 0 0 1 21 9.7v8.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5Z"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M5 4v16M9.5 4v16M14 5l4.5 14.5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M7 7l10 10M17 7 7 17"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" d="M7 12h10"/></symbol>
+    <symbol id="i-pdf" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z M14 3v5h5"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M9 3v4M15 3v4M7 7h10v3a5 5 0 0 1-10 0Z M12 15v6"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-paperclip" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m20 11.5-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7l-8.5 8.5a1.7 1.7 0 0 1-2.4-2.4l7.8-7.8"/></symbol>
+  </svg>
+
+  <header class="bar">
+    <img class="logo" src="../../icons/icon-32.png" alt="" width="22" height="22">
+    <div class="brand">ReviewHunter</div>
+    <span id="conn" class="conn" title="Connection status"><span class="dot"></span><span id="conn-text">Connecting</span></span>
+    <button id="btn-settings" class="icon-btn" type="button" title="Settings"><svg><use href="#i-gear"/></svg></button>
+  </header>
+
+  <main>
+    <!-- Detecting -->
+    <section id="state-loading" class="state">
+      <div class="skeleton">
+        <div class="sk sk-badge"></div>
+        <div class="sk sk-title"></div>
+        <div class="sk sk-title short"></div>
+        <div class="sk sk-line"></div>
+      </div>
+      <p class="muted center">Reading this page...</p>
+    </section>
+
+    <!-- ReviewHunter offline -->
+    <section id="state-offline" class="state" hidden>
+      <div class="empty">
+        <div class="empty-icon"><svg><use href="#i-plug"/></svg></div>
+        <h2>ReviewHunter is not running</h2>
+        <p>Start it from the <strong>ReviewHunter</strong> desktop shortcut, wait for the library window to open, then retry.</p>
+        <p class="muted small">Looking for it at <code id="offline-url"></code></p>
+        <div class="row gap">
+          <button id="btn-retry" class="btn primary" type="button">Retry</button>
+          <button id="btn-offline-settings" class="btn" type="button">Settings</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nothing to save -->
+    <section id="state-none" class="state" hidden>
+      <div class="empty">
+        <div class="empty-icon"><svg><use href="#i-library"/></svg></div>
+        <h2>Nothing to save here</h2>
+        <p id="none-reason">This page cannot be read by extensions.</p>
+      </div>
+    </section>
+
+    <!-- Single item -->
+    <section id="state-single" class="state" hidden>
+      <div class="card">
+        <div class="card-top">
+          <span id="single-type" class="badge type">Journal article</span>
+          <span id="single-source" class="source"></span>
+          <span id="single-inlib" class="badge ok" hidden>In library</span>
+        </div>
+        <textarea id="single-title" class="title-edit" rows="2" spellcheck="true" aria-label="Title"></textarea>
+        <div id="single-authors" class="meta-line"></div>
+        <div id="single-venue" class="meta-line muted"></div>
+        <div class="chips-row">
+          <span id="single-doi" class="chip mono" hidden></span>
+          <span id="single-pdf" class="chip pdf" hidden><svg><use href="#i-pdf"/></svg>PDF link found</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Multiple items -->
+    <section id="state-multi" class="state" hidden>
+      <div class="multi-head">
+        <label class="check"><input id="multi-all" type="checkbox"><span></span></label>
+        <div class="multi-title"><strong id="multi-count">0 references</strong> <span id="multi-source" class="muted"></span></div>
+        <span id="multi-selected" class="muted small"></span>
+      </div>
+      <ul id="multi-list" class="multi-list" role="listbox" aria-multiselectable="true"></ul>
+    </section>
+
+    <!-- PDF tab -->
+    <section id="state-pdf" class="state" hidden>
+      <div class="card">
+        <div class="card-top">
+          <span class="badge type pdf-badge"><svg><use href="#i-pdf"/></svg>PDF</span>
+          <span id="pdf-hint" class="source"></span>
+        </div>
+        <div id="pdf-name" class="pdf-name"></div>
+        <div class="chips-row"><span id="pdf-doi" class="chip mono" hidden></span></div>
+      </div>
+      <div id="pending-box" class="pending" hidden>
+        <div class="pending-head"><svg><use href="#i-paperclip"/></svg>Waiting for their PDF</div>
+        <ul id="pending-list"></ul>
+      </div>
+    </section>
+
+    <!-- Save options (shared by single / multiple / pdf) -->
+    <section id="options" class="options" hidden>
+      <div class="field">
+        <label class="lbl" for="collection-btn">Collection</label>
+        <div class="picker" id="collection-picker">
+          <button id="collection-btn" class="picker-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <svg class="ico"><use id="collection-ico" href="#i-library"/></svg>
+            <span id="collection-label" class="ellipsis">My Library</span>
+            <svg class="chev"><use href="#i-chevron"/></svg>
+          </button>
+          <div id="collection-panel" class="dropdown" hidden>
+            <input id="collection-search" class="input small-input" type="search" placeholder="Search collections" autocomplete="off">
+            <ul id="collection-list" class="dd-list" role="listbox"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="lbl" for="tag-input">Tags</label>
+        <div class="tags" id="tags-box">
+          <div id="tag-chips" class="tag-chips"></div>
+          <input id="tag-input" class="tag-input" type="text" placeholder="Add tags" autocomplete="off" aria-autocomplete="list">
+          <ul id="tag-suggest" class="dropdown dd-list tag-suggest" hidden role="listbox"></ul>
+        </div>
+      </div>
+
+      <div class="field">
+        <button id="note-toggle" class="link-btn" type="button">+ Add a note</button>
+        <textarea id="note" class="input note" rows="2" placeholder="Note attached to the item" hidden></textarea>
+      </div>
+
+      <div class="toggles">
+        <label class="switch" id="sw-pdf"><input id="opt-pdf" type="checkbox"><span class="track"></span><span>Attach PDF</span></label>
+        <label class="switch" id="sw-enrich"><input id="opt-enrich" type="checkbox"><span class="track"></span><span>Improve metadata (CrossRef)</span></label>
+      </div>
+    </section>
+
+    <!-- Saving progress -->
+    <section id="state-progress" class="state" hidden>
+      <h2 id="progress-title" class="progress-title">Saving...</h2>
+      <ul id="steps" class="steps"></ul>
+      <div id="progress-actions" class="row gap end" hidden>
+        <button id="btn-open-app" class="btn" type="button"><svg class="ico"><use href="#i-open"/></svg>Open in ReviewHunter</button>
+        <button id="btn-done" class="btn primary" type="button">Done</button>
+      </div>
+    </section>
+  </main>
+
+  <footer id="footer" class="footer" hidden>
+    <button id="btn-save" class="btn primary wide" type="button">
+      <span id="save-label">Save to ReviewHunter</span><kbd>Enter</kbd>
+    </button>
+  </footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

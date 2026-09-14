@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReviewHunter Connector settings</title>
+  <link rel="stylesheet" href="../ui/common.css">
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <img src="../../icons/icon-128.png" width="52" height="52" alt="">
+      <div>
+        <h1>ReviewHunter Connector</h1>
+        <p class="muted">Save references and PDFs from your browser into your local library.</p>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>Connection</h2>
+      <label class="lbl" for="server-url">ReviewHunter address</label>
+      <div class="row gap">
+        <input id="server-url" class="input" type="url" spellcheck="false" placeholder="http://127.0.0.1:8765">
+        <button id="btn-test" class="btn" type="button">Test connection</button>
+      </div>
+      <div id="test-result" class="result" role="status" hidden></div>
+      <p class="hint">The desktop app listens on <code>http://127.0.0.1:8765</code> by default. Change it only if you started ReviewHunter on another port.</p>
+    </section>
+
+    <section class="panel">
+      <h2>Saving</h2>
+      <label class="lbl" for="default-collection">Default collection</label>
+      <select id="default-collection" class="input">
+        <option value="">My Library (no collection)</option>
+      </select>
+      <p class="hint">Used by context-menu saves. The popup remembers the collection you used last.</p>
+
+      <div class="opts">
+        <label class="switch"><input id="opt-pdf" type="checkbox"><span class="track"></span><span><strong>Attach PDF</strong><br><span class="muted">Download the PDF in the browser, with your institutional session, and attach it.</span></span></label>
+        <label class="switch"><input id="opt-enrich" type="checkbox"><span class="track"></span><span><strong>Improve metadata (CrossRef)</strong><br><span class="muted">Fill missing fields from CrossRef, arXiv or PubMed when the page exposes an identifier.</span></span></label>
+        <label class="switch"><input id="opt-snapshot" type="checkbox"><span class="track"></span><span><strong>Save snapshot for web pages</strong><br><span class="muted">Store the page HTML as an attachment for web pages, blog posts and news articles.</span></span></label>
+        <label class="switch"><input id="opt-bgtab" type="checkbox"><span class="track"></span><span><strong>Allow a background tab as last resort</strong><br><span class="muted">When direct downloads fail, open the PDF in an inactive tab for a few seconds, then close it.</span></span></label>
+      </div>
+      <div id="saved-flag" class="saved-flag" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Keyboard shortcut</h2>
+      <p class="hint">Open the popup with <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd> (<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>Y</kbd> on macOS). Change it at <code>chrome://extensions/shortcuts</code>.</p>
+    </section>
+  </div>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

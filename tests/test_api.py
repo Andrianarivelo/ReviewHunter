@@ -88,6 +88,12 @@ def test_connector_save_attach_and_lookup(client):
         "items": [{"title": "dup", "doi": "10.1016/j.drugalcdep.2017.04.019"}], "tags": ["overdose"]}).json()["saved"][0]
     assert again["id"] == saved["id"] and again["existing"] and again["needs_pdf"] is False
     assert {t["name"] for t in client.get(f"/api/items/{saved['id']}").json()["tags"]} == {"heat", "overdose"}
+    # Re-saving with a note adds exactly one new note (no duplicate from a second link pass).
+    before = len(client.get(f"/api/items/{saved['id']}").json()["notes_list"])
+    client.post("/connector/save", headers=EXT, json={
+        "items": [{"title": "dup", "doi": "10.1016/j.drugalcdep.2017.04.019"}], "note": "second visit"})
+    notes = client.get(f"/api/items/{saved['id']}").json()["notes_list"]
+    assert len(notes) == before + 1 and sum(n["title"] == "second visit" for n in notes) == 1
 
 
 def test_import_export_and_csl(client):

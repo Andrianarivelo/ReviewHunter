@@ -156,7 +156,10 @@ def resolve_isbn(isbn: str) -> Optional[dict]:
                 "creators": creators, "publisher": ", ".join(p.get("name", "") for p in data.get("publishers", [])),
                 "place": ", ".join(p.get("name", "") for p in data.get("publish_places", [])),
                 "num_pages": str(data.get("number_of_pages") or ""), "date": date,
-                "year": catalog.year_from_date(date), "isbn": [isbn], "url": data.get("url", ""),
+                # The Open Library page is a catalogue record, not the work itself: keep it out of `url`
+                # (styles print URLs in citations) and record it in Extra instead.
+                "year": catalog.year_from_date(date), "isbn": [isbn],
+                "extra": f"Open Library: {data['url']}" if data.get("url") else "",
                 "subjects": [s.get("name") for s in data.get("subjects", [])[:10] if s.get("name")],
             }
     except (requests.RequestException, ValueError) as e:

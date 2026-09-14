@@ -1,0 +1,30 @@
+/* Options page layout. Shared tokens/controls live in ../ui/common.css. */
+
+body { background: var(--bg-soft); font-size: 14px; }
+.page { max-width: 680px; margin: 0 auto; padding: 36px 20px 60px; }
+.hero { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+.hero img { border-radius: 14px; box-shadow: var(--shadow-sm); }
+.hero h1 { margin: 0; font-size: 22px; letter-spacing: -0.015em; }
+.hero p { margin: 2px 0 0; }
+.panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 18px 20px 20px; margin-bottom: 14px; box-shadow: var(--shadow-sm);
+}
+.panel h2 { margin: 0 0 12px; font-size: 15px; }
+.lbl { display: block; font-size: 11.5px; font-weight: 650; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+.row .input { flex: 1; }
+.btn { height: 36px; white-space: nowrap; }
+select.input { height: 36px; }
+.hint { margin: 8px 0 0; color: var(--text-3); font-size: 12.5px; }
+.opts { display: grid; gap: 14px; margin-top: 18px; }
+.opts .switch { align-items: flex-start; font-size: 13.5px; color: var(--text); }
+.opts .switch .track { margin-top: 2px; }
+.opts .muted { font-size: 12.5px; }
+.result { margin-top: 10px; padding: 9px 12px; border-radius: 9px; font-size: 13px; }
+.result.ok { background: var(--ok-soft); color: var(--ok-ink); }
+.result.err { background: var(--err-soft); color: var(--err-ink); }
+.saved-flag { height: 18px; margin-top: 10px; font-size: 12.5px; color: var(--ok); transition: opacity 0.3s; }
+kbd {
+  display: inline-block; padding: 1px 6px; border: 1px solid var(--border-strong); border-bottom-width: 2px;
+  border-radius: 5px; background: var(--bg-soft); font: 600 11.5px var(--font);
+}

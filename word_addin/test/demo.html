@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ReviewHunter add-in visual demo</title>
+  <!-- Loads the task pane in dev mode inside an iframe and scripts a realistic session
+       (note style with footnotes, bibliography, a draft cluster with options) so the
+       layout can be inspected or screenshotted headlessly:
+         msedge --headless --window-size=1100,760 --virtual-time-budget=15000
+                --screenshot=out.png "http://127.0.0.1:<port>/addin/test/demo.html?style=nature"
+       Query parameters: style (CSL id, default chicago-notes-bibliography), theme (light|dark). -->
+  <style>
+    html, body { margin: 0; height: 100%; background: #e9edf2; }
+    iframe { border: 0; width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+<iframe id="pane" title="ReviewHunter task pane"></iframe>
+<script>
+(function () {
+  'use strict';
+  const params = new URLSearchParams(location.search);
+  const style = params.get('style') || 'chicago-notes-bibliography';
+  const theme = params.get('theme') || '';
+  const frame = document.getElementById('pane');
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  /** Drive the pane like a user would, through its public objects and DOM events. */
+  frame.addEventListener('load', async () => {
+    if (frame.contentWindow.location.href === 'about:blank') return;   // initial empty document
+    const w = frame.contentWindow;
+    const d = frame.contentDocument;
+    if (theme) d.documentElement.dataset.theme = theme;
+    for (let i = 0; i < 40 && !(w.rhApp && w.rhApp.controller.summary); i++) await sleep(250);
+    const { controller, adapter, api } = w.rhApp;
+    const first = async q => (await api.search(q, 5))[0];
+    const s = await first('Neural Substrate');
+    const h = await first('physical systems');
+    const v = await first('Vaswani');
+    const csl = { [s.id]: s.csl, [h.id]: h.csl, [v.id]: v.csl };
+    await controller.setPrefs({ style });
+    adapter.placeCaretAfter('difference learning.');
+    await controller.insertCitation([{ id: s.id }, { id: h.id, locator: '2555' }], csl);
+    adapter.placeCaretAfter('recurrent dynamics.');
+    await controller.insertCitation([{ id: h.id, locator: '2556' }], csl);
+    adapter.placeCaretAfter('inform each other.');
+    await controller.insertCitation([{ id: v.id }], csl);
+    adapter.placeCaretAfter('References');
+    await controller.insertBibliography();
+
+    // Build a draft cluster in the pane: two references, options open on the first.
+    const q = d.getElementById('q');
+    const type = async text => {
+      q.focus();
+      q.value = text;
+      q.dispatchEvent(new w.Event('input'));
+      await sleep(600);
+      q.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Enter' }));
+      await sleep(150);
+    };
+    await type('Theoretical Neuroscience');
+    await type('Marblestone');
+    d.querySelector('#cluster [data-act="toggle"]').click();
+    const set = (field, value, ev) => {
+      const el = d.querySelector(`#cluster [data-field="${field}"]`);
+      el.value = value;
+      el.dispatchEvent(new w.Event(ev, { bubbles: true }));
+    };
+    set('label', 'chapter', 'change');
+    set('locator', '7', 'input');
+    set('prefix', 'see', 'input');
+    q.focus();
+    q.value = 'hop';
+    q.dispatchEvent(new w.Event('input'));
+    document.title = 'ready';
+  });
+  frame.src = '../taskpane.html?mock=1';
+})();
+</script>
+</body>
+</html>

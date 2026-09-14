@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ReviewHunter</title>
+  <link rel="icon" href="assets/icon-32.png">
+  <link rel="stylesheet" href="taskpane.css">
+  <!-- Office.js must come from Microsoft's CDN and load synchronously in <head>.
+       In a normal browser it loads too, Office.onReady reports no host, and the pane
+       switches to the mock document. ?mock=1 skips the CDN entirely (offline dev/tests). -->
+  <script>
+    if (!/[?&]mock=1\b/.test(location.search)) {
+      document.write('<script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"><\/script>');
+    }
+  </script>
+  <script src="/static/vendor/citeproc.js"></script>
+  <script src="/static/js/citations.js"></script>
+  <script src="js/rh-core.js"></script>
+  <script src="js/rh-word-adapter.js"></script>
+  <script src="js/rh-mock-adapter.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <div id="app" class="app" aria-busy="true">
+
+      <!-- ============================================================ header -->
+      <header class="hdr">
+        <div class="brand">
+          <img class="logo" src="assets/icon-32.png" alt="" width="26" height="26">
+          <div class="brand-text">
+            <div class="brand-name">ReviewHunter</div>
+            <button id="styleChip" class="style-chip" type="button" title="Document preferences">
+              <span id="styleName">Loading style</span>
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="hdr-right">
+          <span id="devBadge" class="badge" hidden>Dev</span>
+          <span id="statusPill" class="pill" role="status" title="Connection to ReviewHunter">
+            <i class="dot"></i><span id="statusText">Connecting</span>
+          </span>
+        </div>
+      </header>
+      <div id="progress" class="progress" hidden><i></i></div>
+
+      <div id="banner" class="banner" hidden>
+        <div class="banner-icon" aria-hidden="true">!</div>
+        <div class="banner-body" id="bannerBody"></div>
+        <button class="icon-btn banner-close" id="bannerClose" type="button" aria-label="Dismiss">
+          <svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+        </button>
+      </div>
+
+      <!-- ============================================================ cite view -->
+      <main class="main">
+        <div id="editBar" class="edit-bar" hidden>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 11.5V13h1.5l7-7L10 4.5l-7 7zM11 3.5l1.5 1.5"/></svg>
+          <span>Editing the selected citation</span>
+          <button id="btnGoto" class="link-btn" type="button">Show</button>
+          <button id="btnCancelEdit" class="link-btn" type="button">New citation</button>
+        </div>
+
+        <div class="search">
+          <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+          <input id="q" type="search" autocomplete="off" spellcheck="false"
+                 placeholder="Search author, title, year" aria-label="Search your ReviewHunter library"
+                 aria-controls="results" aria-autocomplete="list">
+          <span id="searchSpin" class="spin" hidden></span>
+        </div>
+        <ul id="results" class="results" role="listbox" aria-label="Search results"></ul>
+
+        <section class="cluster-wrap" aria-label="Citation being built">
+          <div class="section-head">
+            <span>Citation</span>
+            <span id="clusterCount" class="count"></span>
+          </div>
+          <ol id="cluster" class="cluster"></ol>
+          <div id="clusterEmpty" class="empty">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10M7 11h10M7 15h6"/><rect x="3.5" y="3.5" width="17" height="17" rx="3"/></svg>
+            <div>Search above and press <kbd>Enter</kbd> to add references.
+              <br>Several references make one citation.</div>
+          </div>
+          <div id="previewBox" class="preview" hidden>
+            <div class="preview-label">Preview</div>
+            <div id="preview" class="preview-text"></div>
+          </div>
+        </section>
+
+        <div class="actions">
+          <button id="btnInsert" class="btn primary" type="button" disabled>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>
+            <span id="btnInsertText">Insert citation</span>
+          </button>
+          <button id="btnRemove" class="btn danger-ghost" type="button" hidden>Remove</button>
+        </div>
+      </main>
+
+      <!-- ============================================================ document bar -->
+      <footer class="doc">
+        <div class="doc-actions">
+          <button id="btnBib" class="tool" type="button" title="Insert the bibliography at the cursor or update it">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3.5h10M3 6.5h10M3 9.5h10M3 12.5h6"/></svg>
+            <span id="btnBibText">Bibliography</span>
+          </button>
+          <button id="btnRefresh" class="tool" type="button" title="Refresh all citations and the bibliography">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v2.5h-2.5"/></svg>
+            <span>Refresh</span>
+          </button>
+          <button id="btnPrefs" class="tool" type="button" title="Document preferences">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2"/><path d="M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6l1.4 1.4M11 11l1.4 1.4M3.6 12.4L5 11M11 5l1.4-1.4"/></svg>
+            <span>Document</span>
+          </button>
+        </div>
+        <div id="docStats" class="doc-stats">No citations yet</div>
+      </footer>
+
+      <!-- ============================================================ preferences sheet -->
+      <div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+        <div class="sheet-head">
+          <h2 id="sheetTitle">Document preferences</h2>
+          <button id="sheetClose" class="icon-btn" type="button" aria-label="Close">
+            <svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+          </button>
+        </div>
+        <div class="sheet-body">
+          <label class="field-label" for="styleFilter">Citation style</label>
+          <div class="search small">
+            <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+            <input id="styleFilter" type="search" placeholder="Filter styles" autocomplete="off">
+          </div>
+          <div id="styleList" class="style-list" role="radiogroup" aria-label="Citation styles"></div>
+
+          <div class="grid2">
+            <div>
+              <label class="field-label" for="localeSelect">Language</label>
+              <select id="localeSelect" class="select"></select>
+            </div>
+            <div>
+              <label class="field-label" for="appearanceSelect">Field look in Word</label>
+              <select id="appearanceSelect" class="select">
+                <option value="BoundingBox">Box on hover</option>
+                <option value="Hidden">Hidden</option>
+              </select>
+            </div>
+          </div>
+          <p id="prefsHint" class="hint"></p>
+          <button id="btnApplyPrefs" class="btn primary block" type="button">Apply to document</button>
+
+          <div class="danger-zone">
+            <div class="dz-title">Unlink citations</div>
+            <p class="hint">Turns every citation and the bibliography into plain text for journal
+              submission. ReviewHunter can no longer update this document afterwards. Keep a linked copy.</p>
+            <button id="btnUnlink" class="btn danger-ghost block" type="button">Unlink citations</button>
+            <div id="unlinkConfirm" class="confirm" hidden>
+              <p><strong>This cannot be undone for this document.</strong> Type <code>UNLINK</code> to confirm.</p>
+              <input id="unlinkWord" class="input" autocomplete="off" aria-label="Type UNLINK to confirm">
+              <div class="row">
+                <button id="btnUnlinkCancel" class="btn ghost" type="button">Cancel</button>
+                <button id="btnUnlinkGo" class="btn danger" type="button" disabled>Unlink now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    </div>
+
+    <!-- ============================================================ dev mode document -->
+    <div id="mockHost" class="mock-host" hidden>
+      <div class="mock-toolbar">
+        <strong>Mock document</strong>
+        <span>Office.js host not detected: citations go into this simulated Word document.</span>
+      </div>
+      <div class="mock-page">
+        <div id="mockDoc" class="mock-doc" contenteditable="true" spellcheck="false">
+          <h1>Learning signals in neural circuits</h1>
+          <p>Dopamine neurons report a reward prediction error that resembles temporal difference learning.</p>
+          <p>Attractor networks store memories as stable states of recurrent dynamics.</p>
+          <p>Conductance-based models remain the reference for action potential generation.</p>
+          <p>Deep learning and neuroscience increasingly inform each other.</p>
+          <h2>References</h2>
+          <p></p>
+        </div>
+        <div id="mockNotes" class="mock-notes"></div>
+      </div>
+    </div>
+  </div>
+  <script src="taskpane.js"></script>
+</body>
+</html>

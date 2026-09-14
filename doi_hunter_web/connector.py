@@ -13,11 +13,12 @@ GET  /connector/tags                     -> [{name, color, count}]
 POST /connector/lookup   {doi?, url?, title?}   -> {found: bool, items: [{id, title}]}
 POST /connector/save     {items: [payload], collection_id?, tags?: [str], note?: str,
                           enrich?: bool, pdf_url?: str}
-                         -> {saved: [{id, title, existing, needs_pdf}]}
+                         -> {saved: [{id, title, existing, needs_pdf, pdf_url}]}
 POST /connector/attachment?item_id=..&title=..&url=..&kind=file|snapshot
      body: raw bytes (Content-Type application/pdf, text/html ...)
                          -> {ok, attachment}
-POST /connector/identifiers {text, collection_id?, tags?}  -> {saved: [...], failed: [...]}
+POST /connector/identifiers {text, collection_id?, tags?}
+                         -> {saved: [{id, title, existing, needs_pdf, pdf_url}], failed: [...]}
 
 ``payload`` is the catalog create payload: item_type, title, creators
 ([{creatorType, lastName, firstName} | {creatorType, name}]), journal, date, doi,
@@ -161,11 +162,9 @@ async def save(body: SaveIn, request: Request) -> dict:
         payload.pop("pdf_url", None)
         payload["source_query"] = f"connector:{payload.get('url') or payload.get('doi') or ''}"[:500]
         item = await loop.run_in_executor(None, catalog.create_item, payload)
+        # Re-saving an existing item still applies the chosen folder / tags / note: catalog.create_item
+        # calls _attach_links on its existing-DOI path, so no second call here (it would duplicate notes).
         existing = bool(item.get("_existing"))
-        if existing:
-            # Re-saving an existing item still applies the chosen folder / tags.
-            await loop.run_in_executor(None, catalog._attach_links, item["id"],
-                                       {"tags": payload["tags"], "collections": payload.get("collections")})
         has_file = any(a["kind"] != "link" for a in catalog.list_attachments(item["id"]))
         saved.append({"id": item["id"], "title": item["title"], "existing": existing,
                       "needs_pdf": not has_file, "pdf_url": pdf_url})
@@ -221,12 +220,16 @@ async def add_identifiers(body: IdentifiersIn, request: Request) -> dict:
         if not payload:
             failed.append(value)
             continue
-        payload.pop("_pdf_url", None)
+        pdf_url = payload.pop("_pdf_url", None)
         payload["tags"] = list(body.tags)
         if body.collection_id:
             payload["collections"] = [body.collection_id]
         item = await loop.run_in_executor(None, catalog.create_item, payload)
-        saved.append({"id": item["id"], "title": item["title"], "existing": bool(item.get("_existing"))})
+        existing = bool(item.get("_existing"))
+        has_file = any(a["kind"] != "link" for a in catalog.list_attachments(item["id"]))
+        # needs_pdf / pdf_url let the extension download an open-access copy with the browser session.
+        saved.append({"id": item["id"], "title": item["title"], "existing": existing,
+                      "needs_pdf": not has_file, "pdf_url": pdf_url})
         _publish(request, "item_added", {"id": item["id"], "title": item["title"], "source": "connector"})
     return {"saved": saved, "failed": failed}
 

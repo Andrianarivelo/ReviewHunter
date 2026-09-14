@@ -3,6 +3,13 @@ beautifulsoup4>=4.9.3
 fastapi>=0.110
 uvicorn[standard]>=0.27
 pydantic>=2.5
+python-multipart>=0.0.9
+pypdf>=4.0
+bibtexparser==1.4.3
+cryptography>=42
+google-auth>=2.29
+google-auth-oauthlib>=1.2
+google-api-python-client>=2.120
 https://files.pythonhosted.org/packages/5c/44/70be9e0e536dc80d5d7412c8deb2193c4e103ad00b2c518b963f0b1c6ccf/libgen_api_modern-0.2.1-py3-none-any.whl
 
 # Optional - uncomment for semantic clustering & similarity:

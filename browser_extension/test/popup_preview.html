@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ReviewHunter popup preview</title>
+  <style>
+    body { margin: 0; padding: 24px; background: #cbd5e1; font: 13px "Segoe UI", sans-serif; display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+    figure { margin: 0; }
+    figcaption { font-weight: 600; margin-bottom: 6px; color: #0f172a; }
+    iframe { width: 380px; height: 600px; border: 0; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.25); background: #fff; }
+  </style>
+</head>
+<body>
+  <!--
+    Visual preview of the real popup (src/popup/popup.html + popup.js) with a mocked chrome.* API.
+    Usage: test/popup_preview.html?s=single,multi,pdf,offline,progress  (served by test/serve.py)
+  -->
+  <script type="module">
+    import { detect, detectPdf } from "../src/extract/index.js";
+
+    /** Build the detection for a scenario from the fixtures. */
+    async function detectionFor(s) {
+      const load = async (name) => new DOMParser().parseFromString(await (await fetch(`fixtures/${name}`)).text(), "text/html");
+      if (s === "single" || s === "progress") return detect(await load("sciencedirect.html"), "https://www.sciencedirect.com/science/article/pii/S0376871617302533");
+      if (s === "multi") return detect(await load("scholar.html"), "https://scholar.google.com/scholar?q=hopfield");
+      if (s === "pdf") return detectPdf("https://www.sciencedirect.com/science/article/pii/S0376871617302533/pdfft?md5=1&pid=1-s2.0-S0376871617302533-main.pdf");
+      return { kind: "none", items: [] };
+    }
+
+    const scenarios = (new URLSearchParams(location.search).get("s") || "single,multi,pdf,offline,progress").split(",");
+    const popupHtml = await (await fetch("../src/popup/popup.html")).text();
+
+    for (const s of scenarios) {
+      const det = await detectionFor(s);
+      const mock = {
+        scenario: s,
+        detection: det,
+        collections: [
+          { id: 1, name: "Neuroscience", parent_id: null, depth: 0, path: "Neuroscience", count: 42 },
+          { id: 2, name: "Addiction", parent_id: 1, depth: 1, path: "Neuroscience / Addiction", count: 7 },
+          { id: 3, name: "Climate and health", parent_id: null, depth: 0, path: "Climate and health", count: 12 },
+        ],
+        tags: [{ name: "heat", color: "#ef4444", count: 5 }, { name: "overdose", color: null, count: 3 }, { name: "hopfield", color: null, count: 2 }],
+      };
+      const fig = document.createElement("figure");
+      fig.innerHTML = `<figcaption>${s}</figcaption>`;
+      const frame = document.createElement("iframe");
+      // The mock must exist before popup.js (a deferred module) runs, so it is an inline classic script in srcdoc.
+      const mockScript = `<script>
+        const M = parent.__mocks[${JSON.stringify(s)}];
+        window.chrome = {
+          runtime: {
+            sendMessage: async (msg) => {
+              if (msg.type === "status") return M.scenario === "offline" ? { online: false, error: "not reachable" } : { online: true, info: { app: "ReviewHunter", version: "2.0.0", library: { items: 128 } } };
+              if (msg.type === "detect") return M.detection;
+              if (msg.type === "pending") return M.scenario === "pdf" ? [{ itemId: 9, title: "Association of elevated ambient temperature with opioid overdose deaths", score: 2, at: Date.now() }, { itemId: 4, title: "Another paper waiting for its PDF", score: 0, at: Date.now() }] : [];
+              return {};
+            },
+            connect: () => {
+              const listeners = [];
+              const port = { onMessage: { addListener: (f) => listeners.push(f) }, onDisconnect: { addListener() {} }, disconnect() {},
+                postMessage() {
+                  const steps = [
+                    { id: "meta", label: "Metadata saved", state: "done", detail: "Association of elevated ambient temperature with opioid overdose deaths" },
+                    { id: "pdf", label: "PDF found via page", state: "done", detail: "1.4 MB from pdf.sciencedirectassets.com/.../main.pdf" },
+                    { id: "pdf-upload", label: "Attaching PDF", state: "running", detail: "" },
+                  ];
+                  setTimeout(() => listeners.forEach((f) => f({ type: "progress", steps })), 100);
+                  if (M.scenario !== "progress-running") setTimeout(() => {
+                    steps[2] = { id: "pdf-upload", label: "PDF attached", state: "done" };
+                    steps.push({ id: "snap", label: "Snapshot failed", state: "error", detail: "the page could not be read" });
+                    listeners.forEach((f) => f({ type: "progress", steps }));
+                    listeners.forEach((f) => f({ type: "done", result: { ok: true, itemIds: [9], message: "Saved" } }));
+                  }, 600);
+                } };
+              return port;
+            },
+            openOptionsPage() {},
+            getURL: (p) => p,
+          },
+          tabs: { query: async () => [{ id: 1, url: M.detection.url }] },
+          storage: {
+            local: { get: async () => ({ serverUrl: "http://127.0.0.1:8785", lastCollectionId: 2 }), set: async () => {} },
+            session: { get: async () => ({}), set: async () => {} },
+          },
+        };
+        const realFetch = window.fetch;
+        window.fetch = async (url, init) => {
+          const u = String(url);
+          const json = (v) => new Response(JSON.stringify(v), { headers: { "Content-Type": "application/json" } });
+          if (u.endsWith("/connector/collections")) return json(M.collections);
+          if (u.endsWith("/connector/tags")) return json(M.tags);
+          if (u.endsWith("/connector/lookup")) return json({ found: M.scenario === "single", items: [] });
+          return realFetch(url, init);
+        };
+      <\/script>`;
+      const html = popupHtml
+        .replace("<head>", `<head><base href="${new URL("../src/popup/", location.href).href}">${mockScript}`);
+      window.__mocks = window.__mocks || {};
+      window.__mocks[s] = mock;
+      frame.srcdoc = html;
+      if (s === "progress") frame.addEventListener("load", () => setTimeout(() => frame.contentDocument.getElementById("btn-save").click(), 700));
+      fig.append(frame);
+      document.body.append(fig);
+    }
+  </script>
+</body>
+</html>

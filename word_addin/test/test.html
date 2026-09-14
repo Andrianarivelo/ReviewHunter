@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>ReviewHunter add-in tests</title>
+  <!-- Automated scenarios for the adapter-independent logic (rh-core.js) running on the
+       MockAdapter. Needs a running ReviewHunter server with the test library
+       (Schultz 1997, Hopfield 1982, Hodgkin & Huxley 1952, Vaswani 2017, Dayan & Abbott 2001).
+       Open http://127.0.0.1:<port>/addin/test/test.html -->
+  <script src="/static/vendor/citeproc.js"></script>
+  <script src="/static/js/citations.js"></script>
+  <script src="../js/rh-core.js"></script>
+  <script src="../js/rh-mock-adapter.js"></script>
+  <style>
+    body { font: 13px/1.45 "Segoe UI", system-ui, sans-serif; margin: 0; padding: 16px 20px; background: #f7f8fa; color: #17202c; }
+    h1 { font-size: 17px; margin: 0 0 4px; }
+    #summary { font-size: 15px; font-weight: 600; margin: 6px 0 12px; }
+    #summary.pass { color: #047857; } #summary.fail { color: #b91c1c; }
+    .wrap { display: grid; grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr); gap: 16px; }
+    #log { background: #fff; border: 1px solid #e2e7ee; border-radius: 8px; padding: 8px 10px; font-size: 12px; }
+    .sc { font-weight: 600; margin: 8px 0 2px; }
+    .ok, .ko { padding-left: 12px; } .ok::before { content: "PASS "; color: #047857; font-weight: 600; }
+    .ko::before { content: "FAIL "; color: #b91c1c; font-weight: 600; } .ko { color: #7f1d1d; }
+    .doc { background: #fff; border: 1px solid #e2e7ee; border-radius: 8px; padding: 14px 18px; font: 14px/1.55 Cambria, Georgia, serif; }
+    .doc p { margin: 0 0 8px; } .rh-cc { background: #eff6ff; }
+    .mock-notes ol { font-size: 12px; border-top: 1px solid #ccc; padding-top: 6px; }
+  </style>
+</head>
+<body>
+  <h1>ReviewHunter Word add-in: MockAdapter scenarios</h1>
+  <div id="summary">Running</div>
+  <div class="wrap">
+    <div id="log"></div>
+    <div>
+      <div class="doc">
+        <div id="doc" contenteditable="true">
+          <p>Dopamine neurons report a reward prediction error.</p>
+          <p>Attractor networks store memories in recurrent dynamics.</p>
+          <p>Conductance-based models explain action potentials.</p>
+          <p>References</p>
+        </div>
+        <div id="notes"></div>
+      </div>
+      <div class="doc" style="margin-top:12px">
+        <div id="doc2" contenteditable="true"><p>Second document without footnote support.</p></div>
+        <div id="notes2"></div>
+      </div>
+    </div>
+  </div>
+<script>
+(async function () {
+  'use strict';
+  let pass = 0;
+  let fail = 0;
+  const log = document.getElementById('log');
+
+  /** Print a scenario header. @param {string} name */
+  function scenario(name) {
+    const d = document.createElement('div');
+    d.className = 'sc';
+    d.textContent = name;
+    log.appendChild(d);
+  }
+
+  /**
+   * Record one assertion.
+   * @param {boolean} cond
+   * @param {string} label
+   * @param {*} [detail] shown on failure
+   */
+  function check(cond, label, detail) {
+    const d = document.createElement('div');
+    d.className = cond ? 'ok' : 'ko';
+    d.textContent = label + (cond || detail === undefined ? '' : `  [got: ${typeof detail === 'string' ? detail : JSON.stringify(detail)}]`);
+    log.appendChild(d);
+    cond ? pass++ : fail++;
+  }
+
+  const text = el => (el.textContent || '').replace(/\s+/g, ' ').trim();
+  const docEl = document.getElementById('doc');
+  const cites = () => [...document.querySelectorAll('#doc .rh-cc[data-tag^="RH-CITE:"], #notes .rh-cc')]
+    .map(el => ({ id: el.dataset.tag.slice(8), text: text(el), html: el.innerHTML }));
+  /** Citation text by id, wherever the control is. */
+  const citeText = id => (cites().find(c => c.id === id) || {}).text || '';
+  const bibEl = () => document.querySelector('#doc .rh-cc[data-tag="RH-BIBL"]');
+  const bibEntries = () => [...(bibEl() ? bibEl().querySelectorAll('p.rh-bib-entry') : [])].map(text);
+
+  const api = new RH.ApiClient();
+  const adapter = new RHMockAdapter({ root: docEl, footnotesRoot: document.getElementById('notes'), footnotes: true });
+  const controller = new RH.Controller({ adapter, api, engine: new RHCitations() });
+
+  try {
+    // ------------------------------------------------------------------ 1
+    scenario('1. Server and search');
+    check(await api.ping(), 'health endpoint answers');
+    const find = async (q, re) => (await api.search(q, 10)).find(r => re.test(r.title || ''));
+    const schultz = await find('Schultz', /Neural Substrate/i);
+    const hopfield = await find('Hopfield', /Neural networks and physical/i);
+    const hodgkin = await find('Hodgkin', /quantitative description/i);
+    const vaswani = await find('Vaswani', /Attention/i);
+    check(schultz && hopfield && hodgkin && vaswani, 'search finds Schultz, Hopfield 1982, Hodgkin, Vaswani');
+    check(!!(schultz && schultz.csl && schultz.csl.title), 'search results carry CSL-JSON');
+    const csl = {};
+    [schultz, hopfield, hodgkin, vaswani].forEach(r => { csl[r.id] = r.csl; });
+    await controller.init();
+    check(controller.prefs.style === 'apa', 'default style comes from /api/settings (apa)', controller.prefs.style);
+
+    // ------------------------------------------------------------------ 2
+    scenario('2. Insert three citations (APA), one 2-item cluster with a page locator');
+    adapter.placeCaretAfter('prediction error');
+    const c1 = await controller.insertCitation([{ id: schultz.id }, { id: hopfield.id, locator: '12', label: 'page' }], csl);
+    adapter.placeCaretAfter('recurrent dynamics');
+    const c2 = await controller.insertCitation([{ id: hopfield.id }], csl);
+    adapter.placeCaretAfter('action potentials');
+    const c3 = await controller.insertCitation([{ id: hodgkin.id }], csl);
+    check(cites().length === 3, '3 citation controls in the document', cites().length);
+    check(citeText(c1) === '(Hopfield, 1982, p. 12; Schultz et al., 1997)', 'cluster renders "(Hopfield, 1982, p. 12; Schultz et al., 1997)" (APA sorts within a cluster)', citeText(c1));
+    check(citeText(c2) === '(Hopfield, 1982)', 'second citation "(Hopfield, 1982)"', citeText(c2));
+    check(/Hodgkin & Huxley, 1952/.test(citeText(c3)), 'third citation "(Hodgkin & Huxley, 1952)"', citeText(c3));
+    const docText = text(docEl);
+    check(docText.indexOf('prediction error(') >= 0 || docText.indexOf('prediction error (') >= 0, 'citation inserted at the caret', docText.slice(0, 80));
+    let st = await adapter.loadState();
+    check(Object.keys(st.citations).length === 3, 'rh.citations holds 3 clusters');
+    check(Object.keys(st.items).length === 3 && st.items[String(hodgkin.id)].title, 'rh.items holds 3 CSL snapshots');
+    check(st.citations[c1].items[1].locator === '12' && st.citations[c1].items[1].label === 'page', 'locator stored in the cluster');
+    check(st.prefs && st.prefs.style === 'apa', 'rh.prefs saved with the first citation');
+    check(!!RH.util.uid().match(/^c[a-z0-9]{8}$/) && ('RH-CITE:' + c1).length < 64, 'tag is short (RH-CITE:<9 chars>)');
+
+    // ------------------------------------------------------------------ 3
+    scenario('3. Bibliography');
+    adapter.placeCaretAfter('References');
+    check(await controller.insertBibliography() === 'created', 'bibliography created');
+    check(await controller.insertBibliography() === 'updated', 'second call updates instead of duplicating');
+    check(document.querySelectorAll('#doc .rh-cc[data-tag="RH-BIBL"]').length === 1, 'exactly one RH-BIBL control');
+    let bib = bibEntries();
+    check(bib.length === 3, 'APA bibliography has 3 entries', bib.length);
+    check(/^Hodgkin/.test(bib[0]) && /^Hopfield/.test(bib[1]) && /^Schultz/.test(bib[2]), 'APA entries sorted alphabetically', bib.map(b => b.slice(0, 10)));
+    check(/margin-left:36pt/.test(bibEl().innerHTML) && /text-indent:-36pt/.test(bibEl().innerHTML), 'APA hanging indent as inline CSS');
+    check(/line-height:200%/.test(bibEl().innerHTML), 'APA double line spacing as inline CSS');
+    check(/<i>/.test(bibEl().innerHTML), 'italics preserved in bibliography HTML');
+    check(await adapter.selectBibliography(), 'go to bibliography selects it');
+
+    // ------------------------------------------------------------------ 4
+    scenario('4. Switch to Nature (numeric, order of appearance)');
+    await controller.setPrefs({ style: 'nature', styleTitle: 'Nature', styleFormat: 'numeric' });
+    check(controller.engine.isNumeric, 'engine reports a numeric style');
+    check(citeText(c1) === '1,2', 'first cluster "1,2"', citeText(c1));
+    check(citeText(c2) === '2', 'second citation reuses number 2', citeText(c2));
+    check(citeText(c3) === '3', 'third citation is 3', citeText(c3));
+    check(/<sup>/.test(cites()[0].html), 'Nature citations are superscript HTML');
+    bib = bibEntries();
+    check(bib.length === 3 && /^1\./.test(bib[0]) && /Schultz/.test(bib[0]) && /^2\./.test(bib[1]) && /Hopfield/.test(bib[1]) && /^3\./.test(bib[2]),
+      'numbered bibliography 1. Schultz, 2. Hopfield, 3. Hodgkin', bib.map(b => b.slice(0, 14)));
+    check(/rh-bib-label/.test(bibEl().innerHTML) && /mso-tab-count/.test(bibEl().innerHTML), 'numbered entries use label + tab markup');
+
+    // ------------------------------------------------------------------ 5
+    scenario('5. Switch to Chicago author-date');
+    await controller.setPrefs({ style: 'chicago-author-date', styleTitle: 'Chicago author-date', styleFormat: 'author-date' });
+    check(/^\(Schultz et al\. 1997; Hopfield 1982, 12\)$/.test(citeText(c1)), 'Chicago cluster keeps order, locator without p.', citeText(c1));
+    check(citeText(c2) === '(Hopfield 1982)', 'Chicago single citation', citeText(c2));
+    check(bibEntries().length === 3 && !/^1\./.test(bibEntries()[0]), 'bibliography unnumbered again');
+
+    // ------------------------------------------------------------------ 6
+    scenario('6. Edit a citation');
+    await adapter.selectCitation(c3);
+    const sel = await controller.selectionCluster();
+    check(sel && sel.citationID === c3 && sel.cluster.items[0].id === String(hodgkin.id), 'selection inside a control loads its cluster');
+    await controller.updateCitation(c3, [{ id: vaswani.id, prefix: 'see', suffix: 'for transformers' }], csl);
+    check(/see Vaswani et al\. 2017 for transformers/.test(citeText(c3)), 'edited citation shows prefix, item and suffix', citeText(c3));
+    bib = bibEntries();
+    check(bib.length === 3 && bib.some(b => /Vaswani/.test(b)) && !bib.some(b => /Hodgkin/.test(b)), 'bibliography swapped Hodgkin for Vaswani');
+    st = await adapter.loadState();
+    check(!st.items[String(hodgkin.id)], 'unused snapshot (Hodgkin) purged from rh.items');
+    await controller.updateCitation(c2, [{ id: hopfield.id, 'suppress-author': true }], csl);
+    check(citeText(c2) === '(1982)', 'suppress author gives "(1982)"', citeText(c2));
+    await controller.updateCitation(c2, [{ id: hopfield.id }], csl);
+
+    // ------------------------------------------------------------------ 7
+    scenario('7. Delete a citation and refresh (Nature renumbers)');
+    await controller.setPrefs({ style: 'nature', styleTitle: 'Nature', styleFormat: 'numeric' });
+    check(citeText(c3) === 'see 3 for transformers', 'before delete: Vaswani is 3 (with prefix/suffix)', citeText(c3));
+    await controller.removeCitation(c1);
+    check(cites().length === 2, 'two citations left', cites().length);
+    check(citeText(c2) === '1' && citeText(c3) === 'see 2 for transformers', 'renumbered: Hopfield 1, Vaswani 2', [citeText(c2), citeText(c3)]);
+    bib = bibEntries();
+    check(bib.length === 2 && /Hopfield/.test(bib[0]) && /Vaswani/.test(bib[1]), 'bibliography shrank to 2 entries', bib.length);
+    st = await adapter.loadState();
+    check(Object.keys(st.citations).length === 2 && !st.citations[c1], 'deleted cluster removed from rh.citations');
+    check(!st.items[String(schultz.id)], 'Schultz snapshot removed');
+
+    // ------------------------------------------------------------------ 8
+    scenario('8. User edits outside the pane: manual delete, undo, copy/paste');
+    const el3 = document.querySelector(`#doc .rh-cc[data-tag="RH-CITE:${c3}"]`);
+    const parent3 = el3.parentNode;
+    const next3 = el3.nextSibling;
+    el3.remove();                                    // user deletes the field in Word
+    await controller.refresh();
+    st = await adapter.loadState();
+    check(cites().length === 1 && !st.citations[c3] && st.trash.some(t => t.citationID === c3), 'orphan cluster moved out of rh.citations into the trash');
+    check(bibEntries().length === 1, 'bibliography follows (1 entry)');
+    parent3.insertBefore(el3, next3);                // user presses Undo
+    await controller.refresh();
+    st = await adapter.loadState();
+    check(cites().length === 2 && st.citations[c3] && citeText(c3) === 'see 2 for transformers', 'undo restores the cluster from the trash');
+    const copy = document.querySelector(`#doc .rh-cc[data-tag="RH-CITE:${c2}"]`).cloneNode(true);
+    adapter.placeCaretAfter('action potentials');
+    adapter._insertionRange().insertNode(copy);     // user copies/pastes a citation
+    await controller.refresh();
+    const ids = cites().map(c => c.id);
+    check(ids.length === 3 && new Set(ids).size === 3, 'pasted duplicate gets its own citationID', ids);
+    st = await adapter.loadState();
+    check(Object.keys(st.citations).length === 3, 'duplicate cluster stored separately');
+    const pastedId = ids.find(i => i !== c2 && i !== c3);
+    await controller.removeCitation(pastedId);
+    check(cites().length === 2, 'pasted duplicate removed again');
+
+    // ------------------------------------------------------------------ 9
+    scenario('9. Offline refresh from snapshots and cached style');
+    const offlineApi = new RH.ApiClient();
+    offlineApi.forceOffline = true;
+    const offline = new RH.Controller({ adapter, api: offlineApi, engine: new RHCitations() });
+    await offlineApi.ping();
+    await offline.init();
+    const initSource = offline.styleSource;
+    check(offlineApi.online === false, 'client reports offline');
+    const off = await offline.refresh();
+    check(initSource === 'cache', 'style loaded from the local cache (new engine, no server)', initSource);
+    check(citeText(c2) === '1' && citeText(c3) === 'see 2 for transformers' && bibEntries().length === 2 && off.citations === 2, 'offline refresh renders numbers and bibliography');
+    let err = null;
+    try {
+      await offline.setPrefs({ style: 'ieee' });
+    } catch (e) {
+      err = e;
+    }
+    check(err && /offline/i.test(err.message), 'uncached style offline gives a clear error', err && err.message);
+    check(offline.prefs.style === 'nature', 'failed style change leaves prefs untouched', offline.prefs.style);
+    await controller.init({ refresh: false });       // back to the online controller with current state
+
+    // ------------------------------------------------------------------ 10
+    scenario('10. Note style: citations move into footnotes and back');
+    await controller.setPrefs({ style: 'chicago-notes-bibliography', styleTitle: 'Chicago notes', styleFormat: 'note' });
+    check(controller.engine.isNoteStyle && controller.useFootnotes, 'note style with footnote support');
+    check(document.querySelectorAll('#notes li').length === 2 && document.querySelectorAll('#doc .mock-fnref').length === 2, 'two footnotes created');
+    check(document.querySelectorAll('#doc .rh-cc[data-tag^="RH-CITE:"]').length === 0, 'no in-text citation left');
+    check(/Hopfield/.test(citeText(c2)) && /Neural Networks/i.test(citeText(c2)), 'first note is a full note citation', citeText(c2));
+    adapter.placeCaretAfter('prediction error');
+    const c4 = await controller.insertCitation([{ id: hopfield.id, locator: '2556' }], csl);
+    const order = (await adapter.listCitations()).map(e => e.citationID);
+    check(order[0] === c4 && document.querySelector('#doc .mock-fnref').textContent === '1', 'new footnote placed first in document order');
+    check(/^Hopfield, “/.test(citeText(c2)) && !/John/.test(citeText(c2)), 'subsequent note uses the short form (no given name)', citeText(c2));
+    check(/John J\. Hopfield/.test(citeText(c4)) && /2556/.test(citeText(c4)), 'first note is the full form with locator', citeText(c4));
+    await controller.removeCitation(c4);
+    check(document.querySelectorAll('#notes li').length === 2, 'removing a note citation removes its footnote');
+    await controller.setPrefs({ style: 'apa', styleTitle: 'APA', styleFormat: 'author-date' });
+    check(document.querySelectorAll('#notes li').length === 0 && document.querySelectorAll('#doc .rh-cc[data-tag^="RH-CITE:"]').length === 2, 'back to APA: citations returned to the text');
+    check(citeText(c2) === '(Hopfield, 1982)', 'APA text after moving back', citeText(c2));
+
+    // ------------------------------------------------------------------ 11
+    scenario('11. Locale');
+    await controller.setPrefs({ style: 'chicago-author-date', locale: 'fr-FR' });
+    adapter.placeCaretAfter('prediction error');
+    const c5 = await controller.insertCitation([{ id: hodgkin.id }], csl);
+    check(/Hodgkin et Huxley 1952/.test(citeText(c5)), 'French locale uses "et"', citeText(c5));
+    await controller.setPrefs({ style: 'apa', locale: 'en-US' });
+
+    // ------------------------------------------------------------------ 12
+    scenario('12. Host without footnotes (WordApi < 1.5)');
+    const adapter2 = new RHMockAdapter({ root: document.getElementById('doc2'), footnotesRoot: document.getElementById('notes2'), footnotes: false });
+    const ctl2 = new RH.Controller({ adapter: adapter2, api, engine: new RHCitations() });
+    await ctl2.init();
+    await ctl2.setPrefs({ style: 'chicago-notes-bibliography', styleFormat: 'note' });
+    adapter2.placeCaretAfter('footnote support.');
+    await ctl2.insertCitation([{ id: vaswani.id }], csl);
+    check(document.querySelectorAll('#doc2 .rh-cc').length === 1 && document.querySelectorAll('#notes2 li').length === 0, 'citation inserted in the text');
+    check(ctl2.summary.warnings.length === 1 && /footnote/i.test(ctl2.summary.warnings[0]), 'warning explains the fallback', ctl2.summary.warnings);
+
+    // ------------------------------------------------------------------ 13
+    scenario('13. Preview');
+    const pv = await controller.preview([{ id: vaswani.id, locator: '3' }], csl, null);
+    check(/Vaswani et al\., 2017, p\. 3/.test(RH.util.htmlToText(pv)), 'preview formats a draft cluster', pv);
+    await controller.setPrefs({ style: 'nature' });
+    const cited = RH.util.htmlToText(await controller.preview([{ id: hodgkin.id }], csl, null));
+    check(cited === '1', 'numeric preview of an already cited source reuses its number (Hodgkin = 1)', cited);
+    const pvNum = RH.util.htmlToText(await controller.preview([{ id: schultz.id }], csl, null));
+    check(pvNum === '4', 'numeric preview of a new source shows the next free number (4)', pvNum);
+
+    // ------------------------------------------------------------------ 14
+    scenario('14. Unlink');
+    const before = text(docEl).replace(/\s+/g, '');
+    const n = await controller.unlink();
+    check(n === 4, 'unlinked 3 citations + 1 bibliography', n);
+    check(document.querySelectorAll('#doc .rh-cc').length === 0, 'no ReviewHunter control left');
+    check(text(docEl).replace(/\s+/g, '') === before, 'visible text unchanged');
+    st = await adapter.loadState();
+    check(!st.citations && !st.items && !st.prefs, 'document settings removed');
+  } catch (e) {
+    check(false, 'unexpected exception: ' + (e && e.stack || e));
+  }
+
+  const s = document.getElementById('summary');
+  s.textContent = `${pass} PASS / ${fail} FAIL`;
+  s.className = fail ? 'fail' : 'pass';
+  window.RH_TEST_RESULT = { pass, fail };
+})();
+</script>
+</body>
+</html>

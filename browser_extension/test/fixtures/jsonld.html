@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- Synthetic fixture: journal page exposing only JSON-LD (@graph, nested isPartOf). -->
+<html lang="en">
+<head>
+<title>Grid cells in a synthetic cortex | Journal of Examples</title>
+<meta property="og:site_name" content="Journal of Examples">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {"@type": "WebSite", "name": "Journal of Examples", "url": "https://journals.example.org/"},
+    {
+      "@type": "ScholarlyArticle",
+      "headline": "Grid cells in a synthetic cortex",
+      "author": [
+        {"@type": "Person", "givenName": "Ada", "familyName": "Lovelace"},
+        {"@type": "Person", "name": "Santiago Ramon y Cajal"},
+        {"@type": "Organization", "name": "Blue Brain Consortium"}
+      ],
+      "datePublished": "2021-03-15T08:00:00Z",
+      "pagination": "101-120",
+      "identifier": {"@type": "PropertyValue", "propertyID": "DOI", "value": "10.5555/example.42"},
+      "keywords": ["grid cells", "entorhinal cortex"],
+      "isPartOf": {
+        "@type": "PublicationIssue", "issueNumber": "3",
+        "isPartOf": {"@type": "PublicationVolume", "volumeNumber": "12",
+          "isPartOf": {"@type": "Periodical", "name": "Journal of Examples", "issn": "1234-5678"}}
+      },
+      "publisher": {"@type": "Organization", "name": "Example Press"},
+      "encoding": {"@type": "MediaObject", "encodingFormat": "application/pdf", "contentUrl": "/article/42/pdf/grid-cells.pdf"},
+      "description": "We describe <i>synthetic</i> grid cells."
+    }
+  ]
+}
+</script>
+</head>
+<body><article><h1>Grid cells in a synthetic cortex</h1><p>Body.</p></article></body>
+</html>
