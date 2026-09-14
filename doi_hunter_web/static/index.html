@@ -3,697 +3,1194 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ReviewHunter - Discover</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='80' font-size='80'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E" />
+  <title>ReviewHunter</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%230284c7'/%3E%3Cstop offset='1' stop-color='%2314b8a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='45' font-family='Arial' font-weight='800' font-size='38' text-anchor='middle' fill='white'%3ER%3C/text%3E%3C/svg%3E" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vendored locally so the app works offline (no CDN at runtime). -->
+  <script src="/static/vendor/tailwind.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
-            serif: ['"Source Serif 4"', 'Georgia', 'serif'],
-          },
-          colors: {
-            ink: {
-              50:  '#f8f9fb',
-              100: '#eef0f4',
-              200: '#dde1ea',
-              300: '#bcc3d2',
-              400: '#8b94a9',
-              500: '#5d6479',
-              600: '#3f4458',
-              700: '#272b3c',
-              800: '#181b29',
-              900: '#0f111c',
-              950: '#080a13',
-            },
-            accent: {
-              50:  '#edf7ff',
-              100: '#d9ecff',
-              400: '#38bdf8',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              700: '#0369a1',
-            },
-          },
-          boxShadow: {
-            soft: '0 1px 2px rgba(15,17,28,.04), 0 10px 28px rgba(15,17,28,.08)',
-            pop:  '0 18px 48px rgba(15,17,28,.20)',
-          },
+      theme: { extend: {
+        fontFamily: { sans: ['Inter', 'Segoe UI', 'ui-sans-serif', 'system-ui'], serif: ['"Source Serif 4"', 'Georgia', 'serif'] },
+        colors: {
+          ink: { 50: '#f8f9fb', 100: '#eef0f4', 200: '#dde1ea', 300: '#bcc3d2', 400: '#8b94a9', 500: '#5d6479', 600: '#3f4458', 700: '#272b3c', 800: '#181b29', 900: '#0f111c', 950: '#080a13' },
+          accent: { 50: '#edf7ff', 100: '#d9ecff', 400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1' },
         },
-      },
+        boxShadow: { soft: '0 1px 2px rgba(15,17,28,.04), 0 10px 28px rgba(15,17,28,.08)', pop: '0 18px 48px rgba(15,17,28,.20)' },
+      } },
     };
   </script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&display=swap" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/static/styles.css">
-  <script defer src="https://unpkg.com/alpinejs@3.13.5/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/vendor/citeproc.js"></script>
+  <script src="/static/js/citations.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/library.js"></script>
+  <script src="/static/js/detail.js"></script>
+  <script src="/static/js/dialogs.js"></script>
+  <script src="/static/js/settings.js"></script>
+  <script src="/static/js/discover.js"></script>
+  <script src="/static/app.js"></script>
+  <script defer src="/static/vendor/alpine.min.js"></script>
 </head>
 
-<body class="font-sans bg-ink-50 text-ink-900 dark:bg-ink-950 dark:text-ink-100 antialiased">
+<body class="font-sans text-ink-900 dark:text-ink-100 antialiased overflow-hidden" x-cloak>
 
-  <header class="topbar h-14 flex items-center gap-3 px-4 sticky top-0 z-30">
-    <button @click="selectVirtual('discover')" class="brand-lockup flex items-center gap-2 pr-2">
-      <span class="brand-mark">R</span>
-      <span class="font-serif text-lg font-semibold tracking-tight">ReviewHunter</span>
+<!-- ============================================================ TOP BAR -->
+<header class="topbar h-12 flex items-center gap-2 px-3 relative z-30">
+  <button @click="selectVirtual('all')" class="flex items-center gap-2 pr-2" title="My Library">
+    <span class="brand-mark !w-7 !h-7 text-sm">R</span>
+    <span class="font-serif text-[17px] font-semibold tracking-tight hidden lg:inline">ReviewHunter</span>
+  </button>
+
+  <div class="flex items-center gap-1 ml-1">
+    <div class="relative" @click.outside="newItemMenu=false">
+      <button @click="newItemMenu=!newItemMenu" class="tb-btn" title="New item">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="hidden xl:inline">New Item</span>
+        <svg class="w-3 h-3 opacity-60" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div x-show="newItemMenu" x-transition.opacity class="menu-pop left-0 w-60 max-h-[70vh] overflow-y-auto">
+        <template x-for="t in itemTypes" :key="t.id">
+          <button @click="createItem(t.id)" class="context-row"><span class="type-glyph" :data-type="typeIcon(t.id)"></span><span x-text="t.label"></span></button>
+        </template>
+      </div>
+    </div>
+    <button @click="openIdentify()" class="tb-btn" title="Add Item by Identifier (Ctrl+N): DOI, ISBN, PMID, arXiv">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="m15 4-11 11 5 5 11-11-5-5Z"/><path d="M19 2v3M22 5h-3M17.5 3.5l1 1"/></svg>
+      <span class="hidden xl:inline">Add by ID</span>
+    </button>
+    <button @click="newStandaloneNote()" class="tb-btn" title="New Standalone Note (Ctrl+Shift+N)">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h5"/></svg>
+    </button>
+    <button @click="openImport()" class="tb-btn" title="Import BibTeX, RIS, CSL-JSON, PDFs">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v3h16v-3"/></svg>
+    </button>
+  </div>
+
+  <div class="flex-1 max-w-2xl mx-auto flex items-center gap-2">
+    <div class="relative flex-1">
+      <input x-ref="search" x-model="searchQuery" @input.debounce.250ms="isItemView() ? loadItems() : selectVirtual('all')"
+             @keydown.enter="isItemView() ? loadItems() : null" @keydown.escape="searchQuery=''; loadItems(); $refs.search.blur()"
+             type="text" placeholder="Search library (Ctrl+K)"
+             class="search-input w-full h-8 pl-8 pr-40 rounded-lg text-[13px] outline-none" />
+      <svg class="absolute left-2.5 top-2 w-4 h-4 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <select x-model="searchMode" @change="localStorage.setItem('rh.searchMode', JSON.stringify(searchMode)); loadItems()"
+              class="absolute right-1 top-1 h-6 text-[11px] rounded-md bg-ink-100 dark:bg-ink-800 px-1.5 outline-none text-ink-500">
+        <option value="titleCreatorYear">Title, Creator, Year</option>
+        <option value="fields">All Fields &amp; Tags</option>
+        <option value="everything">Everything</option>
+      </select>
+    </div>
+    <button @click="openAdvanced()" class="tb-btn" title="Advanced search">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+    </button>
+  </div>
+
+  <div class="flex items-center gap-1">
+    <button @click="selectVirtual('discover')" :class="virtual==='discover' ? 'tb-btn-active' : ''" class="tb-btn" title="Discover literature online">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></svg>
+      <span class="hidden xl:inline">Discover</span>
+    </button>
+    <span class="status-dot" :class="online ? 'on' : 'off'" :title="online ? 'Connected' : 'Server offline'"></span>
+    <button @click="openSettings()" class="tb-btn" title="Settings (Ctrl+,)">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+    <button @click="toggleDark()" class="tb-btn" :title="dark ? 'Light mode' : 'Dark mode'">
+      <svg x-show="!dark" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <svg x-show="dark" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+    </button>
+  </div>
+  <div x-show="batch.active" class="batch-bar" :style="`width:${batch.total ? (batch.index / batch.total * 100) : 0}%`"></div>
+</header>
+
+<main class="app-grid">
+
+<!-- ============================================================ LEFT: COLLECTIONS -->
+<aside class="sidebar flex flex-col min-h-0 border-r border-ink-200 dark:border-ink-800">
+  <div class="flex-1 min-h-0 overflow-y-auto px-2 py-2 space-y-0.5"
+       @dragover.prevent @drop.prevent="onDropCollection(null, $event)">
+    <button @click="selectVirtual('all')" :class="virtual==='all' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+      <span class="nav-glyph">&#9635;</span><span>My Library</span><span class="nav-count" x-text="stats.items"></span>
     </button>
 
-    <div class="flex-1 max-w-3xl mx-auto relative flex items-center gap-2">
-      <div class="relative flex-1">
-        <input
-          x-ref="search"
-          x-model.debounce.180ms="searchQuery"
-          @keydown.enter="runTopSearch()"
-          @keydown.escape="searchQuery=''; $refs.search.blur()"
-          type="text"
-          :placeholder="virtual === 'discover' ? 'Search title, DOI, author, or book' : 'Filter this library view, then press Enter to search online'"
-          class="search-input w-full h-10 px-3 pl-10 pr-12 rounded-lg text-sm outline-none transition" />
-        <svg class="absolute left-3 top-2.5 w-5 h-5 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <kbd class="absolute right-2 top-2 text-[10px] px-1.5 py-0.5 rounded bg-white/70 dark:bg-ink-800 text-ink-400 hidden md:block">Ctrl K</kbd>
-      </div>
-      <button @click="runTopSearch()"
-              class="h-10 px-4 inline-flex items-center gap-2 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold shadow-soft transition">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        Search
+    <div class="pl-2 space-y-0.5">
+      <template x-for="c in collectionRows" :key="c.id">
+        <div draggable="true" @dragstart="onDragCollection(c, $event)"
+             @dragover.prevent.stop="dragOver=c.id" @dragleave="dragOver=null" @drop.prevent.stop="onDropCollection(c, $event)"
+             @contextmenu.prevent.stop="openContext('collection', c, $event)"
+             :class="[virtual==='collection' && selectedCollectionId===c.id ? 'nav-active' : 'nav-idle', dragOver===c.id ? 'drop-target' : '']"
+             class="nav-row w-full cursor-pointer group" :style="`padding-left:${0.4 + c.depth * 0.9}rem`"
+             @click="selectCollection(c.id)">
+          <button @click.stop="toggleExpand(c.id)" class="twisty" :class="c.hasChildren ? '' : 'invisible'">
+            <svg class="w-3 h-3 transition" :class="expanded[c.id] ? 'rotate-90' : ''" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>
+          </button>
+          <svg class="w-4 h-4 shrink-0" :style="c.color ? `color:${c.color}` : ''" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          <span class="truncate" x-text="c.name"></span>
+          <span class="nav-count" x-text="c.count || ''"></span>
+        </div>
+      </template>
+      <button @click="newCollection()" class="nav-row nav-idle w-full text-ink-400 text-[12px]">
+        <span class="nav-glyph">+</span><span>New Collection</span>
       </button>
     </div>
 
-    <button @click="openAdd=true" class="h-10 px-3 inline-flex items-center gap-1.5 rounded-lg bg-ink-900 hover:bg-ink-800 dark:bg-white dark:text-ink-950 dark:hover:bg-ink-100 text-white text-sm font-semibold shadow-soft transition">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-      Add
-    </button>
-
-    <button @click="dark=!dark; localStorage.dhDark=dark" :title="dark?'Light mode':'Dark mode'" class="h-10 w-10 inline-flex items-center justify-center rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800 transition">
-      <svg x-show="!dark" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg x-show="dark" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
-    </button>
-  </header>
-
-  <main class="grid grid-cols-[280px_minmax(420px,1fr)_minmax(320px,500px)] h-[calc(100vh-3.5rem)]">
-
-    <aside class="sidebar border-r border-ink-200 dark:border-ink-800 flex flex-col overflow-hidden">
-      <div class="px-3 py-3 border-b border-ink-100 dark:border-ink-800/70 space-y-1">
-        <button @click="selectVirtual('discover')"
-                :class="virtual==='discover' ? 'nav-active' : 'nav-idle'"
-                class="nav-row w-full">
-          <span class="nav-dot bg-accent-500"></span><span>Discover</span>
-          <span class="ml-auto text-[11px] text-ink-400" x-text="modalTotal ? modalTotal : ''"></span>
-        </button>
-        <button @click="openGraph()"
-                :class="virtual==='graph' ? 'nav-active' : 'nav-idle'"
-                class="nav-row w-full">
-          <span class="nav-dot bg-teal-500"></span><span>Concept Map</span>
-          <span class="ml-auto text-[11px] text-ink-400" x-text="graph.nodes.length ? graph.nodes.length : ''"></span>
-        </button>
+    <template x-if="savedSearches.length">
+      <div class="pt-1">
+        <template x-for="s in savedSearches" :key="s.id">
+          <button @click="selectSavedSearch(s.id)" @contextmenu.prevent.stop="openContext('search', s, $event)"
+                  :class="virtual==='search' && selectedSearchId===s.id ? 'nav-active' : 'nav-idle'" class="nav-row w-full pl-3">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/></svg>
+            <span class="truncate" x-text="s.name"></span>
+          </button>
+        </template>
       </div>
+    </template>
 
-      <div class="px-3 py-3 border-b border-ink-100 dark:border-ink-800/70">
-        <div class="rail-label">Library</div>
-        <div class="mt-2 space-y-1">
-          <button @click="selectVirtual('all')" :class="virtual==='all' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
-            <span class="nav-icon">A</span><span>All Papers</span>
-            <span class="ml-auto text-xs text-ink-400" x-text="stats.items"></span>
+    <div class="pt-1 space-y-0.5">
+      <button @click="selectVirtual('unfiled')" :class="virtual==='unfiled' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph">&#9633;</span><span>Unfiled Items</span><span class="nav-count" x-text="stats.unfiled || ''"></span>
+      </button>
+      <button @click="selectVirtual('starred')" :class="virtual==='starred' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph text-amber-400">&#9733;</span><span>Starred</span><span class="nav-count" x-text="stats.starred || ''"></span>
+      </button>
+      <button @click="selectVirtual('recent')" :class="virtual==='recent' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph">&#9719;</span><span>Recently Added</span>
+      </button>
+      <button @click="selectVirtual('notes')" :class="virtual==='notes' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph">&#9998;</span><span>Notes</span><span class="nav-count" x-text="stats.notes || ''"></span>
+      </button>
+      <button @click="selectVirtual('duplicates')" :class="virtual==='duplicates' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph">&#10697;</span><span>Duplicate Items</span>
+      </button>
+      <button @click="selectVirtual('failed')" :class="virtual==='failed' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph text-rose-400">!</span><span>Needs Attention</span><span class="nav-count" x-text="stats.failed || ''"></span>
+      </button>
+      <button @click="openGraph()" :class="virtual==='graph' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph text-teal-500">&#10038;</span><span>Concept Map</span>
+      </button>
+      <button @click="selectVirtual('trash')" :class="virtual==='trash' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
+        <span class="nav-glyph">&#128465;</span><span>Trash</span><span class="nav-count" x-text="stats.trash || ''"></span>
+      </button>
+    </div>
+
+    <div class="pt-2">
+      <button @click="showAuthors=!showAuthors" class="rail-toggle">
+        <svg class="w-3 h-3 transition" :class="showAuthors?'rotate-90':''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+        Authors <span x-text="`(${facets.authors.length})`"></span>
+      </button>
+      <div x-show="showAuthors" class="space-y-0.5">
+        <template x-for="a in facets.authors.slice(0, authorLimit)" :key="a.name">
+          <button @click="selectAuthor(a.name)" @contextmenu.prevent.stop="openContext('author', a, $event)"
+                  :class="virtual==='author' && selectedAuthor===a.name ? 'nav-active' : 'nav-idle'" class="nav-row w-full text-[12.5px] !min-h-[1.8rem] !py-1">
+            <span class="truncate" x-text="shortAuthor(a.name)"></span><span class="nav-count" x-text="a.count"></span>
           </button>
-          <button @click="selectVirtual('recent')" :class="virtual==='recent' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
-            <span class="nav-icon">N</span><span>Recently Added</span>
+        </template>
+        <button x-show="facets.authors.length > authorLimit" @click="authorLimit += 20" class="show-more">Show more...</button>
+      </div>
+      <button @click="showSubjects=!showSubjects" class="rail-toggle">
+        <svg class="w-3 h-3 transition" :class="showSubjects?'rotate-90':''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+        Subjects <span x-text="`(${facets.subjects.length})`"></span>
+      </button>
+      <div x-show="showSubjects" class="space-y-0.5">
+        <template x-for="s in facets.subjects.slice(0, subjectLimit)" :key="s.name">
+          <button @click="selectSubject(s.name)" @contextmenu.prevent.stop="openContext('subject', s, $event)"
+                  :class="virtual==='subject' && selectedSubject===s.name ? 'nav-active' : 'nav-idle'" class="nav-row w-full text-[12.5px] !min-h-[1.8rem] !py-1">
+            <span class="truncate" x-text="s.name"></span><span class="nav-count" x-text="s.count"></span>
           </button>
-          <button @click="selectVirtual('starred')" :class="virtual==='starred' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
-            <span class="nav-icon">S</span><span>Starred</span>
-            <span class="ml-auto text-xs text-ink-400" x-text="stats.starred"></span>
+        </template>
+        <button x-show="facets.subjects.length > subjectLimit" @click="subjectLimit += 20" class="show-more">Show more...</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tag selector (Zotero-style) -->
+  <div class="tag-pane border-t border-ink-200 dark:border-ink-800" :class="tagPaneOpen ? 'open' : ''">
+    <div class="flex items-center gap-1 px-2 h-8">
+      <button @click="tagPaneOpen=!tagPaneOpen; localStorage.setItem('rh.tagPaneOpen', JSON.stringify(tagPaneOpen))" class="rail-toggle !w-auto !px-1">
+        <svg class="w-3 h-3 transition" :class="tagPaneOpen?'rotate-90':''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+        Tags
+      </button>
+      <button x-show="tagFilter.length" @click="clearTagFilter()" class="text-[11px] text-accent-600 ml-1">Deselect all</button>
+      <label class="ml-auto text-[10px] text-ink-400 flex items-center gap-1" title="Show automatic tags (imported keywords)">
+        <input type="checkbox" x-model="showAutomaticTags" @change="localStorage.setItem('rh.showAutoTags', JSON.stringify(showAutomaticTags))" class="rounded w-3 h-3">auto
+      </label>
+    </div>
+    <div x-show="tagPaneOpen" class="px-2 pb-2">
+      <div class="tag-cloud">
+        <template x-for="t in viewTags" :key="t.name">
+          <button @click="toggleTagFilter(t.name)" @contextmenu.prevent.stop="openContext('tag', t, $event)"
+                  @dragover.prevent @drop.prevent.stop="dropOnTag(t, $event)"
+                  :class="[tagFilter.includes(t.name) ? 'tag-on' : '', t.count === 0 ? 'opacity-40' : '', t.type === 1 ? 'tag-auto' : '']"
+                  class="tag-chip" :title="`${t.name} (${t.count})`">
+            <span x-show="t.color" class="tag-swatch" :style="`background:${t.color}`"></span>
+            <span x-text="t.name"></span>
           </button>
-          <button @click="selectVirtual('failed')" :class="virtual==='failed' ? 'nav-active' : 'nav-idle'" class="nav-row w-full">
-            <span class="nav-icon">!</span><span>Needs Attention</span>
-          </button>
+        </template>
+        <div x-show="!viewTags.length" class="empty-note px-1">No tags in this view.</div>
+      </div>
+      <input x-model="tagQuery" placeholder="Filter tags" class="mt-1.5 w-full h-7 px-2 rounded-md text-[12px] bg-ink-100 dark:bg-ink-800 outline-none">
+    </div>
+  </div>
+</aside>
+
+<!-- ============================================================ MIDDLE -->
+<section class="min-w-0 min-h-0 flex flex-col">
+
+  <!-- ---------- Discover ---------- -->
+  <template x-if="virtual === 'discover'">
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="discover-head px-6 py-5">
+        <div class="flex items-end gap-4 flex-wrap">
+          <div>
+            <div class="rail-label">Discover</div>
+            <h1 class="font-serif text-3xl leading-tight mt-1">Find literature</h1>
+          </div>
+          <div class="ml-auto flex rounded-lg p-1 bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800">
+            <template x-for="tab in [{k:'article',label:'Articles'},{k:'author',label:'Authors'},{k:'book',label:'Books'}]" :key="tab.k">
+              <button @click="setSearchKind(tab.k)" :class="searchKind===tab.k ? 'bg-ink-900 text-white dark:bg-white dark:text-ink-950 shadow-soft' : 'text-ink-500 hover:text-ink-900 dark:hover:text-white'"
+                      class="h-8 px-3 rounded-md text-xs font-semibold transition" x-text="tab.label"></button>
+            </template>
+          </div>
+          <select x-model="modalSort" @change="changeModalSort()" class="h-10 text-xs font-semibold bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800 rounded-lg px-3 outline-none">
+            <option value="pertinence">Pertinence</option><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="title">Title</option>
+          </select>
+        </div>
+        <div class="mt-5 relative">
+          <input x-ref="discoverInput" x-model="modalQuery" @keydown.enter="runSearch(true)" :placeholder="modalPlaceholder()"
+                 class="discover-input w-full h-12 pl-11 pr-28 rounded-xl text-base outline-none transition" />
+          <svg class="absolute left-4 top-3.5 w-5 h-5 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <button @click="runSearch(true)" class="absolute right-1.5 top-1.5 h-9 px-5 rounded-lg action-primary text-sm">Search</button>
+        </div>
+      </div>
+      <div x-show="modalResults.length > 0" class="px-6 py-2.5 flex items-center gap-3 border-b border-ink-200 dark:border-ink-800 bg-white/80 dark:bg-ink-900/80 flex-wrap">
+        <input type="checkbox" :checked="allSelected()" @change="toggleSelectAll($event.target.checked)" class="rounded">
+        <span class="text-xs text-ink-500" x-text="`${selectedCount()} selected, showing ${modalResults.length} of ${modalTotal || modalResults.length}`"></span>
+        <span x-show="modalSource" class="text-xs text-ink-400">via <span class="font-medium" x-text="modalSource"></span></span>
+        <select x-model="modalBulkCollectionId" class="ml-auto h-8 text-xs bg-ink-100 dark:bg-ink-800 rounded-md px-2 outline-none">
+          <option value="">No collection</option>
+          <option value="__new__" x-text="suggestedNewFolder()"></option>
+          <template x-for="c in collections" :key="c.id"><option :value="c.id" x-text="collectionPath(c.id)"></option></template>
+        </select>
+        <label class="text-xs flex items-center gap-1.5"><input type="checkbox" x-model="autoDownload" class="rounded">Find PDFs</label>
+        <button @click="addSelected()" :disabled="selectedCount()===0 || modalSubmitting" class="action-primary h-8 px-3 text-xs">Add selected</button>
+        <button @click="addAll()" :disabled="!modalResults.length || modalSubmitting" class="action-secondary h-8 px-3 text-xs">Add all <span x-show="modalTotal>0" x-text="`(${Math.min(modalTotal, addAllCap)})`"></span></button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-5">
+        <template x-if="modalLoading && !modalResults.length"><div class="result-empty">Searching...</div></template>
+        <template x-if="!modalLoading && !modalResults.length && modalAttempted"><div class="result-empty" x-text="modalUnavailable ? 'Search is unavailable right now.' : 'No results.'"></div></template>
+        <template x-if="!modalLoading && !modalResults.length && !modalAttempted">
+          <div class="result-empty">
+            <div class="text-base font-semibold text-ink-700 dark:text-ink-200">Search CrossRef, author catalogues and books.</div>
+            <div class="text-xs mt-1">Found something on a publisher site? Use the browser connector to save it with its PDF.</div>
+          </div>
+        </template>
+        <ul class="space-y-2">
+          <template x-for="(r, i) in modalResults" :key="resultKey(r, i)">
+            <li @click="r._selected = !r._selected" @contextmenu.prevent.stop="openContext('result', r, $event)" :class="r._selected ? 'result-row-selected' : 'result-row'" class="result-item cursor-pointer">
+              <input type="checkbox" :checked="r._selected" @click.stop="r._selected = !r._selected" class="mt-1 rounded">
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-semibold leading-snug" x-text="r.title || '(untitled)'"></div>
+                <div class="mt-1 text-xs text-ink-500 flex flex-wrap gap-x-2 gap-y-1">
+                  <span x-text="formatAuthors(r.authors)"></span>
+                  <span x-show="r.year" class="text-ink-400" x-text="r.year"></span>
+                  <span x-show="r.journal || r.publisher" class="italic" x-text="r.journal || r.publisher"></span>
+                  <span x-show="r.doi" class="text-ink-400" x-text="r.doi"></span>
+                  <span x-show="r.extension" class="type-pill" x-text="r.extension"></span>
+                </div>
+              </div>
+              <button @click.stop="addOne(r)" class="mini-add">Add</button>
+            </li>
+          </template>
+        </ul>
+        <div x-show="modalResults.length < modalTotal && modalResults.length < addAllCap" class="pt-4 text-center">
+          <button @click="runSearch(false)" class="action-secondary h-9 px-4 text-sm">Load more</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ---------- Concept map ---------- -->
+  <template x-if="virtual === 'graph'">
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="pane-head">
+        <div class="font-serif text-lg">Concept map</div>
+        <div class="text-xs text-ink-500 truncate"><span x-text="graph.scope.label"></span> <span x-show="graph.scope.items" x-text="`(${graph.scope.items} items)`"></span></div>
+        <div class="ml-auto flex items-center gap-2">
+          <label class="text-xs text-ink-500 flex items-center gap-1.5">Depth
+            <select x-model.number="graph.depth" @change="loadSubjectGraph()" class="h-7 bg-ink-100 dark:bg-ink-800 rounded-md px-2 outline-none"><option :value="1">1</option><option :value="2">2</option></select>
+          </label>
+          <button @click="resetGraphFocus()" class="action-secondary h-7 px-2.5 text-xs">Reset</button>
+          <button @click="openGraph()" class="action-secondary h-7 px-2.5 text-xs">Whole library</button>
+        </div>
+      </div>
+      <div class="graph-shell flex-1 min-h-0 relative overflow-hidden">
+        <template x-if="!graph.loading && !graph.nodes.length">
+          <div class="absolute inset-0 grid place-items-center p-8"><div class="result-empty compact">No subjects or keywords yet.</div></div>
+        </template>
+        <svg x-show="graph.nodes.length>0" :viewBox="graph.viewBox" class="graph-canvas" aria-hidden="true"><g x-html="graphEdgesMarkup()"></g></svg>
+        <div x-show="graph.nodes.length>0" class="graph-node-layer">
+          <template x-for="node in graph.nodes" :key="node.id">
+            <button :class="graphNodeCardClass(node)" :style="graphNodeCardStyle(node)" :title="node.label" @click="selectGraphNode(node)" @dblclick="enterGraphNode(node)">
+              <span class="graph-node-card-title" x-text="graphNodeLabel(node)"></span>
+              <span class="graph-node-card-count" x-text="`${node.count} item${node.count===1?'':'s'}`"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <!-- ---------- Duplicates ---------- -->
+  <template x-if="virtual === 'duplicates'">
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="pane-head">
+        <div class="font-semibold text-sm">Duplicate Items</div>
+        <div class="text-xs text-ink-500" x-text="`${duplicateGroups.length} group(s)`"></div>
+        <button @click="loadDuplicates()" class="ml-auto action-secondary h-7 px-2.5 text-xs">Re-scan</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-4 space-y-3">
+        <template x-if="duplicatesLoading"><div class="result-empty compact">Scanning library...</div></template>
+        <template x-if="!duplicatesLoading && !duplicateGroups.length"><div class="result-empty compact">No duplicates found.</div></template>
+        <template x-for="(g, gi) in duplicateGroups" :key="gi">
+          <div class="card p-3">
+            <div class="text-xs text-ink-500 mb-2">Choose the master version (its fields win; empty fields are filled from the others; notes, tags, collections and files are moved).</div>
+            <template x-for="it in g.items" :key="it.id">
+              <label class="flex items-start gap-2 py-1.5 px-2 rounded-md hover:bg-ink-100 dark:hover:bg-ink-800 cursor-pointer">
+                <input type="radio" :name="`dup${gi}`" :value="it.id" x-model.number="g.master" class="mt-1">
+                <div class="min-w-0">
+                  <div class="text-sm font-medium" x-text="it.title"></div>
+                  <div class="text-xs text-ink-500"><span x-text="formatCreators(it)"></span> <span x-text="it.year || ''"></span> <span class="italic" x-text="it.journal || ''"></span> <span class="text-ink-400" x-text="it.doi || ''"></span> <span class="text-ink-400" x-text="`added ${formatDate(it.added_at)}`"></span></div>
+                </div>
+                <button @click.prevent="openItem(it.id)" class="ml-auto text-xs text-accent-600">Show</button>
+              </label>
+            </template>
+            <div class="flex justify-end mt-2"><button @click="mergeGroup(g)" class="action-primary h-8 px-3 text-xs" x-text="`Merge ${g.items.length} items`"></button></div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <!-- ---------- Standalone notes ---------- -->
+  <template x-if="virtual === 'notes'">
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="pane-head">
+        <div class="font-semibold text-sm">Standalone Notes</div>
+        <button @click="newStandaloneNote()" class="ml-auto action-primary h-7 px-2.5 text-xs">New Note</button>
+      </div>
+      <div class="flex-1 overflow-y-auto p-3 space-y-2">
+        <template x-if="!standaloneNotes.length"><div class="result-empty compact">No standalone notes. Notes attached to items appear in their item pane.</div></template>
+        <template x-for="n in standaloneNotes" :key="n.id">
+          <div @click="openNoteEditor(n)" :class="note.id===n.id ? 'paper-row-active' : 'paper-row'" class="cursor-pointer">
+            <div class="text-sm font-semibold truncate" x-text="n.title"></div>
+            <div class="text-xs text-ink-400" x-text="`Modified ${formatDate(n.updated_at)}`"></div>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <!-- ---------- Items table ---------- -->
+  <template x-if="isItemView()">
+    <div class="flex-1 min-h-0 flex flex-col" tabindex="0" @keydown="onListKey($event)">
+      <div class="pane-head">
+        <div class="font-semibold text-sm truncate" x-text="paneTitle()"></div>
+        <label x-show="virtual==='collection'" class="text-[11px] text-ink-500 flex items-center gap-1" title="Show items from subcollections">
+          <input type="checkbox" x-model="includeSub" @change="localStorage.setItem('rh.includeSub', JSON.stringify(includeSub)); loadItems()" class="rounded w-3 h-3">subcollections
+        </label>
+        <template x-if="tagFilter.length">
+          <div class="flex items-center gap-1 flex-wrap"><template x-for="t in tagFilter" :key="t"><span class="chip accent-chip" x-text="t"></span></template></div>
+        </template>
+        <div class="ml-auto flex items-center gap-1.5">
+          <span class="text-xs text-ink-400" x-text="`${items.length} item${items.length===1?'':'s'}${selectedIds.length > 1 ? `, ${selectedIds.length} selected` : ''}`"></span>
+          <template x-if="virtual === 'trash'">
+            <div class="flex gap-1.5">
+              <button @click="restoreSelected()" :disabled="!selectedIds.length" class="action-secondary h-7 px-2.5 text-xs">Restore</button>
+              <button @click="emptyTrash()" class="action-danger h-7 px-2.5 text-xs">Empty Trash</button>
+            </div>
+          </template>
+          <template x-if="virtual === 'advanced'">
+            <div class="flex gap-1.5">
+              <button @click="openDialog('advanced')" class="action-secondary h-7 px-2.5 text-xs">Edit search</button>
+              <button @click="saveAdvanced()" class="action-primary h-7 px-2.5 text-xs">Save search</button>
+            </div>
+          </template>
+          <template x-if="selectedIds.length > 1 && virtual !== 'trash'">
+            <div class="flex gap-1.5">
+              <button @click="openFolderChooser()" class="action-secondary h-7 px-2.5 text-xs">Add to collection</button>
+              <button @click="openBulkTags()" class="action-secondary h-7 px-2.5 text-xs">Tags</button>
+              <button @click="openBibliography({ ids: selectedIds })" class="action-secondary h-7 px-2.5 text-xs">Bibliography</button>
+              <button @click="openExport({ ids: selectedIds })" class="action-secondary h-7 px-2.5 text-xs">Export</button>
+              <button @click="trashSelected()" class="action-danger h-7 px-2.5 text-xs">Trash</button>
+            </div>
+          </template>
+          <div class="relative" x-data="{ open: false }" @click.outside="open=false">
+            <button @click="open=!open" class="icon-btn" title="Columns and view options">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div x-show="open" x-transition.opacity class="menu-pop right-0 w-52">
+              <div class="rail-label px-3 pt-2 pb-1">Columns</div>
+              <template x-for="col in [['creator','Creator'],['year','Year'],['publication','Publication'],['type','Item Type'],['key','Citation Key'],['added','Date Added']]" :key="col[0]">
+                <label class="context-row cursor-pointer"><input type="checkbox" :checked="columns[col[0]]" @change="toggleColumn(col[0])" class="rounded w-3.5 h-3.5"><span x-text="col[1]"></span></label>
+              </template>
+              <div class="border-t border-ink-200 dark:border-ink-800 my-1"></div>
+              <button @click="openExport(virtual==='collection' ? { collection_id: selectedCollectionId, label: paneTitle() } : {}); open=false" class="context-row">Export view...</button>
+              <button @click="openBibliography(virtual==='collection' ? { collection_id: selectedCollectionId, label: paneTitle() } : { ids: items.map(i => i.id) }); open=false" class="context-row">Bibliography of view...</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="px-3 py-3 flex items-center">
-        <div class="rail-label">Folders</div>
-        <button @click="newCollection()" title="New folder" class="ml-auto icon-btn">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
+      <div class="items-head" :style="gridTemplate()">
+        <div></div>
+        <button @click="setSort('title')" class="th">Title <span x-text="sortIndicator('title')"></span></button>
+        <button x-show="columns.creator" @click="setSort('creator')" class="th">Creator <span x-text="sortIndicator('creator')"></span></button>
+        <button x-show="columns.year" @click="setSort('year')" class="th">Year <span x-text="sortIndicator('year')"></span></button>
+        <button x-show="columns.publication" @click="setSort('publication')" class="th">Publication <span x-text="sortIndicator('publication')"></span></button>
+        <button x-show="columns.type" @click="setSort('type')" class="th">Type <span x-text="sortIndicator('type')"></span></button>
+        <div x-show="columns.key" class="th">Citation key</div>
+        <button x-show="columns.added" @click="setSort('added')" class="th">Added <span x-text="sortIndicator('added')"></span></button>
+        <div class="th justify-center" title="Attachments and notes">&#128206;</div>
       </div>
 
-      <div class="flex-1 overflow-y-auto px-2 pb-3 space-y-1">
-        <template x-for="c in collections" :key="c.id">
-          <div @dragover.prevent="dragOver=c.id" @dragleave="dragOver=null" @drop.prevent="onDropToCollection(c.id, $event)"
-               @contextmenu.prevent="openCollectionContext(c, $event)"
-               :class="dragOver===c.id ? 'ring-2 ring-accent-400' : ''"
-               class="group rounded-lg transition">
-            <div :class="virtual==='collection' && selectedCollectionId===c.id ? 'nav-active' : 'nav-idle'" class="nav-row">
-              <button @click="selectCollection(c.id)" class="min-w-0 flex-1 flex items-center gap-2 text-left">
-                <span class="w-2.5 h-2.5 rounded-full" :style="`background:${c.color || '#0ea5e9'}`"></span>
-                <span x-text="c.name" class="truncate"></span>
-              </button>
-              <span class="text-xs text-ink-400" x-text="c.count"></span>
-              <button @click.stop="renameCollectionPrompt(c)" class="row-tool" title="Rename">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4h-7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </button>
-              <button @click.stop="deleteCollectionConfirm(c)" class="row-tool hover:text-rose-500" title="Delete">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>
-              </button>
+      <div class="flex-1 min-h-0 overflow-y-auto relative" @dragover.prevent="if (!$event.dataTransfer.types.includes('application/x-rh-items')) dropping=true"
+           @dragleave.self="dropping=false" @drop.prevent="onDropFiles($event)">
+        <div x-show="dropping" class="drop-overlay">Drop PDFs to create items, or BibTeX / RIS / CSL-JSON files to import</div>
+        <template x-if="!items.length && !loading">
+          <div class="h-full grid place-items-center p-10 text-center">
+            <div class="result-empty compact max-w-md">
+              <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="searchQuery ? 'No matching items.' : (virtual==='trash' ? 'The Trash is empty.' : 'No items in this view.')"></div>
+              <div x-show="!searchQuery && virtual!=='trash'" class="text-xs mt-2 leading-relaxed">Add items with <b>Add by ID</b> (DOI, ISBN, PMID, arXiv), drop PDFs or a .bib file here, or save pages with the Chrome connector.</div>
+              <button x-show="searchQuery" @click="modalQuery=searchQuery; selectVirtual('discover'); runSearch(true)" class="mt-3 action-primary h-8 px-3 text-xs">Search online</button>
             </div>
           </div>
         </template>
-        <template x-if="collections.length === 0">
-          <div class="empty-note px-3 py-2">No folders yet.</div>
-        </template>
-
-        <div class="pt-4">
-          <button @click="showAuthors=!showAuthors" class="rail-toggle">
-            <svg class="w-3 h-3 transition" :class="showAuthors?'rotate-90':''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
-            Authors <span x-text="`(${facets.authors.length})`"></span>
-          </button>
-          <div x-show="showAuthors" class="mt-1 space-y-1">
-            <template x-for="a in facets.authors.slice(0, authorLimit)" :key="a.name">
-              <button @click="selectAuthor(a.name)"
-                      @contextmenu.prevent="openAuthorContext(a, $event)"
-                      :class="virtual==='author' && selectedAuthor===a.name ? 'nav-active' : 'nav-idle'"
-                      class="nav-row w-full">
-                <span class="nav-icon">P</span>
-                <span class="truncate" x-text="shortAuthor(a.name)"></span>
-                <span class="ml-auto text-xs text-ink-400" x-text="a.count"></span>
-              </button>
-            </template>
-            <button x-show="facets.authors.length > authorLimit" @click="authorLimit += 20" class="show-more">Show more...</button>
-            <div x-show="facets.authors.length===0" class="empty-note px-3 py-1">No authors yet.</div>
-          </div>
-        </div>
-
-        <div class="pt-4">
-          <button @click="showSubjects=!showSubjects" class="rail-toggle">
-            <svg class="w-3 h-3 transition" :class="showSubjects?'rotate-90':''" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
-            Subjects <span x-text="`(${facets.subjects.length})`"></span>
-          </button>
-          <div x-show="showSubjects" class="mt-1 space-y-1">
-            <template x-for="s in facets.subjects.slice(0, subjectLimit)" :key="s.name">
-              <button @click="selectSubject(s.name)"
-                      @contextmenu.prevent="openSubjectContext(s, $event)"
-                      :class="virtual==='subject' && selectedSubject===s.name ? 'nav-active' : 'nav-idle'"
-                      class="nav-row w-full">
-                <span class="nav-icon">#</span>
-                <span class="truncate" x-text="s.name"></span>
-                <span class="ml-auto text-xs text-ink-400" x-text="s.count"></span>
-              </button>
-            </template>
-            <button x-show="facets.subjects.length > subjectLimit" @click="subjectLimit += 20" class="show-more">Show more...</button>
-            <div x-show="facets.subjects.length===0" class="empty-note px-3 py-1">No subjects yet.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="px-3 py-3 border-t border-ink-100 dark:border-ink-800/70 text-[11px] text-ink-400 leading-snug">
-        <div x-text="`${stats.items} items · ${stats.downloaded} on disk`"></div>
-        <div class="truncate" :title="stats.library_path" x-text="stats.library_path || ''"></div>
-        <div class="mt-2 rounded-lg border border-ink-200/80 dark:border-ink-800 bg-white/55 dark:bg-ink-900/45 p-2 space-y-2">
-          <div class="flex items-center gap-2">
-            <span class="nav-dot" :class="storage.using_google_drive_for_papers ? 'bg-emerald-500' : 'bg-ink-300'"></span>
-            <span class="font-semibold text-ink-600 dark:text-ink-300">Storage</span>
-          </div>
-          <div class="truncate" :title="storage.papers_dir || stats.papers_path" x-text="storage.papers_dir || stats.papers_path || ''"></div>
-          <div x-show="!storage.default_google_drive" class="text-[10px] text-ink-400">Drive not detected; use Folder...</div>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button @click="exportLibraryToDrive()" :disabled="storage.loading || !storage.default_google_drive" class="storage-action" title="Export full backup to detected Google Drive">Export DB</button>
-            <button @click="useGoogleDriveForDownloads()" :disabled="storage.loading || !storage.default_google_drive" class="storage-action" title="Set downloads to detected Google Drive">Use Drive</button>
-            <button @click="exportLibraryToCustomFolder()" :disabled="storage.loading" class="storage-action">Export to...</button>
-            <button @click="setCustomDownloadFolder()" :disabled="storage.loading" class="storage-action">Folder...</button>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <section class="overflow-hidden flex flex-col bg-ink-50 dark:bg-ink-950">
-      <template x-if="virtual === 'discover'">
-        <div class="flex-1 min-h-0 flex flex-col">
-          <div class="discover-head px-6 py-5">
-            <div class="flex items-end gap-4">
-              <div>
-                <div class="rail-label">Home</div>
-                <h1 class="font-serif text-3xl leading-tight mt-1">Find literature</h1>
+        <div class="items-body">
+          <template x-for="it in items" :key="it.id">
+            <div class="item-row" :data-item-row="it.id" :style="gridTemplate()" :class="isSelected(it.id) ? 'selected' : ''"
+                 draggable="true" @dragstart="onDragItem(it, $event)"
+                 @click="clickItem(it, $event)" @dblclick="openBestAttachment(it)" @contextmenu.prevent.stop="openItemContext(it, $event)">
+              <span class="type-glyph" :data-type="typeIcon(it.item_type)" :title="it.type_label"></span>
+              <div class="cell min-w-0 flex items-center gap-1.5">
+                <span x-show="it.starred" class="text-amber-400 text-xs">&#9733;</span>
+                <span class="truncate" x-text="it.title || '(untitled)'"></span>
+                <template x-for="t in (it.tags || []).filter(t => t.color)" :key="t.name"><span class="tag-dot" :style="`background:${t.color}`" :title="t.name"></span></template>
+                <span x-show="statusLabel(it.status)" class="status-pill" :class="`st-${it.status}`" x-text="statusLabel(it.status)"></span>
               </div>
-              <div class="ml-auto flex rounded-lg p-1 bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800">
-                <template x-for="tab in [
-                  {k:'article', label:'Articles'},
-                  {k:'author', label:'Authors'},
-                  {k:'book', label:'Books'},
-                ]" :key="tab.k">
-                  <button @click="setSearchKind(tab.k)"
-                          :class="searchKind===tab.k ? 'bg-ink-900 text-white dark:bg-white dark:text-ink-950 shadow-soft' : 'text-ink-500 hover:text-ink-900 dark:hover:text-white'"
-                          class="h-8 px-3 rounded-md text-xs font-semibold transition"
-                          x-text="tab.label"></button>
+              <div x-show="columns.creator" class="cell truncate text-ink-600 dark:text-ink-300" x-text="formatCreators(it)"></div>
+              <div x-show="columns.year" class="cell text-ink-500" x-text="it.year || ''"></div>
+              <div x-show="columns.publication" class="cell truncate italic text-ink-500" x-text="it.journal || it.publisher || ''"></div>
+              <div x-show="columns.type" class="cell truncate text-ink-500" x-text="it.type_label"></div>
+              <div x-show="columns.key" class="cell truncate font-mono text-[11px] text-ink-500" x-text="it.citation_key || ''"></div>
+              <div x-show="columns.added" class="cell text-ink-400 text-[11.5px]" x-text="formatDate(it.added_at)"></div>
+              <div class="cell flex items-center justify-center gap-1">
+                <button x-show="it.attachment_count" @click.stop="openBestAttachment(it)" class="att-icon" title="Open PDF">PDF</button>
+                <span x-show="it.note_count" class="note-count" :title="`${it.note_count} note(s)`" x-text="it.note_count"></span>
+              </div>
+            </div>
+          </template>
+        </div>
+        <template x-if="virtual === 'trash' && trashedNotes.length">
+          <div class="p-3">
+            <div class="rail-label mb-2">Trashed notes</div>
+            <template x-for="n in trashedNotes" :key="n.id">
+              <div class="flex items-center gap-2 py-1.5 px-2 text-sm border-b border-ink-100 dark:border-ink-800">
+                <span class="truncate" x-text="n.title"></span>
+                <button @click="restoreNote(n)" class="ml-auto text-xs text-accent-600">Restore</button>
+                <button @click="deleteNoteForever(n)" class="text-xs text-rose-500">Delete</button>
+              </div>
+            </template>
+          </div>
+        </template>
+      </div>
+    </div>
+  </template>
+</section>
+
+<!-- ============================================================ RIGHT: ITEM PANE -->
+<aside class="detail-pane border-l border-ink-200 dark:border-ink-800 min-h-0 flex flex-col">
+
+  <!-- Note editor (child or standalone) -->
+  <template x-if="note.open">
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="pane-head">
+        <button @click="closeNoteEditor()" class="action-secondary h-7 px-2.5 text-xs">&#8592; Done</button>
+        <span class="text-[11px] text-ink-400" x-text="note.saving ? 'Saving...' : (note.savedAt ? `Saved ${note.savedAt}` : 'Autosave on')"></span>
+        <button @click="deleteNote({ id: note.id })" class="ml-auto icon-btn hover:!text-rose-500" title="Move note to Trash">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2m3 0-1 14H6L5 6"/></svg>
+        </button>
+      </div>
+      <div class="note-toolbar">
+        <button @mousedown.prevent="noteCmd('bold')" class="nt-btn font-bold">B</button>
+        <button @mousedown.prevent="noteCmd('italic')" class="nt-btn italic">I</button>
+        <button @mousedown.prevent="noteCmd('underline')" class="nt-btn underline">U</button>
+        <button @mousedown.prevent="noteCmd('strikeThrough')" class="nt-btn line-through">S</button>
+        <span class="nt-sep"></span>
+        <button @mousedown.prevent="noteCmd('formatBlock', 'H1')" class="nt-btn text-[11px] font-bold">H1</button>
+        <button @mousedown.prevent="noteCmd('formatBlock', 'H2')" class="nt-btn text-[11px] font-bold">H2</button>
+        <button @mousedown.prevent="noteCmd('formatBlock', 'P')" class="nt-btn text-[11px]">P</button>
+        <button @mousedown.prevent="noteCmd('formatBlock', 'BLOCKQUOTE')" class="nt-btn">&#8220;</button>
+        <span class="nt-sep"></span>
+        <button @mousedown.prevent="noteCmd('insertUnorderedList')" class="nt-btn">&#8226;</button>
+        <button @mousedown.prevent="noteCmd('insertOrderedList')" class="nt-btn text-[11px]">1.</button>
+        <button @mousedown.prevent="noteCmd('link')" class="nt-btn">&#128279;</button>
+        <span class="nt-sep"></span>
+        <template x-for="c in ['#ffd40066', '#5fb23655', '#2ea8e555', '#ff666655']" :key="c">
+          <button @mousedown.prevent="noteCmd('hiliteColor', c)" class="nt-swatch" :style="`background:${c}`" title="Highlight"></button>
+        </template>
+        <button @mousedown.prevent="noteCmd('removeFormat')" class="nt-btn text-[11px]" title="Clear formatting">Tx</button>
+      </div>
+      <div id="note-editor" contenteditable="true" @input="onNoteInput()" @blur="flushNote()" class="note-editor flex-1 overflow-y-auto" spellcheck="true"></div>
+    </div>
+  </template>
+
+  <!-- Concept map node -->
+  <template x-if="!note.open && virtual === 'graph' && graph.selectedNode">
+    <div class="p-5 space-y-4 overflow-y-auto">
+      <div><div class="rail-label">Node</div><h2 class="font-serif text-2xl leading-tight mt-1" x-text="graph.selectedNode.label"></h2>
+        <div class="mt-1 text-sm text-ink-500" x-text="`${graph.selectedNode.count} linked item(s)`"></div></div>
+      <div class="grid gap-2">
+        <button @click="enterGraphNode()" class="action-primary h-9 px-3 text-sm">Enter ramifications</button>
+        <button @click="searchGraphNode()" class="action-secondary h-9 px-3 text-sm">Search online</button>
+        <button @click="openGraphNodeSubject()" class="action-secondary h-9 px-3 text-sm">Show items</button>
+      </div>
+      <div class="space-y-2">
+        <template x-for="paper in (graph.selectedNode.items || [])" :key="paper.id">
+          <button @click="selectGraphItem(paper)" class="graph-paper-link"><span class="graph-paper-title" x-text="paper.title"></span><span class="text-xs text-ink-500" x-text="`${formatAuthors(paper.authors)} ${paper.year || ''}`"></span></button>
+        </template>
+      </div>
+    </div>
+  </template>
+
+  <template x-if="!note.open && !(virtual === 'graph' && graph.selectedNode) && !itemPane">
+    <div class="flex-1 grid place-items-center text-center p-8">
+      <div class="text-ink-400 text-sm" x-text="selectedIds.length > 1 ? `${selectedIds.length} items selected` : 'No item selected'"></div>
+    </div>
+  </template>
+
+  <!-- Item -->
+  <template x-if="!note.open && itemPane && selectedItem && !(virtual === 'graph' && graph.selectedNode)">
+    <div class="flex-1 min-h-0 flex flex-col">
+      <div class="px-4 pt-3 pb-2 border-b border-ink-200/70 dark:border-ink-800">
+        <div class="flex items-center gap-2">
+          <select :value="selectedItem.item_type" @change="changeItemType($event.target.value)" class="type-select">
+            <template x-for="t in itemTypes" :key="t.id"><option :value="t.id" x-text="t.label" :selected="t.id===selectedItem.item_type"></option></template>
+          </select>
+          <span x-show="selectedItem.deleted_at" class="status-pill st-failed">in Trash</span>
+          <div class="ml-auto flex items-center gap-1">
+            <button @click="toggleStar(selectedItem)" class="icon-btn" :class="selectedItem.starred ? '!text-amber-400' : ''" title="Star">&#9733;</button>
+            <button @click="openBestAttachment(selectedItem)" x-show="selectedItem.attachment_count" class="action-primary h-7 px-2.5 text-xs">Open PDF</button>
+            <button @click="downloadItem(selectedItem)" x-show="!selectedItem.attachment_count" class="action-secondary h-7 px-2.5 text-xs" title="Search open access, publisher and other sources">Find PDF</button>
+          </div>
+        </div>
+        <textarea id="item-title-input" rows="1" x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px' })"
+                  @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+                  :value="selectedItem.title" @change="saveTitle($event.target.value)" @keydown.enter.prevent="$event.target.blur()"
+                  class="title-input font-serif"></textarea>
+        <div class="tabs mt-1">
+          <template x-for="tab in [['info','Info'],['notes','Notes'],['tags','Tags'],['attachments','Files'],['related','Related']]" :key="tab[0]">
+            <button @click="detailTab = tab[0]" :class="detailTab===tab[0] ? 'tab-on' : ''" class="tab">
+              <span x-text="tab[1]"></span>
+              <span x-show="tab[0]==='notes' && selectedItem.note_count" class="tab-count" x-text="selectedItem.note_count"></span>
+              <span x-show="tab[0]==='tags' && selectedItem.tags.length" class="tab-count" x-text="selectedItem.tags.length"></span>
+              <span x-show="tab[0]==='attachments' && selectedItem.attachments.length" class="tab-count" x-text="selectedItem.attachments.length"></span>
+              <span x-show="tab[0]==='related' && selectedItem.related.length" class="tab-count" x-text="selectedItem.related.length"></span>
+            </button>
+          </template>
+        </div>
+      </div>
+
+      <div class="flex-1 min-h-0 overflow-y-auto">
+        <!-- INFO -->
+        <div x-show="detailTab==='info'" class="px-4 py-3 space-y-3">
+          <div class="field-grid">
+            <template x-for="(c, ci) in selectedItem.creators" :key="ci">
+              <div class="contents group">
+                <select x-model="c.creatorType" @change="saveCreators()" class="field-label-select">
+                  <template x-for="ct in creatorTypesFor(selectedItem)" :key="ct.id"><option :value="ct.id" x-text="ct.label"></option></template>
+                </select>
+                <div class="flex items-center gap-1 min-w-0">
+                  <template x-if="c.name !== undefined && c.name !== null">
+                    <input x-model="c.name" @change="saveCreators()" placeholder="Name (organisation)" class="field-input flex-1 min-w-0" data-creator-last>
+                  </template>
+                  <template x-if="c.name === undefined || c.name === null">
+                    <div class="flex items-center gap-1 flex-1 min-w-0">
+                      <input x-model="c.lastName" @change="saveCreators()" placeholder="Last" class="field-input w-1/2 min-w-0 font-medium" data-creator-last @keydown.enter="addCreator(ci)">
+                      <input x-model="c.firstName" @change="saveCreators()" placeholder="First" class="field-input w-1/2 min-w-0" @keydown.enter="addCreator(ci)">
+                    </div>
+                  </template>
+                  <div class="creator-tools">
+                    <button @click="toggleCreatorMode(c)" title="Switch to single / two fields" class="mini-tool">&#8644;</button>
+                    <button @click="moveCreator(ci, -1)" title="Move up" class="mini-tool">&#8593;</button>
+                    <button @click="removeCreator(ci)" title="Remove" class="mini-tool hover:!text-rose-500">&#8722;</button>
+                    <button @click="addCreator(ci)" title="Add creator" class="mini-tool">+</button>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template x-if="!selectedItem.creators.length">
+              <div class="contents"><div class="field-label">Creator</div><button @click="addCreator()" class="text-left text-xs text-accent-600 py-1">+ Add creator</button></div>
+            </template>
+
+            <template x-for="f in fieldsFor(selectedItem)" :key="f.id">
+              <div class="contents">
+                <label class="field-label" x-text="f.label"></label>
+                <div class="min-w-0 flex items-center gap-1">
+                  <template x-if="isLongField(f.id)">
+                    <textarea rows="2" :value="selectedItem.field_values[f.id]" @change="saveField(f.id, $event.target.value)" class="field-input w-full resize-y"></textarea>
+                  </template>
+                  <template x-if="!isLongField(f.id)">
+                    <input :value="selectedItem.field_values[f.id]" @change="saveField(f.id, $event.target.value)" @keydown.enter="$event.target.blur()" class="field-input w-full" :class="f.id==='citationKey' ? 'font-mono text-[12px]' : ''">
+                  </template>
+                  <a x-show="f.id==='DOI' && selectedItem.field_values.DOI" :href="`https://doi.org/${selectedItem.field_values.DOI}`" target="_blank" rel="noopener" class="mini-tool" title="Open DOI">&#8599;</a>
+                  <a x-show="f.id==='url' && selectedItem.field_values.url" :href="selectedItem.field_values.url" target="_blank" rel="noopener" class="mini-tool" title="Open URL">&#8599;</a>
+                  <button x-show="f.id==='citationKey'" @click="regenerateKey()" class="mini-tool" title="Regenerate key">&#8635;</button>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <div>
+            <div class="rail-label mb-1">Abstract</div>
+            <textarea rows="5" :value="selectedItem.field_values.abstractNote" @change="saveField('abstractNote', $event.target.value)" placeholder="No abstract"
+                      class="field-input w-full font-serif text-[13px] leading-relaxed resize-y"></textarea>
+          </div>
+
+          <div x-show="citationPreview" class="card p-3">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="rail-label" x-text="styleTitle(settings.citation_style)"></span>
+              <button @click="quickCopy('bibliography')" class="ml-auto text-[11px] text-accent-600">Copy</button>
+            </div>
+            <div class="csl-preview" x-html="citationPreview"></div>
+          </div>
+
+          <div>
+            <div class="rail-label mb-1.5">Collections</div>
+            <div class="flex flex-wrap gap-1.5">
+              <template x-for="cid in selectedItem.collections" :key="cid">
+                <span class="chip inline-flex items-center gap-1"><span x-text="collectionPath(cid)"></span>
+                  <button @click="api.del(`/api/items/${selectedItem.id}/collections/${cid}`).then(() => reloadAll())" class="text-ink-400 hover:text-rose-500">&#215;</button></span>
+              </template>
+              <button @click="selectedIds=[selectedItem.id]; openFolderChooser()" class="chip hover:border-accent-400">+ Add</button>
+            </div>
+          </div>
+          <div class="text-[11px] text-ink-400 space-y-0.5 pt-1">
+            <div x-text="`Date added: ${formatDate(selectedItem.added_at)}`"></div>
+            <div x-text="`Modified: ${formatDate(selectedItem.updated_at)}`"></div>
+            <div x-show="selectedItem.error_msg" class="text-rose-500" x-text="`Last PDF search: ${selectedItem.error_msg}`"></div>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div x-show="detailTab==='notes'" class="px-4 py-3 space-y-2">
+          <button @click="addChildNote()" class="action-primary h-8 px-3 text-xs">+ Add note</button>
+          <template x-for="n in selectedItem.notes_list" :key="n.id">
+            <div @click="openNoteEditor(n)" class="paper-row cursor-pointer !py-2.5">
+              <div class="text-sm font-medium truncate" x-text="n.title"></div>
+              <div class="text-[11px] text-ink-400" x-text="formatDate(n.updated_at)"></div>
+            </div>
+          </template>
+          <div x-show="!selectedItem.notes_list.length" class="empty-note">No notes. Highlights from the PDF reader can be turned into a note.</div>
+        </div>
+
+        <!-- TAGS -->
+        <div x-show="detailTab==='tags'" class="px-4 py-3 space-y-3">
+          <div class="relative">
+            <input x-model="tagInput" @keydown.enter.prevent="addTagToItem()" placeholder="Add tags (comma separated), Enter"
+                   class="field-input w-full !h-8 !border-ink-200 dark:!border-ink-700">
+            <div x-show="tagSuggestions().length" class="menu-pop left-0 right-0 top-9">
+              <template x-for="s in tagSuggestions()" :key="s.name"><button @mousedown.prevent="tagInput = s.name; addTagToItem()" class="context-row" x-text="s.name"></button></template>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1.5">
+            <template x-for="t in selectedItem.tags" :key="t.name">
+              <span class="tag-chip tag-static" :style="tagStyle(t)" :class="t.type===1 ? 'tag-auto' : ''">
+                <span x-text="t.name"></span><button @click="removeTagFromItem(t.name)" class="ml-1 text-ink-400 hover:text-rose-500">&#215;</button>
+              </span>
+            </template>
+          </div>
+          <div x-show="(selectedItem.keywords || []).length">
+            <div class="rail-label mb-1">Suggested from keywords</div>
+            <div class="flex flex-wrap gap-1.5">
+              <template x-for="k in selectedItem.keywords" :key="k"><button @click="tagInput = k; addTagToItem()" class="chip hover:border-accent-400" x-text="`+ ${k}`"></button></template>
+            </div>
+          </div>
+        </div>
+
+        <!-- ATTACHMENTS -->
+        <div x-show="detailTab==='attachments'" class="px-4 py-3 space-y-2"
+             @dragover.prevent @drop.prevent="onAttachFiles([...$event.dataTransfer.files])">
+          <div class="flex gap-1.5">
+            <button @click="pickAttachment()" class="action-primary h-8 px-3 text-xs">Attach file</button>
+            <button @click="addLink()" class="action-secondary h-8 px-3 text-xs">Attach link</button>
+            <button @click="downloadItem(selectedItem)" class="action-secondary h-8 px-3 text-xs">Find PDF</button>
+          </div>
+          <template x-for="a in selectedItem.attachments" :key="a.id">
+            <div class="att-row" @dblclick="openAttachment(a)">
+              <span class="att-kind" x-text="a.kind==='link' ? 'URL' : (a.mime==='application/pdf' ? 'PDF' : (a.kind==='snapshot' ? 'WEB' : 'FILE'))"></span>
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-medium truncate" x-text="a.title"></div>
+                <div class="text-[11px] text-ink-400 truncate">
+                  <span x-text="a.kind==='link' ? a.url : formatSize(a.size)"></span>
+                  <span x-show="a.annotation_count" x-text="` . ${a.annotation_count} annotation(s)`"></span>
+                  <span x-show="a.kind!=='link' && !a.exists" class="text-rose-500"> . file missing</span>
+                </div>
+              </div>
+              <button @click="openAttachment(a)" class="mini-tool" title="Open">&#8599;</button>
+              <button x-show="a.kind!=='link'" @click="api.post(`/api/attachments/${a.id}/show`)" class="mini-tool" title="Show in folder">&#128193;</button>
+              <button @click="renameAttachment(a)" class="mini-tool" title="Rename">&#9998;</button>
+              <button @click="deleteAttachment(a)" class="mini-tool hover:!text-rose-500" title="Delete">&#8722;</button>
+            </div>
+          </template>
+          <div x-show="!selectedItem.attachments.length" class="drop-hint">Drop files here to attach them.<br>
+            <span class="text-[11px]">Paywalled PDF? Open the article in Chrome and click the ReviewHunter connector: it downloads the PDF with your own access.</span></div>
+          <template x-if="attachPreview && pdfAttachment(selectedItem)">
+            <iframe :src="`/api/attachments/${pdfAttachment(selectedItem).id}/file#toolbar=0&view=FitH`" class="w-full h-[380px] rounded-lg border border-ink-200 dark:border-ink-800 mt-2"></iframe>
+          </template>
+        </div>
+
+        <!-- RELATED -->
+        <div x-show="detailTab==='related'" class="px-4 py-3 space-y-2">
+          <div class="relative">
+            <input x-model="relatedQuery" @input.debounce.250ms="searchRelated()" placeholder="Search library to relate an item" class="field-input w-full !h-8 !border-ink-200 dark:!border-ink-700">
+            <div x-show="relatedResults.length" class="menu-pop left-0 right-0 top-9">
+              <template x-for="r in relatedResults" :key="r.id"><button @click="addRelated(r)" class="context-row"><span class="truncate" x-text="`${r.title} (${r.year || 'n.d.'})`"></span></button></template>
+            </div>
+          </div>
+          <template x-for="r in selectedItem.related" :key="r.id">
+            <div class="att-row">
+              <span class="type-glyph" :data-type="typeIcon(r.item_type)"></span>
+              <button @click="openItem(r.id)" class="text-sm text-left truncate flex-1" x-text="`${r.title} (${r.year || 'n.d.'})`"></button>
+              <button @click="removeRelated(r)" class="mini-tool hover:!text-rose-500">&#8722;</button>
+            </div>
+          </template>
+          <div x-show="!selectedItem.related.length" class="empty-note">No related items.</div>
+        </div>
+      </div>
+    </div>
+  </template>
+</aside>
+</main>
+
+<input type="file" id="attach-file-input" class="hidden" multiple @change="onAttachFiles([...$event.target.files])">
+
+<!-- ============================================================ CONTEXT MENU -->
+<div x-show="contextMenu.open" @click.stop class="context-menu fixed z-[70] min-w-60 py-1 max-h-[80vh] overflow-y-auto" :style="contextMenuStyle()">
+  <template x-for="(entry, i) in contextItems()" :key="i">
+    <div>
+      <div x-show="entry.separator" class="my-1 border-t border-ink-200 dark:border-ink-800"></div>
+      <button x-show="!entry.separator" @click.stop="runContext(entry)" :disabled="entry.disabled === true"
+              :class="entry.danger ? 'text-rose-600 dark:text-rose-300' : ''" class="context-row">
+        <span x-text="entry.label"></span><span x-show="entry.hint" class="ml-auto text-[10px] text-ink-400" x-text="entry.hint"></span>
+      </button>
+    </div>
+  </template>
+</div>
+
+<!-- ============================================================ DIALOGS -->
+<div x-show="dialog" x-transition.opacity class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm p-4" @mousedown.self="dialog !== 'settings' && closeDialog()">
+
+  <!-- Add by identifier -->
+  <div x-show="dialog==='identify'" class="dialog w-[min(620px,96vw)] p-5">
+    <div class="dlg-head"><h3>Add items by identifier</h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <p class="text-xs text-ink-500 mt-1">One per line: DOI, ISBN, PubMed ID, arXiv ID, or a title (best CrossRef match).</p>
+    <textarea id="identify-input" x-model="identify.text" rows="7" @keydown.ctrl.enter="submitIdentify()"
+              placeholder="10.1126/science.275.5306.1593&#10;978-0-262-04199-7&#10;PMID: 9054347&#10;arXiv:1706.03762"
+              class="mt-3 w-full p-3 text-sm font-mono bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded-lg outline-none focus:border-accent-500"></textarea>
+    <div class="mt-3 grid grid-cols-2 gap-2">
+      <select x-model="identify.collectionId" class="dlg-input"><option value="">No collection</option><template x-for="c in collections" :key="c.id"><option :value="c.id" x-text="collectionPath(c.id)"></option></template></select>
+      <input x-model="identify.tags" placeholder="Tags (comma separated)" class="dlg-input">
+    </div>
+    <div class="mt-4 flex items-center gap-3">
+      <label class="text-xs flex items-center gap-1.5"><input type="checkbox" x-model="identify.autoDownload" class="rounded">Find available PDFs</label>
+      <div class="ml-auto flex gap-2">
+        <button @click="closeDialog()" class="action-secondary h-9 px-3 text-sm">Cancel</button>
+        <button @click="submitIdentify()" :disabled="!identify.text.trim() || identify.busy" class="action-primary h-9 px-4 text-sm" x-text="`Add ${identifyCount() || ''}`"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import -->
+  <div x-show="dialog==='import'" class="dialog w-[min(640px,96vw)] p-5">
+    <div class="dlg-head"><h3>Import</h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <label class="drop-zone mt-3" @dragover.prevent @drop.prevent="onImportFile($event.dataTransfer.files[0])">
+      <input type="file" class="hidden" accept=".bib,.bibtex,.ris,.json,.txt,.pdf" @change="onImportFile($event.target.files[0])">
+      <div class="font-semibold text-sm" x-text="importState.file ? importState.file.name : 'Choose or drop a file'"></div>
+      <div class="text-xs text-ink-500 mt-1">BibTeX / BibLaTeX (Zotero, JabRef, Mendeley exports), RIS (EndNote), CSL-JSON, a list of identifiers, or a PDF</div>
+    </label>
+    <div class="text-xs text-ink-500 mt-3">...or paste text:</div>
+    <textarea x-model="importState.text" @input="importState.file=null" rows="5" class="mt-1 w-full p-2.5 text-xs font-mono bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded-lg outline-none"></textarea>
+    <div class="mt-2 flex items-center gap-2 text-xs">
+      <span class="text-ink-500">Detected:</span><span class="type-pill" x-text="importPreviewLabel() || 'nothing yet'"></span>
+      <button @click="importFromClipboard()" class="ml-auto text-accent-600">Paste from clipboard</button>
+    </div>
+    <div class="mt-3 grid grid-cols-2 gap-2 items-center">
+      <select x-model="importState.collectionId" class="dlg-input"><option value="">No existing collection</option><template x-for="c in collections" :key="c.id"><option :value="c.id" x-text="collectionPath(c.id)"></option></template></select>
+      <label x-show="!importState.collectionId" class="text-xs flex items-center gap-1.5"><input type="checkbox" x-model="importState.newCollection" class="rounded">Place in a new collection</label>
+    </div>
+    <div x-show="importState.result" class="mt-3 card p-2.5 text-xs" x-text="importState.result ? JSON.stringify(importState.result) : ''"></div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button @click="closeDialog()" class="action-secondary h-9 px-3 text-sm">Close</button>
+      <button @click="submitImport()" :disabled="importState.busy || (!importState.file && !importState.text.trim())" class="action-primary h-9 px-4 text-sm" x-text="importState.busy ? 'Importing...' : 'Import'"></button>
+    </div>
+  </div>
+
+  <!-- Export -->
+  <div x-show="dialog==='export'" class="dialog w-[min(520px,96vw)] p-5">
+    <div class="dlg-head"><h3>Export <span class="text-ink-400 font-normal" x-text="exportState.label"></span></h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <div class="mt-3 space-y-1.5">
+      <template x-for="f in [['bibtex','BibTeX','LaTeX / natbib, JabRef, Overleaf'],['biblatex','BibLaTeX','biber, modern LaTeX'],['ris','RIS','EndNote, Mendeley, Rayyan, Covidence'],['csljson','CSL-JSON','Pandoc, Quarto, Zotero'],['csv','CSV','Spreadsheets, systematic review screening'],['wordxml','Word sources (XML)','Word References > Manage Sources > Browse']]" :key="f[0]">
+        <label class="format-row" :class="exportState.format===f[0] ? 'on' : ''">
+          <input type="radio" name="expfmt" :value="f[0]" x-model="exportState.format" class="sr-only">
+          <span class="font-semibold text-sm" x-text="f[1]"></span><span class="text-xs text-ink-500 ml-auto" x-text="f[2]"></span>
+        </label>
+      </template>
+    </div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button @click="copyExport()" class="action-secondary h-9 px-3 text-sm">Copy to clipboard</button>
+      <button @click="doExport()" class="action-primary h-9 px-4 text-sm">Download</button>
+    </div>
+  </div>
+
+  <!-- Bibliography -->
+  <div x-show="dialog==='bibliography'" class="dialog w-[min(920px,96vw)] h-[min(720px,92vh)] p-5 flex flex-col">
+    <div class="dlg-head"><h3>Create bibliography <span class="text-ink-400 font-normal" x-text="bib.label"></span></h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <div class="mt-3 flex-1 min-h-0 grid grid-cols-[280px_1fr] gap-4">
+      <div class="flex flex-col min-h-0">
+        <input x-model="bib.styleQuery" placeholder="Filter styles" class="dlg-input mb-2">
+        <div class="flex-1 min-h-0 overflow-y-auto border border-ink-200 dark:border-ink-800 rounded-lg">
+          <template x-for="s in filteredStyles()" :key="s.id">
+            <button @click="bib.style = s.id; renderBibliography()" :class="bib.style===s.id ? 'nav-active' : 'nav-idle'" class="w-full text-left px-2.5 py-1.5 text-[12.5px] block">
+              <div class="truncate" x-text="s.title"></div><div class="text-[10px] text-ink-400" x-text="s.format"></div>
+            </button>
+          </template>
+        </div>
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <select x-model="bib.locale" @change="renderBibliography()" class="dlg-input">
+            <template x-for="l in ['en-US','en-GB','fr-FR','de-DE','es-ES','it-IT','pt-BR']" :key="l"><option :value="l" x-text="l"></option></template>
+          </select>
+          <select x-model="bib.mode" @change="renderBibliography()" class="dlg-input"><option value="bibliography">Bibliography</option><option value="citations">Citations</option></select>
+        </div>
+      </div>
+      <div class="flex flex-col min-h-0">
+        <div class="flex-1 min-h-0 overflow-y-auto card p-4 csl-preview bib-preview">
+          <div x-show="bib.loading" class="text-ink-400 text-sm">Formatting...</div>
+          <div x-show="bib.error" class="text-rose-500 text-sm" x-text="bib.error"></div>
+          <div x-show="!bib.loading" x-html="bib.html"></div>
+        </div>
+        <div class="mt-3 flex justify-end gap-2">
+          <button @click="saveSetting('citation_style', bib.style); toast('Default style updated', 'ok')" class="action-secondary h-9 px-3 text-sm mr-auto">Use as default style</button>
+          <button @click="downloadBibliographyHtml()" class="action-secondary h-9 px-3 text-sm">Save HTML</button>
+          <button @click="copyBibliography(true)" class="action-secondary h-9 px-3 text-sm">Copy as text</button>
+          <button @click="copyBibliography(false)" class="action-primary h-9 px-4 text-sm">Copy (rich text)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Advanced search -->
+  <div x-show="dialog==='advanced'" class="dialog w-[min(760px,96vw)] p-5">
+    <div class="dlg-head"><h3 x-text="advanced.id ? 'Edit saved search' : 'Advanced search'"></h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <div class="mt-3 flex items-center gap-2 text-sm">
+      Match <select x-model="advanced.match" class="dlg-input !w-auto"><option value="all">all</option><option value="any">any</option></select> of the following:
+      <input x-model="advanced.name" placeholder="Name (to save)" class="dlg-input ml-auto !w-56">
+    </div>
+    <div class="mt-3 space-y-2 max-h-[50vh] overflow-y-auto">
+      <template x-for="(c, i) in advanced.conditions" :key="i">
+        <div class="grid grid-cols-[170px_150px_1fr_auto] gap-2 items-center">
+          <select x-model="c.field" @change="c.op = opsFor(c.field)[0][0]" class="dlg-input"><template x-for="f in searchFields" :key="f.id"><option :value="f.id" x-text="f.label"></option></template></select>
+          <select x-model="c.op" class="dlg-input"><template x-for="o in opsFor(c.field)" :key="o[0]"><option :value="o[0]" x-text="o[1]"></option></template></select>
+          <template x-if="c.field === 'collection'">
+            <select x-model="c.value" class="dlg-input"><template x-for="col in collections" :key="col.id"><option :value="String(col.id)" x-text="collectionPath(col.id)"></option></template></select>
+          </template>
+          <template x-if="c.field === 'itemType'">
+            <select x-model="c.value" class="dlg-input"><template x-for="t in itemTypes" :key="t.id"><option :value="t.id" x-text="t.label"></option></template></select>
+          </template>
+          <template x-if="c.field === 'hasAttachment' || c.field === 'starred'">
+            <select x-model="c.value" class="dlg-input"><option value="true">yes</option><option value="false">no</option></select>
+          </template>
+          <template x-if="!['collection','itemType','hasAttachment','starred'].includes(c.field)">
+            <input x-model="c.value" :type="c.field==='dateAdded' ? 'date' : 'text'" @keydown.enter="runAdvanced()" class="dlg-input">
+          </template>
+          <div class="flex gap-1"><button @click="removeCondition(i)" class="mini-tool">&#8722;</button><button @click="addCondition(i)" class="mini-tool">+</button></div>
+        </div>
+      </template>
+    </div>
+    <div class="mt-4 flex justify-end gap-2">
+      <button @click="saveAdvanced()" class="action-secondary h-9 px-3 text-sm">Save search</button>
+      <button @click="runAdvanced()" class="action-primary h-9 px-4 text-sm">Search</button>
+    </div>
+  </div>
+
+  <!-- Add to collection -->
+  <div x-show="dialog==='folder'" class="dialog w-[min(520px,96vw)] p-5">
+    <div class="dlg-head"><h3 x-text="`Add ${selectedIds.length} item(s) to collection`"></h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <input x-model="folderChooser.query" placeholder="Filter collections" class="dlg-input mt-3">
+    <div class="mt-2 max-h-72 overflow-y-auto space-y-0.5">
+      <template x-for="c in chooserRows()" :key="c.id">
+        <button @click="chooseFolder(c.id)" class="folder-choice"><span class="w-2.5 h-2.5 rounded-full" :style="`background:${c.color || '#0ea5e9'}`"></span><span x-text="c.path"></span><span class="ml-auto text-xs text-ink-400" x-text="c.count"></span></button>
+      </template>
+    </div>
+    <div class="mt-3 flex gap-2">
+      <input x-model="folderChooser.newName" @keydown.enter="createFolderFromChooser()" placeholder="New collection name" class="dlg-input flex-1">
+      <button @click="createFolderFromChooser()" class="action-primary h-9 px-4 text-sm">Create</button>
+    </div>
+  </div>
+
+  <!-- Bulk tags -->
+  <div x-show="dialog==='bulkTags'" class="dialog w-[min(460px,96vw)] p-5">
+    <div class="dlg-head"><h3 x-text="`Tags for ${selectedIds.length} item(s)`"></h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <label class="block text-xs text-ink-500 mt-3">Add (comma separated)</label>
+    <input x-model="bulkTags.add" list="all-tags-list" class="dlg-input mt-1">
+    <label class="block text-xs text-ink-500 mt-3">Remove</label>
+    <input x-model="bulkTags.remove" list="all-tags-list" class="dlg-input mt-1">
+    <datalist id="all-tags-list"><template x-for="t in allTags" :key="t.id"><option :value="t.name"></option></template></datalist>
+    <div class="mt-4 flex justify-end"><button @click="submitBulkTags()" class="action-primary h-9 px-4 text-sm">Apply</button></div>
+  </div>
+
+  <!-- Tag colour -->
+  <div x-show="dialog==='tagColor'" class="dialog w-[min(360px,96vw)] p-5">
+    <div class="dlg-head"><h3>Tag color</h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <div class="text-sm mt-2" x-text="tagColorTarget ? tagColorTarget.name : ''"></div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <template x-for="c in tagColors" :key="c"><button @click="setTagColor(tagColorTarget, c); closeDialog()" class="w-8 h-8 rounded-full border-2 border-white dark:border-ink-900 shadow" :style="`background:${c}`"></button></template>
+    </div>
+    <p class="text-[11px] text-ink-400 mt-3">Colored tags appear first in the tag selector and as dots next to item titles.</p>
+  </div>
+
+  <!-- ======================== SETTINGS ======================== -->
+  <div x-show="dialog==='settings'" class="dialog w-[min(980px,97vw)] h-[min(760px,94vh)] flex overflow-hidden">
+    <nav class="settings-nav">
+      <div class="font-serif text-lg px-3 pt-4 pb-3">Settings</div>
+      <template x-for="t in [['general','General'],['citations','Citations'],['sync','Google Drive & Backup'],['connector','Browser Connector'],['word','Word Add-in'],['advanced','Advanced']]" :key="t[0]">
+        <button @click="settingsTab = t[0]" :class="settingsTab===t[0] ? 'nav-active' : 'nav-idle'" class="nav-row w-full" x-text="t[1]"></button>
+      </template>
+    </nav>
+    <div class="flex-1 min-w-0 flex flex-col">
+      <div class="flex items-center px-6 h-12 border-b border-ink-200 dark:border-ink-800">
+        <h3 class="font-serif text-lg" x-text="({general:'General', citations:'Citations', sync:'Google Drive & Backup', connector:'Browser Connector', word:'Word Add-in', advanced:'Advanced'})[settingsTab]"></h3>
+        <button @click="closeDialog()" class="ml-auto dlg-x">&#215;</button>
+      </div>
+      <div class="flex-1 min-h-0 overflow-y-auto px-6 py-5">
+
+        <!-- General -->
+        <section x-show="settingsTab==='general'" class="space-y-5">
+          <h4 class="set-h">Files</h4>
+          <label class="set-row"><input type="checkbox" :checked="settings.auto_rename_files" @change="saveSetting('auto_rename_files', $event.target.checked)" class="rounded"><span>Rename downloaded and attached files from item metadata <span class="text-ink-400">(Author - Year - Title.pdf)</span></span></label>
+          <label class="set-row"><input type="checkbox" :checked="settings.auto_index_fulltext" @change="saveSetting('auto_index_fulltext', $event.target.checked)" class="rounded"><span>Index the text of PDFs for "Everything" search</span></label>
+          <label class="set-row"><input type="checkbox" :checked="settings.auto_retrieve_pdf_metadata" @change="saveSetting('auto_retrieve_pdf_metadata', $event.target.checked)" class="rounded"><span>Retrieve metadata automatically for imported PDFs</span></label>
+          <h4 class="set-h">Appearance</h4>
+          <label class="set-row"><input type="checkbox" :checked="dark" @change="toggleDark()" class="rounded"><span>Dark mode</span></label>
+          <h4 class="set-h">Keyboard shortcuts</h4>
+          <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+            <template x-for="k in [['Ctrl+K','Search library'],['Ctrl+N','Add by identifier'],['Ctrl+Shift+N','New standalone note'],['Ctrl+Shift+C','Copy bibliography'],['Ctrl+Shift+A','Copy citation'],['Delete','Move to Trash / remove from collection'],['Shift+Delete','Move to Trash inside a collection'],['Enter / double-click','Open PDF'],['Ctrl+,','Settings']]" :key="k[0]">
+              <div class="contents"><kbd class="kbd" x-text="k[0]"></kbd><span class="text-ink-500" x-text="k[1]"></span></div>
+            </template>
+          </div>
+        </section>
+
+        <!-- Citations -->
+        <section x-show="settingsTab==='citations'" class="space-y-5">
+          <h4 class="set-h">Default style (Quick Copy, previews, Word add-in default)</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <select :value="settings.citation_style" @change="saveSetting('citation_style', $event.target.value)" class="dlg-input">
+              <template x-for="s in styles" :key="s.id"><option :value="s.id" x-text="s.title" :selected="s.id===settings.citation_style"></option></template>
+            </select>
+            <select :value="settings.citation_locale" @change="saveSetting('citation_locale', $event.target.value)" class="dlg-input">
+              <template x-for="l in ['en-US','en-GB','fr-FR','de-DE','es-ES','it-IT','pt-BR']" :key="l"><option :value="l" x-text="l" :selected="l===settings.citation_locale"></option></template>
+            </select>
+          </div>
+          <h4 class="set-h">Install a style</h4>
+          <p class="text-xs text-ink-500">Browse more than 10,000 styles at <a href="https://www.zotero.org/styles" target="_blank" rel="noopener" class="text-accent-600">zotero.org/styles</a>, copy the style link (or its short name, e.g. <code>nature-neuroscience</code>) and install it here. Dependent styles fetch their parent automatically.</p>
+          <div class="flex gap-2">
+            <input x-model="styleUrl" @keydown.enter="installStyle()" placeholder="https://www.zotero.org/styles/journal-of-neuroscience-methods" class="dlg-input flex-1">
+            <button @click="installStyle()" class="action-primary h-9 px-4 text-sm">Install</button>
+            <label class="action-secondary h-9 px-3 text-sm cursor-pointer">Upload .csl<input type="file" accept=".csl,.xml" class="hidden" @change="uploadStyle($event.target.files[0])"></label>
+          </div>
+          <h4 class="set-h" x-text="`Installed styles (${styles.length})`"></h4>
+          <div class="border border-ink-200 dark:border-ink-800 rounded-lg divide-y divide-ink-100 dark:divide-ink-800 max-h-80 overflow-y-auto">
+            <template x-for="s in styles" :key="s.id">
+              <div class="flex items-center gap-3 px-3 py-1.5 text-sm">
+                <span class="truncate" x-text="s.title"></span><span class="type-pill" x-text="s.format"></span>
+                <button x-show="s.source==='user'" @click="removeStyle(s)" class="ml-auto text-xs text-rose-500">Remove</button>
+              </div>
+            </template>
+          </div>
+        </section>
+
+        <!-- Sync -->
+        <section x-show="settingsTab==='sync'" class="space-y-5">
+          <div class="card p-4 flex items-center gap-3">
+            <span class="status-dot" :class="driveSummary().tone === 'ok' ? 'on' : (driveSummary().tone === 'warn' ? 'warn' : 'idle')"></span>
+            <div><div class="font-semibold text-sm" x-text="driveSummary().label"></div>
+              <div class="text-xs text-ink-500" x-text="drive ? `Library files: ${drive.papers_dir}` : ''"></div></div>
+            <button x-show="drive && drive.mode !== 'none'" @click="disableDrive()" class="ml-auto action-secondary h-8 px-3 text-xs">Stop using Drive</button>
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-3" x-show="drive">
+            <!-- Desktop mode card -->
+            <div class="card p-4 space-y-2" :class="drive && drive.mode==='desktop' ? 'ring-2 ring-accent-500' : ''">
+              <div class="flex items-center gap-2"><span class="font-semibold">Google Drive for desktop</span><span class="type-pill">recommended</span></div>
+              <p class="text-xs text-ink-500 leading-relaxed">Drive appears as a folder (for example <code>G:\My Drive</code>). ReviewHunter keeps your PDFs there and writes verified backups of the library database. Nothing to configure in Google Cloud.</p>
+              <div class="text-xs space-y-1">
+                <div><span :class="drive?.desktop.installed ? 'text-emerald-600' : 'text-ink-400'" x-text="drive?.desktop.installed ? '\u2713 Installed' : '\u2715 Not installed'"></span>
+                  <span class="ml-2" :class="drive?.desktop.running ? 'text-emerald-600' : 'text-ink-400'" x-text="drive?.desktop.running ? '\u2713 Running' : '\u2715 Not running'"></span></div>
+                <div x-show="drive?.desktop.candidates.length" class="text-emerald-600" x-text="`\u2713 Drive folder found: ${drive?.desktop.candidates.join(', ')}`"></div>
+              </div>
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button x-show="!drive?.desktop.installed" @click="installDriveDesktop()" class="action-primary h-8 px-3 text-xs">1. Install Google Drive</button>
+                <button @click="loadDrive()" class="action-secondary h-8 px-3 text-xs">Re-detect</button>
+                <button @click="driveWizard.mode='desktop'" class="action-secondary h-8 px-3 text-xs">Set up...</button>
+              </div>
+              <div x-show="driveWizard.mode==='desktop'" class="pt-2 space-y-2 border-t border-ink-200 dark:border-ink-800">
+                <label class="text-xs text-ink-500">Drive folder</label>
+                <input x-model="driveWizard.root" list="drive-candidates" placeholder="G:\My Drive" class="dlg-input">
+                <datalist id="drive-candidates"><template x-for="c in (drive?.desktop.candidates || [])" :key="c"><option :value="c"></option></template></datalist>
+                <label class="set-row text-xs"><input type="checkbox" x-model="driveWizard.papersInDrive" class="rounded"><span>Store PDFs in <code>ReviewHunter\papers</code> inside Drive (existing files are copied)</span></label>
+                <button @click="enableDriveDesktop()" :disabled="driveBusy || !driveWizard.root" class="action-primary h-8 px-3 text-xs" x-text="driveBusy ? 'Working...' : 'Enable'"></button>
+              </div>
+            </div>
+
+            <!-- API mode card -->
+            <div class="card p-4 space-y-2" :class="drive && drive.mode==='api' ? 'ring-2 ring-accent-500' : ''">
+              <div class="flex items-center gap-2"><span class="font-semibold">Google Drive API</span><span class="type-pill">no Drive app</span></div>
+              <p class="text-xs text-ink-500 leading-relaxed">Uploads PDFs and backups directly and restores them on another computer. ReviewHunter only sees files it created (scope <code>drive.file</code>).</p>
+              <div class="text-xs space-y-1">
+                <div :class="drive?.api.client_secret ? 'text-emerald-600' : 'text-ink-400'" x-text="drive?.api.client_secret ? '\u2713 OAuth client configured' : '\u2715 OAuth client missing'"></div>
+                <div :class="drive?.api.connected ? 'text-emerald-600' : 'text-ink-400'" x-text="drive?.api.connected ? '\u2713 Google account connected' : '\u2715 Not connected'"></div>
+                <div x-show="drive?.api.last_sync_at" class="text-ink-500" x-text="`Last sync: ${drive?.api.last_sync_at}`"></div>
+              </div>
+              <div class="flex flex-wrap gap-2 pt-1">
+                <button x-show="!drive?.api.connected" @click="driveWizard.mode='api'; driveWizard.step = drive?.api.client_secret ? 3 : 1" class="action-primary h-8 px-3 text-xs">Set up...</button>
+                <template x-if="drive?.api.connected">
+                  <div class="flex flex-wrap gap-2">
+                    <button @click="syncDriveApi()" :disabled="driveBusy" class="action-primary h-8 px-3 text-xs" x-text="driveBusy ? 'Syncing...' : 'Sync now'"></button>
+                    <button @click="pullDriveFiles()" :disabled="driveBusy" class="action-secondary h-8 px-3 text-xs">Download missing files</button>
+                    <button @click="loadRemoteBackups()" class="action-secondary h-8 px-3 text-xs">Drive backups</button>
+                    <button @click="disconnectDriveApi()" class="action-secondary h-8 px-3 text-xs">Disconnect</button>
+                  </div>
                 </template>
               </div>
-              <select x-model="modalSort"
-                      @change="changeModalSort()"
-                      class="h-10 text-xs font-semibold bg-white dark:bg-ink-900 border border-ink-200 dark:border-ink-800 rounded-lg px-3 outline-none">
-                <option value="pertinence">Pertinence</option>
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="title">Title</option>
-              </select>
-            </div>
-
-            <div class="mt-5 relative">
-              <input x-ref="discoverInput" x-model="modalQuery" @keydown.enter="runSearch(true)"
-                     :placeholder="modalPlaceholder()"
-                     class="discover-input w-full h-14 pl-12 pr-28 rounded-xl text-base outline-none transition" />
-              <svg class="absolute left-4 top-4 w-6 h-6 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-              <button @click="runSearch(true)" class="absolute right-2 top-2 h-10 px-5 rounded-lg bg-accent-600 hover:bg-accent-700 text-white text-sm font-semibold shadow-soft">Search</button>
+              <label x-show="drive?.api.connected" class="set-row text-xs"><input type="checkbox" :checked="settings.drive_api_auto_sync" @change="saveSetting('drive_api_auto_sync', $event.target.checked)" class="rounded"><span>Sync automatically at the backup interval</span></label>
+              <div x-show="driveWizard.mode==='api'" class="pt-2 space-y-2 border-t border-ink-200 dark:border-ink-800 text-xs leading-relaxed">
+                <ol class="list-decimal pl-4 space-y-1.5 text-ink-600 dark:text-ink-300">
+                  <li>Open <a href="https://console.cloud.google.com/projectcreate" target="_blank" rel="noopener" class="text-accent-600">Google Cloud Console</a> and create a project (any name, e.g. ReviewHunter).</li>
+                  <li>Enable the <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener" class="text-accent-600">Google Drive API</a> for that project.</li>
+                  <li>In <a href="https://console.cloud.google.com/auth/overview" target="_blank" rel="noopener" class="text-accent-600">Google Auth Platform</a>: configure the consent screen (External, your email), then in <b>Audience</b> click <b>Publish app</b> so access does not expire after 7 days. Only the non-sensitive <code>drive.file</code> scope is used, so no Google review is needed.</li>
+                  <li>In <b>Clients</b>, create an OAuth client of type <b>Desktop app</b> and download its JSON.</li>
+                  <li>Upload that JSON here:
+                    <label class="action-secondary h-7 px-2.5 text-xs cursor-pointer ml-1">client_secret.json<input type="file" accept=".json" class="hidden" @change="uploadClientSecret($event.target.files[0])"></label></li>
+                  <li>Connect: <button @click="connectDriveApi()" :disabled="!drive?.api.client_secret" class="action-primary h-7 px-2.5 text-xs ml-1">Connect Google account</button></li>
+                </ol>
+              </div>
+              <template x-if="remoteBackups.length">
+                <div class="pt-2 border-t border-ink-200 dark:border-ink-800 space-y-1">
+                  <template x-for="b in remoteBackups" :key="b.id">
+                    <div class="flex items-center text-xs gap-2"><span class="truncate" x-text="b.name"></span><button @click="restoreBackup(b, true)" class="ml-auto text-accent-600">Restore</button></div>
+                  </template>
+                </div>
+              </template>
             </div>
           </div>
 
-          <div x-show="modalResults.length > 0" class="px-6 py-3 flex items-center gap-3 border-y border-ink-200 dark:border-ink-800 bg-white/80 dark:bg-ink-900/80 backdrop-blur">
-            <input type="checkbox" :checked="allSelected()" @change="toggleSelectAll($event.target.checked)" class="rounded">
-            <span class="text-xs text-ink-500" x-text="`${selectedCount()} selected · showing ${modalResults.length} of ${modalTotal || modalResults.length}`"></span>
-            <span x-show="modalSource" class="text-xs text-ink-400">via <span class="font-medium" x-text="modalSource"></span></span>
-            <select x-model="modalBulkCollectionId" class="ml-auto h-8 text-xs bg-ink-100 dark:bg-ink-800 rounded-md px-2 outline-none">
-              <option value="">No folder</option>
-              <option value="__new__" x-text="suggestedNewFolder()"></option>
-              <template x-for="c in collections"><option :value="c.id" x-text="c.name"></option></template>
+          <h4 class="set-h">Automatic backups</h4>
+          <div class="flex flex-wrap items-center gap-3 text-sm">
+            Every <select :value="settings.backup_interval_hours" @change="saveSetting('backup_interval_hours', Number($event.target.value))" class="dlg-input !w-auto">
+              <template x-for="h in [[0,'never'],[6,'6 hours'],[12,'12 hours'],[24,'day'],[72,'3 days'],[168,'week']]" :key="h[0]"><option :value="h[0]" x-text="h[1]" :selected="h[0]===settings.backup_interval_hours"></option></template>
             </select>
-            <label class="text-xs flex items-center gap-1.5">
-              <input type="checkbox" x-model="autoDownload" class="rounded">Auto-download
-            </label>
-            <button @click="addSelected()" :disabled="selectedCount()===0 || modalSubmitting" class="action-primary h-8 px-3 text-xs">Add selected</button>
-            <button @click="addAll()" :disabled="modalResults.length===0 || modalSubmitting" class="action-secondary h-8 px-3 text-xs">
-              Add all <span x-show="modalTotal>0" x-text="`(${Math.min(modalTotal, addAllCap)})`"></span>
-            </button>
+            keep <input type="number" min="1" max="100" :value="settings.backup_keep" @change="saveSetting('backup_keep', Number($event.target.value))" class="dlg-input !w-20"> backups
+            <button @click="backupNow()" :disabled="driveBusy" class="action-primary h-8 px-3 text-xs ml-auto">Back up now</button>
           </div>
-
-          <div class="flex-1 overflow-y-auto p-5">
-            <template x-if="modalLoading && modalResults.length===0">
-              <div class="result-empty">Searching...</div>
-            </template>
-            <template x-if="!modalLoading && modalResults.length===0 && modalAttempted">
-              <div class="result-empty" x-text="modalUnavailable ? 'Books search is unavailable.' : 'No results.'"></div>
-            </template>
-            <template x-if="!modalLoading && modalResults.length===0 && !modalAttempted">
-              <div class="result-empty">
-                <div class="text-base font-semibold text-ink-700 dark:text-ink-200">Start with a DOI, title, author, or book.</div>
-                <div class="mt-2 flex flex-wrap justify-center gap-2">
-                  <button @click="searchKind='author'; modalSort='newest'; modalQuery='Andry Andrianarivelo'; runSearch(true)" class="query-chip">Author catalogue</button>
-                  <button @click="searchKind='article'; modalSort='pertinence'; modalQuery='VTA dopamine neuron social interaction'; runSearch(true)" class="query-chip">Paper topic</button>
-                  <button @click="searchKind='article'; modalSort='pertinence'; modalQuery='10.1038/s41593-021-00972-9'; runSearch(true)" class="query-chip">Exact DOI</button>
-                </div>
+          <div class="text-xs text-ink-500" x-text="drive ? `Destination: ${drive.backups.target}. Last backup: ${drive.backups.last_backup_at || 'never'}` : ''"></div>
+          <div class="border border-ink-200 dark:border-ink-800 rounded-lg divide-y divide-ink-100 dark:divide-ink-800 max-h-56 overflow-y-auto">
+            <template x-for="b in backups" :key="b.path">
+              <div class="flex items-center gap-3 px-3 py-1.5 text-xs">
+                <span class="font-mono truncate" x-text="b.name"></span>
+                <span class="text-ink-400" x-text="`${b.items ?? '?'} items, ${formatSize(b.size)}`"></span>
+                <button @click="restoreBackup(b)" class="ml-auto text-accent-600">Restore...</button>
               </div>
             </template>
+            <div x-show="!backups.length" class="px-3 py-2 text-xs text-ink-400">No backups yet.</div>
+          </div>
+        </section>
 
-            <ul class="space-y-2">
-              <template x-for="(r, i) in modalResults" :key="resultKey(r, i)">
-                <li @click="r._selected = !r._selected"
-                    @contextmenu.prevent="openResultContext(r, $event)"
-                    :class="r._selected ? 'result-row-selected' : 'result-row'"
-                    class="result-item cursor-pointer">
-                  <input type="checkbox" :checked="r._selected" @click.stop="r._selected = !r._selected" class="mt-1 rounded">
-                  <div class="flex-1 min-w-0">
-                    <div class="text-sm font-semibold leading-snug" x-text="r.title || '(untitled)'"></div>
-                    <div class="mt-1 text-xs text-ink-500 flex flex-wrap gap-x-2 gap-y-1">
-                      <span x-text="formatAuthors(r.authors)"></span>
-                      <span x-show="r.year" class="text-ink-400">· <span x-text="r.year"></span></span>
-                      <span x-show="r.journal || r.publisher" class="italic">· <span x-text="r.journal || r.publisher"></span></span>
-                      <span x-show="r.doi" class="text-ink-400" x-text="r.doi"></span>
-                      <span x-show="r.extension" class="type-pill" x-text="r.extension"></span>
-                    </div>
-                  </div>
-                  <button @click.stop="addOne(r)" class="mini-add">Add</button>
-                </li>
-              </template>
-            </ul>
-
-            <div x-show="modalResults.length < modalTotal && modalResults.length < addAllCap" class="pt-4 text-center">
-              <button @click="runSearch(false)" class="action-secondary h-9 px-4 text-sm">Load more</button>
+        <!-- Connector -->
+        <section x-show="settingsTab==='connector'" class="space-y-4 text-sm">
+          <p class="text-ink-600 dark:text-ink-300 leading-relaxed">The <b>ReviewHunter Connector</b> saves the article, book or web page you are viewing in Chrome, with its PDF, straight into your library. It downloads PDFs <b>inside your browser</b>, so papers you can open through your institution or a publisher account are captured too (the server alone cannot pass publisher bot protection).</p>
+          <div class="card p-4 space-y-2">
+            <div class="font-semibold">Install (one time, about 1 minute)</div>
+            <ol class="list-decimal pl-5 space-y-1.5 text-ink-600 dark:text-ink-300">
+              <li>Open <code class="kbd">chrome://extensions</code> in Chrome (type it in the address bar).</li>
+              <li>Turn on <b>Developer mode</b> (top right).</li>
+              <li>Click <b>Load unpacked</b> and select the folder below.</li>
+              <li>Pin the ReviewHunter icon (puzzle icon, then the pin). Shortcut: <kbd class="kbd">Ctrl+Shift+Y</kbd>.</li>
+            </ol>
+            <div class="flex items-center gap-2 pt-1">
+              <code class="kbd truncate" x-text="system ? system.extension_dir : ''"></code>
+              <button @click="copyText(system.extension_dir, 'Folder path copied')" class="action-secondary h-7 px-2.5 text-xs">Copy path</button>
+              <button @click="openPath(system.extension_dir)" class="action-secondary h-7 px-2.5 text-xs">Open folder</button>
             </div>
           </div>
-        </div>
-      </template>
+          <p class="text-xs text-ink-500">ReviewHunter must be running for the connector to save (the icon turns grey otherwise). The server only accepts writes from the app itself and from browser extensions, never from ordinary websites.</p>
+        </section>
 
-      <template x-if="virtual === 'graph'">
-        <div class="flex-1 min-h-0 flex flex-col">
-          <div class="h-14 px-5 flex items-center gap-3 border-b border-ink-200 dark:border-ink-800 bg-white/85 dark:bg-ink-900/85 backdrop-blur">
-            <div class="min-w-0">
-              <div class="rail-label">Discovery</div>
-              <div class="font-serif text-xl leading-tight truncate">Concept map</div>
+        <!-- Word -->
+        <section x-show="settingsTab==='word'" class="space-y-4 text-sm">
+          <p class="text-ink-600 dark:text-ink-300 leading-relaxed">The Word add-in inserts live citations and a bibliography from your library, in any of your citation styles, and renumbers everything when you edit (like the Zotero Word plugin).</p>
+          <div class="card p-4 space-y-2" x-show="system">
+            <div class="font-semibold">Status</div>
+            <div class="grid grid-cols-[18px_1fr] gap-y-1 text-xs">
+              <span :class="system?.word_addin.certificate ? 'text-emerald-600' : 'text-ink-400'" x-text="system?.word_addin.certificate ? '\u2713' : '\u2715'"></span><span>Local HTTPS certificate created</span>
+              <span :class="system?.word_addin.ca_trusted ? 'text-emerald-600' : 'text-ink-400'" x-text="system?.word_addin.ca_trusted ? '\u2713' : '\u2715'"></span><span>Certificate trusted by Windows (current user)</span>
+              <span :class="system?.word_addin.registered ? 'text-emerald-600' : 'text-ink-400'" x-text="system?.word_addin.registered ? '\u2713' : '\u2715'"></span><span>Add-in registered in Word</span>
             </div>
-            <div class="text-xs text-ink-500 min-w-0 truncate">
-              <span x-text="graph.scope.label"></span>
-              <span x-show="graph.scope.items"> · <span x-text="`${graph.scope.items} item${graph.scope.items===1?'':'s'}`"></span></span>
-            </div>
-            <div class="ml-auto flex items-center gap-2">
-              <label class="text-xs text-ink-500 flex items-center gap-1.5">
-                Depth
-                <select x-model.number="graph.depth" @change="loadSubjectGraph()" class="h-8 bg-ink-100 dark:bg-ink-800 rounded-md px-2 outline-none">
-                  <option :value="1">1</option>
-                  <option :value="2">2</option>
-                </select>
-              </label>
-              <button @click="resetGraphFocus()" class="action-secondary h-8 px-3 text-xs">Reset</button>
-              <button @click="openGraph()" class="action-secondary h-8 px-3 text-xs">Whole library</button>
+            <div class="flex gap-2 pt-2">
+              <button @click="setupWordAddin()" class="action-primary h-8 px-3 text-xs">Set up Word add-in...</button>
+              <button @click="loadSystem()" class="action-secondary h-8 px-3 text-xs">Refresh status</button>
             </div>
           </div>
-
-          <div class="graph-shell flex-1 min-h-0 relative overflow-hidden">
-            <template x-if="graph.loading && graph.nodes.length===0">
-              <div class="absolute inset-0 grid place-items-center">
-                <div class="result-empty compact">Building concept map...</div>
-              </div>
-            </template>
-            <template x-if="!graph.loading && graph.nodes.length===0">
-              <div class="absolute inset-0 grid place-items-center p-8 text-center">
-                <div class="result-empty compact">
-                  <div class="font-semibold text-ink-700 dark:text-ink-200">No subject graph yet.</div>
-                  <div class="text-xs text-ink-400 mt-1">Add papers with subjects or keywords, then return to the map.</div>
-                </div>
-              </div>
-            </template>
-
-            <svg x-show="graph.nodes.length>0" :viewBox="graph.viewBox" class="graph-canvas" aria-hidden="true">
-              <g x-html="graphEdgesMarkup()"></g>
-            </svg>
-
-            <div x-show="graph.nodes.length>0" class="graph-node-layer">
-              <template x-for="node in graph.nodes" :key="node.id">
-                <button :class="graphNodeCardClass(node)"
-                        :style="graphNodeCardStyle(node)"
-                        :title="node.label"
-                        @click="selectGraphNode(node)"
-                        @dblclick="enterGraphNode(node)">
-                  <span class="graph-node-card-title" x-text="graphNodeLabel(node)"></span>
-                  <span class="graph-node-card-count" x-text="`${node.count} item${node.count===1?'':'s'}`"></span>
-                </button>
-              </template>
-            </div>
-
-            <div x-show="graph.nodes.length>0" class="graph-legend">
-              <span class="inline-flex items-center gap-1.5"><span class="legend-dot primary"></span> Selected node</span>
-              <span class="inline-flex items-center gap-1.5"><span class="legend-dot muted"></span> Local subject or keyword</span>
-              <span>Double-click a node to enter its ramifications.</span>
-            </div>
+          <div class="text-xs text-ink-500 leading-relaxed space-y-1">
+            <p>Setup opens a PowerShell window that explains and performs two steps: trusting ReviewHunter's local certificate (Windows asks you to confirm) and registering the add-in for Word. Then restart Word: <b>References</b> tab, <b>ReviewHunter</b>.</p>
+            <p>Keep ReviewHunter running while you write. Documents keep a copy of each cited reference, so they still refresh offline.</p>
           </div>
-        </div>
-      </template>
+        </section>
 
-      <template x-if="virtual !== 'discover' && virtual !== 'graph'">
-        <div class="flex-1 min-h-0 flex flex-col">
-          <div class="h-11 px-4 flex items-center text-xs text-ink-500 border-b border-ink-200 dark:border-ink-800 bg-white dark:bg-ink-900">
-            <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="paneTitle()"></div>
-            <div x-show="virtual === 'author'" class="ml-4 flex items-center gap-2">
-              <button @click="openFolderChooser('author', {name: selectedAuthor})" class="action-secondary h-7 px-2.5 text-xs">Add to folder</button>
-              <button @click="createFolderForSelectedAuthor()" class="action-secondary h-7 px-2.5 text-xs">Create folder</button>
-              <button @click="exportAuthorPdfs(selectedAuthor)" class="action-secondary h-7 px-2.5 text-xs">Export PDFs</button>
-              <button @click="exportAuthorList(selectedAuthor)" class="action-secondary h-7 px-2.5 text-xs">Export list</button>
-            </div>
-            <div x-show="virtual === 'subject'" class="ml-4 flex items-center gap-2">
-              <button @click="openFolderChooser('subject', {name: selectedSubject})" class="action-secondary h-7 px-2.5 text-xs">Add to folder</button>
-              <button @click="createFolderForSelectedSubject()" class="action-secondary h-7 px-2.5 text-xs">Create folder</button>
-              <button @click="exportSubjectPdfs(selectedSubject)" class="action-secondary h-7 px-2.5 text-xs">Export PDFs</button>
-              <button @click="exportSubjectList(selectedSubject)" class="action-secondary h-7 px-2.5 text-xs">Export list</button>
-            </div>
-            <button x-show="['collection','author','subject'].includes(virtual)"
-                    @click="openGraphFromCurrent()"
-                    class="ml-3 action-secondary h-7 px-2.5 text-xs">Concept map</button>
-            <div class="ml-auto flex items-center gap-3" x-show="filteredItems.length > 0">
-              <span x-text="`${filteredItems.length} item${filteredItems.length===1?'':'s'}`"></span>
-              <span class="text-ink-300">·</span>
-              <select x-model="sortBy" @change="sortItems()" class="bg-transparent text-xs outline-none">
-                <option value="added">Date added</option>
-                <option value="year">Year</option>
-                <option value="title">Title</option>
-              </select>
-            </div>
-          </div>
-
-          <div @dragover.prevent="dropping=true" @dragleave="dropping=false" @drop.prevent="onDropFile($event)"
-               class="flex-1 overflow-y-auto relative" :class="dropping ? 'ring-2 ring-accent-500 ring-inset' : ''">
-            <div x-show="dropping" class="pointer-events-none absolute inset-0 bg-accent-500/10 backdrop-blur-sm flex items-center justify-center text-accent-700 font-semibold z-10">
-              Drop a .txt of DOIs/titles or PDFs here
-            </div>
-
-            <template x-if="filteredItems.length === 0 && !loading">
-              <div class="h-full grid place-items-center p-12 text-center">
-                <div class="result-empty compact">
-                  <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="searchQuery ? 'No local matches.' : 'No papers in this view.'"></div>
-                  <button x-show="searchQuery" @click="runTopSearch()" class="mt-3 action-primary h-9 px-4 text-sm">Search online</button>
-                </div>
-              </div>
-            </template>
-
-            <ul class="paper-list">
-              <template x-for="it in filteredItems" :key="it.id">
-                <li @click="selectItem(it)"
-                    @contextmenu.prevent="openItemContext(it, $event)"
-                    :draggable="true" @dragstart="onDragItem(it, $event)"
-                    :class="selectedItem && selectedItem.id===it.id ? 'paper-row-active' : 'paper-row'"
-                    class="paper-item cursor-pointer transition">
-                  <button @click.stop="toggleStar(it)" class="text-base leading-none" :title="it.starred?'Unstar':'Star'">
-                    <span x-show="it.starred" class="text-amber-400">★</span>
-                    <span x-show="!it.starred" class="text-ink-300 hover:text-amber-400">☆</span>
-                  </button>
-                  <div class="flex-1 min-w-0">
-                    <div class="font-semibold text-sm truncate flex items-center gap-1.5">
-                      <span x-show="it.item_type==='book'" class="type-pill">book</span>
-                      <span x-text="it.title || '(untitled)'"></span>
-                    </div>
-                    <div class="mt-0.5 text-xs text-ink-500 truncate flex items-center gap-2">
-                      <span x-text="formatAuthors(it.authors)"></span>
-                      <span x-show="it.year" class="text-ink-400">·</span>
-                      <span x-text="it.year || ''" class="text-ink-400"></span>
-                      <span x-show="it.journal" class="text-ink-400">·</span>
-                      <span class="italic truncate" x-text="it.journal || it.publisher || ''"></span>
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-2 text-xs">
-                    <span :class="statusClass(it.status)" class="w-1.5 h-1.5 rounded-full"></span>
-                    <span x-text="statusLabel(it.status)" class="text-ink-400"></span>
-                  </div>
-                </li>
-              </template>
-            </ul>
-          </div>
-        </div>
-      </template>
-    </section>
-
-    <aside class="detail-pane border-l border-ink-200 dark:border-ink-800 overflow-y-auto">
-      <template x-if="virtual === 'graph' && graph.selectedNode">
-        <div class="p-5 space-y-5">
-          <div>
-            <div class="rail-label">Node</div>
-            <h2 class="font-serif text-2xl leading-tight mt-1" x-text="graph.selectedNode.label"></h2>
-            <div class="mt-2 text-sm text-ink-500">
-              <span x-text="`${graph.selectedNode.count} linked item${graph.selectedNode.count===1?'':'s'}`"></span>
-              <span x-show="graph.scope.label"> in <span x-text="graph.scope.label"></span></span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-2">
-            <button @click="enterGraphNode()" class="action-primary h-9 px-3 text-sm">Enter ramifications</button>
-            <button @click="searchGraphNode()" class="action-secondary h-9 px-3 text-sm">Search online</button>
-            <button @click="openGraphNodeSubject()" class="action-secondary h-9 px-3 text-sm">Open subject list</button>
-          </div>
-
-          <div x-show="graph.selectedNode.related && graph.selectedNode.related.length">
-            <div class="rail-label mb-2">Connected Subjects</div>
-            <div class="flex flex-wrap gap-1.5">
-              <template x-for="rel in graph.selectedNode.related" :key="rel.id">
-                <button @click="selectGraphNode(graph.nodes.find(n => n.id === rel.id) || {id: rel.id, label: rel.label, count: rel.weight})"
-                        @dblclick="enterGraphNode(graph.nodes.find(n => n.id === rel.id) || {label: rel.label})"
-                        class="chip hover:border-accent-400">
-                  <span x-text="rel.label"></span>
-                  <span class="text-ink-400" x-text="` ${rel.weight}`"></span>
-                </button>
-              </template>
-            </div>
-          </div>
-
-          <div>
-            <div class="rail-label mb-2">Representative Items</div>
-            <div class="space-y-2">
-              <template x-for="paper in (graph.selectedNode.items || [])" :key="paper.id">
-                <button @click="selectGraphItem(paper)" class="graph-paper-link">
-                  <span class="graph-paper-title" x-text="paper.title"></span>
-                  <span class="text-xs text-ink-500">
-                    <span x-text="formatAuthors(paper.authors)"></span>
-                    <span x-show="paper.year"> &middot; <span x-text="paper.year"></span></span>
-                  </span>
-                </button>
-              </template>
-              <div x-show="!(graph.selectedNode.items || []).length" class="empty-note">No representative papers found.</div>
-            </div>
-          </div>
-        </div>
-      </template>
-
-      <template x-if="!(virtual === 'graph' && graph.selectedNode) && !selectedItem">
-        <div class="h-full grid place-items-center text-center p-8">
-          <div class="result-empty compact">
-            <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="virtual === 'graph' ? 'Select a node' : 'Select an item'"></div>
-            <div class="text-xs text-ink-400 mt-1" x-text="virtual === 'graph' ? 'Node details and related items appear here.' : 'Metadata and preview appear here.'"></div>
-          </div>
-        </div>
-      </template>
-
-      <template x-if="selectedItem && !(virtual === 'graph' && graph.selectedNode)">
-        <div class="p-5 space-y-4">
-          <div>
-            <h2 class="font-serif text-xl leading-snug" x-text="selectedItem.title"></h2>
-            <div class="mt-1 text-sm text-ink-500" x-text="formatAuthors(selectedItem.authors)"></div>
-            <div class="mt-0.5 text-xs text-ink-400">
-              <span x-text="selectedItem.journal || ''"></span>
-              <span x-show="selectedItem.year">· <span x-text="selectedItem.year"></span></span>
-              <span x-show="selectedItem.volume">· vol. <span x-text="selectedItem.volume"></span></span>
-              <span x-show="selectedItem.issue">(<span x-text="selectedItem.issue"></span>)</span>
-              <span x-show="selectedItem.pages">, <span x-text="selectedItem.pages"></span></span>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-2">
-            <button @click="downloadItem(selectedItem)" :disabled="!selectedItem.doi || selectedItem.status==='downloading'" class="action-primary h-8 px-3 text-xs">
-              <span x-show="selectedItem.status!=='downloading' && selectedItem.status!=='downloaded'">Download</span>
-              <span x-show="selectedItem.status==='downloading'">Downloading</span>
-              <span x-show="selectedItem.status==='downloaded'">Downloaded</span>
-            </button>
-            <a x-show="selectedItem.file_path" :href="`/api/items/${selectedItem.id}/file`" target="_blank" class="action-secondary h-8 px-3 text-xs inline-flex items-center">Open PDF</a>
-            <button @click="openItemFolder(selectedItem)" class="action-secondary h-8 px-3 text-xs">Open Folder</button>
-            <button @click="toggleStar(selectedItem)" class="action-secondary h-8 px-3 text-xs">
-              <span x-show="selectedItem.starred">Starred</span>
-              <span x-show="!selectedItem.starred">Star</span>
-            </button>
-            <button @click="deleteItem(selectedItem)" class="action-danger h-8 px-3 text-xs">Delete</button>
-          </div>
-
-          <div x-show="selectedItem.doi" class="text-xs">
-            <span class="text-ink-400">DOI: </span>
-            <a :href="`https://doi.org/${selectedItem.doi}`" target="_blank" class="text-accent-600 hover:underline" x-text="selectedItem.doi"></a>
-          </div>
-
-          <div x-show="selectedItem.subjects && selectedItem.subjects.length" class="flex flex-wrap gap-1.5">
-            <template x-for="s in (selectedItem.subjects || [])">
-              <span class="chip" x-text="s"></span>
-            </template>
-          </div>
-
-          <div x-show="selectedItem.keywords && selectedItem.keywords.length" class="flex flex-wrap gap-1.5">
-            <template x-for="k in (selectedItem.keywords || [])">
-              <span class="chip accent-chip" x-text="k"></span>
-            </template>
-          </div>
-
-          <div x-show="selectedItem.abstract" class="text-sm leading-relaxed text-ink-700 dark:text-ink-300 font-serif">
-            <div class="rail-label font-sans mb-1">Abstract</div>
-            <p x-text="selectedItem.abstract"></p>
-          </div>
-
-          <div>
-            <div class="rail-label mb-2">Folders</div>
-            <div class="flex flex-wrap gap-1.5">
-              <template x-for="cid in (selectedItem.collections || [])">
-                <span class="chip inline-flex items-center gap-1">
-                  <span x-text="collectionName(cid)"></span>
-                  <button @click="unassign(selectedItem.id, cid)" class="text-ink-400 hover:text-rose-500">×</button>
-                </span>
-              </template>
-              <button @click="openFolderChooser('item', selectedItem)" class="chip hover:border-accent-400">+ Add to folder</button>
-            </div>
-          </div>
-
-          <div x-show="selectedItem.file_path" class="pt-2">
-            <div class="rail-label mb-2">Preview</div>
-            <template x-if="isPreviewable(selectedItem)">
-              <iframe :src="`/api/items/${selectedItem.id}/file`" class="w-full h-[420px] rounded-lg border border-ink-200 dark:border-ink-800 bg-ink-100 dark:bg-ink-950"></iframe>
-            </template>
-            <template x-if="!isPreviewable(selectedItem)">
-              <div class="rounded-lg border border-ink-200 dark:border-ink-800 bg-ink-50 dark:bg-ink-950 p-6 text-sm text-ink-500 text-center">
-                Inline preview is not available for <span class="uppercase font-semibold" x-text="selectedItem.extension || 'this format'"></span>.
-              </div>
-            </template>
-          </div>
-        </div>
-      </template>
-    </aside>
-  </main>
-
-  <div x-show="openAdd" x-transition.opacity @keydown.escape.window="openAdd=false" class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm" style="display:none">
-    <div @click.outside="openAdd=false" class="dialog w-[min(640px,92vw)] p-5">
-      <div class="flex items-baseline justify-between">
-        <h3 class="font-serif text-lg font-semibold">Add papers</h3>
-        <button @click="openAdd=false" class="text-ink-400 hover:text-ink-700">×</button>
-      </div>
-      <textarea x-model="addInput" rows="8"
-                placeholder="10.1038/s41593-021-00972-9&#10;Attention is all you need"
-                class="mt-4 w-full p-3 text-sm bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded-lg outline-none focus:border-accent-500 font-mono"></textarea>
-      <div class="mt-3 flex items-center gap-3">
-        <label class="text-xs flex items-center gap-1.5">
-          <input type="checkbox" x-model="autoDownload" class="rounded">
-          Auto-download
-        </label>
-        <select x-model="addCollectionId" class="text-xs bg-ink-100 dark:bg-ink-800 rounded-md px-2 py-1.5 outline-none">
-          <option value="">No folder</option>
-          <template x-for="c in collections">
-            <option :value="c.id" x-text="c.name"></option>
+        <!-- Advanced -->
+        <section x-show="settingsTab==='advanced'" class="space-y-4 text-sm">
+          <h4 class="set-h">Locations</h4>
+          <template x-for="p in [['Library', system?.library_root], ['Files (PDFs)', system?.papers_dir]]" :key="p[0]">
+            <div class="flex items-center gap-2"><span class="w-28 text-ink-500" x-text="p[0]"></span><code class="kbd truncate flex-1" x-text="p[1] || ''"></code>
+              <button @click="openPath(p[1])" class="action-secondary h-7 px-2.5 text-xs">Open</button></div>
           </template>
-        </select>
-        <div class="ml-auto flex gap-2">
-          <button @click="openAdd=false" class="action-secondary h-9 px-3 text-sm">Cancel</button>
-          <button @click="submitAdd()" :disabled="!addInput.trim()" class="action-primary h-9 px-4 text-sm">
-            Add <span x-text="addCount() ? `(${addCount()})` : ''"></span>
-          </button>
-        </div>
+          <h4 class="set-h">Full-text index</h4>
+          <div class="flex items-center gap-3">
+            <span class="text-ink-500" x-text="fulltextStats ? `${fulltextStats.indexed} of ${fulltextStats.total} attachments indexed` : ''"></span>
+            <button @click="reindexFulltext(false)" class="action-secondary h-8 px-3 text-xs ml-auto">Index missing</button>
+            <button @click="reindexFulltext(true)" class="action-secondary h-8 px-3 text-xs">Rebuild index</button>
+          </div>
+          <h4 class="set-h">Maintenance</h4>
+          <div class="flex flex-wrap gap-2">
+            <button @click="deleteAutomaticTags()" class="action-secondary h-8 px-3 text-xs">Delete automatic tags</button>
+            <button @click="closeDialog(); selectVirtual('duplicates')" class="action-secondary h-8 px-3 text-xs">Find duplicates</button>
+            <a href="/api/export?format=csljson" class="action-secondary h-8 px-3 text-xs">Export whole library (CSL-JSON)</a>
+          </div>
+        </section>
       </div>
     </div>
   </div>
+</div>
 
-  <div x-show="folderChooser.open" x-transition.opacity @keydown.escape.window="closeFolderChooser()" class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm" style="display:none">
-    <div @click.outside="closeFolderChooser()" class="dialog w-[min(520px,92vw)] p-5">
-      <div class="flex items-baseline justify-between">
-        <h3 class="font-serif text-lg font-semibold" x-text="folderChooser.title"></h3>
-        <button @click="closeFolderChooser()" class="text-ink-400 hover:text-ink-700">×</button>
-      </div>
-      <div class="mt-4 max-h-72 overflow-y-auto space-y-1">
-        <template x-for="c in collections" :key="c.id">
-          <button @click="chooseFolder(c.id)" class="folder-choice">
-            <span class="w-2.5 h-2.5 rounded-full" :style="`background:${c.color || '#0ea5e9'}`"></span>
-            <span x-text="c.name"></span>
-            <span class="ml-auto text-xs text-ink-400" x-text="c.count"></span>
-          </button>
-        </template>
-        <div x-show="collections.length===0" class="empty-note py-2">No folders yet.</div>
-      </div>
-      <div class="mt-4 flex gap-2">
-        <input x-model="folderChooser.newName" @keydown.enter="createFolderFromChooser()" placeholder="New folder name" class="flex-1 h-10 px-3 rounded-lg bg-ink-100 dark:bg-ink-800 outline-none focus:ring-2 focus:ring-accent-500 text-sm">
-        <button @click="createFolderFromChooser()" class="action-primary h-10 px-4 text-sm">Create</button>
-      </div>
+<!-- ============================================================ TOASTS -->
+<div class="fixed bottom-4 right-4 z-[80] space-y-2 pointer-events-none">
+  <template x-for="t in toasts" :key="t.id">
+    <div class="toast pointer-events-auto" x-transition>
+      <span class="w-2 h-2 rounded-full shrink-0" :class="t.kind==='error' ? 'bg-rose-500' : t.kind==='ok' ? 'bg-emerald-500' : 'bg-accent-500 animate-pulse'"></span>
+      <span class="text-[13px] leading-snug" x-text="t.text"></span>
     </div>
-  </div>
-
-  <div x-show="contextMenu.open" x-cloak @click.stop
-       class="context-menu fixed z-[60] min-w-56 py-1"
-       :style="contextMenuStyle()">
-    <template x-for="(item, i) in contextItems()" :key="i">
-      <div>
-        <div x-show="item.separator" class="my-1 border-t border-ink-200 dark:border-ink-800"></div>
-        <button x-show="!item.separator"
-                @click.stop="runContextAction(item.action)"
-                :disabled="item.disabled === true"
-                :class="item.danger ? 'text-rose-600 dark:text-rose-300' : ''"
-                class="context-row">
-          <span class="w-5 text-ink-400" x-text="item.icon || ''"></span>
-          <span x-text="item.label"></span>
-        </button>
-      </div>
-    </template>
-  </div>
-
-  <div class="fixed bottom-4 right-4 z-40 space-y-2">
-    <template x-for="t in toasts" :key="t.id">
-      <div class="toast" x-transition>
-        <span class="w-2 h-2 rounded-full" :class="t.kind==='error'?'bg-rose-500':t.kind==='ok'?'bg-emerald-500':'bg-accent-500 animate-pulse'"></span>
-        <span class="truncate" x-text="t.text"></span>
-      </div>
-    </template>
-  </div>
-
-  <script src="/static/app.js"></script>
+  </template>
+</div>
 </body>
 </html>

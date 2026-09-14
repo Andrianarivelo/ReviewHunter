@@ -603,6 +603,20 @@ def patch_item(item_id: int, patch: dict) -> Optional[dict]:
             updates[key] = _json(list(patch[key]))
     if not updates:
         return get_item(item_id)
+    # Better BibTeX behaviour: an automatically generated key follows the metadata (author, year, title)
+    # until the user types a custom key, which is then kept forever.
+    key_inputs = {"title", "creators", "authors", "date", "year"}
+    user_key = "citation_key" in updates or "citationKey" in (patch.get("field_values") or {})
+    if not user_key and key_inputs & set(updates) and row.get("citation_key"):
+        was_auto = row["citation_key"] == make_citation_key(row, conn) or re.fullmatch(
+            re.escape(make_citation_key(row, conn)) + r"[a-z]?", row["citation_key"] or "")
+        if was_auto:
+            future = {**row, **{k: v for k, v in updates.items() if k not in ("creators", "authors")}, "id": item_id}
+            if "creators" in updates:
+                future["creators"] = json.loads(updates["creators"]) if updates["creators"] else []
+            if "year" in updates:
+                future["year"] = updates["year"]
+            updates["citation_key"] = make_citation_key(future, conn)
     try:
         conn.execute(
             f"UPDATE items SET {', '.join(f'{k}=?' for k in updates)}, updated_at=datetime('now') WHERE id=?",

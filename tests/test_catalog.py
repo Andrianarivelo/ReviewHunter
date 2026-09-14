@@ -158,3 +158,17 @@ def test_v1_library_migrates(tmp_path, monkeypatch):
     assert c.query_items(q="Old", mode="fields")[0]["id"] == 1
     assert db.get_conn().execute("PRAGMA user_version").fetchone()[0] == 2
     db.reset_connections()
+
+
+def test_citation_key_follows_metadata_until_customised(library):
+    from doi_hunter_web import catalog as c
+
+    it = c.create_item({"title": "Untitled"})
+    assert it["citation_key"] == "anonuntitled"
+    it = c.patch_item(it["id"], {"creators": [{"creatorType": "author", "lastName": "Poirazi", "firstName": "P"}],
+                                 "field_values": {"title": "Dendritic computation", "date": "2019"}})
+    assert it["citation_key"] == "poirazi2019dendritic"
+    it = c.patch_item(it["id"], {"field_values": {"citationKey": "myCustomKey"}})
+    assert it["citation_key"] == "myCustomKey"
+    it = c.patch_item(it["id"], {"field_values": {"title": "Another title"}})
+    assert it["citation_key"] == "myCustomKey", "custom keys must never be overwritten"

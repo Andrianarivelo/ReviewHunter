@@ -145,7 +145,11 @@ def resolve_isbn(isbn: str) -> Optional[dict]:
                                                                        "jscmd": "data"}, headers=UA, timeout=15)
         data = r.json().get(f"ISBN:{isbn}") if r.ok else None
         if data:
-            creators = [catalog.parse_creator_string(a.get("name", ""), "author") for a in data.get("authors", [])]
+            creators = []
+            for a in data.get("authors", []):
+                c = catalog.parse_creator_string(a.get("name", ""), "author")
+                if c not in creators:  # Open Library sometimes lists the same author record twice
+                    creators.append(c)
             date = data.get("publish_date", "")
             return {
                 "item_type": "book", "title": data.get("title", "Untitled") + (f": {data['subtitle']}" if data.get("subtitle") else ""),
