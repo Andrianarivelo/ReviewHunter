@@ -140,3 +140,33 @@ def test_open_access_pdf_of_another_paper_is_rejected(monkeypatch):
     monkeypatch.setattr("pypdf.PdfReader", lambda f: type("R", (), {"pages": [FakePage()]})())
     assert not lib._pdf_matches_title(b"%PDF-", "Associations between short-term ambient temperature exposure")
     assert lib._pdf_matches_title(b"%PDF-", "A Different Paper On Hippocampal Replay")
+
+
+def test_journal_record_is_not_a_paper(monkeypatch):
+    """A CrossRef journal-level DOI whose name is printed in the page banner must not be applied."""
+    from doi_hunter_web import fulltext, identifiers, metadata
+
+    page = "INTERNATIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT\nComparative Study Of Linear Scheduling For High-Rise Buildings\n"
+    monkeypatch.setattr(fulltext, "_pdf_identifiers", lambda p: ([], [], page))
+    monkeypatch.setattr(metadata, "search_crossref", lambda q, rows=5: [
+        {"title": "INTERNATIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT", "doi": "10.55041/ijsrem"}])
+    monkeypatch.setattr(identifiers, "resolve_doi", lambda d: {
+        "doi": d, "item_type": "document", "creators": [],
+        "title": "INTERNATIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT"})
+    payload, _, _ = fulltext._find_verified_metadata({"title": "x"}, "x.pdf")
+    assert payload is None
+
+
+def test_first_printed_title_wins_over_quoted_article(monkeypatch):
+    """A letter that quotes the article it answers: the letter (title printed first) is the paper."""
+    from doi_hunter_web import fulltext, identifiers
+
+    page = ("Correspondence\nMajor Potential Confounder Not Addressed\nJennifer Vines\n"
+            "In response to: Randomized, Controlled Intervention Trial of Male Circumcision for Reduction of HIV\n"
+            "doi 10.1371/journal.pmed.0020298 and doi 10.1371/journal.pmed.0030063\n")
+    titles = {"10.1371/journal.pmed.0020298": "Randomized, Controlled Intervention Trial of Male Circumcision for Reduction of HIV",
+              "10.1371/journal.pmed.0030063": "Major Potential Confounder Not Addressed"}
+    monkeypatch.setattr(fulltext, "_pdf_identifiers", lambda p: (identifiers.extract_identifiers(page), [], page))
+    monkeypatch.setattr(identifiers, "resolve_doi", lambda d: _fake_payload(d, titles[d]))
+    payload, _, _ = fulltext._find_verified_metadata({"title": "x"}, "x.pdf")
+    assert payload["doi"] == "10.1371/journal.pmed.0030063"

@@ -1,0 +1,41 @@
+file,true_doi,previous_outcome,previous_doi,current_outcome,current_doi,audit_note,previous_audited,current_audited
+000.pdf,10.47191/ijmei/v12i8.06,correct,10.47191/ijmei/v12i8.06,correct,10.47191/ijmei/v12i8.06,,correct,correct
+001.pdf,10.33258/bioex.v2i1.100,correct,10.33258/bioex.v2i1.100,correct,10.33258/bioex.v2i1.100,,correct,correct
+002.pdf,10.33477/mangente.v2i1.3070,none,,correct,10.33477/mangente.v2i1.3070,,none,correct
+003.pdf,10.25128/2520-6230.21.3.7,correct,10.25128/2520-6230.21.3.7,correct,10.25128/2520-6230.21.3.7,,correct,correct
+004.pdf,10.1017/s109285292200058x,correct,10.1017/s109285292200058x,correct,10.1017/s109285292200058x,,correct,correct
+005.pdf,10.1186/s13063-023-07733-y,correct,10.1186/s13063-023-07733-y,correct,10.1186/s13063-023-07733-y,,correct,correct
+006.pdf,10.7735/ksmte.2014.23.6.576,correct,10.7735/ksmte.2014.23.6.576,correct,10.7735/ksmte.2014.23.6.576,,correct,correct
+007.pdf,10.52783/jisem.v10i45s.9036,none,,correct,10.52783/jisem.v10i45s.9036,,none,correct
+008.pdf,10.1038/s41598-017-15648-3,correct,10.1038/s41598-017-15648-3,correct,10.1038/s41598-017-15648-3,,correct,correct
+009.pdf,10.9732/2020.v121.844,none,,correct,10.9732/2020.v121.844,,none,correct
+010.pdf,10.52058/3041-1793-2025-2(7)-1130-1142,correct,10.52058/3041-1793-2025-2(7)-1130-1142,correct,10.52058/3041-1793-2025-2(7)-1130-1142,,correct,correct
+011.pdf,10.1073/pnas.2529120123,wrong,10.48550/arxiv.2509.10967,wrong,10.48550/arxiv.2509.10967,file is the arXiv preprint (arXiv id printed on page 1); its DataCite DOI is correct for the file,correct,correct
+012.pdf,10.21638/spbu03.2020.105,correct,10.21638/spbu03.2020.105,correct,10.21638/spbu03.2020.105,,correct,correct
+013.pdf,10.18411/trnio-10-2022-40,correct,10.18411/trnio-10-2022-40,correct,10.18411/trnio-10-2022-40,,correct,correct
+014.pdf,10.1371/journal.pmed.0030066,wrong,10.1371/journal.pmed.0020298,wrong,10.1371/journal.pmed.0030063,PLoS bundle of 12 correspondence letters; page 1 is the letter 'Major Potential Confounder Not Addressed',wrong,correct
+015.pdf,10.46997/revecuatneurol32200049,correct,10.46997/revecuatneurol32200049,correct,10.46997/revecuatneurol32200049,,correct,correct
+016.pdf,10.26717/bjstr.2019.20.003419,correct,10.26717/bjstr.2019.20.003419,correct,10.26717/bjstr.2019.20.003419,,correct,correct
+017.pdf,10.29309/tpmj/2014.21.01.1903,none,,correct,10.29309/tpmj/2014.21.01.1903,,none,correct
+018.pdf,10.1038/s41598-026-57349-w,correct,10.1038/s41598-026-57349-w,correct,10.1038/s41598-026-57349-w,,correct,correct
+019.pdf,10.3389/froh.2024.1290652,correct,10.3389/froh.2024.1290652,correct,10.3389/froh.2024.1290652,,correct,correct
+020.pdf,10.59817/cjes.v7i.159,none,,correct,10.59817/cjes.v7i.159,,none,correct
+021.pdf,10.1038/s41598-020-78496-8,correct,10.1038/s41598-020-78496-8,correct,10.1038/s41598-020-78496-8,,correct,correct
+022.pdf,10.70408/javs.i1-y2026-721,none,,correct,10.70408/javs.i1-y2026-721,,none,correct
+023.pdf,10.15446/bitacora.v31n3.87797,correct,10.15446/bitacora.v31n3.87797,correct,10.15446/bitacora.v31n3.87797,,correct,correct
+024.pdf,10.47460/uct.v30i130.1029,correct,10.47460/uct.v30i130.1029,correct,10.47460/uct.v30i130.1029,,correct,correct
+025.pdf,10.1002/cnma.202100139,correct,10.1002/cnma.202100139,correct,10.1002/cnma.202100139,,correct,correct
+026.pdf,10.34551/00022920,none,,none,,,none,none
+027.pdf,10.5120/6194-8715,correct,10.5120/6194-8715,correct,10.5120/6194-8715,,correct,correct
+028.pdf,10.11591/ijeecs.v31.i1.pp134-142,correct,10.11591/ijeecs.v31.i1.pp134-142,correct,10.11591/ijeecs.v31.i1.pp134-142,,correct,correct
+029.pdf,10.35305/b.v12i23.570,none,,correct,10.35305/b.v12i23.570,,none,correct
+030.pdf,10.1016/j.nima.2005.01.343,none,,wrong,10.48550/arxiv.physics/0502026,file is the arXiv preprint (arXiv id printed on page 1); same rule as 011 for every arxiv.org file,none,correct
+031.pdf,10.26583/sv.18.2.07,wrong,10.26583/sv.17.2.07,wrong,10.26583/sv.17.2.07,publisher link serves another article: page 1 prints 'Implementation of the Set-Theoretic Subtraction...' DOI 10.26583/sv.17.2.07,correct,correct
+032.pdf,10.56238/arev6n3-128,correct,10.56238/arev6n3-128,correct,10.56238/arev6n3-128,,correct,correct
+033.pdf,10.5216/cei.v15i2.24570,none,,correct,10.5216/cei.v15i2.24570,,none,correct
+034.pdf,10.1038/s12276-025-01606-x,correct,10.1038/s12276-025-01606-x,correct,10.1038/s12276-025-01606-x,,correct,correct
+035.pdf,10.54536/ajsde.v4i1.4224,correct,10.54536/ajsde.v4i1.4224,correct,10.54536/ajsde.v4i1.4224,,correct,correct
+036.pdf,10.3389/fpsyg.2023.1259319,correct,10.3389/fpsyg.2023.1259319,correct,10.3389/fpsyg.2023.1259319,,correct,correct
+037.pdf,10.20473/mgk.v10i2.2021.343-351,none,,none,,,none,none
+038.pdf,10.7498/aps.72.20222339,correct,10.7498/aps.72.20222339,correct,10.7498/aps.72.20222339,,correct,correct
+039.pdf,10.55041/ijcope.v2i7.172,wrong,10.55041/ijsrem,none,,publisher link serves another IJSREM article whose printed DOI 10.55041/IJSREM63985 does not resolve: no attachable truth,wrong,none

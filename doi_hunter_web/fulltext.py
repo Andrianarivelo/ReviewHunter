@@ -170,6 +170,18 @@ def _similar(a: str, b: str) -> float:
     return difflib.SequenceMatcher(None, norm(a), norm(b)).ratio()
 
 
+def _is_work(payload: Optional[dict]) -> bool:
+    """A citable work, not a container record.
+
+    CrossRef also registers DOIs for whole journals ("INTERNATIONAL JOURNAL OF ...", type 'journal',
+    no authors). Their title is printed in every page banner, so title verification alone would
+    accept them: records of the generic 'document' type without any creator are rejected.
+    """
+    if not payload or not payload.get("title"):
+        return False
+    return not (catalog.normalize_type(payload.get("item_type")) == "document" and not payload.get("creators"))
+
+
 def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], str, list[str]]:
     """Find metadata for a PDF, accepting a record only when the PDF itself confirms it.
 
@@ -182,13 +194,25 @@ def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], 
     from .metadata import search_crossref
 
     ids, guesses, page_text = _pdf_identifiers(pdf_path)
-    header = page_text[:HEADER_CHARS].lower()
+    header = page_text[:HEADER_CHARS].lower().replace(" ", "")
+    compact_text = _compact(page_text)
+    printed: list[tuple[int, dict, str]] = []      # (position of the title in the PDF, payload, source)
+    header_only: list[tuple[dict, str]] = []
     for kind, value in ids[:6]:
         payload = identifiers.resolve_doi(value) if kind == "doi" else identifiers.resolve_arxiv(value)
-        if not payload:
+        if not _is_work(payload):
             continue
-        if _title_in_text(payload.get("title", ""), page_text) or value.lower() in header.replace(" ", ""):
-            return payload, f"{kind}:{value}", guesses
+        if _title_in_text(payload.get("title", ""), page_text):
+            printed.append((compact_text.find(_compact(payload["title"])), payload, f"{kind}:{value}"))
+        elif value.lower() in header:
+            header_only.append((payload, f"{kind}:{value}"))
+    # Several DOIs can be verified (a letter quoting the article it answers, an issue bundle):
+    # the paper itself is the one whose title is printed first.
+    if printed:
+        _pos, payload, source = min(printed, key=lambda t: t[0])
+        return payload, source, guesses
+    if header_only:
+        return header_only[0][0], header_only[0][1], guesses
 
     # The item's current title may come from the file name ("... Methods. IEEE.pdf"): also a guess.
     item_title = re.sub(r"\.pdf$", "", (item.get("title") or "").strip(), flags=re.I)
@@ -213,7 +237,7 @@ def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], 
             close = any(_similar(title, g) >= TITLE_MATCH_THRESHOLD for g in guesses)
             if verified or close:
                 payload = identifiers.resolve_doi(doi)
-                if payload:
+                if _is_work(payload):
                     how = "title printed in PDF" if verified else "title match"
                     return payload, f"{how}: {title}", guesses
     return None, "", guesses

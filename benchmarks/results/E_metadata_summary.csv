@@ -1,0 +1,13 @@
+ground_truth,version,outcome,count,n,rate,ci95_low,ci95_high,discordant_previous_only,discordant_current_only,discordant_mcnemar_exact_p
+OpenAlex raw,previous,correct,25,40,0.625,0.4703,0.7578,0,8,0.0078125
+OpenAlex raw,previous,wrong,4,40,0.1,0.0396,0.2305,1,1,1.0
+OpenAlex raw,previous,none,11,40,0.275,0.1611,0.4284,,,
+OpenAlex raw,current,correct,33,40,0.825,0.6805,0.9125,0,8,0.0078125
+OpenAlex raw,current,wrong,4,40,0.1,0.0396,0.2305,1,1,1.0
+OpenAlex raw,current,none,3,40,0.075,0.0258,0.1986,,,
+audited,previous,correct,27,40,0.675,0.5202,0.7992,0,10,0.001953125
+audited,previous,wrong,2,40,0.05,0.0138,0.165,2,0,0.5
+audited,previous,none,11,40,0.275,0.1611,0.4284,,,
+audited,current,correct,37,40,0.925,0.8014,0.9742,0,10,0.001953125
+audited,current,wrong,0,40,0.0,0.0,0.0876,2,0,0.5
+audited,current,none,3,40,0.075,0.0258,0.1986,,,
