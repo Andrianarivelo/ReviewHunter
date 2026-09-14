@@ -302,6 +302,39 @@ export function findPdfLinkInHtml(html, baseUrl, opts = {}) {
 }
 
 /**
+ * Is this HTML a human-verification wall (ALTCHA "are you a robot?", DDoS-Guard,
+ * Cloudflare, "Antibot" loading pages) rather than real content? Only the first
+ * 20 kB are inspected: markers live in the first screen, while a real article
+ * could mention "robot" anywhere in its text. Mirrors sources.is_bot_challenge.
+ *
+ * @param {string} html  HTML source.
+ * @returns {boolean} True for challenge pages.
+ */
+export function isBotChallengeHtml(html) {
+  const head = String(html || "").slice(0, 20000);
+  if (/<title[^>]*>\s*loading\.\.\.\s*<\/title>/i.test(head)) return true;
+  return /altcha|êtes-vous un robot|etes-vous un robot|are you a robot|ddos-guard|antibot solution|cf-challenge|challenge-platform|just a moment\.\.\.|verify you are human/i.test(head);
+}
+
+/**
+ * Is this URL a Sci-Hub mirror or an Anna's Archive SciDB page?
+ *
+ * @param {string} url  URL.
+ * @returns {"scihub"|"scidb"|""} Library kind, or "" for any other site.
+ */
+export function shadowLibraryKind(url) {
+  let u;
+  try {
+    u = new URL(url);
+  } catch (_) {
+    return "";
+  }
+  if (/(^|\.)sci-hub\.[a-z]{2,}$/i.test(u.hostname)) return "scihub";
+  if (/(^|\.)annas-archive\.[a-z]{2,}$/i.test(u.hostname) && /^\/scidb\//i.test(u.pathname)) return "scidb";
+  return "";
+}
+
+/**
  * Check whether a byte buffer is a PDF (starts with the "%PDF-" magic number).
  * The server applies the exact same rule, so this avoids uploading login pages.
  *

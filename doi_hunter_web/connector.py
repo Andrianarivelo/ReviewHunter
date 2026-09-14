@@ -10,7 +10,11 @@ Contract (JSON unless stated)
 GET  /connector/ping                     -> {app, version, library: {items}, default_collection_id}
 GET  /connector/collections              -> [{id, name, parent_id, depth, path}]
 GET  /connector/tags                     -> [{name, color, count}]
-POST /connector/lookup   {doi?, url?, title?}   -> {found: bool, items: [{id, title}]}
+POST /connector/lookup   {doi?, url?, title?}   -> {found: bool, items: [{id, title, has_pdf, attachments}]}
+GET  /connector/item/{id}                -> {id, title, doi, in_trash, has_pdf, attachments: [{title, kind, mime,
+                                             size, exists}], collections: [path]}   (post-save verification)
+GET  /connector/pdf-sources?doi=..       -> {doi, pages: [{source, url}]}  Sci-Hub / SciDB landing pages that
+                                             the extension fetches or opens with the user's browser session
 POST /connector/save     {items: [payload], collection_id?, tags?: [str], note?: str,
                           enrich?: bool, pdf_url?: str}
                          -> {saved: [{id, title, existing, needs_pdf, pdf_url}]}
@@ -117,7 +121,53 @@ def lookup(body: LookupIn) -> dict:
     if not rows and body.title and len(body.title) > 12:
         rows = conn.execute("SELECT id, title FROM items WHERE title=? COLLATE NOCASE AND deleted_at IS NULL",
                             (body.title.strip(),)).fetchall()
-    return {"found": bool(rows), "items": [dict(r) for r in rows]}
+    items = []
+    for r in rows:
+        files = _file_attachments(r["id"])
+        items.append({"id": r["id"], "title": r["title"], "has_pdf": any(_is_pdf(a) for a in files),
+                      "attachments": len(files)})
+    return {"found": bool(rows), "items": items}
+
+
+def _file_attachments(item_id: int) -> list[dict]:
+    """Stored file attachments (links excluded) whose file really exists on disk."""
+    return [a for a in catalog.list_attachments(item_id) if a["kind"] != "link" and a.get("exists")]
+
+
+def _is_pdf(att: dict) -> bool:
+    return (att.get("mime") or "") == "application/pdf" or str(att.get("path") or "").lower().endswith(".pdf")
+
+
+@router.get("/item/{item_id}")
+def item_status(item_id: int) -> dict:
+    """What is really stored for an item: lets the extension confirm a save instead of assuming it."""
+    item = catalog.get_item(item_id, full=True)
+    if not item:
+        raise HTTPException(404, "item not found")
+    paths = {c["id"]: c["path"] for c in _collection_tree()}
+    files = _file_attachments(item_id)
+    return {
+        "id": item["id"],
+        "title": item.get("title") or "",
+        "doi": item.get("doi") or "",
+        "in_trash": bool(item.get("deleted_at")),
+        "has_pdf": any(_is_pdf(a) for a in files),
+        "attachments": [{"title": a.get("title") or "", "kind": a["kind"], "mime": a.get("mime") or "",
+                         "size": a.get("size") or 0, "exists": bool(a.get("exists"))} for a in files],
+        "collections": [paths[c] for c in (item.get("collections") or []) if c in paths],
+    }
+
+
+@router.get("/pdf-sources")
+def pdf_sources(doi: str) -> dict:
+    from .sources import shadow_library_pages
+
+    import re
+
+    clean = catalog.normalize_doi(doi)
+    if not re.fullmatch(r"10\.\d{4,9}/\S+", clean or ""):
+        raise HTTPException(400, "a DOI is required")
+    return {"doi": clean, "pages": shadow_library_pages(clean)}
 
 
 def _merge_enriched(payload: dict) -> dict:

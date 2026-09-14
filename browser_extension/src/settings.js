@@ -14,6 +14,9 @@ export const DEFAULTS = Object.freeze({
   improveMetadata: true,
   saveSnapshot: false,
   useBackgroundTab: true,
+  // Same sources as the ReviewHunter app (Sci-Hub, SciDB), fetched with the browser session when the
+  // publisher PDF is not reachable. Human checks are never automated: the page is opened for the user.
+  useShadowLibraries: true,
 });
 
 /**

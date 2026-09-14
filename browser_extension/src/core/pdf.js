@@ -127,11 +127,12 @@ export function shortUrl(url) {
  * b) Download from the service worker with the user's cookies.
  *
  * @param {string} url  URL.
+ * @param {{timeoutMs?: number}} [opts]  timeoutMs: abort after this delay (default 90 s).
  * @returns {Promise<{ok: boolean, bytes?: Uint8Array, finalUrl?: string, html?: string, error?: string}>}
  */
-export async function fetchInWorker(url) {
+export async function fetchInWorker(url, opts = {}) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 90000);
+  const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs || 90000);
   try {
     const res = await fetch(url, { credentials: "include", redirect: "follow", signal: ctrl.signal, cache: "no-store" });
     const finalUrl = res.url || url;

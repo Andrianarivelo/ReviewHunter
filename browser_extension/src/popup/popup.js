@@ -214,14 +214,31 @@ function renderSingle(det) {
   $("single-pdf").hidden = !hasPdf;
   $("sw-enrich").hidden = !(it.doi || it.arxiv_id || it.pmid);
   $("save-label").textContent = "Save to ReviewHunter";
+  $("single-challenge").hidden = !det.challenge;
   showState("single");
   requestAnimationFrame(() => autosize(ta));
   api.lookup({ doi: it.doi || undefined, url: it.url || undefined, title: it.title || undefined })
     .then((r) => {
-      $("single-inlib").hidden = !r.found;
+      showInLibrary($("single-inlib"), r);
       if (r.found) $("save-label").textContent = "Update in ReviewHunter";
     })
     .catch(() => {});
+}
+
+/**
+ * Show whether a reference is already saved, and with or without its PDF.
+ *
+ * @param {HTMLElement} el  Badge element.
+ * @param {{found: boolean, items: Array<{has_pdf?: boolean}>}} r  Lookup result.
+ * @returns {void}
+ */
+function showInLibrary(el, r) {
+  el.hidden = !r.found;
+  if (!r.found) return;
+  const hasPdf = r.items.some((i) => i.has_pdf);
+  el.className = `badge ${hasPdf ? "ok" : "warn"}`;
+  el.replaceChildren(icon(hasPdf ? "i-check" : "i-minus"), hasPdf ? "Saved · PDF" : "Saved · no PDF");
+  el.title = hasPdf ? "Already in your library with its PDF" : "Already in your library, but no PDF is attached yet";
 }
 
 /**
@@ -300,6 +317,7 @@ async function renderPdf(det) {
   $("sw-enrich").hidden = true;
   $("save-label").textContent = "Save PDF";
   showState("pdf");
+  if (it.doi) api.lookup({ doi: it.doi }).then((r) => showInLibrary($("pdf-inlib"), r)).catch(() => {});
 
   const pending = await send({ type: "pending", url: det.url, doi: it.doi }).catch(() => []);
   const list = $("pending-list");
@@ -540,19 +558,21 @@ function runPort(type, request) {
   $("progress-title").textContent = type === "save" ? "Saving to ReviewHunter" : "Attaching PDF";
   $("steps").replaceChildren();
   $("progress-actions").hidden = true;
+  $("result").hidden = true;
   showState("progress");
   const port = chrome.runtime.connect({ name: "rh-save" });
-  port.onMessage.addListener((msg) => {
+  port.onMessage.addListener(async (msg) => {
     if (msg.type === "progress") renderSteps(msg.steps);
     if (msg.type === "done") {
-      state.saving = false;
       state.savedIds = msg.result.itemIds || [];
+      port.disconnect();
       const hadError = [...$("steps").children].some((li) => li.classList.contains("error"));
-      $("progress-title").textContent = msg.result.ok ? (hadError ? "Saved, with a problem" : "Saved") : "Not saved";
+      $("progress-title").textContent = msg.result.ok ? "Checking the library" : "Not saved";
+      await showVerifiedResult(msg.result, hadError, type);
+      state.saving = false;
       $("progress-actions").hidden = false;
       $("btn-open-app").hidden = !state.savedIds.length;
       $("btn-done").focus();
-      port.disconnect();
     }
   });
   port.onDisconnect.addListener(() => {
@@ -566,6 +586,82 @@ function runPort(type, request) {
 }
 
 /**
+ * Ask ReviewHunter what was really stored and show it as a banner: green when every item is
+ * saved with a PDF, amber when saved without PDF (or the PDF is on its way), red when the
+ * server cannot confirm. A save is never reported as done from the extension's side alone.
+ *
+ * @param {{ok: boolean, itemIds: number[], message: string, watching?: boolean}} result  Save summary.
+ * @param {boolean} hadError  A step reported an error.
+ * @param {"save"|"attachPending"} type  Request type.
+ * @returns {Promise<void>}
+ */
+async function showVerifiedResult(result, hadError, type) {
+  const ids = (result.itemIds || []).slice(0, 25);
+  if (!result.ok || !ids.length) {
+    setResult("err", "i-x", type === "save" ? "Not saved" : "PDF not attached", result.message || "", "");
+    $("progress-title").textContent = "";
+    return;
+  }
+  const statuses = (await Promise.all(ids.map((id) => api.itemStatus(id).catch(() => null)))).filter((s) => s && !s.in_trash);
+  $("progress-title").textContent = "";
+  if (!statuses.length) {
+    setResult("err", "i-x", "Could not confirm the save", "ReviewHunter did not return the item. Open the app to check.", "");
+    return;
+  }
+  const withPdf = statuses.filter((s) => s.has_pdf);
+  const where = [...new Set(statuses.flatMap((s) => s.collections))];
+  const place = where.length ? `In ${where.slice(0, 2).join(", ")}${where.length > 2 ? ` +${where.length - 2}` : ""}` : "In My Library";
+  if (statuses.length === 1) {
+    const s = statuses[0];
+    const pdf = s.attachments.find((a) => a.mime === "application/pdf") || s.attachments[0];
+    if (s.has_pdf) {
+      setResult("ok", "i-check", "Saved with its PDF", s.title, `${place} · PDF ${formatSize(pdf ? pdf.size : 0)}`);
+    } else if (result.watching) {
+      setResult("warn", "i-minus", "Saved, PDF on its way", s.title, "Complete the check in the opened tab: the PDF will be attached and you will be notified.");
+    } else {
+      setResult("warn", "i-minus", "Saved without PDF", s.title, `${place} · ${hadError ? "the PDF could not be fetched" : "no PDF attached"}`);
+    }
+    return;
+  }
+  const all = withPdf.length === statuses.length;
+  setResult(all ? "ok" : "warn", all ? "i-check" : "i-minus", `${statuses.length} items saved`,
+    `${withPdf.length} with PDF, ${statuses.length - withPdf.length} without`, place);
+}
+
+/**
+ * Fill the result banner.
+ *
+ * @param {"ok"|"warn"|"err"} tone  Colour.
+ * @param {string} iconId  Symbol id.
+ * @param {string} title   Headline.
+ * @param {string} line1   First detail line.
+ * @param {string} line2   Second detail line.
+ * @returns {void}
+ */
+function setResult(tone, iconId, title, line1, line2) {
+  $("result").className = `result ${tone}`;
+  $("result-ico").setAttribute("href", `#${iconId}`);
+  $("result-title").textContent = title;
+  $("result-line1").textContent = line1;
+  $("result-line1").title = line1;
+  $("result-line2").textContent = line2;
+  $("result-line2").hidden = !line2;
+  $("result").hidden = false;
+}
+
+/**
+ * Human readable byte size.
+ *
+ * @param {number} n  Bytes.
+ * @returns {string} "1.2 MB" style, "" for 0.
+ */
+function formatSize(n) {
+  if (!n) return "";
+  if (n < 1024 * 1024) return `${Math.max(1, Math.round(n / 1024))} KB`;
+  return `${(n / 1024 / 1024).toFixed(1)} MB`;
+}
+
+/**
  * Render the progress checklist.
  *
  * @param {Array<{id: string, label: string, state: string, detail?: string}>} steps  Steps.
@@ -574,7 +670,7 @@ function runPort(type, request) {
 function renderSteps(steps) {
   const ul = $("steps");
   ul.replaceChildren(...steps.map((s) => {
-    const ic = s.state === "done" ? icon("i-check") : s.state === "error" ? icon("i-x") : s.state === "skipped" ? icon("i-minus") : "";
+    const ic = s.state === "done" ? icon("i-check") : s.state === "error" ? icon("i-x") : s.state === "skipped" ? icon("i-minus") : s.state === "waiting" ? icon("i-alert") : "";
     return h("li", { className: s.state },
       h("span", { className: "st-icon" }, ic),
       h("div", {}, h("div", { className: "st-label", textContent: s.label }), s.detail ? h("div", { className: "st-detail", textContent: s.detail }) : null));

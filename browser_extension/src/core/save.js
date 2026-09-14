@@ -7,6 +7,7 @@
 
 import * as api from "../api.js";
 import { acquirePdf, shortUrl } from "./pdf.js";
+import { acquireFromShadowLibraries, openForUser } from "./shadow.js";
 import { snapshotHtml } from "./detect.js";
 import { toPayload } from "../extract/index.js";
 import { addPending, removePending, getSettings } from "../settings.js";
@@ -19,7 +20,7 @@ const WEB_TYPES = new Set(["webpage", "blogPost", "newspaperArticle", "magazineA
  * @typedef {object} Step
  * @property {string} id
  * @property {string} label
- * @property {"pending"|"running"|"done"|"error"|"skipped"} state
+ * @property {"pending"|"running"|"done"|"error"|"skipped"|"waiting"} state  waiting: needs the user (human check)
  * @property {string} [detail]
  */
 
@@ -47,6 +48,8 @@ class Progress {
   constructor(emit) {
     this.steps = [];
     this.emit = emit || (() => {});
+    /** True when a PDF will be attached later, after the user completes a human check. */
+    this.watching = false;
   }
 
   /**
@@ -82,33 +85,67 @@ function formatBytes(n) {
 /**
  * Download a PDF in the browser and attach it to an item, updating a "pdf" step.
  *
- * @param {Progress} progress  Tracker.
+ * Order: page / publisher candidates (user's session), then, when the item has a DOI and the
+ * option is on, Sci-Hub / SciDB fetched from the browser. If those only show a human check,
+ * the page is opened for the user and the item is remembered with `watch: true`; background.js
+ * attaches the PDF as soon as the check is completed (never solved automatically).
+ *
+ * @param {Progress} progress  Tracker (progress.watching is set when waiting for the user).
  * @param {string} stepId      Step id to update.
  * @param {{id: number, title: string}} saved  Saved item.
  * @param {string[]} candidates  PDF URLs.
- * @param {{tabId?: ?number, allowBackgroundTab: boolean, doi?: string, pageUrl?: string, rememberFailure?: boolean}} opts
+ * @param {{tabId?: ?number, allowBackgroundTab: boolean, doi?: string, pageUrl?: string, rememberFailure?: boolean,
+ *   shadow?: boolean}} opts
  * @returns {Promise<boolean>} True when attached.
  */
 async function attachPdfTo(progress, stepId, saved, candidates, opts) {
-  if (!candidates.length) {
-    progress.set(stepId, { state: "skipped", label: "No PDF link found on this page" });
-    return false;
+  const onStep = (text) => progress.set(stepId, { detail: text });
+  let res = { ok: false, attempts: [] };
+  if (candidates.length) {
+    progress.set(stepId, { state: "running", label: "Looking for the PDF", detail: shortUrl(candidates[0]) });
+    res = await acquirePdf(candidates, { tabId: opts.tabId, allowBackgroundTab: opts.allowBackgroundTab, onStep });
   }
-  progress.set(stepId, { state: "running", label: "Looking for the PDF", detail: shortUrl(candidates[0]) });
-  const res = await acquirePdf(candidates, {
-    tabId: opts.tabId,
-    allowBackgroundTab: opts.allowBackgroundTab,
-    onStep: (text) => progress.set(stepId, { detail: text }),
-  });
+  let blocked = null;
+  if (!res.ok && opts.shadow && opts.doi) {
+    progress.set(stepId, { state: "running", label: candidates.length ? "Publisher PDF not reachable: trying Sci-Hub / SciDB" : "Trying Sci-Hub / SciDB" });
+    const sh = await acquireFromShadowLibraries(opts.doi, { onStep });
+    if (sh.ok) res = sh;
+    else {
+      res = { ok: false, attempts: [...res.attempts, ...sh.attempts] };
+      blocked = sh.blocked;
+    }
+  }
   if (!res.ok) {
+    if (!candidates.length && !(opts.shadow && opts.doi)) {
+      progress.set(stepId, { state: "skipped", label: "No PDF link found on this page" });
+      return false;
+    }
     const last = res.attempts[res.attempts.length - 1];
+    if (blocked) {
+      // The user completes the check; background.js sees the article page and attaches the PDF.
+      await addPending({ itemId: saved.id, title: saved.title, doi: opts.doi || "", urls: [...candidates, blocked.url], pageUrl: opts.pageUrl || "", watch: true });
+      const tabId = await openForUser(blocked.url, opts.tabId);
+      progress.watching = true;
+      progress.set(stepId, {
+        state: "waiting",
+        label: `${blocked.source.replace(/\s*\(.*\)$/, "")} asks you to confirm you are human`,
+        detail: tabId !== null
+          ? `Opened ${shortUrl(blocked.url)} in a new tab. Complete the check there: the PDF will be attached automatically and you will get a notification.`
+          : `Open ${blocked.url} in a tab and complete the check: the PDF will then be attached automatically.`,
+      });
+      return false;
+    }
     if (opts.rememberFailure !== false) {
       await addPending({ itemId: saved.id, title: saved.title, doi: opts.doi || "", urls: candidates, pageUrl: opts.pageUrl || "" });
     }
+    const shadowTried = res.attempts.filter((a) => /Sci-Hub|SciDB/.test(a.via));
+    const shadowUnreachable = shadowTried.length && shadowTried.every((a) => /network error|timed out/.test(a.error));
     progress.set(stepId, {
       state: "error",
       label: "Couldn't fetch the PDF automatically",
-      detail: `${last ? `${last.via}: ${last.error}. ` : ""}Open the PDF in a tab and click the ReviewHunter button there to attach it.`,
+      detail: shadowUnreachable
+        ? "Sci-Hub and SciDB could not be reached from the extension (web filter, DNS block or untrusted certificate). If you open the article page yourself and it loads, the PDF is attached automatically."
+        : `${last ? `${last.via}: ${last.error}. ` : ""}Open the PDF in a tab and click the ReviewHunter button there to attach it.`,
     });
     return false;
   }
@@ -167,6 +204,7 @@ export async function runSave(req, onProgress) {
           allowBackgroundTab: settings.useBackgroundTab,
           doi: item.doi,
           pageUrl: det.url,
+          shadow: !!settings.useShadowLibraries,
         });
       }
     }
@@ -185,7 +223,7 @@ export async function runSave(req, onProgress) {
         progress.set("snap", { state: "error", label: "Snapshot failed", detail: "the page could not be read" });
       }
     }
-    return { ok: true, itemIds: [s.id], message: s.existing ? "Updated existing item" : "Saved" };
+    return { ok: true, itemIds: [s.id], message: s.existing ? "Updated existing item" : "Saved", watching: progress.watching };
   } catch (e) {
     progress.set("fatal", { state: "error", label: "Saving failed", detail: e.message });
     return { ok: false, itemIds: [], message: e.message };

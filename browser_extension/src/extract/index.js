@@ -173,11 +173,12 @@ export function detect(doc, url, ctx = {}) {
     ...((site && site.pdfCandidates) || []),
     highwire.pdf_url, bepress.pdf_url, eprints.pdf_url, jsonld.pdf_url,
     absUrl(attrOf(doc, 'link[rel="alternate"][type="application/pdf"]', "href"), url),
-    ...(scholarly ? pdfLinksOnPage(doc, url) : []),
+    ...(scholarly && !(site && site.skipPdfScan) ? pdfLinksOnPage(doc, url) : []),
   ].map((u) => absUrl(u, url)).filter(Boolean);
   const item = finishItem({ ...merged, _pdfCandidates: [...new Set(candidates)] });
   const label = translator ? translator.label : scholarly ? "Embedded metadata" : "Web page";
-  return { kind: "single", translator: label, url, items: [item], scholarly, doiVia };
+  // challenge: the page is a human-verification wall (the user must complete it before the PDF is reachable).
+  return { kind: "single", translator: label, url, items: [item], scholarly, doiVia, challenge: !!(site && site.challenge) };
 }
 
 /**

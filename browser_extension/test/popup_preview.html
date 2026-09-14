@@ -14,6 +14,7 @@
   <!--
     Visual preview of the real popup (src/popup/popup.html + popup.js) with a mocked chrome.* API.
     Usage: test/popup_preview.html?s=single,multi,pdf,offline,progress  (served by test/serve.py)
+    Extra scenarios: scihub-wall, saved-pdf, progress-watch
   -->
   <script type="module">
     import { detect, detectPdf } from "../src/extract/index.js";
@@ -21,6 +22,9 @@
     /** Build the detection for a scenario from the fixtures. */
     async function detectionFor(s) {
       const load = async (name) => new DOMParser().parseFromString(await (await fetch(`fixtures/${name}`)).text(), "text/html");
+      const scihub = "https://sci-hub.fr/10.1177/0269881107082286";
+      if (s === "scihub-wall") return detect(await load("scihub_challenge.html"), scihub);
+      if (s === "saved-pdf" || s === "progress-watch") return detect(await load("scihub.html"), scihub);
       if (s === "single" || s === "progress") return detect(await load("sciencedirect.html"), "https://www.sciencedirect.com/science/article/pii/S0376871617302533");
       if (s === "multi") return detect(await load("scholar.html"), "https://scholar.google.com/scholar?q=hopfield");
       if (s === "pdf") return detectPdf("https://www.sciencedirect.com/science/article/pii/S0376871617302533/pdfft?md5=1&pid=1-s2.0-S0376871617302533-main.pdf");
@@ -70,7 +74,12 @@
                     steps[2] = { id: "pdf-upload", label: "PDF attached", state: "done" };
                     steps.push({ id: "snap", label: "Snapshot failed", state: "error", detail: "the page could not be read" });
                     listeners.forEach((f) => f({ type: "progress", steps }));
-                    listeners.forEach((f) => f({ type: "done", result: { ok: true, itemIds: [9], message: "Saved" } }));
+                    if (M.scenario === "progress-watch") {
+                      steps[1] = { id: "pdf", label: "Sci-Hub asks you to confirm you are human", state: "waiting", detail: "Opened sci-hub.fr/.../0269881107082286 in a new tab. Complete the check there: the PDF will be attached automatically and you will get a notification." };
+                      steps.splice(2);
+                    }
+                    listeners.forEach((f) => f({ type: "progress", steps }));
+                    listeners.forEach((f) => f({ type: "done", result: { ok: true, itemIds: [9], message: "Saved", watching: M.scenario === "progress-watch" } }));
                   }, 600);
                 } };
               return port;
@@ -90,7 +99,16 @@
           const json = (v) => new Response(JSON.stringify(v), { headers: { "Content-Type": "application/json" } });
           if (u.endsWith("/connector/collections")) return json(M.collections);
           if (u.endsWith("/connector/tags")) return json(M.tags);
-          if (u.endsWith("/connector/lookup")) return json({ found: M.scenario === "single", items: [] });
+          if (u.endsWith("/connector/lookup")) {
+            const found = ["single", "scihub-wall", "saved-pdf"].includes(M.scenario);
+            return json({ found, items: found ? [{ id: 9, title: "t", has_pdf: M.scenario === "saved-pdf", attachments: 1 }] : [] });
+          }
+          if (u.includes("/connector/item/")) {
+            const hasPdf = M.scenario !== "progress-watch";
+            return json({ id: 9, title: M.detection.items[0].title, doi: M.detection.items[0].doi || "", in_trash: false, has_pdf: hasPdf,
+              attachments: hasPdf ? [{ title: "Full Text PDF", kind: "file", mime: "application/pdf", size: 1468006 }] : [],
+              collections: ["Neuroscience / Addiction"] });
+          }
           return realFetch(url, init);
         };
       <\/script>`;
@@ -99,7 +117,7 @@
       window.__mocks = window.__mocks || {};
       window.__mocks[s] = mock;
       frame.srcdoc = html;
-      if (s === "progress") frame.addEventListener("load", () => setTimeout(() => frame.contentDocument.getElementById("btn-save").click(), 700));
+      if (s.startsWith("progress")) frame.addEventListener("load", () => setTimeout(() => frame.contentDocument.getElementById("btn-save").click(), 700));
       fig.append(frame);
       document.body.append(fig);
     }

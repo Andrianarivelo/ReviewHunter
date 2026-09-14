@@ -3,9 +3,16 @@
 Resolution order: publisher/open-access PDF -> Sci-Hub mirrors -> Anna's
 Archive SciDB. The library calls ``iter_pdf_urls`` to test candidates lazily
 until a real PDF is saved.
+
+Shadow libraries increasingly answer automated clients with a human check
+(ALTCHA "are you a robot?", DDoS-Guard, JavaScript "antibot" pages). Those
+pages are detected and reported through ``collect_notes`` so the user learns
+*why* nothing was found; they are never solved automatically. The browser
+extension handles that case with the user's own session instead.
 """
 from __future__ import annotations
 
+import contextvars
 import logging
 import os
 import re
@@ -20,18 +27,82 @@ from doi_hunter.netinfo import get_headers
 
 log = logging.getLogger("doihunter.sources")
 
+# sci-hub.fr is the live domain in Sept 2026; .ru and .box redirect to it, .st and .se no longer answer.
+# Redirects to an already visited host are skipped, so listing aliases costs one cheap request each.
 SCIHUB_MIRRORS = [
-    "https://sci-hub.st",
+    "https://sci-hub.fr",
     "https://sci-hub.ru",
+    "https://sci-hub.box",
+    "https://sci-hub.st",
     "https://sci-hub.se",
 ]
 
+# annas-archive.gs was removed: its "Antibot solution" page redirects to an unrelated advertising domain.
 ANNAS_BASES = [
-    "https://annas-archive.pk",
-    "https://annas-archive.gs",
     "https://annas-archive.org",
+    "https://annas-archive.li",
     "https://annas-archive.se",
+    "https://annas-archive.pk",
 ]
+
+# ---------------- Diagnostics (why a source gave nothing) ----------------
+
+_NOTES: contextvars.ContextVar[Optional[list[str]]] = contextvars.ContextVar("rh_source_notes", default=None)
+
+_CHALLENGE_RX = re.compile(
+    r"(altcha|êtes-vous un robot|etes-vous un robot|are you a robot|ddos-guard|antibot solution|"
+    r"cf-challenge|challenge-platform|just a moment\.\.\.|verify you are human)",
+    re.IGNORECASE,
+)
+
+
+def _note(message: str) -> None:
+    """Record a human-readable diagnostic for the current resolution (no-op outside collect_notes)."""
+    notes = _NOTES.get()
+    if notes is not None and message not in notes:
+        notes.append(message)
+    log.info(message)
+
+
+def is_bot_challenge(html: str) -> bool:
+    """True when an HTML page is a human-verification wall instead of real content.
+
+    Checks the first 20 kB only: challenge markers live in the head / first screen, while a real
+    article page is long and could mention "robot" anywhere in its references.
+    """
+    head = (html or "")[:20000]
+    if re.search(r"<title[^>]*>\s*loading\.\.\.\s*</title>", head, re.IGNORECASE):
+        return True
+    return bool(_CHALLENGE_RX.search(head))
+
+
+class collect_notes:
+    """Context manager collecting diagnostics emitted by resolvers.
+
+    >>> with collect_notes() as notes:
+    ...     list(iter_pdf_urls(doi))
+    >>> notes  # ["Sci-Hub (sci-hub.fr): human verification required", ...]
+    """
+
+    def __enter__(self) -> list[str]:
+        self._notes: list[str] = []
+        self._token = _NOTES.set(self._notes)
+        return self._notes
+
+    def __exit__(self, *exc) -> None:
+        _NOTES.reset(self._token)
+
+
+def shadow_library_pages(doi: str) -> list[dict]:
+    """Landing pages of the configured Sci-Hub mirrors and SciDB bases for a DOI.
+
+    Used by the browser extension, which opens / fetches them with the user's browser session.
+    """
+    doi = doi.strip()
+    path = quote(doi, safe="/")
+    pages = [{"source": f"Sci-Hub ({b.split('//', 1)[-1]})", "url": f"{b}/{path}"} for b in _scihub_bases()]
+    pages += [{"source": f"Anna's Archive SciDB ({b.split('//', 1)[-1]})", "url": f"{b}/scidb/{path}"} for b in _scidb_bases()]
+    return pages
 
 _PDF_RX = re.compile(r"\.pdf(?:[/?#~]|$)", re.IGNORECASE)
 _PDF_URLISH_RX = re.compile(r"""(?i)(?:(?:https?:)?//|/)[^'"<>\s]+?\.pdf(?:[#?~][^'"<>\s]*)?""")
@@ -54,6 +125,33 @@ def _get(url: str, **kw) -> Optional[requests.Response]:
         return None
 
 
+def _fetch_page(url: str, label: str = "") -> Optional[requests.Response]:
+    """GET that keeps non-200 responses (bot walls often answer 403).
+
+    Returns None on network errors after recording why (``label`` prefixes the note). Certificate
+    errors are never bypassed: an untrusted certificate usually means a web filter (FortiClient,
+    corporate proxy) is intercepting the site, and verification must stay on.
+    """
+    try:
+        return requests.get(url, headers=get_headers(), timeout=20, allow_redirects=True)
+    except requests.exceptions.SSLError as e:
+        _note(f"{label}: HTTPS certificate not trusted (a web filter or proxy is probably intercepting this site)")
+        log.debug(f"GET {url} SSL error: {e}")
+    except requests.exceptions.ConnectionError as e:
+        text = str(e)
+        if "NameResolution" in text or "getaddrinfo" in text:
+            _note(f"{label}: domain does not resolve (blocked by DNS filtering, or the mirror is gone)")
+        else:
+            _note(f"{label}: not reachable (connection refused or reset)")
+        log.debug(f"GET {url} failed: {e}")
+    except requests.exceptions.Timeout:
+        _note(f"{label}: no answer within 20 s")
+    except Exception as e:
+        _note(f"{label}: request failed ({type(e).__name__})")
+        log.debug(f"GET {url} failed: {e}")
+    return None
+
+
 def _absolutize(href: str, base: str) -> str:
     return urljoin(base, href.strip())
 
@@ -62,6 +160,14 @@ def _configured_bases(env_name: str, defaults: list[str]) -> list[str]:
     raw = os.environ.get(env_name, "")
     configured = [p.strip().rstrip("/") for p in raw.split(",") if p.strip()]
     return configured or defaults
+
+
+def _scihub_bases() -> list[str]:
+    return _configured_bases("REVIEWHUNTER_SCIHUB_MIRRORS", _configured_bases("DOIHUNTER_SCIHUB_MIRRORS", SCIHUB_MIRRORS))
+
+
+def _scidb_bases() -> list[str]:
+    return _configured_bases("REVIEWHUNTER_SCIDB_BASES", _configured_bases("DOIHUNTER_SCIDB_BASES", ANNAS_BASES))
 
 
 def _is_pdf_response(r: requests.Response) -> bool:
@@ -212,17 +318,34 @@ def _scihub_candidates(doi: str) -> list[Resolved]:
     doi = doi.strip()
     resolved: list[Resolved] = []
     seen_urls: set[str] = set()
-    for base in _configured_bases("REVIEWHUNTER_SCIHUB_MIRRORS", _configured_bases("DOIHUNTER_SCIHUB_MIRRORS", SCIHUB_MIRRORS)):
-        r = _get(f"{base}/{quote(doi, safe='/')}", allow_redirects=True)
-        if not r:
+    visited_hosts: set[str] = set()
+    for base in _scihub_bases():
+        base_host = urlsplit(base).netloc.lower()
+        if base_host in visited_hosts:
             continue
-        mirror = base.split("//", 1)[-1]
+        r = _fetch_page(f"{base}/{quote(doi, safe='/')}", f"Sci-Hub ({base_host})")
+        if r is None:
+            continue
+        final_host = urlsplit(r.url).netloc.lower()
+        if final_host in visited_hosts:
+            continue  # alias redirecting to a mirror already tried
+        visited_hosts.update({base_host, final_host})
+        mirror = final_host or base_host
+        if not _is_pdf_response(r) and is_bot_challenge(r.text):
+            _note(f"Sci-Hub ({mirror}): human verification required (open the page in Chrome and save with the extension)")
+            continue
+        if r.status_code != 200:
+            _note(f"Sci-Hub ({mirror}): HTTP {r.status_code}")
+            continue
         if _is_pdf_response(r):
             if r.url not in seen_urls:
                 seen_urls.add(r.url)
                 resolved.append(Resolved(url=r.url, source=f"Sci-Hub ({mirror})"))
             continue
-        for _, url in _pdf_candidates_from_html(r.text, r.url, base):
+        found = _pdf_candidates_from_html(r.text, r.url, _origin(r.url))
+        if not found:
+            _note(f"Sci-Hub ({mirror}): article not available")
+        for _, url in found:
             clean_url = urldefrag(url).url
             if clean_url and clean_url not in seen_urls:
                 seen_urls.add(clean_url)
@@ -266,19 +389,25 @@ def _scidb_candidates(doi: str) -> list[Resolved]:
     doi = doi.strip()
     resolved: list[Resolved] = []
     seen_urls: set[str] = set()
-    for base in _configured_bases("REVIEWHUNTER_SCIDB_BASES", _configured_bases("DOIHUNTER_SCIDB_BASES", ANNAS_BASES)):
-        page = _get(f"{base}/scidb/{quote(doi, safe='/')}", allow_redirects=True)
-        if not page:
+    for base in _scidb_bases():
+        host = urlsplit(base).netloc.lower()
+        page = _fetch_page(f"{base}/scidb/{quote(doi, safe='/')}", f"SciDB ({host})")
+        if page is None:
+            continue
+        if is_bot_challenge(page.text):
+            _note(f"SciDB ({host}): human verification required")
+            continue
+        if page.status_code != 200:
+            _note(f"SciDB ({host}): HTTP {page.status_code}")
             continue
         if urlsplit(page.url).path.startswith("/search"):
+            _note(f"SciDB ({host}): article not available")
             continue
         soup = BeautifulSoup(page.text, "html.parser")
 
-        # Quick negative/anti-bot filters.
         body_text = (soup.get_text(" ") or "").lower()
         if "not in our database" in body_text or "no scimag" in body_text:
-            continue
-        if "antibot solution" in body_text or (soup.title and soup.title.get_text(strip=True).lower() == "loading..."):
+            _note(f"SciDB ({host}): article not available")
             continue
 
         candidates: list[tuple[int, str]] = []

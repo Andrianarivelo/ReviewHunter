@@ -8,13 +8,15 @@
  * - patch: partial payload that overrides generic metadata;
  * - pdfCandidates: ordered PDF URLs to try in the browser;
  * - skipDoiScan: do not guess a DOI from links/text (e.g. arXiv shows DataCite DOIs);
+ * - skipPdfScan: do not add generic "PDF" links found on the page (the translator knows the real file);
+ * - challenge: the page is a human-verification wall;
  * - items: a list for multi-item pages (then patch is ignored).
  *
  * @module extract/sites
  */
 
 import { clean, stripTags, normalizeDate, pageRange, parseCreators, cleanIsbns, splitKeywords } from "./normalize.js";
-import { arxivIdFrom, pmidFromUrl, piiFromUrl, doiFromUrl, cleanDoi, extractDoi } from "../shared/identifiers.js";
+import { arxivIdFrom, pmidFromUrl, piiFromUrl, doiFromUrl, cleanDoi, extractDoi, isBotChallengeHtml, shadowLibraryKind } from "../shared/identifiers.js";
 import { absUrl } from "./doi.js";
 import { readGoogleScholar, readPubMedSearch, readCrossRefSearch } from "./multi.js";
 
@@ -83,8 +85,74 @@ function jsonFromScripts(doc, marker) {
   return null;
 }
 
+/**
+ * PDF viewers and download links on a Sci-Hub / SciDB article page, best first.
+ * Sci-Hub embeds the file in `<object type="application/pdf" data="//host/storage/...pdf#view=FitH">`
+ * and repeats it in a `.download` link; protocol-relative URLs are made absolute.
+ *
+ * @param {Document} doc  Document.
+ * @param {string} url    Page URL.
+ * @returns {string[]} Absolute PDF URLs without fragments.
+ */
+function shadowPdfLinks(doc, url) {
+  let raw = [
+    ...[...doc.querySelectorAll('object[type="application/pdf"], object[data]')].map((el) => el.getAttribute("data")),
+    ...[...doc.querySelectorAll("embed[src], iframe[src]")].map((el) => el.getAttribute("src")).filter((s) => /pdf/i.test(s || "")),
+    ...[...doc.querySelectorAll(".download a[href]")].map((a) => a.getAttribute("href")),
+  ];
+  // Plain ".pdf" anchors only when the page has no viewer / download button: they may be unrelated site documents.
+  if (!raw.length) raw = [...doc.querySelectorAll("a[href$='.pdf'], a[href*='.pdf?']")].map((a) => a.getAttribute("href"));
+  const out = [];
+  for (const r of raw) {
+    const abs = absUrl(r, url);
+    if (!abs || !/^https?:/i.test(abs)) continue;
+    const clean = abs.replace(/#.*$/, "");
+    if (/\.pdf(\?|$)/i.test(clean) && !out.includes(clean)) out.push(clean);
+  }
+  return out;
+}
+
 /** @type {Array<{id: string, label: string, test: (url: string) => boolean, run: Function}>} */
 export const TRANSLATORS = [
+  {
+    id: "shadow-library",
+    label: "Sci-Hub / SciDB",
+    test: (url) => !!shadowLibraryKind(url) && !!doiFromUrl(url),
+    run: (doc, url) => {
+      const kind = shadowLibraryKind(url);
+      const doi = doiFromUrl(url);
+      const challenge = isBotChallengeHtml(doc.documentElement ? doc.documentElement.outerHTML : "");
+      // Sci-Hub titles read "Sci-Hub. <title> / <journal>, <year>"; the journal part follows the LAST " / ".
+      let title = "";
+      let journal = "";
+      let date = "";
+      if (!challenge) {
+        const full = clean(doc.title).replace(/^sci-hub\s*[.:|-]\s*/i, "").replace(/\s*[|-]\s*anna.s archive.*$/i, "");
+        const cut = kind === "scihub" ? full.lastIndexOf(" / ") : -1;
+        title = cut > 0 ? full.slice(0, cut) : full;
+        const venue = cut > 0 ? full.slice(cut + 3) : "";
+        const m = venue.match(/^(.*?),\s*((?:1[89]|20)\d{2})\s*$/);
+        journal = m ? m[1] : venue;
+        date = m ? m[2] : "";
+      }
+      return {
+        challenge,
+        skipDoiScan: true,
+        skipPdfScan: true,
+        patch: {
+          item_type: "journalArticle",
+          doi,
+          // Placeholder on a verification wall: CrossRef enrichment replaces it with the real title.
+          title: title || `DOI ${doi}`,
+          journal,
+          date,
+          // The shadow-library address is not the article's home: store the DOI link instead.
+          url: `https://doi.org/${doi}`,
+        },
+        pdfCandidates: challenge ? [] : shadowPdfLinks(doc, url),
+      };
+    },
+  },
   {
     id: "scholar",
     label: "Google Scholar",

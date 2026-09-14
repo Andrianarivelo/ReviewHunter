@@ -116,6 +116,28 @@ export function lookup(q) {
 }
 
 /**
+ * GET /connector/item/{id}: what is really stored (PDF attached? which collections?).
+ * Used to confirm a save instead of assuming it worked.
+ *
+ * @param {number} itemId  Item id.
+ * @returns {Promise<{id: number, title: string, doi: string, in_trash: boolean, has_pdf: boolean,
+ *   attachments: Array<{title: string, kind: string, mime: string, size: number}>, collections: string[]}>}
+ */
+export function itemStatus(itemId) {
+  return request(`/connector/item/${encodeURIComponent(itemId)}`, { timeout: 8000 });
+}
+
+/**
+ * GET /connector/pdf-sources: Sci-Hub / SciDB landing pages configured in ReviewHunter for a DOI.
+ *
+ * @param {string} doi  DOI.
+ * @returns {Promise<{doi: string, pages: Array<{source: string, url: string}>}>}
+ */
+export function pdfSources(doi) {
+  return request(`/connector/pdf-sources?doi=${encodeURIComponent(doi)}`, { timeout: 8000 });
+}
+
+/**
  * POST /connector/save.
  *
  * @param {{items: object[], collection_id?: ?number, tags?: string[], note?: string, enrich?: boolean, pdf_url?: string}} body

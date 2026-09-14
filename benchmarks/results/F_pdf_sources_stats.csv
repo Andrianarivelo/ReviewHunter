@@ -1,0 +1,4 @@
+test,statistic,p_value,n,interpretation,note
+Shapiro-Wilk on paired time differences (current - previous),0.9534,0.7679,6,normality not rejected,n is tiny: Wilcoxon is used regardless (no normality assumption)
+"Wilcoxon signed-rank, elapsed seconds (paired, two-sided, exact)",1.0,0.0625,6,not significant,median paired difference -1.56 s (negative = current faster)
+"Exact McNemar, informative outcome (candidate or explained failure) vs silent","b=0, c=6",0.0312,6,significant,with n=6 the smallest achievable two-sided p is 0.031 (all 6 discordant in one direction)

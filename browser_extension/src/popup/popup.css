@@ -175,4 +175,32 @@ main { padding: 12px 14px 4px; }
 .steps li.skipped .st-label { color: var(--text-2); font-weight: 500; }
 .steps li.running .st-icon { border: 2px solid var(--brand-soft); border-top-color: var(--brand); animation: spin 0.8s linear infinite; }
 .steps li.pending .st-icon { border: 2px solid var(--border); }
+.steps li.waiting { background: var(--warn-soft); }
+.steps li.waiting .st-icon { color: var(--warn-ink); }
+.steps li.waiting .st-detail { color: var(--warn-ink); }
 #progress-actions { padding-bottom: 10px; }
+
+/* Notice under the card (human-verification wall on the page) */
+.notice {
+  display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px; margin-top: 10px; padding: 8px 10px;
+  border-radius: var(--radius-sm); background: var(--warn-soft); color: var(--warn-ink); font-size: 12px; line-height: 1.4;
+}
+.notice svg { width: 16px; height: 16px; margin-top: 1px; }
+
+/* Verified save result (confirmed by the server, not assumed) */
+.result {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: center;
+  margin: 0 0 10px; padding: 10px 12px; border-radius: var(--radius); border: 1px solid transparent;
+  animation: pop-in 0.22s ease-out;
+}
+.result .r-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: #fff; }
+.result .r-icon svg { width: 18px; height: 18px; }
+.result .r-title { font-weight: 700; font-size: 13.5px; }
+.result .r-line { font-size: 11.5px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.result.ok { background: var(--ok-soft); border-color: rgba(22, 163, 74, 0.25); }
+.result.ok .r-icon { background: var(--ok); }
+.result.warn { background: var(--warn-soft); border-color: rgba(217, 119, 6, 0.25); }
+.result.warn .r-icon { background: #d97706; }
+.result.err { background: var(--err-soft); border-color: rgba(220, 38, 38, 0.25); }
+.result.err .r-icon { background: var(--err); }
+@keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }

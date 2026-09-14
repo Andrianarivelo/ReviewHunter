@@ -42,6 +42,15 @@ After pulling new code, press the reload arrow on the extension card in
   *Add selection as identifiers*.
 - The badge shows how many references were detected on the tab; a grey icon
   means ReviewHunter is not running (checked at most every 20 s).
+- **Saved indicator**: when the reference on the tab is already in your library
+  the badge shows a check mark, **green** when its PDF is attached, **amber**
+  when the PDF is still missing (hover the button for the title). The popup
+  shows the same state (*Saved · PDF* / *Saved · no PDF*).
+- **Verified result**: after a save, the popup asks ReviewHunter what was really
+  stored and shows a banner: *Saved with its PDF* (collection and file size),
+  *Saved without PDF*, *Saved, PDF on its way* (waiting for a human check) or an
+  error. Saves finished in the background (context menu, auto attach) raise a
+  desktop notification after the same server check.
 
 ## How the PDF is obtained
 
@@ -62,6 +71,19 @@ page, open-access URL returned by the server), best first:
    opened in an inactive tab, the extension waits for Chrome's PDF viewer, reads
    the bytes and closes the tab.
 
+5. **Sci-Hub / SciDB** (Options: *Try Sci-Hub and SciDB*, on by default, needs a
+   DOI): the mirrors configured in ReviewHunter (`/connector/pdf-sources`, env
+   `REVIEWHUNTER_SCIHUB_MIRRORS` / `REVIEWHUNTER_SCIDB_BASES`) are fetched with
+   the browser session; an article page is parsed for its PDF viewer. Aliases
+   redirecting to a mirror already tried are skipped.
+   - If a mirror shows a **human check** (ALTCHA "are you a robot?", DDoS-Guard,
+     "Antibot" page), it is **never solved automatically**: the page opens in a
+     new background tab, you complete the check, and the extension attaches the
+     PDF as soon as the article appears (re-checked every 3 s for 5 min), then
+     notifies you.
+   - **Auto attach**: opening a Sci-Hub / SciDB article page for a DOI that is in
+     your library without a PDF attaches that PDF automatically.
+
 Bytes are uploaded only if they start with `%PDF-` and are at most 200 MB (the
 server checks the same). If everything fails the popup says so, and the item is
 remembered for 24 h: open the PDF yourself and click the button to attach it.
@@ -74,6 +96,7 @@ remembered for 24 h: open the PDF yourself and click the button to attach it.
 | `tabs` | Badge per tab, PDF-tab detection, last-resort background tab, focusing the ReviewHunter window. |
 | `storage` | Settings, last collection, pending PDF attachments (session only). |
 | `contextMenus` | Right-click save actions. |
+| `notifications` | "PDF saved" confirmation for saves that finish outside the popup (auto attach, context menu). |
 | `http://127.0.0.1/*`, `http://localhost/*` | Talk to the local ReviewHunter server. |
 | `<all_urls>` | Download PDFs **with your browser session** from whichever publisher hosts them (this is what makes closed-access downloads work), and count references for the badge. |
 
@@ -92,6 +115,7 @@ src/settings.js        settings, pending attachments, ping cache
 src/core/detect.js     injects the extractor into a tab (dynamic import in the isolated world)
 src/core/pdf.js        in-browser PDF acquisition strategies
 src/core/save.js       save orchestration with a progress checklist
+src/core/shadow.js     Sci-Hub / SciDB fallback in the browser (walls detected, never solved)
 src/extract/           translator-lite: meta tags, JSON-LD, COinS, DOI discovery, site rules, multi-item pages
 src/shared/identifiers.js  DOI / arXiv / PMID / PII helpers, interstitial parser, %PDF- check
 src/popup/, src/options/, src/ui/common.css   user interface
@@ -102,11 +126,13 @@ test/                  browser harnesses, fixtures, API smoke test
 ## Tests
 
 ```bash
-# Extractor + helpers (94 assertions) and PDF acquisition (11 assertions)
+# Extractor + helpers (105 assertions), PDF acquisition (11), Sci-Hub / SciDB fallback (8)
 .venv/Scripts/python.exe browser_extension/test/serve.py 8799
 #   open http://127.0.0.1:8799/test/test.html
 #   open http://127.0.0.1:8799/test/pdf_test.html
+#   open http://127.0.0.1:8799/test/shadow_test.html  (fake mirrors: wall, alias, article page)
 #   open http://127.0.0.1:8799/test/popup_preview.html   (visual check of popup states, mocked chrome API)
+#        ?s=scihub-wall,saved-pdf,progress,progress-watch  for the saved / verified states
 
 # Connector API exactly as the extension calls it (use a throwaway library, not your real one)
 REVIEWHUNTER_HOME=/tmp/rh-test REVIEWHUNTER_PORT=8785 .venv/Scripts/python.exe run.py -- --no-browser --port 8785 --no-https
@@ -114,6 +140,11 @@ REVIEWHUNTER_HOME=/tmp/rh-test REVIEWHUNTER_PORT=8785 .venv/Scripts/python.exe r
 ```
 
 ## Known limitations
+
+- **Web filters** (FortiClient Web Filter, corporate proxies, DNS blocking) can
+  intercept Sci-Hub / SciDB with an untrusted certificate or refuse to resolve
+  them. Neither the extension nor the server bypasses that: the popup and the
+  app report it ("certificate not trusted", "domain does not resolve").
 
 - Sites that show a CAPTCHA or "verify you are human" page (Cloudflare, some
   JSTOR / Wiley flows) cannot be passed automatically. Solve it in a tab, open

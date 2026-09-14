@@ -12,7 +12,7 @@
 import { detect, detectPdf, toPayload } from "../src/extract/index.js";
 import {
   cleanDoi, doiFromUrl, extractAllDois, arxivIdFrom, pmidFromUrl, piiFromUrl, isLikelyPdfUrl,
-  findPdfLinkInHtml, isPdfBytes, identifiersInText, fileNameFromUrl,
+  findPdfLinkInHtml, isPdfBytes, identifiersInText, fileNameFromUrl, isBotChallengeHtml, shadowLibraryKind,
 } from "../src/shared/identifiers.js";
 import { parseCreator, parseCreators, normalizeDate, splitKeywords, cleanIsbns } from "../src/extract/normalize.js";
 import { parseKev, kevToPayload } from "../src/extract/coins.js";
@@ -252,6 +252,31 @@ await group("pdf-tab", () => {
   eq([b.items[0].item_type, b.items[0].doi, b.items[0].title], ["document", "", "some paper final"], "anonymous PDF");
   const doc = new DOMParser().parseFromString('<html><body><embed type="application/pdf" src="about:blank"></body></html>', "text/html");
   eq(detect(doc, "https://www.jneurosci.org/content/jneuro/37/1/1.full.pdf").kind, "pdf", "Chrome viewer wrapper detected");
+});
+
+await group("shadow-library", async () => {
+  const url = "https://sci-hub.fr/10.1177/0269881107082286";
+  eq([shadowLibraryKind(url), shadowLibraryKind("https://annas-archive.org/scidb/10.1/x"), shadowLibraryKind("https://annas-archive.org/search?q=x"), shadowLibraryKind("https://sci-hub-fan.example.com/10.1/x")],
+    ["scihub", "scidb", "", ""], "shadowLibraryKind");
+  const page = await fixture("scihub.html");
+  const det = detect(page, url);
+  const it = det.items[0];
+  eq([det.kind, det.translator, det.challenge, it.item_type, it.doi], ["single", "Sci-Hub / SciDB", false, "journalArticle", "10.1177/0269881107082286"], "article page detected with DOI from URL");
+  eq([it.title, it.journal, it.date, it.url],
+    ["High ambient temperature increases intravenous methamphetamine self-administration on fixed and progressive ratio schedules in rats", "Journal of Psychopharmacology", "2007", "https://doi.org/10.1177/0269881107082286"],
+    "title / journal / year parsed from the page title; DOI link stored as URL");
+  eq(it._pdfCandidates, ["https://sci-hub.red/storage/moscow/3858/15232c46/cornish2007.pdf"], "protocol-relative viewer PDF, fragment removed, deduplicated with download link");
+  const raw = await (await fetch("fixtures/scihub.html")).text();
+  eq(findPdfLinkInHtml(raw, url, { minScore: 18 }), "https://sci-hub.red/storage/moscow/3858/15232c46/cornish2007.pdf#navpanes=0&view=FitH", "worker fallback finds the viewer object in raw HTML");
+  ok(!isBotChallengeHtml(raw), "article page is not a challenge");
+
+  const wallRaw = await (await fetch("fixtures/scihub_challenge.html")).text();
+  ok(isBotChallengeHtml(wallRaw), "ALTCHA page is a challenge");
+  ok(isBotChallengeHtml("<html><head><title>DDoS-Guard</title></head></html>"), "DDoS-Guard is a challenge");
+  ok(isBotChallengeHtml("<html><head><title>Loading...</title></head><body>Antibot solution</body></html>"), "Antibot loading page is a challenge");
+  ok(!isBotChallengeHtml(`<html><title>Robot kinematics</title>${"x".repeat(30000)} are you a robot`), "late mention of robot is not a challenge");
+  const wall = detect(await fixture("scihub_challenge.html"), url);
+  eq([wall.kind, wall.challenge, wall.items[0].doi, wall.items[0]._pdfCandidates.length, wall.items[0].title], ["single", true, "10.1177/0269881107082286", 0, "DOI 10.1177/0269881107082286"], "challenge page: DOI kept, no PDF, placeholder title (robot title never saved)");
 });
 
 // ------------------------------------------------------------------------------------------ report

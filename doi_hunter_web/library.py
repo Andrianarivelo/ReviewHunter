@@ -37,7 +37,7 @@ from .metadata import (
     search_crossref,
     suggest_collections,
 )
-from .sources import iter_pdf_urls
+from .sources import collect_notes, iter_pdf_urls
 from .freebooks import resolve_book_url
 
 log = logging.getLogger("doihunter.library")
@@ -907,34 +907,42 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
     expect_pdf = target.suffix.lower() == ".pdf"
     attempted = 0
     total_options = len(source_options) if isinstance(source_options, list) else None
-    for index, (source, url) in enumerate(source_options, start=1):
-        attempted = index
-        if progress:
-            label = f"{source} ({index}/{total_options})" if total_options else f"{source} (attempt {index})"
-            progress("source", {"id": item_id, "source": label})
-        try:
-            size = _download_url_to_target(url, target, item_id, progress, expect_pdf=expect_pdf)
-        except Exception as e:
-            last_error = f"{source}: {e}"
-            log.warning(f"download option failed for item {item_id} via {source}: {e}")
+    # Resolver diagnostics (dead mirrors, human-verification walls) are collected while the lazy
+    # generator runs, so a failure tells the user why nothing was found.
+    with collect_notes() as source_notes:
+        for index, (source, url) in enumerate(source_options, start=1):
+            attempted = index
             if progress:
-                progress("source_failed", {"id": item_id, "source": source, "error": str(e)})
-            continue
+                label = f"{source} ({index}/{total_options})" if total_options else f"{source} (attempt {index})"
+                progress("source", {"id": item_id, "source": label})
+            try:
+                size = _download_url_to_target(url, target, item_id, progress, expect_pdf=expect_pdf)
+            except Exception as e:
+                last_error = f"{source}: {e}"
+                log.warning(f"download option failed for item {item_id} via {source}: {e}")
+                if progress:
+                    progress("source_failed", {"id": item_id, "source": source, "error": str(e)})
+                continue
 
-        get_conn().execute(
-            "UPDATE items SET file_path=?, file_size=?, status='downloaded', error_msg=NULL, "
-            "updated_at=datetime('now') WHERE id=?",
-            (str(target), size, item_id),
-        )
-        catalog.register_file(item_id, target, url=url)
-        _index_fulltext_async(item_id)
-        if progress:
-            progress("done", {"id": item_id, "path": str(target), "size": size})
-        return get_item(item_id)
+            get_conn().execute(
+                "UPDATE items SET file_path=?, file_size=?, status='downloaded', error_msg=NULL, "
+                "updated_at=datetime('now') WHERE id=?",
+                (str(target), size, item_id),
+            )
+            catalog.register_file(item_id, target, url=url)
+            _index_fulltext_async(item_id)
+            if progress:
+                progress("done", {"id": item_id, "path": str(target), "size": size})
+            return get_item(item_id)
+
+    if source_notes:
+        detail = "; ".join(source_notes[:6])
+        no_source_msg = f"{no_source_msg}. {detail}"
+        last_error = f"{last_error}. {detail}" if last_error else detail
 
     if attempted == 0:
         get_conn().execute(
-            "UPDATE items SET status='failed', error_msg=? WHERE id=?", (no_source_msg, item_id)
+            "UPDATE items SET status='failed', error_msg=? WHERE id=?", (no_source_msg[:500], item_id)
         )
         if progress:
             progress("failed", {"id": item_id, "error": no_source_msg})
@@ -948,7 +956,7 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
         except OSError:
             pass
     get_conn().execute(
-        "UPDATE items SET status='failed', error_msg=? WHERE id=?", (error[:300], item_id)
+        "UPDATE items SET status='failed', error_msg=? WHERE id=?", (error[:500], item_id)
     )
     if progress:
         progress("failed", {"id": item_id, "error": error})

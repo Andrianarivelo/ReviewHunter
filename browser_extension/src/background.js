@@ -4,8 +4,11 @@
  * Responsibilities:
  * - answer popup messages (detect, status, pending attachments, open app);
  * - run saves through a long-lived port so they survive the popup closing;
- * - keep the toolbar icon in sync (item count badge, grey icon when offline);
- * - context menus (save page / link / selection).
+ * - keep the toolbar icon in sync (item count badge, grey icon when offline, green / amber
+ *   check when the page's reference is already saved with / without its PDF);
+ * - context menus (save page / link / selection);
+ * - auto attach: when a Sci-Hub / SciDB article page opens for an item still missing its PDF
+ *   (typically after the user completed a human check), download and attach it, then notify.
  *
  * @module background
  */
@@ -14,8 +17,8 @@ import * as api from "./api.js";
 import { detectInTab } from "./core/detect.js";
 import { runSave, runAttachPending } from "./core/save.js";
 import { acquirePdf } from "./core/pdf.js";
-import { getSettings, setSettings, getPending, matchPending } from "./settings.js";
-import { identifiersInText, isLikelyPdfUrl, fileNameFromUrl, doiFromUrl } from "./shared/identifiers.js";
+import { getSettings, setSettings, getPending, matchPending, removePending } from "./settings.js";
+import { identifiersInText, isLikelyPdfUrl, fileNameFromUrl, doiFromUrl, shadowLibraryKind } from "./shared/identifiers.js";
 
 /** How long a ping result is trusted (ms). */
 const STATUS_TTL = 20000;
@@ -107,6 +110,13 @@ async function updateBadge(tabId) {
   const det = await detectInTab(tabId);
   const count = det.kind === "multiple" ? det.items.length : det.kind === "single" || det.kind === "pdf" ? 1 : 0;
   const scholarly = det.kind === "multiple" || det.kind === "pdf" || (det.kind === "single" && det.scholarly);
+  if (status.online && scholarly && (det.kind === "single" || det.kind === "pdf")) {
+    const saved = await savedState(det.items[0]);
+    if (saved) {
+      await showSavedBadge(tabId, saved);
+      return;
+    }
+  }
   // Plain web pages are still savable, but only scholarly finds get a number (like Zotero's icon change).
   await chrome.action.setBadgeText({ tabId, text: count && scholarly ? String(count > 99 ? "99+" : count) : "" });
   await chrome.action.setBadgeBackgroundColor({ tabId, color: status.online ? "#0284c7" : "#94a3b8" });
@@ -116,6 +126,73 @@ async function updateBadge(tabId) {
     tabId,
     title: status.online ? `Save to ReviewHunter${what ? ` (${det.translator}: ${what})` : ""}` : "ReviewHunter is not running (click for help)",
   });
+}
+
+/** Library lookups per reference key, reused for a few seconds (tab switches re-run detection). */
+const savedCache = new Map();
+const SAVED_TTL = 8000;
+
+/**
+ * Is the detected reference already in the library, and does it have its PDF?
+ *
+ * @param {object} item  Detected item (doi / url / title).
+ * @returns {Promise<?{id: number, title: string, hasPdf: boolean}>} Null when not saved or unknown.
+ */
+async function savedState(item) {
+  if (!item) return null;
+  const q = item.doi ? { doi: item.doi } : { url: item.url || undefined, title: item.title || undefined };
+  const key = JSON.stringify(q);
+  const hit = savedCache.get(key);
+  if (hit && Date.now() - hit.at < SAVED_TTL) return hit.value;
+  let value = null;
+  try {
+    const r = await api.lookup(q);
+    if (r.found && r.items.length) {
+      const best = r.items.find((i) => i.has_pdf) || r.items[0];
+      value = { id: best.id, title: best.title, hasPdf: !!best.has_pdf };
+    }
+  } catch (_) {
+    value = null;
+  }
+  savedCache.set(key, { at: Date.now(), value });
+  return value;
+}
+
+/** Forget cached lookups (after a save or an attachment). */
+function invalidateSaved() {
+  savedCache.clear();
+}
+
+/**
+ * Green check: saved with its PDF. Amber check: saved, PDF still missing.
+ *
+ * @param {number} tabId  Tab id.
+ * @param {{title: string, hasPdf: boolean}} saved  Saved state.
+ * @returns {Promise<void>}
+ */
+async function showSavedBadge(tabId, saved) {
+  await chrome.action.setBadgeText({ tabId, text: "\u2713" }).catch(() => {});
+  await chrome.action.setBadgeBackgroundColor({ tabId, color: saved.hasPdf ? "#16a34a" : "#d97706" }).catch(() => {});
+  if (chrome.action.setBadgeTextColor) await chrome.action.setBadgeTextColor({ tabId, color: "#ffffff" }).catch(() => {});
+  await chrome.action.setTitle({
+    tabId,
+    title: saved.hasPdf ? `Saved in ReviewHunter with its PDF: ${saved.title}` : `Saved in ReviewHunter, PDF missing: ${saved.title}`,
+  }).catch(() => {});
+}
+
+/**
+ * Desktop notification (used when a save finishes outside the popup).
+ *
+ * @param {string} title    Title line.
+ * @param {string} message  Body.
+ * @returns {void}
+ */
+function notify(title, message) {
+  if (!chrome.notifications) return;
+  chrome.notifications.create(
+    { type: "basic", iconUrl: chrome.runtime.getURL("icons/icon-128.png"), title, message: String(message).slice(0, 250), priority: 0 },
+    () => void chrome.runtime.lastError,
+  );
 }
 
 /**
@@ -137,7 +214,86 @@ async function flashBadge(tabId, text, color, title) {
 chrome.tabs.onActivated.addListener(({ tabId }) => scheduleBadge(tabId));
 chrome.tabs.onUpdated.addListener((tabId, info, tab) => {
   if (info.status === "complete" && tab.active) scheduleBadge(tabId, 600);
+  if (info.status === "complete" && shadowLibraryKind(tab.url || "")) autoAttach(tabId, tab.url).catch(() => {});
 });
+
+// ------------------------------------------------------------------------------------------
+// Auto attach from Sci-Hub / SciDB article pages
+// ------------------------------------------------------------------------------------------
+
+/** Items currently being attached (avoid double uploads when a page fires several events). */
+const attaching = new Set();
+/** How long a verification wall is re-checked after the page loaded (ms). */
+const CHALLENGE_WAIT_MS = 5 * 60 * 1000;
+
+/**
+ * A Sci-Hub / SciDB page finished loading. If its DOI belongs to an item that still has no
+ * PDF (pending after a failed save, or found in the library without a file), download the
+ * PDF shown on the page with the user's session and attach it.
+ *
+ * While the page is a human-verification wall, nothing is automated: the tab is re-checked
+ * every 3 s (up to 5 min) until the user has completed the check and the article appears.
+ *
+ * @param {number} tabId  Tab id.
+ * @param {string} url    Tab URL.
+ * @returns {Promise<void>}
+ */
+async function autoAttach(tabId, url) {
+  const settings = await getSettings();
+  if (!settings.useShadowLibraries) return;
+  const doi = doiFromUrl(url);
+  if (!doi) return;
+  const pending = (await getPending()).find((p) => p.doi && p.doi.toLowerCase() === doi.toLowerCase());
+  let target = pending ? { id: pending.itemId, title: pending.title } : null;
+  if (!target) {
+    if (!(await getStatus()).online) return;
+    const saved = await savedState({ doi });
+    if (!saved || saved.hasPdf) return;
+    target = { id: saved.id, title: saved.title };
+  }
+  if (attaching.has(target.id)) return;
+  attaching.add(target.id);
+  try {
+    const started = Date.now();
+    let det = await detectInTab(tabId);
+    while (det.challenge && Date.now() - started < CHALLENGE_WAIT_MS) {
+      await new Promise((r) => setTimeout(r, 3000));
+      const tab = await chrome.tabs.get(tabId).catch(() => null);
+      if (!tab || doiFromUrl(tab.url || "").toLowerCase() !== doi.toLowerCase()) return; // closed or navigated away
+      det = await detectInTab(tabId);
+    }
+    const item = det.items && det.items[0];
+    const candidates = (item && item._pdfCandidates) || [];
+    if (det.challenge || !candidates.length) return;
+    const status = await api.itemStatus(target.id).catch(() => null);
+    if (!status || status.in_trash) return;
+    if (status.has_pdf) {
+      await removePending(target.id);
+      return;
+    }
+    await flashBadge(tabId, "...", "#0284c7", "ReviewHunter: attaching the PDF");
+    const pdf = await acquirePdf(candidates, { tabId, allowBackgroundTab: false });
+    if (!pdf.ok) {
+      const last = pdf.attempts[pdf.attempts.length - 1];
+      await flashBadge(tabId, "ERR", "#dc2626", `ReviewHunter: PDF not attached (${last ? last.error : "download failed"})`);
+      return;
+    }
+    await api.uploadAttachment(target.id, pdf.bytes, { url: pdf.finalUrl, title: "Full Text PDF", contentType: "application/pdf" });
+    await removePending(target.id);
+    invalidateSaved();
+    // Confirm from the server before telling the user it is saved.
+    const after = await api.itemStatus(target.id).catch(() => null);
+    if (after && after.has_pdf) {
+      clearTimeout(badgeTimers.get(tabId));
+      await showSavedBadge(tabId, { title: after.title, hasPdf: true });
+      notify("PDF saved in ReviewHunter", `${after.title}${after.collections.length ? `\nCollection: ${after.collections.join(", ")}` : ""}`);
+    }
+  } catch (e) {
+    await flashBadge(tabId, "ERR", "#dc2626", `ReviewHunter: ${e.message}`);
+  } finally {
+    attaching.delete(target.id);
+  }
+}
 chrome.windows.onFocusChanged.addListener(async (windowId) => {
   if (windowId === chrome.windows.WINDOW_ID_NONE) return;
   const [tab] = await chrome.tabs.query({ active: true, windowId });
@@ -207,6 +363,7 @@ chrome.runtime.onConnect.addListener((port) => {
     } else {
       result = { ok: false, itemIds: [], message: "unknown request" };
     }
+    invalidateSaved();
     post({ type: "done", result });
     if (msg.request && msg.request.tabId !== undefined && msg.request.tabId !== null) scheduleBadge(msg.request.tabId, 0);
   });
@@ -300,7 +457,10 @@ async function handleMenu(info, tab) {
     if (det.kind !== "single" && det.kind !== "pdf") throw new Error(det.error || "nothing to save");
     const res = await runSave({ tabId, detection: det, tags: [], ...d }, () => {});
     if (!res.ok) throw new Error(res.message);
+    invalidateSaved();
+    const st = res.itemIds.length ? await api.itemStatus(res.itemIds[0]).catch(() => null) : null;
     await flashBadge(tabId, "OK", "#16a34a", "ReviewHunter: saved");
+    if (st) notify(st.has_pdf ? "Saved in ReviewHunter with its PDF" : "Saved in ReviewHunter (no PDF yet)", st.title);
     return;
   }
 
