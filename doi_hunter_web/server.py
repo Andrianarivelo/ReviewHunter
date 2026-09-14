@@ -72,6 +72,8 @@ async def _startup() -> None:
         return
     _started = True
     await asyncio.to_thread(_ensure_citation_keys)
+    if config.get_settings().get("auto_retrieve_pdf_metadata", True):
+        threading.Thread(target=_retrieve_missing_metadata, daemon=True, name="metadata-backfill").start()
     threading.Thread(target=gdrive.scheduler_loop, args=(_scheduler_stop,), daemon=True,
                      name="backup-scheduler").start()
     # First-run nicety: if the user has the legacy ./downloads/ folder, adopt those PDFs.
@@ -95,6 +97,37 @@ def _ensure_citation_keys() -> None:
     for row in conn.execute("SELECT * FROM items WHERE citation_key IS NULL OR citation_key=''").fetchall():
         item = row_to_dict(row)
         conn.execute("UPDATE items SET citation_key=? WHERE id=?", (catalog.make_citation_key(item, conn), item["id"]))
+
+
+def _retrieve_missing_metadata() -> None:
+    """Background pass: items that have a PDF but neither DOI nor authors get 'Retrieve Metadata'.
+
+    Typical case: PDFs imported by file name before v2. Only verified matches are applied
+    (see fulltext.retrieve_metadata). Each item is tried once; attempted ids are remembered in
+    settings so an unidentifiable PDF does not cost network calls at every start.
+    """
+    from . import fulltext
+    from .db import get_conn
+
+    attempted = set(config.get_settings().get("metadata_backfill_attempted") or [])
+    rows = get_conn().execute(
+        "SELECT DISTINCT i.id FROM items i JOIN attachments a ON a.item_id=i.id "
+        "WHERE i.deleted_at IS NULL AND (i.doi IS NULL OR i.doi='') "
+        "AND (i.creators IS NULL OR i.creators IN ('', '[]')) "
+        "AND a.kind='file' AND lower(a.path) LIKE '%.pdf'"
+    ).fetchall()
+    for (item_id,) in rows:
+        if item_id in attempted:
+            continue
+        try:
+            result = fulltext.retrieve_metadata(item_id)
+            log.info(f"metadata backfill item {item_id}: {result}")
+            if result.get("ok"):
+                bus.publish("item_changed", {"id": item_id})
+        except Exception as e:  # one bad PDF must not stop the pass
+            log.warning(f"metadata backfill failed for item {item_id}: {e}")
+        attempted.add(item_id)
+        config.update_settings({"metadata_backfill_attempted": sorted(attempted)})
 
 
 app.include_router(api_v2.router)

@@ -451,6 +451,24 @@ def normalize_doi(value: Any) -> str:
     return s.lower()
 
 
+# A section heading glued to the text by HTML tag stripping: "AbstractSubstance use..." or
+# "Abstract: We..." (ScienceDirect, Springer and Wiley pages render <h2>Abstract</h2><p>...</p>).
+_ABSTRACT_HEADING_RE = re.compile(r"^\s*(?:abstract|summary)(?:\s*[:.\-]\s*|\s+|(?=[A-Z]))(?=\S)", re.I)
+
+
+def clean_abstract(value: Any) -> str:
+    """Remove a leading 'Abstract'/'Summary' heading and collapse whitespace.
+
+    Only the heading word is removed and only when it is followed by the start of the
+    text (a capital letter, punctuation or whitespace), so a sentence such as
+    "Abstraction is..." is left intact.
+    """
+    s = re.sub(r"\s+", " ", str(value or "")).strip()
+    if re.match(r"^(?i:abstract|summary)[a-z]", s) or re.match(r"^(ABSTRACT|SUMMARY)[A-Z]", s):
+        return s  # "Abstraction...", "ABSTRACTION...": a real word, not a glued heading.
+    return _ABSTRACT_HEADING_RE.sub("", s, count=1)
+
+
 def create_item(data: dict, *, dedupe_doi: bool = True) -> dict:
     """Create an item from a mixed payload.
 
@@ -460,6 +478,8 @@ def create_item(data: dict, *, dedupe_doi: bool = True) -> dict:
     (missing fields filled) and returned with ``_existing=True``.
     """
     conn = get_conn()
+    if data.get("abstract"):
+        data = {**data, "abstract": clean_abstract(data["abstract"])}
     item_type = normalize_type(data.get("item_type"))
     creators = clean_creators(data.get("creators") or data.get("authors") or [])
     doi = normalize_doi(data.get("doi") or (data.get("field_values") or {}).get("DOI")) or None

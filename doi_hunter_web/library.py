@@ -1007,3 +1007,75 @@ def _index_fulltext_async(item_id: int) -> None:
             log.warning(f"full-text indexing failed for item {item_id}: {e}")
 
     threading.Thread(target=run, daemon=True).start()
+
+
+# ----------------------------------------------------------------------------- legal open-access fallback
+
+OA_MAX_BYTES = 100 * 1024 * 1024   # refuse absurdly large responses
+OA_TIMEOUT_S = 45
+
+
+def _pdf_matches_title(data: bytes, title: str, pages: int = 3, min_text: int = 500) -> bool:
+    """Integrity check: the item title must be printed in the first pages of the downloaded PDF.
+
+    Scanned PDFs without a text layer (< ``min_text`` characters) cannot be checked and are accepted,
+    because the candidate URL already comes from an index keyed by the item's DOI.
+    """
+    from pypdf import PdfReader
+
+    from .fulltext import _title_in_text
+
+    try:
+        reader = PdfReader(io.BytesIO(data))
+        text = "\n".join((p.extract_text() or "") for p in reader.pages[:pages])
+    except Exception:
+        return False  # unreadable file: do not attach
+    if len(text.strip()) < min_text or len(title) < 15:
+        return True
+    return _title_in_text(title, text)
+
+
+def _has_file_attachment(item_id: int) -> bool:
+    return any(a["kind"] != "link" for a in catalog.list_attachments(item_id))
+
+
+def fetch_open_access_pdf(item_id: int) -> dict:
+    """Attach a legal open-access copy (OpenAlex / Europe PMC locations only, never shadow libraries).
+
+    Used after a save from the browser connector when the extension could not download the
+    publisher PDF itself. Each candidate must really be a PDF (``%PDF-`` magic bytes): HTML
+    landing pages and login walls are rejected, so nothing wrong is ever attached.
+    Returns {ok, source?, url?, reason?}.
+    """
+    from .sources import _open_access_candidates
+
+    item = catalog.get_item(item_id, full=False)
+    if not item:
+        return {"ok": False, "reason": "item not found"}
+    if _has_file_attachment(item_id):
+        return {"ok": False, "reason": "already has a file"}
+    if not item.get("doi"):
+        return {"ok": False, "reason": "no DOI"}
+    try:
+        candidates = _open_access_candidates(item["doi"])
+    except Exception as e:  # network trouble: report, do not raise into a background thread
+        return {"ok": False, "reason": f"open-access lookup failed: {e}"}
+    for cand in candidates:
+        try:
+            r = requests.get(cand.url, headers=get_headers(), timeout=OA_TIMEOUT_S, allow_redirects=True)
+        except requests.RequestException as e:
+            log.info(f"OA candidate failed {cand.url}: {e}")
+            continue
+        data = r.content
+        if r.status_code != 200 or data[:5] != b"%PDF-" or len(data) > OA_MAX_BYTES:
+            continue
+        if not _pdf_matches_title(data, item.get("title") or ""):
+            log.info(f"OA candidate rejected (title not printed in PDF): {cand.url}")
+            continue
+        if _has_file_attachment(item_id):  # the extension finished meanwhile: keep its copy
+            return {"ok": False, "reason": "already has a file"}
+        catalog.store_file_bytes(item_id, data, "file.pdf", title="Open Access PDF", url=cand.url)
+        get_conn().execute("UPDATE items SET status='downloaded', error_msg=NULL WHERE id=?", (item_id,))
+        _index_fulltext_async(item_id)
+        return {"ok": True, "source": cand.source, "url": cand.url}
+    return {"ok": False, "reason": "no open-access PDF available"}

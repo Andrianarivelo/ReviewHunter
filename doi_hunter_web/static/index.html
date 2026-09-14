@@ -582,6 +582,7 @@
           <span x-show="selectedItem.deleted_at" class="status-pill st-failed">in Trash</span>
           <div class="ml-auto flex items-center gap-1">
             <button @click="toggleStar(selectedItem)" class="icon-btn" :class="selectedItem.starred ? '!text-amber-400' : ''" title="Star">&#9733;</button>
+            <button @click="retrieveMetadata(selectedItem)" x-show="selectedItem.attachment_count && !selectedItem.doi && !(selectedItem.creators || []).length" class="action-secondary h-7 px-2.5 text-xs" title="Read the DOI / title printed in the PDF and fill authors, journal, year...">Retrieve metadata</button>
             <button @click="openBestAttachment(selectedItem)" x-show="selectedItem.attachment_count" class="action-primary h-7 px-2.5 text-xs">Open PDF</button>
             <button @click="downloadItem(selectedItem)" x-show="!selectedItem.attachment_count" class="action-secondary h-7 px-2.5 text-xs" title="Search open access, publisher and other sources">Find PDF</button>
           </div>

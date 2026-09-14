@@ -44,6 +44,10 @@ router = APIRouter(prefix="/connector", tags=["connector"])
 
 APP_VERSION = "2.0.0"
 MAX_ATTACHMENT_BYTES = 200 * 1024 * 1024
+# Seconds to wait after a connector save before the server looks for a legal open-access copy.
+# The extension tries the publisher PDF with the user's session first; if that upload lands
+# within this delay the fallback does nothing.
+OA_FALLBACK_DELAY_S = 40
 
 
 class SaveIn(BaseModel):
@@ -169,7 +173,32 @@ async def save(body: SaveIn, request: Request) -> dict:
         saved.append({"id": item["id"], "title": item["title"], "existing": existing,
                       "needs_pdf": not has_file, "pdf_url": pdf_url})
         _publish(request, "item_added", {"id": item["id"], "title": item["title"], "source": "connector"})
+        if not has_file and item.get("doi"):
+            _schedule_open_access_fallback(request, item["id"])
     return {"saved": saved}
+
+
+def _schedule_open_access_fallback(request: Request, item_id: int, delay: float = OA_FALLBACK_DELAY_S) -> None:
+    """After ``delay`` seconds, attach a legal open-access PDF if the item still has no file."""
+    import threading
+
+    from .library import fetch_open_access_pdf
+
+    bus = getattr(request.app.state, "bus", None)
+
+    def run() -> None:
+        try:
+            result = fetch_open_access_pdf(item_id)
+        except Exception as e:  # background best effort: never crash the server
+            log.warning(f"open-access fallback failed for item {item_id}: {e}")
+            return
+        log.info(f"open-access fallback item {item_id}: {result}")
+        if result.get("ok") and bus is not None:
+            bus.publish("item_changed", {"id": item_id})
+
+    timer = threading.Timer(delay, run)
+    timer.daemon = True
+    timer.start()
 
 
 @router.post("/attachment")

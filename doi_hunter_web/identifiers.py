@@ -68,10 +68,22 @@ def classify(text: str) -> tuple[str, str]:
     return "title", s
 
 
+# PDF text extraction often splits a DOI prefix with spaces (kerning / ligatures):
+# "10.1 109/ACCESS.2020.2968390" or "10. 1016/j.x". The registrant code is digits only,
+# so rejoining digits between "10." and "/" cannot merge two unrelated tokens.
+_BROKEN_DOI_PREFIX_RE = re.compile(r"\b10\s?\.\s?(\d(?:\s?\d){3,8})\s?/(?=\S)")
+
+
+def repair_broken_dois(text: str) -> str:
+    """Rejoin DOI prefixes that PDF text extraction split with spaces."""
+    return _BROKEN_DOI_PREFIX_RE.sub(lambda m: "10." + re.sub(r"\s", "", m.group(1)) + "/", text or "")
+
+
 def extract_identifiers(text: str) -> list[tuple[str, str]]:
     """All identifiers in a blob of text (dedup, order preserved)."""
     found: list[tuple[str, str]] = []
     seen = set()
+    text = repair_broken_dois(text)
     for m in DOI_RE.finditer(text or ""):
         key = ("doi", clean_doi(m.group(1)))
         if key not in seen:

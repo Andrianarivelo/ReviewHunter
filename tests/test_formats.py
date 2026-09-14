@@ -143,5 +143,5 @@ def test_fulltext_index_and_doi_detection(library, sample_pdf):
     hits = c.query_items(q="prediction", mode="everything")
     assert [h["id"] for h in hits] == [it["id"]]
     assert c.query_items(q="prediction", mode="fields") == []
-    ids, _title = fulltext._pdf_identifiers(str(sample_pdf))
+    ids, _guesses, _text = fulltext._pdf_identifiers(str(sample_pdf))
     assert ("doi", "10.1234/rh.test.5") in ids

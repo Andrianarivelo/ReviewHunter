@@ -126,6 +126,7 @@ DEFAULT_SETTINGS: dict = {
     "auto_tag_keywords": True,               # add keywords from metadata as automatic tags
     "auto_index_fulltext": True,
     "auto_retrieve_pdf_metadata": True,
+    "metadata_backfill_attempted": [],   # item ids already tried by the startup metadata backfill
     "backup_interval_hours": 24,             # 0 disables automatic backups
     "backup_keep": 10,
     "drive_mode": "none",                    # none | desktop | api
