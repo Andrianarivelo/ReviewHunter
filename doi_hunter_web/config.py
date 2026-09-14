@@ -111,3 +111,59 @@ def default_google_drive_root() -> Path | None:
 
 HOST = os.environ.get("REVIEWHUNTER_HOST") or os.environ.get("DOIHUNTER_HOST", "127.0.0.1")
 PORT = int(os.environ.get("REVIEWHUNTER_PORT") or os.environ.get("DOIHUNTER_PORT", "8765"))
+
+
+# --------------------------------------------------------------------------------------
+# Generic user settings (settings.json). Defaults live here so the UI and the server
+# always agree on what a missing key means.
+# --------------------------------------------------------------------------------------
+DEFAULT_SETTINGS: dict = {
+    "citation_style": "apa",                 # CSL style id used by Quick Copy / bibliography
+    "citation_locale": "en-US",
+    "quick_copy_format": "bibliography",     # bibliography | citation | bibtex | ris
+    "rename_pattern": "{author} - {year} - {title}",
+    "auto_rename_files": True,
+    "auto_tag_keywords": True,               # add keywords from metadata as automatic tags
+    "auto_index_fulltext": True,
+    "auto_retrieve_pdf_metadata": True,
+    "backup_interval_hours": 24,             # 0 disables automatic backups
+    "backup_keep": 10,
+    "drive_mode": "none",                    # none | desktop | api
+    "drive_desktop_root": "",
+    "drive_papers_in_drive": False,
+    "drive_api_auto_sync": False,
+    "last_backup_at": "",
+    "last_drive_sync_at": "",
+    "https_port": 8766,
+}
+
+
+def get_settings() -> dict:
+    return {**DEFAULT_SETTINGS, **_read_settings()}
+
+
+def update_settings(patch: dict) -> dict:
+    current = _read_settings()
+    for key, value in (patch or {}).items():
+        if key in DEFAULT_SETTINGS or key == "papers_dir":
+            current[key] = value
+    _write_settings(current)
+    return get_settings()
+
+
+def certs_dir() -> Path:
+    p = library_root() / "certs"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def google_dir() -> Path:
+    p = library_root() / "google"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def backups_dir() -> Path:
+    p = library_root() / "backups"
+    p.mkdir(parents=True, exist_ok=True)
+    return p

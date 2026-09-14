@@ -27,7 +27,7 @@ import requests
 from doi_hunter.netinfo import get_headers
 from doi_hunter.utils import sanitize_filename
 
-from . import config
+from . import catalog, config
 from .config import papers_dir
 from .db import get_conn, row_to_dict, rows_to_dicts, tx
 from .metadata import (
@@ -121,49 +121,59 @@ def upsert_item(item: dict) -> int:
                 set_sql = ", ".join(f"{k}=?" for k in fields) + ", updated_at=datetime('now')"
                 conn.execute(f"UPDATE items SET {set_sql} WHERE id=?",
                              [s.get(k) for k in fields] + [iid])
+            if "authors" in fields:
+                conn.execute("UPDATE items SET creators=NULL WHERE id=?", (iid,))
+            _post_upsert(iid)
             return iid
+    if not s.get("item_type"):
+        s["item_type"] = "journalArticle"
     vals = [s.get(c) for c in _ITEM_COLS]
     cur = conn.execute(
         f"INSERT INTO items ({','.join(_ITEM_COLS)}) VALUES ({','.join('?' for _ in _ITEM_COLS)})",
         vals,
     )
+    _post_upsert(cur.lastrowid)
     return cur.lastrowid
 
 
+def _post_upsert(item_id: int) -> None:
+    """Fill v2 columns (creators, date, citation key, normalized type) for legacy writers."""
+    conn = get_conn()
+    row = row_to_dict(conn.execute("SELECT * FROM items WHERE id=?", (item_id,)).fetchone())
+    if not row:
+        return
+    updates: dict[str, Any] = {}
+    if not row.get("creators") and row.get("authors"):
+        updates["creators"] = json.dumps(catalog.clean_creators(row["authors"]), ensure_ascii=False)
+    if not row.get("date") and row.get("year"):
+        updates["date"] = str(row["year"])
+    normalized = catalog.normalize_type(row.get("item_type"))
+    if normalized != row.get("item_type"):
+        updates["item_type"] = normalized
+    if not row.get("citation_key"):
+        creators = json.loads(updates["creators"]) if "creators" in updates else row.get("creators")
+        updates["citation_key"] = catalog.make_citation_key({**row, "creators": creators}, conn)
+    if row.get("deleted_at"):
+        updates["deleted_at"] = None
+    if updates:
+        conn.execute(f"UPDATE items SET {', '.join(k + '=?' for k in updates)} WHERE id=?",
+                     [*updates.values(), item_id])
+
+
 def get_item(item_id: int) -> Optional[dict]:
-    row = get_conn().execute("SELECT * FROM items WHERE id = ?", (item_id,)).fetchone()
-    item = row_to_dict(row)
-    if item:
-        item["collections"] = [
-            r["collection_id"] for r in get_conn().execute(
-                "SELECT collection_id FROM item_collections WHERE item_id=?", (item_id,)
-            ).fetchall()
-        ]
-    return item
+    """Full item (v2 shape, legacy keys preserved)."""
+    return catalog.get_item(item_id)
 
 
 def update_item(item_id: int, patch: dict) -> Optional[dict]:
-    allowed = {"title", "authors", "year", "journal", "abstract", "keywords",
-               "subjects", "starred", "notes"}
-    p = _serialize({k: v for k, v in patch.items() if k in allowed})
-    if not p:
-        return get_item(item_id)
-    set_sql = ", ".join(f"{k}=?" for k in p) + ", updated_at=datetime('now')"
-    get_conn().execute(f"UPDATE items SET {set_sql} WHERE id=?", list(p.values()) + [item_id])
-    return get_item(item_id)
+    return catalog.patch_item(item_id, patch)
 
 
-def delete_item(item_id: int, delete_file: bool = False) -> bool:
-    item = get_item(item_id)
-    if not item:
-        return False
-    if delete_file and item.get("file_path"):
-        try:
-            os.remove(item["file_path"])
-        except OSError:
-            pass
-    get_conn().execute("DELETE FROM items WHERE id=?", (item_id,))
-    return True
+def delete_item(item_id: int, delete_file: bool = False, *, permanent: bool = False) -> bool:
+    """Move to trash (default, Zotero behaviour) or delete permanently."""
+    if permanent:
+        return catalog.delete_items_permanently([item_id], delete_files=delete_file) > 0
+    return catalog.trash_items([item_id]) > 0
 
 
 def list_items(
@@ -174,61 +184,19 @@ def list_items(
     author: Optional[str] = None,
     subject: Optional[str] = None,
     limit: int = 500,
+    **extra: Any,
 ) -> list[dict]:
-    conn = get_conn()
-    sql = "SELECT i.* FROM items i"
-    params: list[Any] = []
-    where: list[str] = []
-
-    if collection_id is not None:
-        sql += " JOIN item_collections ic ON ic.item_id = i.id"
-        where.append("ic.collection_id = ?")
-        params.append(collection_id)
-    if starred:
-        where.append("i.starred = 1")
-    if status:
-        where.append("i.status = ?")
-        params.append(status)
-    if author:
-        # authors is JSON like ["Smith, John", ...]; substring match is good enough for surname/full-name
-        where.append("i.authors LIKE ?")
-        params.append(f"%{author}%")
-    if subject:
-        where.append("(i.subjects LIKE ? OR i.keywords LIKE ?)")
-        params.append(f"%\"{subject}\"%")
-        params.append(f"%\"{subject}\"%")
-    if query:
-        # FTS5 query — sanitize quotes, fall back to LIKE if FTS errors out
-        safe = query.replace('"', '""')
-        sql += " JOIN items_fts f ON f.rowid = i.id"
-        where.append('items_fts MATCH ?')
-        params.append(f'"{safe}"*')
-
-    if where:
-        sql += " WHERE " + " AND ".join(where)
-    sql += " ORDER BY i.added_at DESC LIMIT ?"
-    params.append(limit)
-
-    try:
-        rows = conn.execute(sql, params).fetchall()
-    except sqlite3.OperationalError:
-        # FTS query failed — fall back to a forgiving LIKE search
-        if not query:
-            raise
-        like = f"%{query}%"
-        rows = conn.execute(
-            "SELECT i.* FROM items i WHERE i.title LIKE ? OR i.authors LIKE ? OR i.abstract LIKE ? "
-            "ORDER BY i.added_at DESC LIMIT ?",
-            (like, like, like, limit),
-        ).fetchall()
-    return rows_to_dicts(rows)
+    return catalog.query_items(
+        collection_id=collection_id, starred=starred, q=query, status=status,
+        author=author, subject=subject, limit=limit, mode=extra.pop("mode", "fields"), **extra,
+    )
 
 
 # ---------------- Facets (auto-organization) ----------------
 
 def list_authors(limit: int = 200) -> list[dict]:
     """Aggregate distinct authors across the library, with item counts."""
-    rows = get_conn().execute("SELECT authors FROM items WHERE authors IS NOT NULL").fetchall()
+    rows = get_conn().execute("SELECT authors FROM items WHERE authors IS NOT NULL AND deleted_at IS NULL").fetchall()
     counter: dict[str, int] = {}
     for r in rows:
         try:
@@ -245,7 +213,7 @@ def list_authors(limit: int = 200) -> list[dict]:
 
 def list_subjects(limit: int = 200) -> list[dict]:
     """Aggregate distinct subjects + keywords across the library, with counts."""
-    rows = get_conn().execute("SELECT subjects, keywords FROM items").fetchall()
+    rows = get_conn().execute("SELECT subjects, keywords FROM items WHERE deleted_at IS NULL").fetchall()
     counter: dict[str, int] = {}
     for r in rows:
         for col in ("subjects", "keywords"):
@@ -461,12 +429,7 @@ def subject_graph(
 # ---------------- Collections ----------------
 
 def list_collections() -> list[dict]:
-    rows = get_conn().execute(
-        "SELECT c.id, c.name, c.parent_id, c.color, c.icon, c.sort_order, "
-        "  (SELECT COUNT(*) FROM item_collections ic WHERE ic.collection_id = c.id) AS count "
-        "FROM collections c ORDER BY c.sort_order, c.name"
-    ).fetchall()
-    return [dict(r) for r in rows]
+    return catalog.list_collections()
 
 
 def create_collection(name: str, parent_id: Optional[int] = None, color: Optional[str] = None) -> dict:
@@ -735,12 +698,13 @@ def configure_papers_directory(destination: str | Path, *, migrate_existing: boo
     copied = 0
     skipped = 0
     if migrate_existing:
-        items = list_items(limit=100000)
-        for item in items:
-            src_raw = item.get("file_path")
-            if not src_raw:
-                continue
-            src = Path(src_raw)
+        # Every file attachment (not only the primary PDF) follows the library to the new folder.
+        conn = get_conn()
+        rows = conn.execute(
+            "SELECT id, item_id, path FROM attachments WHERE kind IN ('file','snapshot') AND path IS NOT NULL"
+        ).fetchall()
+        for row in rows:
+            src = Path(row["path"])
             if not src.exists() or not src.is_file():
                 skipped += 1
                 continue
@@ -751,10 +715,9 @@ def configure_papers_directory(destination: str | Path, *, migrate_existing: boo
                 pass
             target = _unique_target(dest, src)
             shutil.copy2(src, target)
-            get_conn().execute(
-                "UPDATE items SET file_path=?, file_size=?, updated_at=datetime('now') WHERE id=?",
-                (str(target), target.stat().st_size, item["id"]),
-            )
+            conn.execute("UPDATE attachments SET path=?, size=? WHERE id=?",
+                         (str(target), target.stat().st_size, row["id"]))
+            conn.execute("UPDATE items SET file_path=? WHERE file_path=?", (str(target), str(src)))
             copied += 1
 
     config.set_papers_dir(dest)
@@ -963,6 +926,8 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
             "updated_at=datetime('now') WHERE id=?",
             (str(target), size, item_id),
         )
+        catalog.register_file(item_id, target, url=url)
+        _index_fulltext_async(item_id)
         if progress:
             progress("done", {"id": item_id, "path": str(target), "size": size})
         return get_item(item_id)
@@ -1013,22 +978,32 @@ def import_pdf_folder(folder: str | Path) -> dict:
             skipped += 1
             continue
         title = pdf.stem.replace("_", " ").strip() or "Imported PDF"
-        upsert_item({
+        iid = upsert_item({
             "title": title,
             "file_path": str(target),
             "file_size": target.stat().st_size,
             "status": "downloaded",
             "source_query": f"import:{pdf.name}",
         })
+        catalog.register_file(iid, target)
+        _index_fulltext_async(iid)
         imported += 1
     return {"imported": imported, "skipped": skipped}
 
 
 def stats() -> dict:
-    c = get_conn()
-    return {
-        "items": c.execute("SELECT COUNT(*) FROM items").fetchone()[0],
-        "downloaded": c.execute("SELECT COUNT(*) FROM items WHERE status='downloaded'").fetchone()[0],
-        "starred": c.execute("SELECT COUNT(*) FROM items WHERE starred=1").fetchone()[0],
-        "collections": c.execute("SELECT COUNT(*) FROM collections").fetchone()[0],
-    }
+    return catalog.stats()
+
+
+def _index_fulltext_async(item_id: int) -> None:
+    """Index PDF text in a background thread (never blocks or breaks a download)."""
+    import threading
+
+    def run() -> None:
+        try:
+            from . import fulltext
+            fulltext.index_item(item_id)
+        except Exception as e:  # pragma: no cover - best effort
+            log.warning(f"full-text indexing failed for item {item_id}: {e}")
+
+    threading.Thread(target=run, daemon=True).start()

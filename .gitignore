@@ -9,3 +9,10 @@ venv/
 *.egg-info/
 dist/
 build/
+
+# local project memory
+PROJECT_MEMORY.md
+# local certificates / secrets
+certs/
+*.pem
+client_secret*.json

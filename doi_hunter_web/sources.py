@@ -325,10 +325,56 @@ def _scidb(doi: str) -> Optional[Resolved]:
     return next(iter(_scidb_candidates(doi)), None)
 
 
+# ---------------- Legal open-access copies (OpenAlex + Europe PMC) ----------------
+
+def _open_access_candidates(doi: str) -> list[Resolved]:
+    """Open-access PDF locations indexed by OpenAlex and Europe PMC (no API key needed).
+
+    OpenAlex aggregates Unpaywall-style OA data (publisher OA, green repositories,
+    preprint servers). Europe PMC adds PubMed Central author manuscripts. Tried first
+    because these copies are legal and rarely bot-protected.
+    """
+    doi = doi.strip().lower()
+    out: list[Resolved] = []
+    seen: set[str] = set()
+
+    def add(url: Optional[str], label: str) -> None:
+        if url and url not in seen:
+            seen.add(url)
+            out.append(Resolved(url=url, source=label))
+
+    try:
+        r = requests.get(f"https://api.openalex.org/works/doi:{quote(doi, safe='/')}",
+                         params={"select": "best_oa_location,locations"}, timeout=15,
+                         headers={"User-Agent": "ReviewHunter/2.0"})
+        if r.ok:
+            data = r.json()
+            best = data.get("best_oa_location") or {}
+            add(best.get("pdf_url"), "Open access (OpenAlex)")
+            for loc in data.get("locations") or []:
+                if loc.get("is_oa"):
+                    name = ((loc.get("source") or {}).get("display_name") or "repository")
+                    add(loc.get("pdf_url"), f"Open access ({name})")
+    except (requests.RequestException, ValueError) as e:
+        log.debug(f"OpenAlex lookup failed for {doi}: {e}")
+    try:
+        r = requests.get("https://www.ebi.ac.uk/europepmc/webservices/rest/search",
+                         params={"query": f'DOI:"{doi}"', "format": "json", "resultType": "core"}, timeout=15)
+        if r.ok:
+            for res in (r.json().get("resultList") or {}).get("result", [])[:1]:
+                for ft in (res.get("fullTextUrlList") or {}).get("fullTextUrl", []):
+                    if ft.get("documentStyle") == "pdf" and ft.get("availabilityCode") in ("OA", "F"):
+                        add(ft.get("url"), "Open access (Europe PMC)")
+    except (requests.RequestException, ValueError) as e:
+        log.debug(f"Europe PMC lookup failed for {doi}: {e}")
+    return out
+
+
 # ---------------- Public API ----------------
 
 DEFAULT_RESOLVERS: list[Callable[[str], Optional[Resolved]]] = [_publisher_pdf, _scihub, _scidb]
 DEFAULT_OPTION_RESOLVERS: list[Callable[[str], Iterable[Resolved]]] = [
+    _open_access_candidates,
     _publisher_pdf_candidates,
     _scihub_candidates,
     _scidb_candidates,

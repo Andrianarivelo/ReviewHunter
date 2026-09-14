@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
+import threading
 import logging
 import re
 from pathlib import Path
@@ -13,12 +15,18 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import books, library
+from . import api_v2, books, catalog, config, connector, gdrive, library
 from .config import default_google_drive_root, library_root, papers_dir
+from .security import LocalOriginGuard, NoStoreApi
 
 log = logging.getLogger("doihunter.server")
 
-app = FastAPI(title="ReviewHunter", version="0.1.0")
+app = FastAPI(title="ReviewHunter", version="2.0.0")
+
+# Loopback-only hardening: rejects foreign Host headers and cross-site writes (see security.py).
+_trusted_ports = {config.PORT, int(config.get_settings().get("https_port") or 8766)}
+app.add_middleware(NoStoreApi)
+app.add_middleware(LocalOriginGuard, ports=_trusted_ports)
 
 # ----------- WebSocket fanout -----------
 
@@ -51,16 +59,46 @@ class JobBus:
 
 
 bus = JobBus()
+app.state.bus = bus
+_scheduler_stop = threading.Event()
+_started = False
 
 
 @app.on_event("startup")
 async def _startup() -> None:
+    global _started
     bus.bind_loop(asyncio.get_running_loop())
+    if _started:  # the HTTPS listener shares this app: background work starts only once
+        return
+    _started = True
+    await asyncio.to_thread(_ensure_citation_keys)
+    threading.Thread(target=gdrive.scheduler_loop, args=(_scheduler_stop,), daemon=True,
+                     name="backup-scheduler").start()
     # First-run nicety: if the user has the legacy ./downloads/ folder, adopt those PDFs.
+    # Opt-in only: the repository ships a sample downloads/ folder that must not pollute new libraries.
     legacy = Path.cwd() / "downloads"
-    if legacy.exists() and library.stats()["items"] == 0:
+    if os.environ.get("REVIEWHUNTER_IMPORT_LEGACY_DOWNLOADS") == "1" and legacy.exists() and library.stats()["items"] == 0:
         result = library.import_pdf_folder(legacy)
         log.info(f"first-run import from {legacy}: {result}")
+
+
+@app.on_event("shutdown")
+async def _shutdown() -> None:
+    _scheduler_stop.set()
+
+
+def _ensure_citation_keys() -> None:
+    """Legacy items (pre-v2) get a Better-BibTeX-style citation key once."""
+    from .db import get_conn, row_to_dict
+
+    conn = get_conn()
+    for row in conn.execute("SELECT * FROM items WHERE citation_key IS NULL OR citation_key=''").fetchall():
+        item = row_to_dict(row)
+        conn.execute("UPDATE items SET citation_key=? WHERE id=?", (catalog.make_citation_key(item, conn), item["id"]))
+
+
+app.include_router(api_v2.router)
+app.include_router(connector.router)
 
 
 # ----------- Models -----------
@@ -73,6 +111,8 @@ class CollectionIn(BaseModel):
 
 class CollectionPatch(BaseModel):
     name: Optional[str] = None
+    color: Optional[str] = None
+    parent_id: Optional[int] = None
 
 
 class AddIn(BaseModel):
@@ -118,11 +158,6 @@ class ItemPatch(BaseModel):
 
 # ----------- API: stats / health -----------
 
-@app.get("/api/stats")
-def api_stats() -> dict:
-    return {**library.stats(), "library_path": str(library_root()), "papers_path": str(papers_dir())}
-
-
 @app.get("/api/health")
 def api_health() -> dict:
     return {"ok": True}
@@ -146,6 +181,9 @@ def api_create_collection(body: CollectionIn) -> dict:
 def api_patch_collection(cid: int, body: CollectionPatch) -> dict:
     if body.name is not None:
         library.rename_collection(cid, body.name)
+    if body.color is not None:
+        from .db import get_conn
+        get_conn().execute("UPDATE collections SET color=? WHERE id=?", (body.color or None, cid))
     return {"ok": True}
 
 
@@ -156,22 +194,6 @@ def api_delete_collection(cid: int) -> dict:
 
 
 # ----------- API: items -----------
-
-@app.get("/api/items")
-def api_items(
-    collection_id: Optional[int] = None,
-    starred: bool = False,
-    q: Optional[str] = None,
-    status: Optional[str] = None,
-    author: Optional[str] = None,
-    subject: Optional[str] = None,
-    limit: int = 500,
-) -> list[dict]:
-    return library.list_items(
-        collection_id=collection_id, starred=starred, query=q, status=status,
-        author=author, subject=subject, limit=limit,
-    )
-
 
 @app.get("/api/facets")
 def api_facets() -> dict:
@@ -196,31 +218,6 @@ def api_subject_graph(
         depth=depth,
         limit=limit,
     )
-
-
-@app.get("/api/items/{item_id}")
-def api_get_item(item_id: int) -> dict:
-    item = library.get_item(item_id)
-    if not item:
-        raise HTTPException(404, "not found")
-    return item
-
-
-@app.patch("/api/items/{item_id}")
-def api_patch_item(item_id: int, patch: ItemPatch) -> dict:
-    payload: dict[str, Any] = {k: v for k, v in patch.dict().items() if v is not None}
-    if "starred" in payload:
-        payload["starred"] = 1 if payload["starred"] else 0
-    item = library.update_item(item_id, payload)
-    if not item:
-        raise HTTPException(404, "not found")
-    return item
-
-
-@app.delete("/api/items/{item_id}")
-def api_delete_item(item_id: int, delete_file: bool = False) -> dict:
-    library.delete_item(item_id, delete_file=delete_file)
-    return {"ok": True}
 
 
 @app.post("/api/items/{item_id}/collections/{cid}")
@@ -251,6 +248,9 @@ _MIME_BY_EXT = {
 @app.get("/api/items/{item_id}/file")
 def api_get_file(item_id: int):
     item = library.get_item(item_id)
+    if item and not item.get("file_path"):
+        catalog.sync_primary_file(item_id)
+        item = library.get_item(item_id)
     if not item or not item.get("file_path"):
         raise HTTPException(404, "file not found")
     p = Path(item["file_path"])
@@ -530,6 +530,16 @@ async def _run_add_batch(queries: list[str], collection_id: Optional[int], auto_
 
 _static_dir = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
+
+# Word add-in task pane (served over https://localhost:8766 by __main__).
+_addin_dir = Path(__file__).resolve().parents[1] / "word_addin"
+_addin_dir.mkdir(exist_ok=True)
+app.mount("/addin", StaticFiles(directory=str(_addin_dir), html=True), name="addin")
+
+
+@app.get("/reader")
+def reader_page():
+    return FileResponse(str(_static_dir / "reader.html"))
 
 
 @app.get("/")
