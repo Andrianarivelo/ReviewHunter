@@ -1218,8 +1218,12 @@ def query_items(
     direction: str = "desc",
     limit: int = 5000,
     offset: int = 0,
+    compact: bool = False,
 ) -> list[dict]:
-    """Single entry point for every list view (library, collections, tags, searches, trash)."""
+    """Single entry point for every list view (library, collections, tags, searches, trash).
+
+    ``compact`` drops columns list views never show (abstract, mirrors...) to shrink payloads.
+    """
     conn = get_conn()
     where: list[str] = ["i.deleted_at IS NOT NULL" if trash else "i.deleted_at IS NULL"]
     params: list[Any] = []
@@ -1302,9 +1306,58 @@ def query_items(
                            unfiled=unfiled, starred=starred, trash=trash, status=status, author=author,
                            subject=subject, tags=tags, item_type=item_type, q=q, mode="titleCreatorYear",
                            conditions=conditions, match=match, sort=sort, direction=direction, limit=limit,
-                           offset=offset)
+                           offset=offset, compact=compact)
     items = rows_to_dicts(rows)
-    return [decorate(it) for it in items]
+    return decorate_many(items, compact=compact)
+
+
+# Columns the list views never display; dropped from list payloads (the item pane loads the full item).
+_HEAVY_LIST_COLUMNS = ("abstract", "mirrors", "source_query", "subjects", "fields")
+
+
+def decorate_many(items: list[dict], *, compact: bool = False) -> list[dict]:
+    """Batch version of ``decorate`` for lists.
+
+    Benchmark iteration 1 showed per-item decoration (2 extra queries per row, N+1 pattern) made
+    listing 2000 items 3.7x slower than v1. Here tags and counts are fetched with one grouped query
+    per chunk of ids, independent of the number of rows.
+    """
+    if not items:
+        return items
+    conn = get_conn()
+    ids = [it["id"] for it in items]
+    tags: dict[int, list[dict]] = {}
+    notes: dict[int, int] = {}
+    atts: dict[int, int] = {}
+    for start in range(0, len(ids), 900):              # stay below SQLite's bound-parameter limit
+        chunk = ids[start:start + 900]
+        marks = ",".join("?" for _ in chunk)
+        for r in conn.execute(
+            f"SELECT it.item_id, t.id, t.name, t.color, t.type FROM item_tags it JOIN tags t ON t.id=it.tag_id "
+            f"WHERE it.item_id IN ({marks}) ORDER BY t.name COLLATE NOCASE", chunk
+        ):
+            tags.setdefault(r[0], []).append({"id": r[1], "name": r[2], "color": r[3], "type": r[4]})
+        for r in conn.execute(
+            f"SELECT item_id, COUNT(*) FROM notes WHERE deleted_at IS NULL AND item_id IN ({marks}) GROUP BY item_id",
+            chunk,
+        ):
+            notes[r[0]] = r[1]
+        for r in conn.execute(f"SELECT item_id, COUNT(*) FROM attachments WHERE item_id IN ({marks}) GROUP BY item_id",
+                              chunk):
+            atts[r[0]] = r[1]
+    for it in items:
+        iid = it["id"]
+        it["item_type"] = normalize_type(it.get("item_type"))
+        it["type_label"] = ITEM_TYPES[it["item_type"]]["label"]
+        if not it.get("creators") and it.get("authors"):
+            it["creators"] = clean_creators(it["authors"])
+        it["tags"] = tags.get(iid, [])
+        it["note_count"] = notes.get(iid, 0)
+        it["attachment_count"] = atts.get(iid, 0)
+        if compact:
+            for col in _HEAVY_LIST_COLUMNS:
+                it.pop(col, None)
+    return items
 
 
 # ---------------------------- Saved searches ----------------------------

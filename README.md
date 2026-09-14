@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-1.1.1-blue)](https://github.com/Andrianarivelo/ReviewHunter)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/Andrianarivelo/ReviewHunter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Issues](https://img.shields.io/github/issues/Andrianarivelo/ReviewHunter)](https://github.com/Andrianarivelo/ReviewHunter/issues)
 [![Size](https://img.shields.io/github/repo-size/Andrianarivelo/ReviewHunter.svg)](https://github.com/Andrianarivelo/ReviewHunter)
@@ -6,31 +6,47 @@
 
 # ReviewHunter
 
-**ReviewHunter** is a local bibliographic review app for collecting papers, resolving DOI metadata, finding real author publication lists, organizing literature into folders, and testing available PDF sources before saving files.
+**ReviewHunter** is a local, private reference manager built to replace Zotero for literature reviews:
+collect papers and books, find legal PDFs, organise them in nested collections and tags, read and annotate
+PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Everything runs on your computer
+(SQLite + your files); Google Drive is optional for storage and backups.
 
-It ships with **ReviewHunter Web**, a Zotero-style local library app with folders, search, auto-categorization, auto-renaming, batch downloads, source-tested downloads, and a clean three-pane UI. One command launches it.
+## What you get (v2)
 
-## Features
+| Area | Features |
+|------|----------|
+| Library | Zotero item types with type-aware fields, creators with roles, nested collections, colored tags + tag selector, starred, unfiled, trash with restore, related items, duplicate detection and merge |
+| Adding items | Add by DOI / ISBN / PMID / arXiv, drag PDFs (metadata retrieved from the PDF), import BibTeX / BibLaTeX / RIS / CSL-JSON, **direct migration of a Zotero library** (collections, notes, files, annotations, saved searches), online discovery (CrossRef, author catalogues, books) |
+| PDFs | Legal open-access finder (OpenAlex, Europe PMC) then publisher pages, built-in reader with highlights, underlines, sticky notes, find, thumbnails, outline, "note from annotations" |
+| Notes & search | Rich-text child and standalone notes, full-text PDF index, search modes (title/creator/year, all fields and tags, everything), advanced search, saved searches |
+| Citing | citeproc-js (the engine Zotero uses), 25 bundled styles + installer for any zotero.org style, Quick Copy (Ctrl+Shift+C / Ctrl+Shift+A), bibliography builder, reports, Better-BibTeX-style citation keys, export BibTeX / BibLaTeX / RIS / CSL-JSON / CSV / Word sources XML |
+| Browser | **Chrome connector** (`browser_extension/`): saves the page you are reading and downloads its PDF inside your browser session, so papers you can access through your institution are captured too |
+| Word | **Word add-in** (`word_addin/`): live citations and bibliography that renumber as you edit, footnotes for note styles, works offline from copies stored in the document |
+| Storage | Google Drive for desktop folder mode or Google Drive API mode (`drive.file` scope), verified automatic backups with staged restore |
+| Security | The local server rejects cross-site writes and DNS rebinding; only the app and browser extensions can modify the library |
 
-### CLI
-- **Batch Download**: Download multiple research papers in one go using a list of DOIs or titles.
-- **Title to DOI**: Retrieves DOIs using paper titles through the CrossRef API and downloads the corresponding papers.
-- **Custom File Naming**: Automatically names files based on paper titles for easy identification.
-- **Error Handling**: Logs failed downloads and provides detailed summaries after processing.
+### First steps
 
-### Web app (`doi_hunter_web`)
-- **Zotero-style three-pane UI** - collections, items, metadata + PDF preview.
-- **Smart search bar** - paste a DOI, type a title, or filter the local library; CrossRef matches show inline.
-- **Pertinence ordering** - discovery results are ranked by title/query coverage plus source relevance scores.
-- **Auto-rename** - files are saved as `Author - Year - Title.pdf` from CrossRef metadata.
-- **Auto-categorize** - folder suggestions from CrossRef subjects + extracted keywords.
-- **Concept map** - explore connected subjects and keywords as an interactive node graph.
-- **Folders & drag-drop** - create your own; drag papers from the list onto a folder to assign.
-- **Batch import** - drop a `.txt` of DOIs/titles onto the window, or paste them in the Add dialog.
-- **Google Drive sync-folder support** - export a full backup to Drive or set the download folder to a local Google Drive Desktop path.
-- **Live progress** - every download streams its status over WebSocket; toasts surface failures.
-- **Local & private** - SQLite + your filesystem under `~/ReviewHunter/`. No login, no cloud.
-- **Light & dark mode**, refined typography (Inter + Source Serif), zero build step.
+1. Double-click the **ReviewHunter** shortcut (or `ReviewHunter.bat`). The app opens at `http://127.0.0.1:8765`.
+2. **Coming from Zotero?** Import (toolbar) > *Migrate from Zotero* > Detect > Import. Zotero's files are only read.
+3. **Chrome connector:** Settings > Browser Connector shows the folder to load in `chrome://extensions` (Developer mode > Load unpacked).
+4. **Word add-in:** Settings > Word Add-in > *Set up Word add-in...* opens a script you run once (it trusts ReviewHunter's local certificate and registers the add-in), then restart Word: References tab > ReviewHunter.
+5. **Google Drive:** Settings > Google Drive & Backup. Desktop mode needs only Google Drive for desktop; API mode walks you through creating a Desktop OAuth client.
+
+### Why a paywalled PDF may fail from the app but work in your browser
+
+Publishers such as ScienceDirect block non-browser downloads (HTTP 403) and closed-access papers have no
+open copy. Your browser has your institutional session; the server does not. Use the Chrome connector on the
+article page: it downloads the PDF with your own access and attaches it to the existing item.
+
+### Tests and benchmarks
+
+```bash
+.venv/Scripts/python.exe -m pytest tests -q                     # backend, formats, API, Zotero migration
+.venv/Scripts/python.exe tools/ui_snapshot.py --url http://127.0.0.1:8765/ --step "$(cat tests/e2e_ui.js)"   # UI scenario (test library only)
+```
+`benchmarks/benchmark_v1_v2.py` compares v1 and v2 (PDF availability, API latency, feature coverage); results and
+figures are in `benchmarks/results/`.
 
 ## Launching the Web App - no install required
 
@@ -54,13 +70,7 @@ ReviewHunter then starts on `http://127.0.0.1:8765` and your browser opens autom
 
 The library lives at `~/ReviewHunter/` (override with `REVIEWHUNTER_HOME=...`). Renamed PDFs go in `~/ReviewHunter/papers/`; the catalog is `~/ReviewHunter/library.db` (SQLite).
 
-Google Drive support targets the local Google Drive Desktop sync folder. In the
-left rail, **Export DB** writes a timestamped backup under
-`Google Drive/ReviewHunter/backups/` when Drive is detected, including
-`library.db`, `library.csv`, a manifest, and downloaded files. **Use Drive**
-sets future downloads to `Google Drive/ReviewHunter/papers/` and copies existing
-downloaded files there. If Drive is not auto-detected, use **Export to...** or
-**Folder...** and paste the mounted Drive path.
+Google Drive, backups, citation styles and integrations are configured in **Settings** (gear icon, Ctrl+,).
 
 Pass arguments to the app after `--`:
 ```bash

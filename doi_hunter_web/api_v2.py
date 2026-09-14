@@ -228,13 +228,15 @@ def list_items(
     direction: str = "desc",
     limit: int = 5000,
     offset: int = 0,
+    full: bool = False,
 ) -> list[dict]:
+    """Item list. Compact by default (no abstract/mirrors); pass full=true for complete records."""
     conds = json.loads(conditions) if conditions else None
     return catalog.query_items(
         collection_id=collection_id, include_subcollections=include_sub, unfiled=unfiled, starred=starred,
         trash=trash, status=status, author=author, subject=subject, tags=tag, item_type=item_type, q=q, mode=mode,
         saved_search_id=saved_search_id, conditions=conds, match=match, has_notes=has_notes, sort=sort,
-        direction=direction, limit=min(limit, 20000), offset=offset,
+        direction=direction, limit=min(limit, 20000), offset=offset, compact=not full,
     )
 
 
