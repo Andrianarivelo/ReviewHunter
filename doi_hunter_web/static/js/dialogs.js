@@ -12,6 +12,7 @@ window.dialogsPart = function dialogsPart() {
     identify: { text: '', collectionId: '', tags: '', autoDownload: true, busy: false },
     newItemMenu: false,
     importState: { file: null, text: '', format: '', collectionId: '', newCollection: true, busy: false, result: null },
+    zotero: { dataDir: '', summary: null, copyFiles: true, includeTrash: false, running: false, progress: null, report: null, error: '' },
     exportState: { format: 'bibtex', scope: {}, label: '' },
     bib: { scope: {}, label: '', style: '', locale: 'en-US', mode: 'bibliography', html: '', text: '', loading: false, error: '', styleQuery: '' },
     advanced: { id: null, name: '', match: 'all', conditions: [{ field: 'title', op: 'contains', value: '' }] },
@@ -115,6 +116,33 @@ window.dialogsPart = function dialogsPart() {
         s.busy = false;
       }
     },
+    /** Locate the Zotero data directory and show what will be migrated. */
+    async detectZotero() {
+      this.zotero.error = '';
+      try {
+        const r = await api.get('/api/import/zotero/detect', { data_dir: this.zotero.dataDir || null });
+        this.zotero.summary = r.found ? r : null;
+        if (r.data_dir) this.zotero.dataDir = r.data_dir;
+        if (!r.found) this.zotero.error = 'No zotero.sqlite found here. In Zotero: Edit > Settings > Advanced > Files and Folders shows the data directory.';
+      } catch (e) { this.zotero.error = e.message; }
+    },
+    /** Start the background migration (progress arrives on the WebSocket). */
+    async runZoteroImport() {
+      const msg = 'Import your Zotero library into ReviewHunter?\n\nZotero files are only read (a temporary copy of the database is used). '
+        + 'Close Zotero first for a consistent snapshot. Running it again later only adds what is new.';
+      if (!confirm(msg)) return;
+      this.zotero.running = true;
+      this.zotero.report = null;
+      this.zotero.progress = { stage: 'starting', index: 0, total: 1 };
+      try {
+        await api.post('/api/import/zotero', { data_dir: this.zotero.dataDir || null, copy_files: this.zotero.copyFiles,
+          include_trash: this.zotero.includeTrash });
+      } catch (e) {
+        this.zotero.running = false;
+        this.toast(e.message, 'error', 8000);
+      }
+    },
+
     async importFromClipboard() {
       try {
         const text = await navigator.clipboard.readText();

@@ -73,6 +73,8 @@ function app() {
 
       /** Live job events (downloads, imports, connector saves) from the server. */
       connectWS() {
+        // Exactly one live socket: a second one would duplicate every toast and refresh.
+        if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) return;
         const proto = location.protocol === 'https:' ? 'wss' : 'ws';
         const ws = new WebSocket(`${proto}://${location.host}/ws/jobs`);
         this.ws = ws;
@@ -99,6 +101,17 @@ function app() {
               this.toast(m.error || 'Operation failed', 'error', 6000);
               scheduleRefresh();
               break;
+            case 'zotero_progress':
+              this.zotero.running = true;
+              this.zotero.progress = m;
+              break;
+            case 'zotero_done':
+              this.zotero.running = false;
+              this.zotero.progress = null;
+              this.zotero.report = m;
+              this.toast(`Zotero import finished: ${m.items} items, ${m.files} files, ${m.notes} notes`, 'ok', 8000);
+              scheduleRefresh();
+              break;
             case 'batch_start':
               this.batch = { active: true, index: 0, total: m.total, query: '' };
               break;
@@ -114,6 +127,7 @@ function app() {
           }
         };
         ws.onclose = () => {
+          if (this.ws !== ws) return;   // an older socket closing must not spawn another reconnect loop
           this.online = false;
           setTimeout(() => this.connectWS(), 2500);
         };

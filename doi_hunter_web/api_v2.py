@@ -22,7 +22,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Upload
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from pydantic import BaseModel
 
-from . import catalog, config, duplicates, formats, fulltext, gdrive, identifiers
+from . import catalog, config, duplicates, formats, fulltext, gdrive, identifiers, zotero_import
 from .csl import item_to_csl
 from .db import get_conn
 
@@ -151,6 +151,12 @@ class ImportTextIn(BaseModel):
     format: Optional[str] = None
     collection_id: Optional[int] = None
     create_collection: Optional[str] = None
+
+
+class ZoteroImportIn(BaseModel):
+    data_dir: Optional[str] = None
+    copy_files: bool = True
+    include_trash: bool = False
 
 
 class StyleInstallIn(BaseModel):
@@ -814,6 +820,40 @@ async def _post_pdf_import(request: Request, item_ids: list[int]) -> None:
             _publish(request, "item_changed", {"id": iid, "metadata": res})
         except Exception as e:
             _publish(request, "failed", {"id": iid, "error": f"metadata: {e}"})
+
+
+@router.get("/import/zotero/detect")
+def zotero_detect(data_dir: Optional[str] = None) -> dict:
+    """Find the Zotero data directory (default ~/Zotero) and summarise what would be imported."""
+    folder = Path(data_dir).expanduser() if data_dir else zotero_import.default_data_dir()
+    if not folder or not (folder / "zotero.sqlite").exists():
+        return {"found": False, "data_dir": str(folder) if folder else ""}
+    try:
+        return {"found": True, **zotero_import.inspect(folder)}
+    except Exception as e:
+        raise HTTPException(400, f"cannot read Zotero database: {e}")
+
+
+@router.post("/import/zotero")
+async def zotero_run(body: ZoteroImportIn, request: Request) -> dict:
+    """Run the migration in the background; progress arrives as zotero_progress / zotero_done events."""
+    folder = Path(body.data_dir).expanduser() if body.data_dir else zotero_import.default_data_dir()
+    if not folder or not (folder / "zotero.sqlite").exists():
+        raise HTTPException(400, "zotero.sqlite not found; choose your Zotero data directory")
+
+    def progress(stage: str, data: dict) -> None:
+        _publish(request, stage, data)
+
+    async def run() -> None:
+        try:
+            await asyncio.to_thread(zotero_import.import_library, folder, copy_files=body.copy_files,
+                                    include_trash=body.include_trash, progress=progress)
+            await asyncio.to_thread(fulltext.reindex_all)
+        except Exception as e:
+            _publish(request, "failed", {"error": f"Zotero import failed: {e}"})
+
+    asyncio.create_task(run())
+    return {"queued": True, "data_dir": str(folder)}
 
 
 # ======================================================================================

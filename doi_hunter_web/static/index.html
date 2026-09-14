@@ -814,9 +814,34 @@
   </div>
 
   <!-- Import -->
-  <div x-show="dialog==='import'" class="dialog w-[min(640px,96vw)] p-5">
+  <div x-show="dialog==='import'" class="dialog w-[min(640px,96vw)] p-5 max-h-[94vh] overflow-y-auto">
     <div class="dlg-head"><h3>Import</h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
-    <label class="drop-zone mt-3" @dragover.prevent @drop.prevent="onImportFile($event.dataTransfer.files[0])">
+    <div class="card p-3 mt-3">
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-sm">Migrate from Zotero</span>
+        <span class="type-pill">collections, notes, PDFs, annotations</span>
+        <button @click="detectZotero()" class="ml-auto action-secondary h-7 px-2.5 text-xs">Detect</button>
+      </div>
+      <input x-model="zotero.dataDir" @keydown.enter="detectZotero()" placeholder="Zotero data directory, e.g. C:\Users\you\Zotero" class="dlg-input mt-2">
+      <div x-show="zotero.error" class="text-xs text-rose-500 mt-1.5" x-text="zotero.error"></div>
+      <template x-if="zotero.summary">
+        <div class="mt-2 text-xs text-ink-600 dark:text-ink-300 space-y-2">
+          <div x-text="`Found ${zotero.summary.items} items, ${zotero.summary.collections} collections, ${zotero.summary.notes} notes, ${zotero.summary.attachments} attachments, ${zotero.summary.annotations} annotations, ${zotero.summary.tags} tags.`"></div>
+          <div class="flex flex-wrap gap-4">
+            <label class="flex items-center gap-1.5"><input type="checkbox" x-model="zotero.copyFiles" class="rounded">Copy stored files into ReviewHunter</label>
+            <label class="flex items-center gap-1.5"><input type="checkbox" x-model="zotero.includeTrash" class="rounded">Include Zotero trash</label>
+          </div>
+          <button @click="runZoteroImport()" :disabled="zotero.running" class="action-primary h-8 px-3 text-xs" x-text="zotero.running ? 'Importing...' : 'Import Zotero library'"></button>
+        </div>
+      </template>
+      <div x-show="zotero.progress" class="mt-2">
+        <div class="h-1.5 rounded-full bg-ink-100 dark:bg-ink-800 overflow-hidden"><div class="h-full bg-accent-500 transition-all" :style="`width:${zotero.progress ? Math.round(zotero.progress.index / Math.max(1, zotero.progress.total) * 100) : 0}%`"></div></div>
+        <div class="text-[11px] text-ink-400 mt-1" x-text="zotero.progress ? `${zotero.progress.stage}: ${zotero.progress.index} / ${zotero.progress.total}` : ''"></div>
+      </div>
+      <div x-show="zotero.report" class="text-xs text-emerald-600 mt-2" x-text="zotero.report ? `Done: ${zotero.report.items} new items (${zotero.report.items_existing} already present), ${zotero.report.collections} collections, ${zotero.report.notes} notes, ${zotero.report.files} files, ${zotero.report.annotations} annotations, ${zotero.report.missing_files} missing files.` : ''"></div>
+    </div>
+    <div class="rail-label mt-4 mb-1">Files and text</div>
+    <label class="drop-zone" @dragover.prevent @drop.prevent="onImportFile($event.dataTransfer.files[0])">
       <input type="file" class="hidden" accept=".bib,.bibtex,.ris,.json,.txt,.pdf" @change="onImportFile($event.target.files[0])">
       <div class="font-semibold text-sm" x-text="importState.file ? importState.file.name : 'Choose or drop a file'"></div>
       <div class="text-xs text-ink-500 mt-1">BibTeX / BibLaTeX (Zotero, JabRef, Mendeley exports), RIS (EndNote), CSL-JSON, a list of identifiers, or a PDF</div>

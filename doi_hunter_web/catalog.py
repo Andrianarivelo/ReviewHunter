@@ -815,7 +815,14 @@ def sanitize_html(html: str) -> str:
 def note_title(html: str) -> str:
     from bs4 import BeautifulSoup
 
-    text = BeautifulSoup(html or "", "html.parser").get_text("\n").strip()
+    soup = BeautifulSoup(html or "", "html.parser")
+    # Title = text of the first non-empty block; inline tags (<b>, <i>, <a>) stay part of the same line.
+    blocks = ("p", "h1", "h2", "h3", "h4", "li", "blockquote", "pre", "td")
+    for el in soup.find_all(blocks):
+        text = re.sub(r"\s+", " ", el.get_text(" ")).strip()
+        if text:
+            return text[:120]
+    text = re.sub(r"[ \t]+", " ", soup.get_text("\n"))
     first = next((line.strip() for line in text.splitlines() if line.strip()), "")
     return first[:120] or "Untitled note"
 
