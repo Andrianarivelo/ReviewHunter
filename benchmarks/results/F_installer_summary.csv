@@ -1,0 +1,4 @@
+scenario,method,platforms,successes,median_seconds_successful,discordant_previous_only,discordant_installer_only,mcnemar_exact_p
+python,legacy,5,2,47,0,3,0.25
+python,installer,5,5,36,0,3,0.25
+bare,installer,3,3,34,,,
