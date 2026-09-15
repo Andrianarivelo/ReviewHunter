@@ -279,11 +279,11 @@ async function autoAttach(tabId, url) {
       await flashBadge(tabId, "ERR", "#dc2626", `ReviewHunter: PDF not attached (${last ? last.error : "download failed"})`);
       return;
     }
-    await api.uploadAttachment(target.id, pdf.bytes, { url: pdf.finalUrl, title: "Full Text PDF", contentType: "application/pdf" });
+    const uploaded = await api.uploadAttachment(target.id, pdf.bytes, { url: pdf.finalUrl, title: "Full Text PDF", contentType: "application/pdf" });
     await removePending(target.id);
     invalidateSaved();
     // Confirm from the server before telling the user it is saved.
-    const after = await api.itemStatus(target.id).catch(() => null);
+    const after = await api.itemStatus(uploaded.item_id || target.id).catch(() => null);
     if (after && after.has_pdf) {
       clearTimeout(badgeTimers.get(tabId));
       await showSavedBadge(tabId, { title: after.title, hasPdf: true });
@@ -376,10 +376,18 @@ async function pollHandoffs() {
   }
 }
 
-chrome.alarms.create("rh-handoffs", { periodInMinutes: 1 });
-chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === "rh-handoffs") pollHandoffs().catch(() => {});
-});
+// The "alarms" permission arrived in 1.2.0: an extension registration that predates it (reloaded without
+// "Remove" + "Load unpacked") has no chrome.alarms, and a top-level throw here would kill the whole worker
+// (badge, saves, hand-offs). Without alarms the live bridge from the app page still works; only the
+// once-a-minute backup poll is lost.
+if (chrome.alarms) {
+  chrome.alarms.create("rh-handoffs", { periodInMinutes: 1 });
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === "rh-handoffs") pollHandoffs().catch(() => {});
+  });
+} else {
+  console.warn("ReviewHunter: 'alarms' permission missing (remove and re-load the unpacked extension); backup poll disabled");
+}
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Failures travel in a dedicated key: normal payloads (e.g. an offline status) may carry their own "error" field.
