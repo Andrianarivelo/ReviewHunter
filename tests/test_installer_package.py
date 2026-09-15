@@ -27,6 +27,8 @@ REQUIRED_FILES = (
     "doi_hunter_web/insight.py", "doi_hunter_web/method_taxonomy.py",
     "doi_hunter_web/method_details.py", "doi_hunter_web/word_concepts.py",
     "doi_hunter_web/goal_extraction.py", "doi_hunter_web/static/js/goal_views.js",
+    "doi_hunter_web/result_extraction.py", "doi_hunter_web/concept_analysis.py",
+    "doi_hunter_web/static/js/analysis_views.js",
     "doi_hunter_web/static/js/insights.js", "doi_hunter_web/static/index.html",
     "doi_hunter_web/static/insights.css",
     "browser_extension/manifest.json", "browser_extension/src/core/pdf.js",

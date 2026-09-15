@@ -48,13 +48,17 @@ and [the PDF identity benchmark](benchmarks/results/H_pdf_identity_notes.md).
 | Security | The local server rejects cross-site writes and DNS rebinding; only the app and browser extensions can modify the library |
 | Impact factor | A free, OpenAlex-based journal impact metric next to the Publication column (sortable, filterable), with a per-journal search dialog and a manual override for a real Journal Impact Factor when you have one |
 
-### Insight maps (v2.5)
+### Insight maps (v2.6)
 
 Open **Concepts**, **Words**, **Goals**, or **Methodology** in the sidebar. Opening a map from a
 collection inherits that collection; **Select collections** combines any checked collections, with
 optional subcollections. Overlapping papers are counted once. The selection carries across all four
-maps. The scope bar also supports authors, tags, and the whole library. Concepts shows clustered
-co-occurrence and Words offers a cloud or ranked bars with subset distinctiveness.
+maps. The scope bar also supports authors, tags, and the whole library. Concepts combines readable
+full-label cards and an overlap matrix with prevalence, shared-paper overlap and unusual concept
+combinations. Broad indexing terms and single-paper concepts can be included explicitly. The sparse
+network keeps two strong connections per concept; the matrix reconstructs every overlap from paper
+memberships, including edges omitted by the network API's display cap. Words offers a cloud or ranked
+bars with subset distinctiveness.
 
 Goals opens a **Question atlas** with every scoped paper represented. Each visual card includes a
 complete explicit aim, a clearly labelled title-derived focus, or an unavailable-text status. Cards
@@ -62,7 +66,17 @@ show supported factor/outcome relationships and preserve negative statements. Fi
 type, theme, or search text; switch to **Factor–outcome connections** to compare relationships.
 Click a card for its complete source evidence and all extracted relations. Both views paginate long
 scopes; CSV and JSON retain every paper, including those without a reliable pair.
-[Goal extraction audit](docs/goal-extraction-audit.md) records the read-only ten-paper comparison.
+Aim search includes unheaded introductions and explicit retrospective purpose statements in Discussion
+and Conclusion. [Aim-source audit](docs/aim-source-audit.md) documents recovery of both previously missed
+aims on the same ten-paper sample, increasing explicit-aim coverage from eight to ten.
+
+The **Outcomes** tab separates reported increases, decreases, no detected change, mixed responses and
+unclear directions from research questions. Findings retain source sentences and experimental context.
+Compatible-context groups show agreement and minority directions; a separate expandable section groups
+shared outcomes where context differs or is incomplete. These are descriptive reading aids, not pooled
+effects or statistical outlier tests. CSV exports the active view's records for every scoped paper;
+JSON includes aims, findings and comparisons together. [Extraction limits](docs/result-extraction-audit.md)
+and [visual checks](docs/insight-results/README.md) document the evidence and validation.
 
 Words uses a stronger size range and stable colours for lexical concept groups. **Very rare** shows
 terms occurring exactly once, with gold underlining. **Unusual in this scope** shows repeated terms

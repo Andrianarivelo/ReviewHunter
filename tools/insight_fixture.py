@@ -150,7 +150,33 @@ def goal_fixture_papers() -> list[dict]:
     return papers
 
 
-def create_fixture(destination: Path, *, detailed: bool = False, goals: bool = False) -> dict:
+def result_fixture_papers() -> list[dict]:
+    """Create exact directional comparisons while keeping missing findings explicit."""
+    papers = goal_fixture_papers()
+    for index, direction in enumerate(("increased", "increased", "increased", "decreased", "increased")):
+        temperature = 30 if index == 4 else 22
+        finding = f"MDMA {direction} body temperature in rats at {temperature}\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls."
+        papers[index].update({
+            "title": f"Synthetic MDMA thermoregulation experiment {index + 1} in rats",
+            "abstract": "We examined the effect of MDMA on body temperature in rats. " + finding,
+            "results": finding,
+            "methods": f"Male rats received MDMA at 5 mg/kg by intraperitoneal administration at {temperature} degrees C. Core temperature was recorded by telemetry. A factorial design and repeated-measures ANOVA were used.",
+            "keywords": ["general", "MDMA", "body temperature", "ambient temperature", "thermoregulation",
+                         "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"],
+        })
+    for index in (6, 7):
+        finding = "Cocaine did not alter locomotor activity in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls."
+        papers[index].update({
+            "title": f"Synthetic cocaine locomotion experiment {index + 1} in rats",
+            "abstract": "We examined the effect of cocaine on locomotor activity. " + finding,
+            "results": finding,
+            "keywords": ["general", "cocaine", "locomotor activity", "ambient temperature"],
+            "methods": "Male rats received cocaine at 5 mg/kg intraperitoneally. Locomotor activity was recorded using video tracking.",
+        })
+    return papers
+
+
+def create_fixture(destination: Path, *, detailed: bool = False, goals: bool = False, results: bool = False) -> dict:
     """Seed a new temporary library and return reproducible scope identifiers."""
     destination = destination.resolve()
     if not destination.is_relative_to(TEMP_ROOT.resolve()):
@@ -168,9 +194,9 @@ def create_fixture(destination: Path, *, detailed: bool = False, goals: bool = F
     parent = library.create_collection("Temperature_addiction (synthetic)")
     child = library.create_collection("Dopamine (synthetic)", parent_id=parent["id"])
     collections = {"parent": parent["id"], "child": child["id"]}
-    if goals:
+    if goals or results:
         collections["sibling"] = library.create_collection("Visual cognition (synthetic)")["id"]
-    papers = goal_fixture_papers() if goals else [*DETAIL_PAPERS, *PAPERS] if detailed else PAPERS
+    papers = result_fixture_papers() if results else goal_fixture_papers() if goals else [*DETAIL_PAPERS, *PAPERS] if detailed else PAPERS
     ids = []
     parent_items, descendant_items, sibling_items = [], [], []
     for index, paper in enumerate(papers, 1):
@@ -180,7 +206,8 @@ def create_fixture(destination: Path, *, detailed: bool = False, goals: bool = F
             "year": 2020 + index % 6, "status": "metadata", "source_query": "synthetic UI fixture",
         })
         path = destination / f"synthetic-paper-{index}.txt"
-        text = f"{paper['title']}\nAbstract\n{paper['abstract']}\nIntroduction\nA monkey study is cited once for context.\nMaterials and methods\n{paper['methods']}\nResults\nSynthetic results are provided only to test the interface.\nReferences\n"
+        result_text = paper.get("results", "Synthetic results are provided only to test the interface.")
+        text = f"{paper['title']}\nAbstract\n{paper['abstract']}\nIntroduction\nA monkey study is cited once for context.\nMaterials and methods\n{paper['methods']}\nResults\n{result_text}\nReferences\n"
         if not paper.get("no_fulltext"):
             path.write_text(text, encoding="utf-8")
             catalog.register_file(item_id, path, title="Synthetic Methods-section text")
@@ -199,7 +226,7 @@ def create_fixture(destination: Path, *, detailed: bool = False, goals: bool = F
             catalog.add_tag(item_id, "detail-stress")
         ids.append(item_id)
     result = {"home": str(destination), "synthetic": True, "items": ids, "collections": collections,
-              "titles": [paper["title"] for paper in papers], "detailed": detailed, "goals": goals,
+              "titles": [paper["title"] for paper in papers], "detailed": detailed, "goals": goals, "results": results,
               "parent_items": parent_items, "descendant_items": descendant_items, "port": 8775}
     if detailed and not goals:
         result["detail_expectations"] = {
@@ -215,13 +242,19 @@ def create_fixture(destination: Path, *, detailed: bool = False, goals: bool = F
                 {"id": ids[3], "present": ["drug_mdma", "tool_dlight", "tool_fiber_photometry", "signal_dopamine"], "absent": ["signal_calcium"]},
             ],
         }
-    if goals:
+    if goals or results:
         result["sibling_items"] = sibling_items
         result["union_items"] = sorted(set(descendant_items + sibling_items))
         result["goal_expectations"] = {"negative": ids[0], "passive": ids[1], "title_focus": ids[2],
             "malformed": ids[3], "groups": ids[4], "unavailable": ids[5],
             "statuses": {str(ids[0]): "title_focus", str(ids[1]): "explicit_aim", str(ids[2]): "title_focus",
                          str(ids[3]): "explicit_aim", str(ids[5]): "unavailable"}}
+    if results:
+        result.pop("goal_expectations", None)
+        result["result_expectations"] = {"increase_ids": ids[:3], "decrease_id": ids[3],
+            "different_context_id": ids[4], "missing_id": ids[5], "unchanged_ids": ids[6:8],
+            "comparison_ids": ids[:4], "directions": {"increase": 3, "decrease": 1},
+            "long_concept": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"}
     (destination / "fixture.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     db.reset_connections()
     return result
@@ -233,10 +266,11 @@ def main() -> None:
     parser.add_argument("--home", type=Path)
     parser.add_argument("--detailed", action="store_true", help="Use 12 synthetic papers with detailed methods and rare words")
     parser.add_argument("--goals", action="store_true", help="Use 12 synthetic goal-provenance and multi-collection cases")
+    parser.add_argument("--results", action="store_true", help="Use 12 synthetic concepts and directional outcome comparisons")
     args = parser.parse_args()
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     destination = args.home or Path(tempfile.mkdtemp(prefix="insight-ui-", dir=TEMP_ROOT))
-    print(json.dumps(create_fixture(destination, detailed=args.detailed, goals=args.goals), indent=2))
+    print(json.dumps(create_fixture(destination, detailed=args.detailed, goals=args.goals, results=args.results), indent=2))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,11 @@
+item_id,doi,baseline_revision,baseline_findings_feature_available,before_exposed_finding_count,after_finding_count,after_capped,directions,sources,interpretation
+3,10.1159/000138648,d8558bd,False,0,6,False,decrease;mixed;unspecified,abstract;results,"Descriptive extraction coverage, not independent accuracy validation"
+4,10.1016/j.drugalcdep.2023.110917,d8558bd,False,0,1,False,decrease,results,"Descriptive extraction coverage, not independent accuracy validation"
+5,10.1016/j.pbb.2017.10.008,d8558bd,False,0,8,True,decrease;increase,abstract;results,"Descriptive extraction coverage, not independent accuracy validation"
+8,10.1177/0269881107082286,d8558bd,False,0,7,False,decrease;increase,abstract;results,"Descriptive extraction coverage, not independent accuracy validation"
+9,10.1038/sj.npp.1300673,d8558bd,False,0,7,False,decrease;increase;no_detected_change,abstract;results,"Descriptive extraction coverage, not independent accuracy validation"
+10,10.1523/jneurosci.18-13-05086.1998,d8558bd,False,0,2,False,increase;unspecified,results,"Descriptive extraction coverage, not independent accuracy validation"
+11,10.1016/s0892-0362(98)00004-x,d8558bd,False,0,1,False,unspecified,abstract,"Descriptive extraction coverage, not independent accuracy validation"
+12,10.1016/j.neuropharm.2017.07.025,d8558bd,False,0,3,False,decrease;increase;mixed,abstract;results,"Descriptive extraction coverage, not independent accuracy validation"
+13,10.1007/bf00181238,d8558bd,False,0,5,False,decrease;increase,abstract;results,"Descriptive extraction coverage, not independent accuracy validation"
+14,10.1016/0741-8329(90)90047-g,d8558bd,False,0,8,False,decrease;increase,abstract;results,"Descriptive extraction coverage, not independent accuracy validation"

@@ -169,6 +169,7 @@
       insight: { kind: 'concepts', loading: false, data: {}, scope: 'all', includeSub: true, source: 'abstract',
         collectionIds: [], collectionDraft: [], collectionQuery: '', collectionPicker: false,
         goalView: 'atlas', goalKind: '', goalTheme: '', goalQuery: '', goalPage: 0,
+        resultDirection: '', resultMode: 'all', conceptView: 'network', conceptCount: 24, conceptSingles: false, conceptBroad: false, conceptEdges: [],
         metric: 'count', terms: 'all', wordPool: 'frequent', wordConcept: '', view: 'cloud', methodView: 'pipeline', focus: '', cluster: null, selected: null,
         svg: '', height: HEIGHT, width: WIDTH, actions: [], nodes: [], page: 0, error: '', request: 0, zoom: 1 },
       insightKinds: Object.entries(KINDS).map(([id, label]) => ({ id, label })),
@@ -218,7 +219,7 @@
         const data = this.insight.data, total = data.scope?.items || 0;
         if (this.insight.kind === 'concepts') {
           const leading = [...(data.nodes || [])].sort((a, b) => b.count - a.count)[0];
-          return [{ value: data.nodes?.length || 0, label: 'concepts shown' }, { value: data.clusters?.length || 0, label: 'themes' },
+          return [{ value: data.nodes?.length || 0, label: 'concepts retained' }, { value: data.clusters?.length || 0, label: data.clusters?.length === 1 ? 'theme' : 'themes' },
             { value: leading ? `${leading.count}/${total}` : '0', label: leading ? `papers share “${leading.label}”` : 'papers linked' }];
         }
         if (this.insight.kind === 'words') {
@@ -236,6 +237,7 @@
       scrollInsightReporting() { document.querySelector('.insight-diagnostics')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
       insightChartStyle() {
         const state = this.insight;
+        if (state.kind === 'concepts') return `width:${state.zoom * 100}%;min-width:${state.width}px;height:auto;`;
         if (state.kind === 'goals' && state.goalView === 'atlas') return `width:100%;min-width:${state.selected ? 580 : 850}px;`;
         const fitted = state.kind === 'concepts' || state.kind === 'words' && state.view === 'cloud';
         if (fitted) {
@@ -325,7 +327,7 @@
             s.metric = 'count';
             if (s.wordPool === 'unusual') s.wordPool = 'frequent';
           }
-          s.nodes = forceLayout(data.nodes || [], data.edges || []);
+          s.nodes = data.nodes || [];
           this.renderInsight();
         } catch (e) { if (s.request === request) { s.error = e.message || 'Could not load this map'; s.data = {}; s.svg = ''; } }
         finally { if (s.request === request) s.loading = false; }
@@ -343,7 +345,8 @@
         }
         if (limits.scope_capped) notes.push(`Scope reached the ${limits.max_items || 2000}-paper analysis limit; narrow the scope for complete coverage.`);
         if (limits.no_text) notes.push(`${limits.no_text} without assessable text`);
-        if (limits.fulltext_scan_chars) notes.push(`Goal search reads up to ${Number(limits.fulltext_scan_chars).toLocaleString()} indexed characters per paper.`);
+        if (limits.fulltext_scan_chars) notes.push(`Aim and result search reads up to ${Number(limits.fulltext_scan_chars).toLocaleString()} indexed characters per paper.`);
+        if (limits.findings_capped) notes.push(`${limits.findings_capped} papers reached the ${limits.findings_per_paper}-finding display limit; capped papers are excluded from compatible comparison counts.`);
         return notes.join(' · ');
       },
       insightHasData() { const d = this.insight.data; return !!(d.nodes?.length || d.words?.length || d.rare_words?.length || d.papers?.length); },
@@ -364,7 +367,7 @@
         const id = clear ? null : event.target.closest('[data-node]')?.getAttribute('data-node');
         const svg = document.getElementById('insight-svg'); if (!svg) return;
         const neighbours = new Set([id]);
-        for (const e of this.insight.data.edges || []) { if (e.source === id) neighbours.add(e.target); if (e.target === id) neighbours.add(e.source); }
+        for (const e of this.insight.conceptEdges || []) { if (e.source === id) neighbours.add(e.target); if (e.target === id) neighbours.add(e.source); }
         for (const n of svg.querySelectorAll('[data-node]')) n.style.opacity = !id || neighbours.has(n.getAttribute('data-node')) ? 1 : .2;
         for (const e of svg.querySelectorAll('[data-edge]')) e.style.opacity = !id || e.getAttribute('data-a') === id || e.getAttribute('data-b') === id ? 1 : .1;
       },
@@ -379,7 +382,8 @@
         const state = this.insight, query = state.goalQuery.trim().toLowerCase();
         return (state.data.papers || []).filter(paper => (!state.goalKind || paper.goal_type === state.goalKind) &&
           (!state.goalTheme || (paper.themes || []).some(theme => theme.id === state.goalTheme)) &&
-          (!query || [paper.title, paper.focus, ...(paper.aims || []).map(aim => aim.sentence)].join(' ').toLowerCase().includes(query)));
+          (!query || [paper.title, paper.focus, ...(paper.aims || []).map(aim => aim.sentence), ...(paper.findings || []).map(finding => finding.evidence)].join(' ').toLowerCase().includes(query)) &&
+          (state.goalView !== 'outcomes' || !state.resultDirection || (paper.findings || []).some(finding => finding.direction === state.resultDirection)));
       },
       goalThemes() {
         const themes = new Map();
@@ -393,11 +397,48 @@
       goalPageCount() { return Math.max(1, Math.ceil(this.goalFilteredPapers().length / GOAL_PAGE_SIZE)); },
       filterGoals() { this.insight.goalPage = 0; this.renderInsight(); },
       goalPage(delta) { this.insight.goalPage = Math.max(0, Math.min(this.goalPageCount() - 1, this.insight.goalPage + delta)); this.renderInsight(); },
-      clearGoalFilters() { this.insight.goalKind = ''; this.insight.goalTheme = ''; this.insight.goalQuery = ''; this.filterGoals(); },
+      clearGoalFilters() { this.insight.goalKind = ''; this.insight.goalTheme = ''; this.insight.goalQuery = ''; this.insight.resultDirection = ''; this.filterGoals(); },
+      directionLabel(direction) { const [symbol, label] = window.InsightAnalysisViews.direction(direction); return symbol + ' ' + label; },
+      directionColour(direction) { return color(window.InsightAnalysisViews.direction(direction)[2]); },
+      findingContext(context) {
+        return Object.entries(context || {}).filter(([key, value]) => Array.isArray(value) && !key.endsWith('_source'))
+          .flatMap(([, value]) => value).filter(Boolean).join(' · ');
+      },
+      findingDetail(finding, paper) {
+        return { label: this.directionLabel(finding.direction) + ': ' + finding.outcome, items: [paper],
+          description: finding.factor + '. Context: ' + (this.findingContext(finding.context) || 'not resolved') + '. Direction describes this source statement, not a pooled effect.',
+          evidence: [{ id: paper.id, sentence: finding.evidence, source: finding.source }] };
+      },
+      /** Compare only complete backend groups; a UI filter must not change who is in the minority. */
+      resultComparisons() {
+        const visible = new Set(this.goalFilteredPapers().map(paper => paper.id));
+        return (this.insight.data.result_comparisons || []).filter(group =>
+          (group.findings || []).some(finding => visible.has(finding.paper_id)) &&
+          (this.insight.resultMode !== 'different' || Object.keys(group.direction_counts || {}).length > 1) &&
+          (this.insight.resultMode !== 'similar' || Object.keys(group.direction_counts || {}).length === 1));
+      },
+      relatedOutcomes() {
+        const visible = new Set(this.goalFilteredPapers().map(paper => paper.id));
+        return (this.insight.data.related_outcomes || []).filter(group =>
+          (group.findings || []).some(finding => visible.has(finding.paper_id)));
+      },
+      inspectResultComparison(group) {
+        const ids = new Set((group.findings || []).map(finding => finding.paper_id));
+        this.insight.selected = { label: group.factor ? group.factor + ' → ' + group.outcome : group.outcome,
+          description: group.interpretation + (group.context ? ' Context: ' + this.findingContext(group.context) : ''),
+          items: (this.insight.data.papers || []).filter(paper => ids.has(paper.id)),
+          evidence: (group.findings || []).map(finding => ({ id: finding.paper_id, sentence: finding.evidence, source: this.directionLabel(finding.direction) + ' · ' + finding.source + ' · ' + this.findingContext(finding.context) })) };
+        this.clearItem();
+      },
+      resultCoverage() {
+        const papers = this.goalFilteredPapers();
+        return `${papers.filter(paper => paper.findings?.length).length} of ${papers.length} papers have extracted findings. Missing direction is kept explicit.`;
+      },
       goalPaperDetail(paper) {
         const evidence = (paper.aims || []).map(aim => ({ id: paper.id, sentence: aim.sentence, source: aim.source || paper.focus_source || 'Available text' }));
         if (!evidence.length && paper.focus) evidence.push({ id: paper.id, sentence: paper.focus, source: paper.focus_source === 'title' ? 'Title-derived focus, not an explicit aim' : paper.focus_source });
         for (const pair of paper.pairs || []) if (!evidence.some(entry => entry.sentence === pair.evidence)) evidence.push({ id: paper.id, sentence: pair.evidence, source: pair.source || 'Relation evidence' });
+        for (const finding of paper.findings || []) evidence.push({ id: paper.id, sentence: finding.evidence, source: this.directionLabel(finding.direction) + ' · ' + finding.source });
         return { label: paper.title, items: [paper], evidence, goalPairs: paper.pairs || [],
           description: `${paper.focus_label || 'Research focus'} · ${this.goalType(paper.goal_type)}. ${(paper.pairs || []).length} supported factor–outcome ${(paper.pairs || []).length === 1 ? 'relation' : 'relations'}.` };
       },
@@ -412,20 +453,50 @@
         if (s.kind === 'methods') s.svg = s.methodView === 'matrix' ? this.matrixSVG() : this.pipelineSVG();
       },
       conceptSVG() {
-        const s = this.insight, nodes = s.nodes.filter(n => s.cluster === null || n.cluster === s.cluster), byId = new Map(nodes.map(n => [n.id, n]));
-        s.height = graphHeight(s.nodes.length);
-        let svg = '';
-        for (const e of s.data.edges || []) {
-          const a = byId.get(e.source), b = byId.get(e.target); if (!a || !b) continue;
-          svg += `<g data-edge="" data-a="${esc(e.source)}" data-b="${esc(e.target)}"><line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${color(a.cluster)}" stroke-width="${Math.min(6, .7 + Math.sqrt(e.weight))}" opacity="${Math.min(.4, .07 + e.weight * .045)}"/></g>`;
-        }
-        for (const n of nodes) {
-          const action = this.insightAction({ label: n.label, items: n.items || [], evidence: n.evidence || [], related: n.related || [], count: n.count });
-          const labelX = n.labelX ?? n.x, labelY = n.labelY ?? n.y + n.r + 20;
-          const leader = Math.abs(labelX - n.x) > 6 || labelY < n.y ? `<line x1="${n.x}" y1="${n.y}" x2="${labelX}" y2="${labelY - 7}" stroke="${color(n.cluster)}" opacity=".4"/>` : '';
-          svg += `<g class="insight-node" data-node="${esc(n.id)}" ${action}>${title(n.label + ' · ' + paperCount(n.count))}${leader}<circle cx="${n.x}" cy="${n.y}" r="${n.r + 6}" fill="${color(n.cluster)}" opacity=".1"/><circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${color(n.cluster)}"/>${text(labelX, labelY, clip(n.label, nodes.length > 45 ? 21 : 32), nodes.length > 45 ? 13 : 16, 'text-anchor="middle" class="insight-label"')}${text(n.x, n.y + 4.5, n.count, 13, `text-anchor="middle" fill="${document.documentElement.classList.contains('dark') ? '#101522' : '#ffffff'}"`)}</g>`;
-        }
-        return svg;
+        const state = this.insight, nodes = this.visibleConcepts();
+        // Memberships are complete even when the API caps its visual edge list.
+        const memberships = new Map(nodes.map(node => [node.id, new Set((node.items || []).map(paper => paper.id))]));
+        const edges = [];
+        nodes.forEach((a, i) => nodes.slice(i + 1).forEach(b => {
+          const left = memberships.get(a.id), right = memberships.get(b.id);
+          const shared = [...left].filter(id => right.has(id));
+          if (shared.length) edges.push({ source: a.id, target: b.id, weight: shared.length, shared_count: shared.length,
+            item_ids: shared, jaccard: shared.length / (left.size + right.size - shared.length) });
+        }));
+        state.conceptEdges = edges;
+        // A sparse network keeps each node's two strongest overlaps; the matrix retains every edge.
+        const backbone = new Set();
+        for (const node of nodes) edges.filter(edge => edge.source === node.id || edge.target === node.id)
+          .sort((a, b) => b.weight - a.weight || b.jaccard - a.jaccard).slice(0, 2).forEach(edge => backbone.add(edge));
+        const draw = window.InsightAnalysisViews[state.conceptView === 'matrix' ? 'matrix' : 'network'];
+        const rendered = draw(nodes, state.conceptView === 'matrix' ? edges : [...backbone], {
+          text, textLines, wrapText, esc, color, action: detail => this.insightAction(detail),
+          nodeDetail: node => this.conceptDetail(node), edgeDetail: edge => this.conceptEdgeDetail(edge) });
+        state.height = rendered.height; state.width = rendered.width;
+        return rendered.svg;
+      },
+      visibleConcepts() {
+        const state = this.insight;
+        return (state.data.nodes || []).filter(node => (state.cluster === null || node.cluster === state.cluster) &&
+          (state.conceptBroad || !node.broad_metadata) && (state.conceptSingles || node.count > 1 || state.data.scope?.items === 1))
+          .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)).slice(0, Number(state.conceptCount));
+      },
+      conceptDetail(node) { return { label: node.label, items: node.items || [], evidence: node.evidence || [], related: node.related || [], count: node.count,
+        description: `${Math.round((node.prevalence || 0) * 100)}% of scoped papers contain this concept. ${node.broad_metadata ? 'Broad indexing metadata.' : 'Presence in title, abstract or curated metadata.'}` }; },
+      conceptEdgeDetail(edge) {
+        const nodes = this.insight.data.nodes || [], a = nodes.find(node => node.id === edge.source), b = nodes.find(node => node.id === edge.target);
+        const shared = new Set(edge.item_ids || (a?.items || []).filter(item => (b?.items || []).some(other => item.id === other.id)).map(item => item.id));
+        return { label: `${a?.label || edge.source} + ${b?.label || edge.target}`,
+          items: (a?.items || []).filter(item => shared.has(item.id)),
+          evidence: [...(a?.evidence || []), ...(b?.evidence || [])].filter(entry => shared.has(entry.id)),
+          description: `${paperCount(edge.shared_count ?? edge.weight)} contain both concepts. ${Math.round((edge.jaccard || 0) * 100)}% Jaccard overlap: shared papers divided by papers containing either concept. Co-occurrence does not imply a causal relationship.` };
+      },
+      inspectConcept(node) { this.insight.selected = this.conceptDetail(node); this.clearItem(); },
+      inspectConceptLink(edge) { this.insight.selected = this.conceptEdgeDetail(edge); this.clearItem(); },
+      inspectConceptCombination(entry) {
+        this.insight.selected = { label: entry.title || entry.paper?.title || 'Unusual concept combination', items: entry.items || (entry.paper ? [entry.paper] : []),
+          evidence: entry.evidence || [], description: entry.interpretation || 'These concept pairs occur in only this paper in the selected scope. This is descriptive rarity, not evidence of scientific novelty.' };
+        this.clearItem();
       },
       /** Signed values use a shared zero axis; frequency and distinctiveness never share an encoding. */
       wordSVG() {
@@ -471,12 +542,22 @@
       },
 
       goalSVG() {
+        if (this.insight.goalView === 'outcomes') {
+          const papers = this.goalVisiblePapers().map(paper => ({ ...paper, findings: (paper.findings || []).filter(finding => !this.insight.resultDirection || finding.direction === this.insight.resultDirection) }));
+          const rendered = window.InsightAnalysisViews.outcomes(papers, { text, textLines, wrapText, color, contextLabel: context => this.findingContext(context),
+            action: detail => this.insightAction(detail), findingDetail: (finding, paper) => this.findingDetail(finding, paper) });
+          this.insight.height = rendered.height; this.insight.width = rendered.width;
+          return rendered.svg;
+        }
         if (this.insight.goalView === 'connections') return this.goalRelationsSVG();
         const width = this.insight.selected ? 600 : 1000;
-        const rendered = window.InsightGoalViews.atlas(this.goalVisiblePapers(), {
-          width, columns: this.insight.selected ? 1 : 2, text, textLines, wrapText, esc,
+        const visible = this.goalVisiblePapers();
+        const rendered = window.InsightGoalViews.atlas(visible, {
+          width, columns: this.insight.selected || visible.length === 1 ? 1 : 2, text, textLines, wrapText, esc,
           color: kind => this.goalColour(kind), goalType: kind => this.goalType(kind),
           detail: paper => this.goalPaperDetail(paper), action: value => this.insightAction(value),
+          direction: value => this.directionLabel(value), directionColor: value => this.directionColour(value),
+          findingDetail: (finding, paper) => this.findingDetail(finding, paper),
         });
         this.insight.width = rendered.width; this.insight.height = rendered.height;
         return rendered.svg;
@@ -643,6 +724,11 @@
       inspectGoalPaper(paper) { this.insight.selected = this.goalPaperDetail(paper); this.clearItem(); this.$nextTick(() => this.renderInsight()); },
       insightCSV() {
         const d = this.insight.data, kind = this.insight.kind;
+        if (kind === 'goals' && this.insight.goalView === 'outcomes') return [
+          ['paper_id', 'paper_title', 'factor', 'outcome', 'direction', 'source', 'evidence', 'drugs', 'species', 'conditions'],
+          ...(d.papers || []).flatMap(paper => (paper.findings?.length ? paper.findings : [null]).map(finding =>
+            [paper.id, paper.title, finding?.factor || '', finding?.outcome || '', finding?.direction || 'not_detected', finding?.source || '', finding?.evidence || '',
+              (finding?.context?.drugs || []).join(';'), (finding?.context?.species || []).join(';'), (finding?.context?.conditions || []).join(';')]))];
         if (kind === 'methods') return [['paper_id', 'title', 'year', 'text_source', ...(d.matrix || []).map(m => m.label)], ...(d.papers || []).map(p => [p.id, p.title, p.year, p.source, ...(d.matrix || []).map(m => p.detected.some(x => x.id === m.id) ? 1 : 0)])];
         if (kind === 'words') {
           const terms = new Map();
@@ -655,7 +741,9 @@
           ...(d.papers || []).flatMap(paper => (paper.pairs?.length ? paper.pairs : [null]).map(pair =>
             [pair?.factor || '', pair?.outcome || '', pair?.kind || paper.goal_type, paper.id, paper.title,
               pair?.evidence || paper.focus || '', paper.focus || '', paper.focus_status || '', pair?.source || paper.focus_source || '', pair?.relation_label || '', pair?.negated ?? '']))];
-        return [['record_type', 'id_or_source', 'label_or_target', 'paper_count_or_weight', 'cluster', 'paper_ids'], ...(d.nodes || []).map(n => ['node', n.id, n.label, n.count, n.cluster, n.items.map(p => p.id).join(';')]), ...(d.edges || []).map(e => ['edge', e.source, e.target, e.weight, '', ''])];
+        return [['record_type', 'id_or_source', 'label_or_target', 'paper_count_or_weight', 'cluster', 'paper_ids', 'prevalence', 'jaccard_overlap', 'broad_indexing_metadata'],
+          ...(d.nodes || []).map(node => ['node', node.id, node.label, node.count, node.cluster, node.items.map(paper => paper.id).join(';'), node.prevalence, '', !!node.broad_metadata]),
+          ...(d.edges || []).map(edge => ['edge', edge.source, edge.target, edge.weight, '', (edge.item_ids || []).join(';'), '', edge.jaccard, !!edge.broad_metadata])];
       },
       async exportInsight(format) {
         const s = this.insight, name = `ReviewHunter-${s.kind}-${(s.data.scope?.label || 'library').replace(/[^a-z0-9-]/gi, '_')}`;
@@ -669,9 +757,14 @@
               ? [this.insightLimits(), 'Colours: lexical concept groups; gold and underlining = exactly one occurrence; pink = unusual in this scope.',
                 'Unusual: at least two occurrences, absent from available comparison text, and log-odds >= 1. Not a novelty claim.']
               : s.kind === 'goals' ? [this.insightLimits(),
-                `Question atlas / connections: page ${s.goalPage + 1} of ${this.goalPageCount()}; ${paperCount(this.goalFilteredPapers().length)} matching. CSV/JSON include every scoped paper.`,
-                'Explicit aims and title-derived focuses are labelled separately. Dashed relationships indicate a reported negative statement, not a positive effect.']
-              : [this.insightLimits()];
+                `${s.goalView === 'outcomes' ? 'Reported outcomes' : 'Question atlas / connections'}: page ${s.goalPage + 1} of ${this.goalPageCount()}; ${paperCount(this.goalFilteredPapers().length)} matching. CSV/JSON include every scoped paper.`,
+                'Aims and reported findings are separate evidence types. Directions require source evidence; missing extraction is not a null result.',
+                ...(s.goalView === 'outcomes' ? this.resultComparisons().map(group => `${group.factor} / ${group.outcome}: ` + Object.entries(group.direction_counts).map(([direction, count]) => `${direction}: ${paperCount(count)}`).join('; ') + '. Matching reported context only; not a statistical outlier test.') : [])]
+              : [this.insightLimits(), `${this.visibleConcepts().length} concepts shown; analytics use all retained concepts. Network positions group themes, not effect sizes.`,
+                'Jaccard overlap = shared papers / papers containing either concept. Counts measure text or metadata co-occurrence, not causality.',
+                ...(s.data.analytics?.core_themes || []).slice(0, 3).map(node => `Core concept: ${node.label}, ${node.count}/${s.data.scope.items} papers.`),
+                ...(s.data.analytics?.strongest_links || []).slice(0, 3).map(edge => `${edge.source_label} + ${edge.target_label}: ${edge.shared_count} shared papers; ${Math.round(edge.jaccard * 100)}% overlap.`),
+                ...(s.data.analytics?.unusual_combinations || []).slice(0, 2).map(entry => `Unusual concept combinations: ${entry.title}, ${Math.round(entry.score * 100)}% of eligible pairs unique to this paper. Not a novelty claim.`)];
           const footer = notes.filter(Boolean).flatMap(line => String(line).match(/.{1,115}(?:\s|$)|.{1,115}/g) || []);
           const legend = s.kind === 'words' ? this.insightWordLegend() : [];
           const height = s.height + 90 + footer.length * 22 + Math.ceil(legend.length / 3) * 24;

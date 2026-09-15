@@ -21,7 +21,8 @@ def test_every_paper_gets_an_honest_focus_status(library):
         catalog.create_item({"title": title, "abstract": abstract})
     result = insight.goals()
     assert len(result["papers"]) == 3
-    assert result["coverage"] == {"papers": 3, "explicit_aim": 1, "title_focus": 1, "unavailable": 1, "with_relationships": 1}
+    expected = {"papers": 3, "explicit_aim": 1, "title_focus": 1, "unavailable": 1, "with_relationships": 1}
+    assert {key: result["coverage"][key] for key in expected} == expected
     fallback = next(paper for paper in result["papers"] if paper["focus_status"] == "title_focus")
     assert fallback["focus"] == fallback["title"] and fallback["focus_source"] == "title"
     assert not fallback["aims"] and fallback["goal_type"] == "unknown"
@@ -150,3 +151,67 @@ def test_coordinated_outcome_nouns_remain_complete(outcome):
     """A coordinated noun phrase must not be mistaken for a new research action."""
     source = "We examined the effect of ambient temperature on " + outcome + "."
     assert extract("Synthetic experiment", source)["pairs"][0]["outcome"] == outcome
+
+
+def test_unheaded_introduction_is_searched_even_with_existing_abstract():
+    """A metadata abstract must not disable the actual purpose stated before Methods."""
+    purpose = "The purpose of this study was to investigate the interaction of ambient temperature, core temperature, and drug-induced neurotoxicity."
+    indexed = "Article title\nA descriptive summary without a stated aim.\n" + purpose + "\nMATERIALS AND METHODS\nRats received drug.\nDISCUSSION\nWe hypothesize that heat changes drug metabolism.\nREFERENCES\nOther research."
+    result = extract_goal("Temperature and neurotoxicity", "A complete but purely descriptive abstract.",
+                          fallback_text=indexed, splitter=sentences)
+    assert result["focus"] == purpose and result["focus_source"] == "fulltext"
+    assert not any("hypothesize" in aim["sentence"] for aim in result["aims"])
+
+
+def test_retrospective_primary_aim_in_conclusion_beats_general_discussion():
+    """A clearly stated study purpose can be recovered from a later section."""
+    purpose = "The primary aim of these studies was to evaluate if chemical structure impacts responses at different temperatures."
+    indexed = "1 Introduction\nEarlier research described drug responses.\n2 Methods\nThe animals were observed.\n3 Results\nWe examined the data and found stronger responses.\n4 Discussion\nThe studies reported here evaluated the role of chemical structure in drug responses.\n5 Conclusion\n" + purpose + " The answer was yes.\nReferences\nThe purpose of this study was to investigate unrelated outcomes."
+    result = extract_goal("Drug responses", "A short metadata abstract.", fallback_text=indexed, splitter=sentences)
+    assert result["focus"] == purpose and result["focus_source"] == "conclusion"
+    assert all("found stronger" not in aim["sentence"] and "unrelated outcomes" not in aim["sentence"] for aim in result["aims"])
+
+
+def test_full_introduction_is_searched_not_only_last_twelve_sentences():
+    """An earlier explicit objective survives a long introduction's background tail."""
+    aim = "We investigated whether temperature alters learning."
+    introduction = aim + " " + "Background evidence motivates this experiment. " * 20
+    result = extract("Learning experiment", "A descriptive abstract.", introduction)
+    assert result["focus"] == aim
+
+
+@pytest.mark.parametrize("statement", [
+    "We hypothesize that heat changes drug metabolism.",
+    "Based on these results, we hypothesize that heat changes drug metabolism.",
+    "A direct assessment of this hypothesis is beyond the scope of the present study.",
+    "The primary aim of future studies will be to investigate this hypothesis.",
+    "In our previous study we examined the effect of heat on memory.",
+    "These findings add support to the hypothesis that the compound has unusual properties.",
+])
+def test_late_section_speculation_and_prior_work_are_not_aims(statement):
+    """Widened source search must not recast findings or future work as study aims."""
+    indexed = "Introduction\nA descriptive overview.\nMethods\nAn observational method.\nDiscussion\n" + statement + "\nReferences\nOther research."
+    result = extract_goal("Unstated study purpose", "No objective is specified.", fallback_text=indexed, splitter=sentences)
+    assert result["aims"] == [] and result["focus_status"] == "title_focus"
+
+
+def test_declared_intro_hypothesis_is_kept_but_result_hypothesis_is_not():
+    """Context distinguishes a prospective hypothesis from a post-hoc explanation."""
+    aim = "Our hypothesis was that heat alters learning."
+    result = extract("Learning experiment", "Results: We hypothesize that heat affects metabolism.", aim)
+    assert [entry["sentence"] for entry in result["aims"]] == [aim]
+
+
+def test_editorial_interruption_does_not_become_a_chopped_aim():
+    """A PDF author/date insertion is not part of a reliable purpose sentence."""
+    indexed = "We developed an apparatus that maintains Received Jan. 5, 1998; revised April 13, 1998; accepted April 15, 1998.\nMethods\nAnimals were observed."
+    result = extract_goal("Apparatus report", "A descriptive abstract.", fallback_text=indexed, splitter=sentences)
+    assert result["aims"] == []
+
+
+def test_explicit_hypothesis_test_is_not_confused_with_supporting_a_hypothesis():
+    """Purpose clauses using 'to test' differ from a discussion of supporting results."""
+    aim = "The drug effect was determined to test the hypothesis that heat alters reward thresholds."
+    assert extract("Reward experiment", aim)["focus"] == aim
+    background = "The experiences add support to the hypothesis that this drug has distinct properties."
+    assert extract("Reward experiment", background)["aims"] == []

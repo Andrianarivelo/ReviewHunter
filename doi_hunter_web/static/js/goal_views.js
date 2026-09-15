@@ -4,7 +4,7 @@
 
   /** Measure every line before drawing so long scientific titles cannot overlap the next card. */
   function atlas(papers, options) {
-    const { width, columns, text, textLines, wrapText, esc, color, goalType, detail, action } = options;
+    const { width, columns, text, textLines, wrapText, esc, color, goalType, detail, action, direction, directionColor, findingDetail } = options;
     const gap = 18, margin = 12, cardWidth = (width - margin * 2 - gap * (columns - 1)) / columns;
     const inner = cardWidth - 36, pairWidth = (inner - 32) / 2;
     const cards = papers.map(paper => {
@@ -19,17 +19,20 @@
         return { pair, factor, outcome, height: Math.max(factor.length, outcome.length) * 16 + 50 };
       });
       const flowHeight = pairs.reduce((sum, pair) => sum + pair.height + 9, 0);
+      const findings = (paper.findings || []).slice(0, 2).map(finding => ({ finding,
+        lines: wrapText(`${direction(finding.direction)}: ${finding.outcome}`, inner - 18, 12.5) }));
+      const resultHeight = findings.length ? 32 + findings.reduce((sum, entry) => sum + entry.lines.length * 17 + 17, 0) + 23 : 0;
       const titleFocus = paper.focus_status === 'title_focus';
       const height = 79 + focusLines.length * 20 + (pairs.length ? flowHeight + 28 : 34) +
-        (titleFocus ? 22 : titleLines.length * 16 + 28) + 23;
-      return { paper, focusLines, titleLines, pairs, height, titleFocus };
+        (titleFocus ? 22 : titleLines.length * 16 + 28) + 23 + resultHeight;
+      return { paper, focusLines, titleLines, pairs, findings, height, titleFocus };
     });
     let y = 12, svg = '';
     for (let index = 0; index < cards.length; index += columns) {
       const row = cards.slice(index, index + columns);
       const rowHeight = Math.max(...row.map(card => card.height));
       row.forEach((card, column) => {
-        const { paper, focusLines, titleLines, pairs, titleFocus } = card;
+        const { paper, focusLines, titleLines, pairs, findings, titleFocus } = card;
         const x = margin + column * (cardWidth + gap), left = x + 18;
         const tint = color(paper.goal_type);
         const status = paper.focus_label || (paper.aims?.length ? 'Explicit aim' : 'From title');
@@ -70,6 +73,20 @@
             ? 'No source text available to extract relationships.'
             : titleFocus ? 'An explicit aim was not found in the available text.' : 'No reliable factor–outcome pair extracted from this aim.';
           svg += text(left, cursor + 5, explanation, 11, 'opacity=".7"');
+          cursor += 25;
+        }
+        if (findings.length) {
+          cursor += 25;
+          svg += text(left, cursor, 'REPORTED RESULTS', 10, 'letter-spacing="1" opacity=".65"');
+          cursor += 10;
+          for (const { finding, lines } of findings) {
+            const height = lines.length * 17 + 11;
+            svg += `<g class="insight-finding" ${action(findingDetail(finding, paper))}>` +
+              `<rect x="${left}" y="${cursor}" width="${inner}" height="${height}" rx="5" fill="${directionColor(finding.direction)}" opacity=".09"/>` +
+              textLines(left + 9, cursor + 19, lines, 12.5, 17, `fill="${directionColor(finding.direction)}"`) + '</g>';
+            cursor += height + 6;
+          }
+          if ((paper.findings || []).length > findings.length) svg += text(left, cursor + 11, `+${paper.findings.length - findings.length} findings in Outcomes`, 10, 'opacity=".7"');
         }
         // Source titles remain complete. A title-derived focus already displays the full title above.
         const footerY = y + rowHeight - (titleFocus ? 22 : titleLines.length * 16 + 28);

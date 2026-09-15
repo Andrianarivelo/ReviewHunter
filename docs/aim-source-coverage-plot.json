@@ -1,0 +1,34 @@
+{
+  "input_sha256": "f9a2072ec04227360c1dc1c6d8ec96021ffa5a0e0b06cc69330945f13da1f45f",
+  "paper_ids": [
+    "3",
+    "4",
+    "5",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14"
+  ],
+  "counts": [
+    {
+      "version": "before",
+      "papers": 10,
+      "explicit_aim": 8,
+      "title_focus": 2,
+      "unavailable": 0,
+      "explicit_aim_fraction": 0.8
+    },
+    {
+      "version": "after",
+      "papers": 10,
+      "explicit_aim": 10,
+      "title_focus": 0,
+      "unavailable": 0,
+      "explicit_aim_fraction": 1.0
+    }
+  ],
+  "interpretation": "Descriptive source-coverage audit on the same convenience sample. Not extraction accuracy or a statistical test."
+}

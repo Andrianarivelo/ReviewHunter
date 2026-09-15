@@ -20,14 +20,33 @@ _ACTION = r"(?:investigat(?:e|ed|es)|examin(?:e|ed|es)|determin(?:e|ed|es)|asses
 _RELATION_VERB = r"(?:alters?|altered|affects?|affected|influences?|influenced|changes?|changed|modulates?|modulated|increases?|increased|decreases?|decreased|reduces?|reduced|enhances?|enhanced|facilitates?|facilitated|impairs?|impaired|promotes?|promoted|induces?|induced|causes?|caused|predicts?|predicted|drives?|mediates?)"
 _AIM_PATTERNS = (
     re.compile(r"\b(?:objectives?|aims?|purpose)\s*:", re.I),
-    re.compile(r"\b(?:our|the|this) (?:primary |main )?(?:aim|objective|purpose|hypothesis)\b", re.I),
+    re.compile(r"\b(?:our|the|this) (?:primary |main )?(?:aim|objective|purpose)\b", re.I),
+    re.compile(r"\b(?:our (?:primary |main )?hypothesis|the hypothesis (?:of|for) (?:this|the present) study)\b", re.I),
+    re.compile(r"\b(?:to test|tested) (?:the|our) hypothesis\b", re.I),
     re.compile(r"\b(?:we|authors)\s+(?:here |also |further |therefore |specifically )?(?:" + _ACTION + r"|aim(?:ed)?|sought|hypothesi[sz](?:e|ed)|develop(?:ed)?|propos(?:e|ed))\b", re.I),
     re.compile(r"\b(?:this|the present|the current|our) (?:study|experiment|work|paper)\s+(?:(?:was|is|were)\s+)?(?:designed|aim(?:ed|s)?|sought|" + _ACTION + r")\b", re.I),
     re.compile(r"\b(?:was|were)\s+(?:investigated|examined|assessed|evaluated|explored|compared)\b", re.I),
     re.compile(r"^\s*(?:To|In order to)\s+" + _ACTION + r"\s+(?:whether|how|if)\b", re.I),
     re.compile(r"\b(?:being developed as a model|allowed us)\s+to\s+" + _ACTION + r"\b", re.I),
+    re.compile(r"\b(?:the )?(?:studies|experiments|work) (?:reported|presented|described) here\s+" + _ACTION + r"\b", re.I),
 )
-_BACKGROUND = re.compile(r"\b(?:previous|earlier|prior) (?:studies|work|research)|\b(?:others|previous authors) (?:examined|investigated)|\b(?:future studies|remains? to be|should be investigated)\b", re.I)
+_BACKGROUND = re.compile(r"\b(?:previous|earlier|prior) (?:study|studies|work|research)|\b(?:others|previous authors) (?:examined|investigated)\b", re.I)
+_DEFERRED = re.compile(r"\b(?:future (?:study|studies|work|research)|remains? to be|should be investigated|"
+                       r"(?:beyond|outside) the scope|further (?:experiments|studies) are (?:necessary|needed))\b", re.I)
+_POSTHOC_HYPOTHESIS = re.compile(r"\b(?:based on|in light of|given|following) (?:these|our|the present) (?:results|findings|data)\b", re.I)
+_EDITORIAL_BREAK = re.compile(r"\b(?:received\s+[A-Z][a-z]+\.?\s+\d|revised\s+[A-Z][a-z]+\s+\d|"
+                              r"correspondence should|this paper has been reviewed|copyright\s+(?:\d|©))", re.I)
+_CURRENT_STUDY = re.compile(r"\b(?:here|this (?:study|work|paper)|the present (?:study|work|paper)|the current study|these studies)\b", re.I)
+_STRONG_PURPOSE = re.compile(
+    r"\b(?:(?:primary|main|specific)\s+)?(?:aims?|objectives?|purpose)\s*:\s*|"
+    r"\b(?:(?:primary|main|specific)\s+)?(?:aims?|objectives?|purpose)\s+of\s+(?:this|these|our|the present|the current)\s+(?:study|studies|work|paper|experiments?)\b|"
+    r"\b(?:this|the present|the current|our)\s+(?:study|work|paper|experiment)\s+(?:was|is)\s+(?:designed|intended)\s+to\b|"
+    r"\b(?:the )?(?:studies|experiments|work) (?:reported|presented|described) here\s+" + _ACTION + r"\b", re.I)
+_SECTION_HEADING = re.compile(
+    r"^\s*(?:\d+(?:\.\d+)*[.)]?\s+)?(?P<section>abstract|introduction|background|"
+    r"(?:materials\s+(?:and|&)\s+)?methods|results(?:\s+(?:and|&)\s+discussion)?|discussion|"
+    r"conclusions?|references|bibliography|acknowledg(?:e)?ments)\s*[:.]?\s*$", re.I | re.M)
+_ABSTRACT_HEADING = re.compile(r"\b(?P<section>background|rationale|objectives?|aims?|purpose|methods?|results?|conclusions?)\s*:\s*", re.I)
 _COORDINATED_ACTION = re.compile(
     r"\s+(?:and|but|while|whereas)\s+(?:(?:also|then|further|separately)\s+)?"
     r"(?:(?:we|the authors|this study)\s+(?:also\s+)?" + _ACTION +
@@ -100,12 +119,60 @@ def goal_type(sentence: str) -> str:
     return "describe"
 
 
-def is_explicit_aim(sentence: str) -> bool:
+def is_explicit_aim(sentence: str, *, strict_purpose: bool = False) -> bool:
     """Require purpose or investigation language, not merely a mention of this study."""
     candidate = normalized(sentence)
-    if _BACKGROUND.search(candidate) and not re.search(r"\b(?:we|this study|present study)\b", candidate, re.I):
+    if _DEFERRED.search(candidate) or _POSTHOC_HYPOTHESIS.search(candidate) or _EDITORIAL_BREAK.search(candidate):
         return False
+    if _BACKGROUND.search(candidate) and not _CURRENT_STUDY.search(candidate):
+        return False
+    if strict_purpose:
+        return bool(_STRONG_PURPOSE.search(candidate))
     return any(pattern.search(candidate) for pattern in _AIM_PATTERNS)
+
+
+def aim_sources(abstract: str, introduction: str, indexed_text: str) -> list[tuple[str, str, bool]]:
+    """Search useful source regions even when metadata already contains an abstract.
+
+    Front matter can contain an unheaded introduction. Discussion and conclusion
+    sections require explicit study-purpose language, excluding post-hoc hypotheses
+    and results. Methods, Results and References are not searched for generic aims.
+    """
+    def abstract_parts(text: str, source: str = "abstract") -> list[tuple[str, str, bool]]:
+        """Use structured abstract headings to keep result hypotheses out of aims."""
+        headings = list(_ABSTRACT_HEADING.finditer(text))
+        if not headings:
+            return [(text, source, False)]
+        parts = [(text[:headings[0].start()], source, False)]
+        for index, heading in enumerate(headings):
+            end = headings[index + 1].start() if index + 1 < len(headings) else len(text)
+            strict = heading.group("section").lower().startswith(("result", "conclusion"))
+            parts.append((text[heading.start():end], source, strict))
+        return parts
+
+    sources = abstract_parts(abstract or "") + [(introduction or "", "introduction", False)]
+    headings = list(_SECTION_HEADING.finditer(indexed_text or ""))
+    if not headings:
+        if indexed_text:
+            sources.append((indexed_text, "fulltext", True))
+        return sources
+    if headings[0].start():
+        first = headings[0].group("section").lower()
+        sources.append((indexed_text[:headings[0].start()], "fulltext", first not in ("abstract", "introduction", "background", "methods", "materials and methods")))
+    for index, heading in enumerate(headings):
+        label = heading.group("section").lower()
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(indexed_text)
+        body = indexed_text[heading.end():end]
+        if label in ("abstract", "introduction", "background"):
+            if label == "abstract":
+                # The PDF's Abstract block may also contain an unheaded introduction.
+                # Report indexed-text provenance rather than claiming metadata origin.
+                sources.extend(abstract_parts(body, "fulltext"))
+            else:
+                sources.append((body, "introduction", False))
+        elif label in ("discussion", "conclusion", "conclusions"):
+            sources.append((body, "conclusion" if label.startswith("conclusion") else "discussion", True))
+    return sources
 
 
 def extract_pairs(sentence: str, source: str) -> list[dict]:
@@ -161,15 +228,21 @@ def extract_pairs(sentence: str, source: str) -> list[dict]:
 def extract_goal(title: str, abstract: str, introduction: str = "", fallback_text: str = "",
                  *, splitter: Callable[[str], list[str]], max_aims: int = 3) -> dict:
     """Produce one traceable focus for every paper, with optional validated relations."""
-    candidates = [(sentence, "abstract") for sentence in splitter(abstract or "")]
-    candidates += [(sentence, "introduction") for sentence in splitter(introduction or "")[-12:]]
-    if not introduction and not abstract and fallback_text:
-        candidates += [(sentence, "fulltext") for sentence in splitter(fallback_text[:6000])]
+    candidates = []
+    for body, source, strict in aim_sources(abstract, introduction, fallback_text):
+        for sentence in splitter(body):
+            if is_explicit_aim(sentence, strict_purpose=strict):
+                # Specific purpose statements outrank broad investigation language,
+                # while equal-strength candidates retain their natural source order.
+                matched = normalized(sentence)
+                priority = (0 if re.search(r"\b(?:aims?|objectives?|purpose|designed|intended)\b", matched, re.I) else 1) if _STRONG_PURPOSE.search(matched) else 2
+                candidates.append((priority, sentence, source))
+    candidates.sort(key=lambda entry: entry[0])
     aims = []
     seen = set()
-    for sentence, source in candidates:
+    for _, sentence, source in candidates:
         key = normalized(sentence).lower()
-        if key in seen or not is_explicit_aim(sentence):
+        if key in seen:
             continue
         seen.add(key)
         aims.append({"sentence": sentence, "kind": goal_type(sentence), "source": source, "confidence": "high"})

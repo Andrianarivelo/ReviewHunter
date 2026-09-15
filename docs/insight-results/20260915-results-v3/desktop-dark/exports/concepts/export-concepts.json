@@ -1,0 +1,7319 @@
+{
+  "scope": {
+    "label": "Whole library",
+    "items": 12,
+    "collection_id": null,
+    "collection_ids": [],
+    "author": null,
+    "tag": null,
+    "focus": "",
+    "include_sub": true
+  },
+  "nodes": [
+    {
+      "id": "temperature",
+      "label": "temperature",
+      "count": 10,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 12,
+          "source": "tags",
+          "sentence": "temperature"
+        },
+        {
+          "id": 11,
+          "source": "title",
+          "sentence": "Temperature effects on dopamine release"
+        },
+        {
+          "id": 10,
+          "source": "title",
+          "sentence": "Ambient temperatures and locomotor activity"
+        },
+        {
+          "id": 9,
+          "source": "title",
+          "sentence": "Ambient temperature and stimulant self-administration"
+        },
+        {
+          "id": 6,
+          "source": "tags",
+          "sentence": "temperature"
+        },
+        {
+          "id": 5,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 4,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 3,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 2,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 1,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        }
+      ],
+      "items": [
+        {
+          "id": 12,
+          "title": "Human working memory and visual attention",
+          "year": 2020,
+          "authors": [
+            "Example, Dana"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 11,
+          "title": "Temperature effects on dopamine release",
+          "year": 2025,
+          "authors": [
+            "Example, Carol"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 10,
+          "title": "Ambient temperatures and locomotor activity",
+          "year": 2024,
+          "authors": [
+            "Example, Alice",
+            "Example, Bob"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 9,
+          "title": "Ambient temperature and stimulant self-administration",
+          "year": 2023,
+          "authors": [
+            "Example, Alice"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 6,
+          "title": "(untitled)",
+          "year": 2020,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 8
+        },
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.8333333333333334,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 17,
+      "weighted_degree": 66
+    },
+    {
+      "id": "ambient temperature",
+      "label": "ambient temperature",
+      "count": 10,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 11,
+          "source": "abstract",
+          "sentence": "Our aim was to measure the effect of ambient temperature on dopamine release."
+        },
+        {
+          "id": 10,
+          "source": "title",
+          "sentence": "Ambient temperatures and locomotor activity"
+        },
+        {
+          "id": 9,
+          "source": "title",
+          "sentence": "Ambient temperature and stimulant self-administration"
+        },
+        {
+          "id": 8,
+          "source": "keywords",
+          "sentence": "ambient temperature"
+        },
+        {
+          "id": 7,
+          "source": "keywords",
+          "sentence": "ambient temperature"
+        },
+        {
+          "id": 5,
+          "source": "keywords",
+          "sentence": "ambient temperature"
+        },
+        {
+          "id": 4,
+          "source": "keywords",
+          "sentence": "ambient temperature"
+        },
+        {
+          "id": 3,
+          "source": "keywords",
+          "sentence": "ambient temperature"
+        },
+        {
+          "id": 2,
+          "source": "keywords",
+          "sentence": "ambient temperature"
+        },
+        {
+          "id": 1,
+          "source": "keywords",
+          "sentence": "ambient temperature"
+        }
+      ],
+      "items": [
+        {
+          "id": 11,
+          "title": "Temperature effects on dopamine release",
+          "year": 2025,
+          "authors": [
+            "Example, Carol"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 10,
+          "title": "Ambient temperatures and locomotor activity",
+          "year": 2024,
+          "authors": [
+            "Example, Alice",
+            "Example, Bob"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 9,
+          "title": "Ambient temperature and stimulant self-administration",
+          "year": 2023,
+          "authors": [
+            "Example, Alice"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "temperature",
+          "weight": 8
+        },
+        {
+          "label": "general",
+          "weight": 7
+        },
+        {
+          "label": "rats",
+          "weight": 7
+        },
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.8333333333333334,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 23,
+      "weighted_degree": 82
+    },
+    {
+      "id": "general",
+      "label": "general",
+      "count": 7,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "keywords",
+          "sentence": "general"
+        },
+        {
+          "id": 7,
+          "source": "keywords",
+          "sentence": "general"
+        },
+        {
+          "id": 5,
+          "source": "keywords",
+          "sentence": "general"
+        },
+        {
+          "id": 4,
+          "source": "keywords",
+          "sentence": "general"
+        },
+        {
+          "id": 3,
+          "source": "keywords",
+          "sentence": "general"
+        },
+        {
+          "id": 2,
+          "source": "keywords",
+          "sentence": "general"
+        },
+        {
+          "id": 1,
+          "source": "keywords",
+          "sentence": "general"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 7
+        },
+        {
+          "label": "rats",
+          "weight": 7
+        },
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "synthetic mdma",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.5833333333333334,
+      "broad_metadata": true,
+      "broad_reason": "Broad indexing label",
+      "degree": 0,
+      "weighted_degree": 0
+    },
+    {
+      "id": "rat",
+      "label": "rats",
+      "count": 7,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": 7,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+        },
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 7
+        },
+        {
+          "label": "general",
+          "weight": 7
+        },
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "synthetic mdma",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.5833333333333334,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 21,
+      "weighted_degree": 76
+    },
+    {
+      "id": "mdma",
+      "label": "MDMA",
+      "count": 5,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        },
+        {
+          "label": "synthetic mdma",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "body temperature",
+      "label": "body temperature",
+      "count": 5,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 4,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 3,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 2,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        },
+        {
+          "id": 1,
+          "source": "abstract",
+          "sentence": "We examined the effect of MDMA on body temperature in rats."
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        },
+        {
+          "label": "synthetic mdma",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "thermoregulation",
+      "label": "thermoregulation",
+      "count": 5,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "count": 5,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "keywords",
+          "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+        },
+        {
+          "id": 4,
+          "source": "keywords",
+          "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+        },
+        {
+          "id": 3,
+          "source": "keywords",
+          "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+        },
+        {
+          "id": 2,
+          "source": "keywords",
+          "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+        },
+        {
+          "id": 1,
+          "source": "keywords",
+          "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        },
+        {
+          "label": "synthetic mdma",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "synthetic mdma thermoregulation",
+      "label": "synthetic mdma thermoregulation",
+      "count": 5,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "mdma thermoregulation experiment",
+      "label": "mdma thermoregulation experiment",
+      "count": 5,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        },
+        {
+          "label": "synthetic mdma",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "thermoregulation experiment",
+      "label": "thermoregulation experiment",
+      "count": 5,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "synthetic mdma",
+      "label": "synthetic mdma",
+      "count": 5,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "mdma thermoregulation",
+      "label": "mdma thermoregulation",
+      "count": 5,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 5,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": 4,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": 3,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": 2,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": 1,
+          "source": "title",
+          "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "year": 2025,
+          "authors": [
+            "Synthetic, Helena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "year": 2024,
+          "authors": [
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 5
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 5
+        },
+        {
+          "label": "body temperature",
+          "weight": 5
+        },
+        {
+          "label": "general",
+          "weight": 5
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 5
+        },
+        {
+          "label": "rats",
+          "weight": 5
+        },
+        {
+          "label": "synthetic mdma",
+          "weight": 5
+        }
+      ],
+      "prevalence": 0.4166666666666667,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 58
+    },
+    {
+      "id": "locomotor activity",
+      "label": "locomotor activity",
+      "count": 3,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 10,
+          "source": "title",
+          "sentence": "Ambient temperatures and locomotor activity"
+        },
+        {
+          "id": 8,
+          "source": "abstract",
+          "sentence": "We examined the effect of cocaine on locomotor activity."
+        },
+        {
+          "id": 7,
+          "source": "abstract",
+          "sentence": "We examined the effect of cocaine on locomotor activity."
+        }
+      ],
+      "items": [
+        {
+          "id": 10,
+          "title": "Ambient temperatures and locomotor activity",
+          "year": 2024,
+          "authors": [
+            "Example, Alice",
+            "Example, Bob"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 3
+        },
+        {
+          "label": "cocaine",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "general",
+          "weight": 2
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "rats",
+          "weight": 2
+        },
+        {
+          "label": "synthetic cocaine",
+          "weight": 2
+        }
+      ],
+      "prevalence": 0.25,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 11,
+      "weighted_degree": 20
+    },
+    {
+      "id": "neural-recording",
+      "label": "neural-recording",
+      "count": 3,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 3,
+          "source": "tags",
+          "sentence": "neural-recording"
+        },
+        {
+          "id": 2,
+          "source": "tags",
+          "sentence": "neural-recording"
+        },
+        {
+          "id": 1,
+          "source": "tags",
+          "sentence": "neural-recording"
+        }
+      ],
+      "items": [
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "year": 2023,
+          "authors": [
+            "Synthetic, Grace"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Elena"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Elena",
+            "Synthetic, Farid"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "MDMA",
+          "weight": 3
+        },
+        {
+          "label": "ambient temperature",
+          "weight": 3
+        },
+        {
+          "label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+          "weight": 3
+        },
+        {
+          "label": "body temperature",
+          "weight": 3
+        },
+        {
+          "label": "general",
+          "weight": 3
+        },
+        {
+          "label": "mdma thermoregulation",
+          "weight": 3
+        },
+        {
+          "label": "mdma thermoregulation experiment",
+          "weight": 3
+        },
+        {
+          "label": "rats",
+          "weight": 3
+        }
+      ],
+      "prevalence": 0.25,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 12,
+      "weighted_degree": 36
+    },
+    {
+      "id": "cocaine",
+      "label": "cocaine",
+      "count": 2,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": 7,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "general",
+          "weight": 2
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 2
+        },
+        {
+          "label": "rats",
+          "weight": 2
+        },
+        {
+          "label": "synthetic cocaine",
+          "weight": 2
+        }
+      ],
+      "prevalence": 0.16666666666666666,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 10,
+      "weighted_degree": 18
+    },
+    {
+      "id": "synthetic cocaine locomotion",
+      "label": "synthetic cocaine locomotion",
+      "count": 2,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": 7,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 2
+        },
+        {
+          "label": "cocaine",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "general",
+          "weight": 2
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 2
+        },
+        {
+          "label": "rats",
+          "weight": 2
+        }
+      ],
+      "prevalence": 0.16666666666666666,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 10,
+      "weighted_degree": 18
+    },
+    {
+      "id": "cocaine locomotion experiment",
+      "label": "cocaine locomotion experiment",
+      "count": 2,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": 7,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 2
+        },
+        {
+          "label": "cocaine",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 2
+        },
+        {
+          "label": "general",
+          "weight": 2
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 2
+        },
+        {
+          "label": "rats",
+          "weight": 2
+        },
+        {
+          "label": "synthetic cocaine",
+          "weight": 2
+        }
+      ],
+      "prevalence": 0.16666666666666666,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 10,
+      "weighted_degree": 18
+    },
+    {
+      "id": "synthetic cocaine",
+      "label": "synthetic cocaine",
+      "count": 2,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": 7,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 2
+        },
+        {
+          "label": "cocaine",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "general",
+          "weight": 2
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 2
+        },
+        {
+          "label": "rats",
+          "weight": 2
+        }
+      ],
+      "prevalence": 0.16666666666666666,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 10,
+      "weighted_degree": 18
+    },
+    {
+      "id": "locomotion experiment",
+      "label": "locomotion experiment",
+      "count": 2,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": 7,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 2
+        },
+        {
+          "label": "cocaine",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "general",
+          "weight": 2
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 2
+        },
+        {
+          "label": "rats",
+          "weight": 2
+        },
+        {
+          "label": "synthetic cocaine",
+          "weight": 2
+        }
+      ],
+      "prevalence": 0.16666666666666666,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 10,
+      "weighted_degree": 18
+    },
+    {
+      "id": "cocaine locomotion",
+      "label": "cocaine locomotion",
+      "count": 2,
+      "cluster": 0,
+      "curated": false,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": 7,
+          "source": "title",
+          "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 2
+        },
+        {
+          "label": "cocaine",
+          "weight": 2
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "general",
+          "weight": 2
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 2
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 2
+        },
+        {
+          "label": "rats",
+          "weight": 2
+        },
+        {
+          "label": "synthetic cocaine",
+          "weight": 2
+        }
+      ],
+      "prevalence": 0.16666666666666666,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 10,
+      "weighted_degree": 18
+    },
+    {
+      "id": "working memory",
+      "label": "working memory",
+      "count": 1,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 12,
+          "source": "title",
+          "sentence": "Human working memory and visual attention"
+        }
+      ],
+      "items": [
+        {
+          "id": 12,
+          "title": "Human working memory and visual attention",
+          "year": 2020,
+          "authors": [
+            "Example, Dana"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "temperature",
+          "weight": 1
+        },
+        {
+          "label": "visual attention",
+          "weight": 1
+        }
+      ],
+      "prevalence": 0.08333333333333333,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 2,
+      "weighted_degree": 2
+    },
+    {
+      "id": "visual attention",
+      "label": "visual attention",
+      "count": 1,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 12,
+          "source": "title",
+          "sentence": "Human working memory and visual attention"
+        }
+      ],
+      "items": [
+        {
+          "id": 12,
+          "title": "Human working memory and visual attention",
+          "year": 2020,
+          "authors": [
+            "Example, Dana"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "temperature",
+          "weight": 1
+        },
+        {
+          "label": "working memory",
+          "weight": 1
+        }
+      ],
+      "prevalence": 0.08333333333333333,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 2,
+      "weighted_degree": 2
+    },
+    {
+      "id": "dopamine release",
+      "label": "dopamine release",
+      "count": 1,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 11,
+          "source": "title",
+          "sentence": "Temperature effects on dopamine release"
+        }
+      ],
+      "items": [
+        {
+          "id": 11,
+          "title": "Temperature effects on dopamine release",
+          "year": 2025,
+          "authors": [
+            "Example, Carol"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 1
+        },
+        {
+          "label": "temperature",
+          "weight": 1
+        }
+      ],
+      "prevalence": 0.08333333333333333,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 2,
+      "weighted_degree": 2
+    },
+    {
+      "id": "self-administration",
+      "label": "self-administration",
+      "count": 1,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 9,
+          "source": "title",
+          "sentence": "Ambient temperature and stimulant self-administration"
+        }
+      ],
+      "items": [
+        {
+          "id": 9,
+          "title": "Ambient temperature and stimulant self-administration",
+          "year": 2023,
+          "authors": [
+            "Example, Alice"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 1
+        },
+        {
+          "label": "temperature",
+          "weight": 1
+        }
+      ],
+      "prevalence": 0.08333333333333333,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 2,
+      "weighted_degree": 2
+    },
+    {
+      "id": "computing",
+      "label": "computing",
+      "count": 1,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 8,
+          "source": "tags",
+          "sentence": "computing"
+        }
+      ],
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "year": 2022,
+          "authors": [
+            "Synthetic, Jun"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 1
+        },
+        {
+          "label": "cocaine",
+          "weight": 1
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 1
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 1
+        },
+        {
+          "label": "general",
+          "weight": 1
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 1
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 1
+        },
+        {
+          "label": "rats",
+          "weight": 1
+        }
+      ],
+      "prevalence": 0.08333333333333333,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 9,
+      "weighted_degree": 9
+    },
+    {
+      "id": "cognition",
+      "label": "cognition",
+      "count": 1,
+      "cluster": 0,
+      "curated": true,
+      "focused": false,
+      "evidence": [
+        {
+          "id": 7,
+          "source": "tags",
+          "sentence": "cognition"
+        }
+      ],
+      "items": [
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "year": 2021,
+          "authors": [
+            "Synthetic, Ibrahim"
+          ],
+          "journal": ""
+        }
+      ],
+      "related": [
+        {
+          "label": "ambient temperature",
+          "weight": 1
+        },
+        {
+          "label": "cocaine",
+          "weight": 1
+        },
+        {
+          "label": "cocaine locomotion",
+          "weight": 1
+        },
+        {
+          "label": "cocaine locomotion experiment",
+          "weight": 1
+        },
+        {
+          "label": "general",
+          "weight": 1
+        },
+        {
+          "label": "locomotion experiment",
+          "weight": 1
+        },
+        {
+          "label": "locomotor activity",
+          "weight": 1
+        },
+        {
+          "label": "rats",
+          "weight": 1
+        }
+      ],
+      "prevalence": 0.08333333333333333,
+      "broad_metadata": false,
+      "broad_reason": "",
+      "degree": 9,
+      "weighted_degree": 9
+    }
+  ],
+  "edges": [
+    {
+      "source": "ambient temperature",
+      "target": "temperature",
+      "weight": 8,
+      "shared_count": 8,
+      "jaccard": 0.6666666666666666,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        11
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "general",
+      "weight": 7,
+      "shared_count": 7,
+      "jaccard": 0.7,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "ambient temperature",
+      "target": "rat",
+      "weight": 7,
+      "shared_count": 7,
+      "jaccard": 0.7,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "general",
+      "target": "rat",
+      "weight": 7,
+      "shared_count": 7,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "ambient temperature",
+      "target": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "body temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "mdma thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "body temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "general",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "mdma thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "rat",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "general",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "body temperature",
+      "target": "mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "mdma thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "rat",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "general",
+      "target": "mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "mdma thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.4166666666666667,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "mdma",
+      "target": "mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma",
+      "target": "mdma thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma",
+      "target": "rat",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "mdma thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "rat",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation experiment",
+      "target": "rat",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation experiment",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation experiment",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation experiment",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation experiment",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation experiment",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "rat",
+      "target": "synthetic mdma",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "rat",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "rat",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.4166666666666667,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "rat",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "rat",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.7142857142857143,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic mdma",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic mdma",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic mdma",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic mdma",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic mdma thermoregulation",
+      "target": "temperature",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic mdma thermoregulation",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic mdma thermoregulation",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "temperature",
+      "target": "thermoregulation",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "temperature",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 0.5,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "thermoregulation",
+      "target": "thermoregulation experiment",
+      "weight": 5,
+      "shared_count": 5,
+      "jaccard": 1,
+      "item_ids": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "locomotor activity",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.3,
+      "item_ids": [
+        7,
+        8,
+        10
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "neural-recording",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.3,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+      "target": "neural-recording",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "body temperature",
+      "target": "neural-recording",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "general",
+      "target": "neural-recording",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.42857142857142855,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "mdma",
+      "target": "neural-recording",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation",
+      "target": "neural-recording",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "mdma thermoregulation experiment",
+      "target": "neural-recording",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "neural-recording",
+      "target": "rat",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.42857142857142855,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "neural-recording",
+      "target": "synthetic mdma",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "neural-recording",
+      "target": "synthetic mdma thermoregulation",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "neural-recording",
+      "target": "temperature",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.3,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "neural-recording",
+      "target": "thermoregulation",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "neural-recording",
+      "target": "thermoregulation experiment",
+      "weight": 3,
+      "shared_count": 3,
+      "jaccard": 0.6,
+      "item_ids": [
+        1,
+        2,
+        3
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "cocaine locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "cocaine locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "general",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "cocaine",
+      "target": "locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "locomotor activity",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.6666666666666666,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "rat",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "cocaine locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "general",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "locomotor activity",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.6666666666666666,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "rat",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "general",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "locomotor activity",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.6666666666666666,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "rat",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "general",
+      "target": "locomotion experiment",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "locomotor activity",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.25,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "general",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "locomotion experiment",
+      "target": "locomotor activity",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.6666666666666666,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "locomotion experiment",
+      "target": "rat",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "locomotion experiment",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "locomotion experiment",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "locomotor activity",
+      "target": "rat",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.25,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "locomotor activity",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.6666666666666666,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "locomotor activity",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.6666666666666666,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "rat",
+      "target": "synthetic cocaine",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "rat",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 0.2857142857142857,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "synthetic cocaine",
+      "target": "synthetic cocaine locomotion",
+      "weight": 2,
+      "shared_count": 2,
+      "jaccard": 1,
+      "item_ids": [
+        7,
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "cognition",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "computing",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "dopamine release",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        11
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "ambient temperature",
+      "target": "self-administration",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        9
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "cognition",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine",
+      "target": "computing",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "cognition",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion",
+      "target": "computing",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "cognition",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cocaine locomotion experiment",
+      "target": "computing",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cognition",
+      "target": "general",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.14285714285714285,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "cognition",
+      "target": "locomotion experiment",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cognition",
+      "target": "locomotor activity",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.3333333333333333,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cognition",
+      "target": "rat",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.14285714285714285,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cognition",
+      "target": "synthetic cocaine",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "cognition",
+      "target": "synthetic cocaine locomotion",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        7
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "computing",
+      "target": "general",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.14285714285714285,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": true
+    },
+    {
+      "source": "computing",
+      "target": "locomotion experiment",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "computing",
+      "target": "locomotor activity",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.3333333333333333,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "computing",
+      "target": "rat",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.14285714285714285,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "computing",
+      "target": "synthetic cocaine",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "computing",
+      "target": "synthetic cocaine locomotion",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.5,
+      "item_ids": [
+        8
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "dopamine release",
+      "target": "temperature",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        11
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "locomotor activity",
+      "target": "temperature",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.08333333333333333,
+      "item_ids": [
+        10
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "self-administration",
+      "target": "temperature",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        9
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "temperature",
+      "target": "visual attention",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        12
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "temperature",
+      "target": "working memory",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 0.1,
+      "item_ids": [
+        12
+      ],
+      "broad_metadata": false
+    },
+    {
+      "source": "visual attention",
+      "target": "working memory",
+      "weight": 1,
+      "shared_count": 1,
+      "jaccard": 1,
+      "item_ids": [
+        12
+      ],
+      "broad_metadata": false
+    }
+  ],
+  "clusters": [
+    {
+      "id": 0,
+      "label": "ambient temperature",
+      "size": 27,
+      "terms": [
+        "ambient temperature",
+        "temperature",
+        "general",
+        "rats",
+        "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "body temperature",
+        "MDMA",
+        "mdma thermoregulation"
+      ],
+      "items": 12
+    }
+  ],
+  "total_terms": 27,
+  "analytics": {
+    "summary": {
+      "papers": 12,
+      "papers_with_concepts": 12,
+      "selected_concepts": 27,
+      "analytical_concepts": 26,
+      "broad_metadata_count": 1,
+      "cooccurring_pairs": 139,
+      "communities": 1
+    },
+    "core_themes": [
+      {
+        "id": "ambient temperature",
+        "label": "ambient temperature",
+        "count": 10,
+        "cluster": 0,
+        "prevalence": 0.8333333333333334,
+        "degree": 23,
+        "weighted_degree": 82,
+        "items": [
+          {
+            "id": 11,
+            "title": "Temperature effects on dopamine release",
+            "year": 2025,
+            "authors": [
+              "Example, Carol"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 10,
+            "title": "Ambient temperatures and locomotor activity",
+            "year": 2024,
+            "authors": [
+              "Example, Alice",
+              "Example, Bob"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 9,
+            "title": "Ambient temperature and stimulant self-administration",
+            "year": 2023,
+            "authors": [
+              "Example, Alice"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 8,
+            "title": "Synthetic cocaine locomotion experiment 8 in rats",
+            "year": 2022,
+            "authors": [
+              "Synthetic, Jun"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 7,
+            "title": "Synthetic cocaine locomotion experiment 7 in rats",
+            "year": 2021,
+            "authors": [
+              "Synthetic, Ibrahim"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 5,
+            "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "year": 2025,
+            "authors": [
+              "Synthetic, Helena"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 4,
+            "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "year": 2024,
+            "authors": [
+              "Synthetic, Farid"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 3,
+            "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "year": 2023,
+            "authors": [
+              "Synthetic, Grace"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 2,
+            "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "year": 2022,
+            "authors": [
+              "Synthetic, Elena"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 1,
+            "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "year": 2021,
+            "authors": [
+              "Synthetic, Elena",
+              "Synthetic, Farid"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 11,
+            "source": "abstract",
+            "sentence": "Our aim was to measure the effect of ambient temperature on dopamine release."
+          },
+          {
+            "id": 10,
+            "source": "title",
+            "sentence": "Ambient temperatures and locomotor activity"
+          },
+          {
+            "id": 9,
+            "source": "title",
+            "sentence": "Ambient temperature and stimulant self-administration"
+          },
+          {
+            "id": 8,
+            "source": "keywords",
+            "sentence": "ambient temperature"
+          },
+          {
+            "id": 7,
+            "source": "keywords",
+            "sentence": "ambient temperature"
+          },
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature"
+          }
+        ],
+        "broad_metadata": false
+      },
+      {
+        "id": "temperature",
+        "label": "temperature",
+        "count": 10,
+        "cluster": 0,
+        "prevalence": 0.8333333333333334,
+        "degree": 17,
+        "weighted_degree": 66,
+        "items": [
+          {
+            "id": 12,
+            "title": "Human working memory and visual attention",
+            "year": 2020,
+            "authors": [
+              "Example, Dana"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 11,
+            "title": "Temperature effects on dopamine release",
+            "year": 2025,
+            "authors": [
+              "Example, Carol"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 10,
+            "title": "Ambient temperatures and locomotor activity",
+            "year": 2024,
+            "authors": [
+              "Example, Alice",
+              "Example, Bob"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 9,
+            "title": "Ambient temperature and stimulant self-administration",
+            "year": 2023,
+            "authors": [
+              "Example, Alice"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 6,
+            "title": "(untitled)",
+            "year": 2020,
+            "authors": [
+              "Synthetic, Helena"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 5,
+            "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "year": 2025,
+            "authors": [
+              "Synthetic, Helena"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 4,
+            "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "year": 2024,
+            "authors": [
+              "Synthetic, Farid"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 3,
+            "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "year": 2023,
+            "authors": [
+              "Synthetic, Grace"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 2,
+            "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "year": 2022,
+            "authors": [
+              "Synthetic, Elena"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 1,
+            "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "year": 2021,
+            "authors": [
+              "Synthetic, Elena",
+              "Synthetic, Farid"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 12,
+            "source": "tags",
+            "sentence": "temperature"
+          },
+          {
+            "id": 11,
+            "source": "title",
+            "sentence": "Temperature effects on dopamine release"
+          },
+          {
+            "id": 10,
+            "source": "title",
+            "sentence": "Ambient temperatures and locomotor activity"
+          },
+          {
+            "id": 9,
+            "source": "title",
+            "sentence": "Ambient temperature and stimulant self-administration"
+          },
+          {
+            "id": 6,
+            "source": "tags",
+            "sentence": "temperature"
+          },
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats."
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats."
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats."
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats."
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats."
+          }
+        ],
+        "broad_metadata": false
+      },
+      {
+        "id": "rat",
+        "label": "rats",
+        "count": 7,
+        "cluster": 0,
+        "prevalence": 0.5833333333333334,
+        "degree": 21,
+        "weighted_degree": 76,
+        "items": [
+          {
+            "id": 8,
+            "title": "Synthetic cocaine locomotion experiment 8 in rats",
+            "year": 2022,
+            "authors": [
+              "Synthetic, Jun"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 7,
+            "title": "Synthetic cocaine locomotion experiment 7 in rats",
+            "year": 2021,
+            "authors": [
+              "Synthetic, Ibrahim"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 5,
+            "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "year": 2025,
+            "authors": [
+              "Synthetic, Helena"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 4,
+            "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "year": 2024,
+            "authors": [
+              "Synthetic, Farid"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 3,
+            "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "year": 2023,
+            "authors": [
+              "Synthetic, Grace"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 2,
+            "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "year": 2022,
+            "authors": [
+              "Synthetic, Elena"
+            ],
+            "journal": ""
+          },
+          {
+            "id": 1,
+            "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "year": 2021,
+            "authors": [
+              "Synthetic, Elena",
+              "Synthetic, Farid"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 8,
+            "source": "title",
+            "sentence": "Synthetic cocaine locomotion experiment 8 in rats"
+          },
+          {
+            "id": 7,
+            "source": "title",
+            "sentence": "Synthetic cocaine locomotion experiment 7 in rats"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "broad_metadata": false
+      }
+    ],
+    "strongest_links": [
+      {
+        "source": "ambient temperature",
+        "target": "temperature",
+        "weight": 8,
+        "shared_count": 8,
+        "jaccard": 0.6666666666666666,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          9,
+          10,
+          11
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature",
+        "target_label": "temperature",
+        "evidence": [
+          {
+            "id": 11,
+            "source": "abstract",
+            "sentence": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 10,
+            "source": "title",
+            "sentence": "Ambient temperatures and locomotor activity",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 9,
+            "source": "title",
+            "sentence": "Ambient temperature and stimulant self-administration",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 11,
+            "source": "title",
+            "sentence": "Temperature effects on dopamine release",
+            "concept_id": "temperature"
+          },
+          {
+            "id": 10,
+            "source": "title",
+            "sentence": "Ambient temperatures and locomotor activity",
+            "concept_id": "temperature"
+          },
+          {
+            "id": 9,
+            "source": "title",
+            "sentence": "Ambient temperature and stimulant self-administration",
+            "concept_id": "temperature"
+          },
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "temperature"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature",
+        "target": "rat",
+        "weight": 7,
+        "shared_count": 7,
+        "jaccard": 0.7,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          8
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature",
+        "target_label": "rats",
+        "evidence": [
+          {
+            "id": 8,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 7,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature",
+            "concept_id": "ambient temperature"
+          },
+          {
+            "id": 8,
+            "source": "title",
+            "sentence": "Synthetic cocaine locomotion experiment 8 in rats",
+            "concept_id": "rat"
+          },
+          {
+            "id": 7,
+            "source": "title",
+            "sentence": "Synthetic cocaine locomotion experiment 7 in rats",
+            "concept_id": "rat"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "rat"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "rat"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "rat"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "rat"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "rat"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "body temperature",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "body temperature",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "mdma",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "MDMA",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "mdma thermoregulation",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "mdma thermoregulation",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma thermoregulation"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "mdma thermoregulation experiment",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "mdma thermoregulation experiment",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "synthetic mdma",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "synthetic mdma",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "synthetic mdma"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "synthetic mdma thermoregulation",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "synthetic mdma thermoregulation",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "thermoregulation",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "thermoregulation",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "thermoregulation"
+          }
+        ]
+      },
+      {
+        "source": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target": "thermoregulation experiment",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+        "target_label": "thermoregulation experiment",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 4,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 3,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 2,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 1,
+            "source": "keywords",
+            "sentence": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling",
+            "concept_id": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "thermoregulation experiment"
+          }
+        ]
+      },
+      {
+        "source": "body temperature",
+        "target": "mdma",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "body temperature",
+        "target_label": "MDMA",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma"
+          }
+        ]
+      },
+      {
+        "source": "body temperature",
+        "target": "mdma thermoregulation",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "body temperature",
+        "target_label": "mdma thermoregulation",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma thermoregulation"
+          }
+        ]
+      },
+      {
+        "source": "body temperature",
+        "target": "mdma thermoregulation experiment",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "body temperature",
+        "target_label": "mdma thermoregulation experiment",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          }
+        ]
+      },
+      {
+        "source": "body temperature",
+        "target": "synthetic mdma",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "body temperature",
+        "target_label": "synthetic mdma",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "synthetic mdma"
+          }
+        ]
+      },
+      {
+        "source": "body temperature",
+        "target": "synthetic mdma thermoregulation",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "body temperature",
+        "target_label": "synthetic mdma thermoregulation",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "synthetic mdma thermoregulation"
+          }
+        ]
+      },
+      {
+        "source": "body temperature",
+        "target": "thermoregulation",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "body temperature",
+        "target_label": "thermoregulation",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "thermoregulation"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "thermoregulation"
+          }
+        ]
+      },
+      {
+        "source": "body temperature",
+        "target": "thermoregulation experiment",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "body temperature",
+        "target_label": "thermoregulation experiment",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 4,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 3,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 2,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "We examined the effect of MDMA on body temperature in rats.",
+            "concept_id": "body temperature"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "thermoregulation experiment"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "thermoregulation experiment"
+          }
+        ]
+      },
+      {
+        "source": "mdma",
+        "target": "mdma thermoregulation",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "MDMA",
+        "target_label": "mdma thermoregulation",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma thermoregulation"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma thermoregulation"
+          }
+        ]
+      },
+      {
+        "source": "mdma",
+        "target": "mdma thermoregulation experiment",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "MDMA",
+        "target_label": "mdma thermoregulation experiment",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma thermoregulation experiment"
+          }
+        ]
+      },
+      {
+        "source": "mdma",
+        "target": "synthetic mdma",
+        "weight": 5,
+        "shared_count": 5,
+        "jaccard": 1,
+        "item_ids": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "broad_metadata": false,
+        "source_label": "MDMA",
+        "target_label": "synthetic mdma",
+        "evidence": [
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "mdma"
+          },
+          {
+            "id": 5,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 5 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 4,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 4 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 3,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 3 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 2,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 2 in rats",
+            "concept_id": "synthetic mdma"
+          },
+          {
+            "id": 1,
+            "source": "title",
+            "sentence": "Synthetic MDMA thermoregulation experiment 1 in rats",
+            "concept_id": "synthetic mdma"
+          }
+        ]
+      }
+    ],
+    "bridge_concepts": [],
+    "rare_concepts": [
+      {
+        "id": "cognition",
+        "label": "cognition",
+        "count": 1,
+        "cluster": 0,
+        "prevalence": 0.08333333333333333,
+        "degree": 9,
+        "weighted_degree": 9,
+        "items": [
+          {
+            "id": 7,
+            "title": "Synthetic cocaine locomotion experiment 7 in rats",
+            "year": 2021,
+            "authors": [
+              "Synthetic, Ibrahim"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 7,
+            "source": "tags",
+            "sentence": "cognition"
+          }
+        ],
+        "broad_metadata": false
+      },
+      {
+        "id": "computing",
+        "label": "computing",
+        "count": 1,
+        "cluster": 0,
+        "prevalence": 0.08333333333333333,
+        "degree": 9,
+        "weighted_degree": 9,
+        "items": [
+          {
+            "id": 8,
+            "title": "Synthetic cocaine locomotion experiment 8 in rats",
+            "year": 2022,
+            "authors": [
+              "Synthetic, Jun"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 8,
+            "source": "tags",
+            "sentence": "computing"
+          }
+        ],
+        "broad_metadata": false
+      },
+      {
+        "id": "dopamine release",
+        "label": "dopamine release",
+        "count": 1,
+        "cluster": 0,
+        "prevalence": 0.08333333333333333,
+        "degree": 2,
+        "weighted_degree": 2,
+        "items": [
+          {
+            "id": 11,
+            "title": "Temperature effects on dopamine release",
+            "year": 2025,
+            "authors": [
+              "Example, Carol"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 11,
+            "source": "title",
+            "sentence": "Temperature effects on dopamine release"
+          }
+        ],
+        "broad_metadata": false
+      },
+      {
+        "id": "self-administration",
+        "label": "self-administration",
+        "count": 1,
+        "cluster": 0,
+        "prevalence": 0.08333333333333333,
+        "degree": 2,
+        "weighted_degree": 2,
+        "items": [
+          {
+            "id": 9,
+            "title": "Ambient temperature and stimulant self-administration",
+            "year": 2023,
+            "authors": [
+              "Example, Alice"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 9,
+            "source": "title",
+            "sentence": "Ambient temperature and stimulant self-administration"
+          }
+        ],
+        "broad_metadata": false
+      },
+      {
+        "id": "visual attention",
+        "label": "visual attention",
+        "count": 1,
+        "cluster": 0,
+        "prevalence": 0.08333333333333333,
+        "degree": 2,
+        "weighted_degree": 2,
+        "items": [
+          {
+            "id": 12,
+            "title": "Human working memory and visual attention",
+            "year": 2020,
+            "authors": [
+              "Example, Dana"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 12,
+            "source": "title",
+            "sentence": "Human working memory and visual attention"
+          }
+        ],
+        "broad_metadata": false
+      },
+      {
+        "id": "working memory",
+        "label": "working memory",
+        "count": 1,
+        "cluster": 0,
+        "prevalence": 0.08333333333333333,
+        "degree": 2,
+        "weighted_degree": 2,
+        "items": [
+          {
+            "id": 12,
+            "title": "Human working memory and visual attention",
+            "year": 2020,
+            "authors": [
+              "Example, Dana"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 12,
+            "source": "title",
+            "sentence": "Human working memory and visual attention"
+          }
+        ],
+        "broad_metadata": false
+      }
+    ],
+    "peripheral_concepts": [],
+    "unusual_combinations": [
+      {
+        "id": 10,
+        "title": "Ambient temperatures and locomotor activity",
+        "year": 2024,
+        "authors": [
+          "Example, Alice",
+          "Example, Bob"
+        ],
+        "journal": "",
+        "paper": {
+          "id": 10,
+          "title": "Ambient temperatures and locomotor activity",
+          "year": 2024,
+          "authors": [
+            "Example, Alice",
+            "Example, Bob"
+          ],
+          "journal": ""
+        },
+        "items": [
+          {
+            "id": 10,
+            "title": "Ambient temperatures and locomotor activity",
+            "year": 2024,
+            "authors": [
+              "Example, Alice",
+              "Example, Bob"
+            ],
+            "journal": ""
+          }
+        ],
+        "evidence": [
+          {
+            "id": 10,
+            "source": "title",
+            "sentence": "Ambient temperatures and locomotor activity",
+            "concept_id": "locomotor activity"
+          },
+          {
+            "id": 10,
+            "source": "title",
+            "sentence": "Ambient temperatures and locomotor activity",
+            "concept_id": "temperature"
+          }
+        ],
+        "score": 0.3333333333333333,
+        "unique_pair_count": 1,
+        "eligible_pair_count": 3,
+        "pairs": [
+          {
+            "source": "locomotor activity",
+            "target": "temperature",
+            "weight": 1,
+            "shared_count": 1,
+            "jaccard": 0.08333333333333333,
+            "item_ids": [
+              10
+            ],
+            "broad_metadata": false,
+            "source_label": "locomotor activity",
+            "target_label": "temperature",
+            "evidence": [
+              {
+                "id": 10,
+                "source": "title",
+                "sentence": "Ambient temperatures and locomotor activity",
+                "concept_id": "locomotor activity"
+              },
+              {
+                "id": 10,
+                "source": "title",
+                "sentence": "Ambient temperatures and locomotor activity",
+                "concept_id": "temperature"
+              }
+            ]
+          }
+        ],
+        "pair_examples_capped": false
+      }
+    ],
+    "candidate_counts": {
+      "core_themes": 3,
+      "strongest_links": 139,
+      "bridge_concepts": 0,
+      "rare_concepts": 6,
+      "peripheral_concepts": 0,
+      "unusual_combinations": 1
+    },
+    "limits": {
+      "node_selection_capped": false,
+      "visual_edges_capped": false,
+      "all_selected_edges": 161,
+      "displayed_edges": 161,
+      "scope_capped": false,
+      "rank_limit": 20,
+      "paper_rank_limit": 12,
+      "pair_example_limit": 6
+    },
+    "semantics": {
+      "basis": "Descriptive co-occurrence in retained tags, keywords and title/abstract phrases. No full-text concept scan.",
+      "prevalence": "Fraction of analysed scoped papers containing the concept; missing metadata remains in the denominator.",
+      "core_themes": "Concepts present in at least half of scoped papers and at least two papers.",
+      "strongest_links": "Ranked by shared paper count, then Jaccard overlap: shared papers divided by papers containing either concept.",
+      "bridges": "Weighted participation across the detected neighbour communities, 1 minus the sum of squared community weight fractions. Community assignments are graph-dependent.",
+      "peripheral": "At most one neighbour among selected non-broad concepts; rarity means exactly one paper.",
+      "unusual_combinations": "Pairs occurring in one paper while both component concepts occur in at least two. Score is the fraction of that paper's eligible pairs meeting this rule. Descriptive rarity, not novelty or a statistical outlier.",
+      "broad_metadata": "Broad indexing labels remain in source data and graph exports but are excluded from analytical rankings and degree calculations.",
+      "limits": "Analytics use selected nodes and all their edges before the visual edge cap. Term extraction, node selection and scope caps can change rankings."
+    }
+  },
+  "insights": {
+    "unique_terms": [
+      "working memory",
+      "visual attention",
+      "dopamine release",
+      "self-administration",
+      "computing",
+      "cognition"
+    ],
+    "isolated_items": []
+  },
+  "limits": {
+    "no_abstract": 1,
+    "scope_capped": false,
+    "max_items": 2000
+  }
+}

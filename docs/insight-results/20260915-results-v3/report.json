@@ -1,0 +1,2464 @@
+{
+  "synthetic": true,
+  "fixture": {
+    "home": "C:\\Users\\andry\\AppData\\Local\\Temp\\claude\\insight-ui-t4_xnxxo",
+    "synthetic": true,
+    "items": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "collections": {
+      "parent": 1,
+      "child": 2,
+      "sibling": 3
+    },
+    "titles": [
+      "Synthetic MDMA thermoregulation experiment 1 in rats",
+      "Synthetic MDMA thermoregulation experiment 2 in rats",
+      "Synthetic MDMA thermoregulation experiment 3 in rats",
+      "Synthetic MDMA thermoregulation experiment 4 in rats",
+      "Synthetic MDMA thermoregulation experiment 5 in rats",
+      "",
+      "Synthetic cocaine locomotion experiment 7 in rats",
+      "Synthetic cocaine locomotion experiment 8 in rats",
+      "Ambient temperature and stimulant self-administration",
+      "Ambient temperatures and locomotor activity",
+      "Temperature effects on dopamine release",
+      "Human working memory and visual attention"
+    ],
+    "detailed": false,
+    "goals": false,
+    "results": true,
+    "parent_items": [
+      4,
+      5,
+      9,
+      10
+    ],
+    "descendant_items": [
+      1,
+      2,
+      4,
+      5,
+      9,
+      10,
+      11
+    ],
+    "port": 8775,
+    "sibling_items": [
+      3,
+      7,
+      8,
+      12
+    ],
+    "union_items": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "result_expectations": {
+      "increase_ids": [
+        1,
+        2,
+        3
+      ],
+      "decrease_id": 4,
+      "different_context_id": 5,
+      "missing_id": 6,
+      "unchanged_ids": [
+        7,
+        8
+      ],
+      "comparison_ids": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "directions": {
+        "increase": 3,
+        "decrease": 1
+      },
+      "long_concept": "ambient temperature-dependent modulation of mesolimbic dopamine reward signalling"
+    }
+  },
+  "url": "http://127.0.0.1:8775/",
+  "runs": {
+    "desktop-light": {
+      "views": {
+        "concept-overview": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-network": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-evidence": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "concept-matrix": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-link-evidence": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "atlas-results-all": {
+          "cards": 20,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "atlas-results-focused": {
+          "cards": 2,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-overview": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-table": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-minority-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-related-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-filtered": {
+          "cards": 1,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        }
+      },
+      "concept_summary": {
+        "papers": 12,
+        "papers_with_concepts": 12,
+        "selected_concepts": 27,
+        "analytical_concepts": 26,
+        "broad_metadata_count": 1,
+        "cooccurring_pairs": 139,
+        "communities": 1
+      },
+      "comparison": {
+        "factor": "MDMA",
+        "outcome": "body temperature",
+        "context": {
+          "drugs": [
+            "MDMA"
+          ],
+          "species": [
+            "rats"
+          ],
+          "species_source": "sentence",
+          "regions": [],
+          "temperatures": [
+            "22\u00b0C"
+          ],
+          "doses": [
+            "5mg/kg"
+          ],
+          "routes": [
+            "intraperitoneal"
+          ],
+          "conditions": [],
+          "comparators": [
+            "saline controls"
+          ],
+          "ambiguous_conditions": false,
+          "strains": [],
+          "sex": [],
+          "time_windows": []
+        },
+        "paper_count": 4,
+        "direction_counts": {
+          "decrease": 1,
+          "increase": 3
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "minority_directions": [
+          "decrease"
+        ],
+        "interpretation": "Descriptive agreement among matching reported contexts, not a meta-analysis. Minority directions are not statistical outliers; verify protocols and comparators."
+      },
+      "related_outcome": {
+        "outcome": "body temperature",
+        "paper_count": 5,
+        "direction_counts": {
+          "increase": 4,
+          "decrease": 1
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "30\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 5,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 5 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "comparison_level": "different_contexts",
+        "interpretation": "Shared outcome across different experiments; directions are not directly comparable."
+      },
+      "console_errors": []
+    },
+    "desktop-dark": {
+      "views": {
+        "concept-overview": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-network": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-evidence": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "concept-matrix": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-link-evidence": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "atlas-results-all": {
+          "cards": 20,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "atlas-results-focused": {
+          "cards": 2,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-overview": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-table": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-minority-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-related-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-filtered": {
+          "cards": 1,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        }
+      },
+      "concept_summary": {
+        "papers": 12,
+        "papers_with_concepts": 12,
+        "selected_concepts": 27,
+        "analytical_concepts": 26,
+        "broad_metadata_count": 1,
+        "cooccurring_pairs": 139,
+        "communities": 1
+      },
+      "comparison": {
+        "factor": "MDMA",
+        "outcome": "body temperature",
+        "context": {
+          "drugs": [
+            "MDMA"
+          ],
+          "species": [
+            "rats"
+          ],
+          "species_source": "sentence",
+          "regions": [],
+          "temperatures": [
+            "22\u00b0C"
+          ],
+          "doses": [
+            "5mg/kg"
+          ],
+          "routes": [
+            "intraperitoneal"
+          ],
+          "conditions": [],
+          "comparators": [
+            "saline controls"
+          ],
+          "ambiguous_conditions": false,
+          "strains": [],
+          "sex": [],
+          "time_windows": []
+        },
+        "paper_count": 4,
+        "direction_counts": {
+          "decrease": 1,
+          "increase": 3
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "minority_directions": [
+          "decrease"
+        ],
+        "interpretation": "Descriptive agreement among matching reported contexts, not a meta-analysis. Minority directions are not statistical outliers; verify protocols and comparators."
+      },
+      "related_outcome": {
+        "outcome": "body temperature",
+        "paper_count": 5,
+        "direction_counts": {
+          "increase": 4,
+          "decrease": 1
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "30\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 5,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 5 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "comparison_level": "different_contexts",
+        "interpretation": "Shared outcome across different experiments; directions are not directly comparable."
+      },
+      "console_errors": []
+    },
+    "laptop-light": {
+      "views": {
+        "concept-overview": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-network": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-evidence": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "concept-matrix": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-link-evidence": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "atlas-results-all": {
+          "cards": 20,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "atlas-results-focused": {
+          "cards": 2,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-overview": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-table": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-minority-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-related-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-filtered": {
+          "cards": 1,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        }
+      },
+      "concept_summary": {
+        "papers": 12,
+        "papers_with_concepts": 12,
+        "selected_concepts": 27,
+        "analytical_concepts": 26,
+        "broad_metadata_count": 1,
+        "cooccurring_pairs": 139,
+        "communities": 1
+      },
+      "comparison": {
+        "factor": "MDMA",
+        "outcome": "body temperature",
+        "context": {
+          "drugs": [
+            "MDMA"
+          ],
+          "species": [
+            "rats"
+          ],
+          "species_source": "sentence",
+          "regions": [],
+          "temperatures": [
+            "22\u00b0C"
+          ],
+          "doses": [
+            "5mg/kg"
+          ],
+          "routes": [
+            "intraperitoneal"
+          ],
+          "conditions": [],
+          "comparators": [
+            "saline controls"
+          ],
+          "ambiguous_conditions": false,
+          "strains": [],
+          "sex": [],
+          "time_windows": []
+        },
+        "paper_count": 4,
+        "direction_counts": {
+          "decrease": 1,
+          "increase": 3
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "minority_directions": [
+          "decrease"
+        ],
+        "interpretation": "Descriptive agreement among matching reported contexts, not a meta-analysis. Minority directions are not statistical outliers; verify protocols and comparators."
+      },
+      "related_outcome": {
+        "outcome": "body temperature",
+        "paper_count": 5,
+        "direction_counts": {
+          "increase": 4,
+          "decrease": 1
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "30\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 5,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 5 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "comparison_level": "different_contexts",
+        "interpretation": "Shared outcome across different experiments; directions are not directly comparable."
+      },
+      "console_errors": []
+    },
+    "laptop-dark": {
+      "views": {
+        "concept-overview": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-network": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-evidence": {
+          "cards": 20,
+          "nodes": 20,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "concept-matrix": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": false
+        },
+        "concept-link-evidence": {
+          "cards": 0,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 400,
+          "findingRows": 0,
+          "overflow": false,
+          "selected": true
+        },
+        "atlas-results-all": {
+          "cards": 20,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "atlas-results-focused": {
+          "cards": 2,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-overview": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-table": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": false
+        },
+        "outcomes-minority-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-related-evidence": {
+          "cards": 8,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 8,
+          "overflow": false,
+          "selected": true
+        },
+        "outcomes-filtered": {
+          "cards": 1,
+          "nodes": 0,
+          "clipped": [],
+          "overlaps": [],
+          "matrixLabelOverlaps": 0,
+          "complete": true,
+          "matrixCells": 0,
+          "findingRows": 1,
+          "overflow": false,
+          "selected": false
+        }
+      },
+      "concept_summary": {
+        "papers": 12,
+        "papers_with_concepts": 12,
+        "selected_concepts": 27,
+        "analytical_concepts": 26,
+        "broad_metadata_count": 1,
+        "cooccurring_pairs": 139,
+        "communities": 1
+      },
+      "comparison": {
+        "factor": "MDMA",
+        "outcome": "body temperature",
+        "context": {
+          "drugs": [
+            "MDMA"
+          ],
+          "species": [
+            "rats"
+          ],
+          "species_source": "sentence",
+          "regions": [],
+          "temperatures": [
+            "22\u00b0C"
+          ],
+          "doses": [
+            "5mg/kg"
+          ],
+          "routes": [
+            "intraperitoneal"
+          ],
+          "conditions": [],
+          "comparators": [
+            "saline controls"
+          ],
+          "ambiguous_conditions": false,
+          "strains": [],
+          "sex": [],
+          "time_windows": []
+        },
+        "paper_count": 4,
+        "direction_counts": {
+          "decrease": 1,
+          "increase": 3
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "minority_directions": [
+          "decrease"
+        ],
+        "interpretation": "Descriptive agreement among matching reported contexts, not a meta-analysis. Minority directions are not statistical outliers; verify protocols and comparators."
+      },
+      "related_outcome": {
+        "outcome": "body temperature",
+        "paper_count": 5,
+        "direction_counts": {
+          "increase": 4,
+          "decrease": 1
+        },
+        "findings": [
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 30\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "30\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 5,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 5 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "decrease",
+            "evidence": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA decreased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 4,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 3,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 2,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+          },
+          {
+            "id": "finding-1",
+            "factor": "MDMA",
+            "outcome": "body temperature",
+            "direction": "increase",
+            "evidence": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "source": "abstract",
+            "clause": "MDMA increased body temperature in rats at 22\u00b0C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+            "context": {
+              "drugs": [
+                "MDMA"
+              ],
+              "species": [
+                "rats"
+              ],
+              "species_source": "sentence",
+              "regions": [],
+              "temperatures": [
+                "22\u00b0C"
+              ],
+              "doses": [
+                "5mg/kg"
+              ],
+              "routes": [
+                "intraperitoneal"
+              ],
+              "conditions": [],
+              "comparators": [
+                "saline controls"
+              ],
+              "ambiguous_conditions": false,
+              "strains": [],
+              "sex": [],
+              "time_windows": []
+            },
+            "comparison_eligible": true,
+            "interpretation": "Reported direction only; no effect-size or significance inference.",
+            "paper_id": 1,
+            "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+          }
+        ],
+        "comparison_level": "different_contexts",
+        "interpretation": "Shared outcome across different experiments; directions are not directly comparable."
+      },
+      "console_errors": []
+    }
+  },
+  "source_sha256": {
+    "doi_hunter_web/insight.py": "8d6a63fa867ec04955ee3b8420d5e35f6812d2fb4dc1779e91136a1682bf0134",
+    "doi_hunter_web/goal_extraction.py": "dab13bcae1bae20264088cfa42f4dbf8b7af9f3c2542dec6496505b40cb814b9",
+    "doi_hunter_web/static/js/analysis_views.js": "b63d9023341ad2ff9b183d7a993effc5b35f14b67dbb998839ed4c3a7b29365f",
+    "doi_hunter_web/static/js/goal_views.js": "300d7fd9dbdd86c26d82dcbed012373102896290312a34d5d24f0adef90f0487",
+    "doi_hunter_web/static/js/insights.js": "e26f8a51e59a7410a587eb6549ae8db7b4af162f66ba52ecb806f124984d11ca",
+    "doi_hunter_web/result_extraction.py": "da60a6ed91c892ecbb06419a6f8287af54747893bad7f16474b97a73a80dafb8",
+    "doi_hunter_web/concept_analysis.py": "e843d76108881ba74cad2b00b2c64798be7ab083170ed8d23d6ee37973b04e74"
+  },
+  "exports": {
+    "goals": {
+      "json": {
+        "name": "ReviewHunter-goals-Whole_library.json",
+        "type": "application/json",
+        "size": 52613
+      },
+      "csv": {
+        "name": "ReviewHunter-goals-Whole_library.csv",
+        "type": "text/csv;charset=utf-8",
+        "size": 2423,
+        "rows": 13
+      },
+      "png": {
+        "name": "ReviewHunter-goals-Whole_library.png",
+        "type": "image/png",
+        "size": 179676
+      },
+      "csv_columns": [
+        "paper_id",
+        "paper_title",
+        "factor",
+        "outcome",
+        "direction",
+        "source",
+        "evidence",
+        "drugs",
+        "species",
+        "conditions"
+      ]
+    },
+    "concepts": {
+      "json": {
+        "name": "ReviewHunter-concepts-Whole_library.json",
+        "type": "application/json",
+        "size": 184044
+      },
+      "csv": {
+        "name": "ReviewHunter-concepts-Whole_library.csv",
+        "type": "text/csv;charset=utf-8",
+        "size": 17129,
+        "rows": 189
+      },
+      "png": {
+        "name": "ReviewHunter-concepts-Whole_library.png",
+        "type": "image/png",
+        "size": 596527
+      },
+      "csv_columns": [
+        "record_type",
+        "id_or_source",
+        "label_or_target",
+        "paper_count_or_weight",
+        "cluster",
+        "paper_ids",
+        "prevalence",
+        "jaccard_overlap",
+        "broad_indexing_metadata"
+      ]
+    }
+  }
+}

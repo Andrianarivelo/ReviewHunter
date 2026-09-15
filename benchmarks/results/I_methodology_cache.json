@@ -1,16 +1,18 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-09-15T12:40:29.016511+00:00",
+  "created_utc": "2026-09-15T13:28:37.603465+00:00",
   "dependencies": {
     "benchmarks/fixtures/methodology/annotations.json": "8b17595bd0b8ba509ee70486b9ebaecd112031cebc179f830a64ee98416ad279",
     "benchmarks/fixtures/methodology/baseline/insight.py": "a29ed73c8a8dde1d0e4b28744dec6309f3fcf9a76f847ca5adaead2741c96e9d",
     "benchmarks/fixtures/methodology/baseline/method_taxonomy.py": "dfcb716b278c6ac3325f50cb2068b2725872ce854d72035175467cbe9ff5a4a3",
-    "doi_hunter_web/insight.py": "17699dc441c8652c78a15408fdf4d2e9aeb1894083d11ddba882a22bb809e2c6",
+    "doi_hunter_web/insight.py": "8d6a63fa867ec04955ee3b8420d5e35f6812d2fb4dc1779e91136a1682bf0134",
     "doi_hunter_web/method_taxonomy.py": "01a7652b7407281cdee27a4587fbfc4fb776c9d425fb399a26e08444986360a9",
     "doi_hunter_web/method_details.py": "2c83b62b141903989da2733b2f65da2c828083abbbae07aba5922a0b3036e6e5",
     "doi_hunter_web/word_concepts.py": "651a91aa3651525f682d553e072ae067fdad288cfbc2e095a265d9c9d4083cbe",
-    "doi_hunter_web/goal_extraction.py": "9407651c3fc6a016f060212be422da3b33f2c6f99ba4c7ff2cdc43b432362a3c",
-    "benchmark_numeric_functions": "abc79460e8b78e1c570a3164dae40f8cb52b76e090b18bef6549c8ac2b44ba81"
+    "doi_hunter_web/goal_extraction.py": "dab13bcae1bae20264088cfa42f4dbf8b7af9f3c2542dec6496505b40cb814b9",
+    "doi_hunter_web/result_extraction.py": "da60a6ed91c892ecbb06419a6f8287af54747893bad7f16474b97a73a80dafb8",
+    "doi_hunter_web/concept_analysis.py": "e843d76108881ba74cad2b00b2c64798be7ab083170ed8d23d6ee37973b04e74",
+    "benchmark_numeric_functions": "b920313dabd03dd1d5ff909739f90bd441626490c178ac9997d2aa31751655aa"
   },
   "n_papers": 5,
   "annotation_status": "Coding agent manual evidence audit; independent human review pending",
@@ -202,13 +204,13 @@
     {
       "version": "baseline",
       "n_papers": 5,
-      "seconds": 0.582783300007577,
+      "seconds": 0.6645191999996314,
       "protocol": "One local CPU call; descriptive timing, not a stable speed benchmark"
     },
     {
       "version": "current",
       "n_papers": 5,
-      "seconds": 0.3583608000044478,
+      "seconds": 0.3664749000017764,
       "protocol": "One local CPU call; descriptive timing, not a stable speed benchmark"
     }
   ],

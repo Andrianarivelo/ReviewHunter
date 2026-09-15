@@ -1,0 +1,10 @@
+{
+  "papers_compared": 10,
+  "before_explicit": 8,
+  "after_explicit": 10,
+  "library_live_items_at_comparison": 14,
+  "same_in_memory_source_text_for_both_parsers": true,
+  "baseline_revision": "d8558bd46f4f2c79685b85adc00e5a1fac201c53",
+  "before_source_sha256": "9407651c3fc6a016f060212be422da3b33f2c6f99ba4c7ff2cdc43b432362a3c",
+  "after_source_sha256": "dab13bcae1bae20264088cfa42f4dbf8b7af9f3c2542dec6496505b40cb814b9"
+}

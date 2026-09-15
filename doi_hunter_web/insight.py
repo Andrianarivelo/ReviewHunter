@@ -322,7 +322,9 @@ def _term_evidence(iid: int, term: str, text: dict, *, normalized: bool = False,
 def concepts(collection_id: Optional[int] = None, author: Optional[str] = None, tag: Optional[str] = None,
              limit: int = MAX_CONCEPT_NODES, focus: Optional[str] = None, include_sub: bool = True,
              collection_ids: Optional[list[int]] = None) -> dict:
-    """Concept co-occurrence graph with clusters."""
+    """Concept co-occurrence graph with evidence and descriptive scope analytics."""
+    from .concept_analysis import analyse
+
     items = scope_items(collection_id, author, tag, include_sub, collection_ids=collection_ids)
     texts = _texts(items, with_fulltext=False)
     limit = max(10, min(limit, 160))
@@ -442,14 +444,18 @@ def concepts(collection_id: Optional[int] = None, author: Optional[str] = None, 
                       "evidence": [_term_evidence(i["id"], per_item[i["id"]][k], texts[i["id"]], normalized=True)
                                    for i in term_items[k]],
                       "items": term_items[k], "related": [{"label": l, "weight": w} for l, w in related]})
-    edge_payload = sorted(({"source": a, "target": b, "weight": w} for (a, b), w in edges.items() if a in sel and b in sel),
-                          key=lambda e: -e["weight"])[:400]
+    all_selected_edges = sorted(({"source": a, "target": b, "weight": w} for (a, b), w in edges.items() if a in sel and b in sel),
+                                key=lambda e: (-e["weight"], e["source"], e["target"]))
+    edge_payload = all_selected_edges[:400]
+    analytics = analyse(nodes, all_selected_edges, [_item_brief(it) for it in items], total_terms=len(counts),
+                        displayed_edges=len(edge_payload), scope_capped=getattr(items, "capped", False))
     unique = [label_by_key[k] for k, c in counts.items() if c == 1 and k in curated][:20]
     return {
         "scope": {"label": scope_label(collection_id, author, tag, collection_ids=collection_ids), "items": len(items), "collection_id": collection_id,
                   "collection_ids": selected_collection_ids(collection_id, collection_ids),
                   "author": author, "tag": tag, "focus": focus or "", "include_sub": include_sub},
         "nodes": nodes, "edges": edge_payload, "clusters": cluster_payload, "total_terms": len(counts),
+        "analytics": analytics,
         "insights": {"unique_terms": unique,
                      "isolated_items": [_item_brief(it) for it in items if not per_item.get(it["id"])][:10]},
         "limits": {"no_abstract": sum(1 for it in items if not (it.get("abstract") or "").strip()),
@@ -567,6 +573,7 @@ def goals(collection_id: Optional[int] = None, author: Optional[str] = None, tag
           include_sub: bool = True, collection_ids: Optional[list[int]] = None) -> dict:
     """Represent every paper's research focus, with optional source-backed relationships."""
     from .goal_extraction import extract_goal
+    from .result_extraction import MAX_FINDINGS, compare_findings, extract_findings, related_outcomes
 
     items = scope_items(collection_id, author, tag, include_sub, collection_ids=collection_ids)
     texts = _texts(items, with_fulltext=True, max_fulltext_chars=GOAL_TEXT_CHARS)
@@ -582,6 +589,9 @@ def goals(collection_id: Optional[int] = None, author: Optional[str] = None, tag
         extracted = extract_goal(text["title"], text["abstract"], text["sections"].get("introduction", ""),
                                  text["fulltext"], splitter=sentences, max_aims=MAX_GOAL_SENTENCES)
         paper = {**_item_brief(item), **extracted}
+        findings = extract_findings(text["title"], text["abstract"], text["sections"].get("results", ""), splitter=sentences)
+        paper["findings"] = [{**finding, "paper_id": item["id"]} for finding in findings]
+        paper["findings_capped"] = findings.capped
         papers.append(paper)
         type_counts[paper["goal_type"]] += 1
         for theme in paper["themes"]:
@@ -613,19 +623,25 @@ def goals(collection_id: Optional[int] = None, author: Optional[str] = None, tag
                   "collection_id": collection_id, "collection_ids": selected_collection_ids(collection_id, collection_ids),
                   "author": author, "tag": tag, "include_sub": include_sub},
         "papers": papers, "factors": nodes(factors), "outcomes": nodes(outcomes),
+        "result_comparisons": compare_findings(papers),
+        "related_outcomes": related_outcomes(papers),
         "links": sorted(links.values(), key=lambda link: (-len(link["items"]), link["factor"], link["outcome"])),
         "goal_types": [{"kind": kind, "count": count} for kind, count in type_counts.most_common()],
         "themes": [{"id": key, "label": theme_labels[key], "count": count} for key, count in theme_counts.most_common()],
         "coverage": {"papers": len(papers), "explicit_aim": sum(p["focus_status"] == "explicit_aim" for p in papers),
                      "title_focus": sum(p["focus_status"] == "title_focus" for p in papers),
                      "unavailable": sum(p["focus_status"] == "unavailable" for p in papers),
+                     "with_findings": sum(bool(p["findings"]) for p in papers),
                      "with_relationships": sum(bool(p["pairs"]) for p in papers)},
         "insights": {"single_paper_outcomes": [node["label"] for node in nodes(outcomes) if node["count"] == 1],
                      "no_aim_found": [paper["title"] for paper in papers if paper["focus_status"] != "explicit_aim"]},
         "limits": {"scope_capped": getattr(items, "capped", False), "max_items": MAX_ITEMS,
                    "no_abstract": sum(not texts[item["id"]]["abstract"].strip() for item in items),
                    "fulltext_scan_chars": GOAL_TEXT_CHARS,
-                   "interpretation": "Explicit aims come from abstracts and introductions within the first 60000 indexed characters. A title-derived focus is labelled separately and is not an invented aim. Relationships are stated links, not proof of causation; papers without a valid pair remain in the atlas."},
+                   "findings_per_paper": MAX_FINDINGS,
+                   "findings_capped": sum(p["findings_capped"] for p in papers),
+                   "result_interpretation": "Reported directions are extracted from abstracts and detected Results sections within the indexed-text scan. Compatible comparisons require matching stated drugs, species, temperatures, doses, routes, comparators and remaining detected context; papers reaching the finding limit are excluded. Shared-outcome groups span different experiments and are not direct comparisons. Counts are descriptive; minority directions are not statistical outliers and missing extraction is not evidence of no effect.",
+                   "interpretation": "Explicit aims come from abstracts, introductions and unheaded introductory text within the first 60000 indexed characters; explicit retrospective statements of study purpose may also come from Discussion or Conclusion sections. A title-derived focus is labelled separately and is not an invented aim. Relationships are stated links, not proof of causation; papers without a valid pair remain in the atlas."},
     }
 
 

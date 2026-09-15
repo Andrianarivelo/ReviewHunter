@@ -34,6 +34,7 @@
   <script src="/static/js/settings.js"></script>
   <script src="/static/js/discover.js"></script>
   <script src="/static/js/goal_views.js"></script>
+  <script src="/static/js/analysis_views.js"></script>
   <script src="/static/js/insights.js"></script>
   <script src="/static/app.js"></script>
   <script defer src="/static/vendor/alpine.min.js"></script>
@@ -368,7 +369,10 @@
           <div class="insight-summary" aria-label="Map overview"><template x-for="(stat,i) in insightSummary()" :key="i"><div><strong x-text="stat.value"></strong><span x-text="stat.label"></span><button x-show="stat.action" @click="scrollInsightReporting()">Review reporting ↓</button></div></template></div>
           <div class="insight-limits" x-show="insightLimits()"><strong>Text coverage</strong><span x-text="insightLimits()"></span></div>
           <div class="insight-tools" x-show="insight.kind==='concepts'">
-            <span>Node size: papers · Links: co-occurrence</span>
+            <div class="insight-segment"><button @click="insight.conceptView='network'; renderInsight()" :class="{'active':insight.conceptView==='network'}">Concept network</button><button @click="insight.conceptView='matrix'; renderInsight()" :class="{'active':insight.conceptView==='matrix'}">Overlap matrix</button></div>
+            <select aria-label="Concept count" x-model.number="insight.conceptCount" @change="renderInsight()"><option value="12">12 concepts</option><option value="24">24 concepts</option><option value="48">48 concepts</option><option value="160">All concepts</option></select>
+            <label><input type="checkbox" x-model="insight.conceptSingles" @change="renderInsight()"> Single-paper concepts</label>
+            <label><input type="checkbox" x-model="insight.conceptBroad" @change="renderInsight()"> Broad indexing terms</label>
             <label>Zoom <input aria-label="Map zoom" type="range" min="1" max="2.4" step="0.1" x-model.number="insight.zoom"></label>
             <button x-show="insight.focus || insight.cluster!==null" @click="resetGraphFocus()" class="action-secondary">Clear focus</button>
           </div>
@@ -391,12 +395,51 @@
             <span>Click a chip or cell to inspect its evidence.</span>
           </div>
           <div class="insight-goal-controls" x-show="insight.kind==='goals'">
-            <div class="insight-tools"><div class="insight-segment"><button @click="insight.goalView='atlas'; renderInsight()" :class="{'active':insight.goalView==='atlas'}">Question atlas</button><button @click="insight.goalView='connections'; renderInsight()" :class="{'active':insight.goalView==='connections'}">Factor–outcome connections</button></div><input aria-label="Search research questions" type="search" placeholder="Find a paper or research question…" x-model="insight.goalQuery" @input.debounce.180ms="filterGoals()"><button @click="clearGoalFilters()" x-show="insight.goalKind || insight.goalTheme || insight.goalQuery">Clear filters</button></div>
+            <div class="insight-tools"><div class="insight-segment"><button @click="insight.goalView='atlas'; filterGoals()" :class="{'active':insight.goalView==='atlas'}">Question atlas</button><button @click="insight.goalView='connections'; filterGoals()" :class="{'active':insight.goalView==='connections'}">Factor–outcome connections</button><button @click="insight.goalView='outcomes'; filterGoals()" :class="{'active':insight.goalView==='outcomes'}">Outcomes</button></div><input aria-label="Search research questions" type="search" placeholder="Find a paper, question or finding…" x-model="insight.goalQuery" @input.debounce.180ms="filterGoals()"><button @click="clearGoalFilters()" x-show="insight.goalKind || insight.goalTheme || insight.goalQuery || insight.resultDirection">Clear filters</button></div>
             <div class="insight-goal-types"><button @click="insight.goalKind=''; filterGoals()" :class="{'active':!insight.goalKind}">All question types</button><template x-for="type in (insight.data.goal_types || [])" :key="type.kind"><button @click="insight.goalKind=insight.goalKind===type.kind ? '' : type.kind; filterGoals()" :class="{'active':insight.goalKind===type.kind}" :style="'--goal-colour:' + goalColour(type.kind)"><i></i><span x-text="goalType(type.kind)"></span><b x-text="type.count"></b></button></template></div>
             <div class="insight-goal-themes" x-show="goalThemes().length"><span>Explore a theme</span><template x-for="theme in goalThemes()" :key="theme.id"><button @click="insight.goalTheme=insight.goalTheme===theme.id ? '' : theme.id; filterGoals()" :class="{'active':insight.goalTheme===theme.id}"><span x-text="theme.label"></span><b x-text="theme.count"></b></button></template></div>
             <p class="insight-goal-coverage"><strong x-text="goalFilteredPapers().length + ' of ' + (insight.data.papers || []).length + ' papers'"></strong><span x-show="insight.goalView==='atlas'">Each card shows an explicit aim or a clearly labelled title-based focus. Click to inspect the source.</span><span x-show="insight.goalView==='connections'">Connections show supported pairs on this page. Papers without a reliable pair remain in the atlas.</span></p>
           </div>
+          <section class="insight-analysis" x-show="insight.kind==='goals' &amp;&amp; insight.goalView==='outcomes'">
+            <div class="insight-analysis-heading"><div><div class="rail-label">Compare reported results</div><h2>Where studies agree and differ</h2></div><span x-text="resultCoverage()"></span></div>
+            <p>Groups require matching factors, outcomes and extracted context. Different directions are candidates for reading side by side, not statistical outliers or evidence that one study is wrong.</p>
+            <div class="insight-tools">
+              <select aria-label="Finding direction" x-model="insight.resultDirection" @change="filterGoals()"><option value="">All directions</option><option value="increase">↑ Increase</option><option value="decrease">↓ Decrease</option><option value="no_detected_change">↔ No detected change</option><option value="mixed">↕ Mixed / conditional</option><option value="unspecified">? Direction unclear</option></select>
+              <div class="insight-segment"><button @click="insight.resultMode='all'" :class="{'active':insight.resultMode==='all'}">All comparisons</button><button @click="insight.resultMode='similar'" :class="{'active':insight.resultMode==='similar'}">Similar directions</button><button @click="insight.resultMode='different'" :class="{'active':insight.resultMode==='different'}">Different directions</button></div>
+            </div>
+            <div class="insight-comparison-grid"><template x-for="(group,index) in resultComparisons()" :key="index">
+              <button class="insight-comparison" @click="inspectResultComparison(group)">
+                <strong x-text="group.factor + ' → ' + group.outcome"></strong>
+                <small x-text="findingContext(group.context)"></small>
+                <div class="insight-direction-counts"><template x-for="(count,direction) in group.direction_counts" :key="direction"><span :style="'--direction:' + directionColour(direction)"><b x-text="directionLabel(direction)"></b><em x-text="paperCount(count)"></em></span></template></div>
+                <span class="insight-minority" x-show="group.minority_directions?.length" x-text="'Minority direction: ' + (group.minority_directions || []).map(value => directionLabel(value)).join(', ')"></span>
+                <small>Inspect studies and context ↗</small>
+              </button>
+            </template></div>
+            <p class="insight-analysis-empty" x-show="!resultComparisons().length">No repeated, compatible comparison meets these filters. Individual findings remain below; missing groups do not imply that studies agree.</p>
+            <details class="insight-related-outcomes" x-show="relatedOutcomes().length">
+              <summary>Shared outcomes to explore in context</summary>
+              <p>Use these groups to inspect how drugs, doses, models and conditions differ. Contexts may differ or be incompletely reported; these directions are not directly comparable.</p>
+              <div class="insight-comparison-grid"><template x-for="(group,index) in relatedOutcomes()" :key="index">
+                <button class="insight-comparison" @click="inspectResultComparison(group)">
+                  <strong x-text="group.outcome"></strong><small x-text="paperCount(group.paper_count) + ' · inspect experimental context'"></small>
+                  <div class="insight-direction-counts"><template x-for="(count,direction) in group.direction_counts" :key="direction"><span :style="'--direction:' + directionColour(direction)"><b x-text="directionLabel(direction)"></b><em x-text="paperCount(count)"></em></span></template></div>
+                  <small>Inspect conditions and source evidence ↗</small>
+                </button>
+              </template></div>
+            </details>
+          </section>
+          <section class="insight-analysis" x-show="insight.kind==='concepts'">
+            <div class="insight-analysis-heading"><div><div class="rail-label">Read the structure</div><h2>Common ground &amp; unusual combinations</h2></div><span>Analysis uses all retained concepts in this scope</span></div>
+            <div class="insight-analysis-grid">
+              <div><h3>Core concepts <small>in at least half the papers</small></h3><template x-for="node in (insight.data.analytics?.core_themes || []).slice(0,5)" :key="node.id"><button class="insight-analysis-row" @click="inspectConcept(node)"><span x-text="node.label"></span><b x-text="node.count + '/' + insight.data.scope?.items"></b><i><em :style="'width:' + 100*node.prevalence + '%'"></em></i></button></template><p x-show="!insight.data.analytics?.core_themes?.length">No shared core across this scope.</p></div>
+              <div><h3>Strongest connections <small>shared papers, then overlap</small></h3><template x-for="(edge,index) in (insight.data.analytics?.strongest_links || []).slice(0,3)" :key="index"><button class="insight-analysis-row" @click="inspectConceptLink(edge)"><span x-text="(edge.source_label || edge.source) + ' + ' + (edge.target_label || edge.target)"></span><b x-text="Math.round(edge.jaccard*100) + '%'"></b><small x-text="paperCount(edge.shared_count ?? edge.weight) + ' shared'"></small></button></template><p x-show="!insight.data.analytics?.strongest_links?.length">No repeated connection detected.</p></div>
+              <div><h3>Unusual combinations <small>unique pairs of recurring concepts</small></h3><template x-for="(entry,index) in (insight.data.analytics?.unusual_combinations || []).slice(0,3)" :key="index"><button class="insight-analysis-row" @click="inspectConceptCombination(entry)"><span x-text="entry.title || entry.paper?.title"></span><b x-text="Math.round(entry.score*100) + '%'"></b><small x-text="(entry.pairs || []).slice(0,2).map(pair => (pair.source_label || pair.source) + ' + ' + (pair.target_label || pair.target)).join('; ')"></small></button></template><p x-show="!insight.data.analytics?.unusual_combinations?.length">No unique pairing of recurring concepts.</p></div>
+            </div>
+            <div class="insight-analysis-footer"><span>Jaccard = papers sharing both concepts / papers containing either. Combination percentages show the share of eligible concept pairs unique to one paper. This is library structure, not scientific novelty.</span><span x-text="(insight.data.analytics?.bridge_concepts || []).length + ' bridges between detected themes · ' + (insight.data.analytics?.rare_concepts || []).length + ' single-paper concepts'"></span></div>
+          </section>
           <div class="insight-legend" x-show="insight.kind==='concepts'"><template x-for="cluster in (insight.data.clusters || [])" :key="cluster.id"><button @click="insight.cluster=insight.cluster===cluster.id ? null : cluster.id; renderInsight()" :class="{'active': insight.cluster===cluster.id}" :style="'--cluster-color:' + ['#0891b2','#8b5cf6','#d97706','#10b981','#e05d8b','#527de3','#a48544'][cluster.id%7]"><i></i><span x-text="cluster.label"></span><b x-text="cluster.size"></b></button></template></div>
+          <p class="insight-concept-caption" x-show="insight.kind==='concepts'"><span x-text="visibleConcepts().length + ' of ' + (insight.data.nodes || []).length + ' retained concepts shown. '"></span><span x-show="insight.conceptView==='network'">Full labels, prevalence bars and the two strongest connections per concept. Position groups themes, not effect size.</span><span x-show="insight.conceptView==='matrix'">Cells show shared-paper counts. Darker cells indicate larger normalized overlap.</span></p>
           <div class="insight-visual card" :class="{'insight-wide':insight.kind==='methods'}">
             <svg id="insight-svg" xmlns="http://www.w3.org/2000/svg" :view-box.camel="'0 0 ' + insight.width + ' ' + insight.height" :style="insightChartStyle()" role="group" :aria-label="insightTitle() + ' interactive map'" @click="insightActivate($event)" @keydown.enter.prevent="insightActivate($event)" @keydown.space.prevent="insightActivate($event)" @mouseover="insightHover($event)" @mouseleave="insightHover($event,true)"><g x-html="insight.svg"></g></svg>
           </div>

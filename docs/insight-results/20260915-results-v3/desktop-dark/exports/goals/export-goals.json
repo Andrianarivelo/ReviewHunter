@@ -1,0 +1,1732 @@
+{
+  "scope": {
+    "label": "Whole library",
+    "items": 12,
+    "collection_id": null,
+    "collection_ids": [],
+    "author": null,
+    "tag": null,
+    "include_sub": true
+  },
+  "papers": [
+    {
+      "id": 12,
+      "title": "Human working memory and visual attention",
+      "year": 2020,
+      "authors": [
+        "Example, Dana"
+      ],
+      "journal": "",
+      "focus": "We compared working memory and visual attention in human participants.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "compare",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We compared working memory and visual attention in human participants.",
+          "kind": "compare",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [],
+      "themes": [
+        {
+          "id": "cognition",
+          "label": "Cognition & behaviour",
+          "match": "memory",
+          "source": "abstract"
+        }
+      ],
+      "findings": [],
+      "findings_capped": false
+    },
+    {
+      "id": 11,
+      "title": "Temperature effects on dopamine release",
+      "year": 2025,
+      "authors": [
+        "Example, Carol"
+      ],
+      "journal": "",
+      "focus": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "ambient temperature",
+          "outcome": "dopamine release",
+          "kind": "effect",
+          "evidence": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "dopamine",
+          "label": "Dopamine",
+          "match": "dopamine",
+          "source": "abstract"
+        }
+      ],
+      "findings": [],
+      "findings_capped": false
+    },
+    {
+      "id": 10,
+      "title": "Ambient temperatures and locomotor activity",
+      "year": 2024,
+      "authors": [
+        "Example, Alice",
+        "Example, Bob"
+      ],
+      "journal": "",
+      "focus": "We investigated whether ambient temperature alters locomotor activity.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "test",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We investigated whether ambient temperature alters locomotor activity.",
+          "kind": "test",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "ambient temperature",
+          "outcome": "locomotor activity",
+          "kind": "test",
+          "evidence": "We investigated whether ambient temperature alters locomotor activity.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "cognition",
+          "label": "Cognition & behaviour",
+          "match": "locomotor",
+          "source": "abstract"
+        }
+      ],
+      "findings": [],
+      "findings_capped": false
+    },
+    {
+      "id": 9,
+      "title": "Ambient temperature and stimulant self-administration",
+      "year": 2023,
+      "authors": [
+        "Example, Alice"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of ambient temperature on methamphetamine self-administration.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of ambient temperature on methamphetamine self-administration.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "ambient temperature",
+          "outcome": "methamphetamine self-administration",
+          "kind": "effect",
+          "evidence": "We examined the effect of ambient temperature on methamphetamine self-administration.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "self_administration",
+          "label": "Self-administration",
+          "match": "self-administration",
+          "source": "abstract"
+        },
+        {
+          "id": "methamphetamine",
+          "label": "Methamphetamine",
+          "match": "methamphetamine",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "ambient temperature",
+          "outcome": "self-administration",
+          "direction": "increase",
+          "evidence": "Ambient temperatures increased self-administration.",
+          "source": "abstract",
+          "clause": "Ambient temperatures increased self-administration.",
+          "context": {
+            "drugs": [],
+            "species": [],
+            "species_source": "unavailable",
+            "regions": [],
+            "temperatures": [],
+            "doses": [],
+            "routes": [],
+            "conditions": [],
+            "comparators": [],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": false,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 9
+        }
+      ],
+      "findings_capped": false
+    },
+    {
+      "id": 8,
+      "title": "Synthetic cocaine locomotion experiment 8 in rats",
+      "year": 2022,
+      "authors": [
+        "Synthetic, Jun"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of cocaine on locomotor activity.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of cocaine on locomotor activity.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "cocaine",
+          "outcome": "locomotor activity",
+          "kind": "effect",
+          "evidence": "We examined the effect of cocaine on locomotor activity.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "cognition",
+          "label": "Cognition & behaviour",
+          "match": "locomotor",
+          "source": "abstract"
+        },
+        {
+          "id": "cocaine",
+          "label": "Cocaine",
+          "match": "cocaine",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "Cocaine",
+          "outcome": "locomotor activity",
+          "direction": "no_detected_change",
+          "evidence": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "Cocaine"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 8
+        }
+      ],
+      "findings_capped": false
+    },
+    {
+      "id": 7,
+      "title": "Synthetic cocaine locomotion experiment 7 in rats",
+      "year": 2021,
+      "authors": [
+        "Synthetic, Ibrahim"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of cocaine on locomotor activity.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of cocaine on locomotor activity.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "cocaine",
+          "outcome": "locomotor activity",
+          "kind": "effect",
+          "evidence": "We examined the effect of cocaine on locomotor activity.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "cognition",
+          "label": "Cognition & behaviour",
+          "match": "locomotor",
+          "source": "abstract"
+        },
+        {
+          "id": "cocaine",
+          "label": "Cocaine",
+          "match": "cocaine",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "Cocaine",
+          "outcome": "locomotor activity",
+          "direction": "no_detected_change",
+          "evidence": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "Cocaine"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 7
+        }
+      ],
+      "findings_capped": false
+    },
+    {
+      "id": 6,
+      "title": "(untitled)",
+      "year": 2020,
+      "authors": [
+        "Synthetic, Helena"
+      ],
+      "journal": "",
+      "focus": "",
+      "focus_source": "",
+      "focus_status": "unavailable",
+      "focus_label": "Text unavailable",
+      "goal_type": "unknown",
+      "confidence": "none",
+      "aims": [],
+      "pairs": [],
+      "themes": [],
+      "findings": [],
+      "findings_capped": false
+    },
+    {
+      "id": 5,
+      "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+      "year": 2025,
+      "authors": [
+        "Synthetic, Helena"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of MDMA on body temperature in rats.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of MDMA on body temperature in rats.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "mdma",
+          "outcome": "body temperature",
+          "kind": "effect",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "mdma",
+          "label": "MDMA",
+          "match": "MDMA",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 30°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 30°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "30°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 5
+        }
+      ],
+      "findings_capped": false
+    },
+    {
+      "id": 4,
+      "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+      "year": 2024,
+      "authors": [
+        "Synthetic, Farid"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of MDMA on body temperature in rats.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of MDMA on body temperature in rats.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "mdma",
+          "outcome": "body temperature",
+          "kind": "effect",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "mdma",
+          "label": "MDMA",
+          "match": "MDMA",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "decrease",
+          "evidence": "MDMA decreased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA decreased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 4
+        }
+      ],
+      "findings_capped": false
+    },
+    {
+      "id": 3,
+      "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+      "year": 2023,
+      "authors": [
+        "Synthetic, Grace"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of MDMA on body temperature in rats.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of MDMA on body temperature in rats.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "mdma",
+          "outcome": "body temperature",
+          "kind": "effect",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "mdma",
+          "label": "MDMA",
+          "match": "MDMA",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 3
+        }
+      ],
+      "findings_capped": false
+    },
+    {
+      "id": 2,
+      "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+      "year": 2022,
+      "authors": [
+        "Synthetic, Elena"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of MDMA on body temperature in rats.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of MDMA on body temperature in rats.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "mdma",
+          "outcome": "body temperature",
+          "kind": "effect",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "mdma",
+          "label": "MDMA",
+          "match": "MDMA",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 2
+        }
+      ],
+      "findings_capped": false
+    },
+    {
+      "id": 1,
+      "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+      "year": 2021,
+      "authors": [
+        "Synthetic, Elena",
+        "Synthetic, Farid"
+      ],
+      "journal": "",
+      "focus": "We examined the effect of MDMA on body temperature in rats.",
+      "focus_source": "abstract",
+      "focus_status": "explicit_aim",
+      "focus_label": "Explicit aim",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of MDMA on body temperature in rats.",
+          "kind": "effect",
+          "source": "abstract",
+          "confidence": "high"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "mdma",
+          "outcome": "body temperature",
+          "kind": "effect",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question",
+          "interpretation": "Stated relationship, not a demonstrated causal effect."
+        }
+      ],
+      "themes": [
+        {
+          "id": "temperature",
+          "label": "Temperature",
+          "match": "temperature",
+          "source": "abstract"
+        },
+        {
+          "id": "mdma",
+          "label": "MDMA",
+          "match": "MDMA",
+          "source": "abstract"
+        }
+      ],
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 1
+        }
+      ],
+      "findings_capped": false
+    }
+  ],
+  "factors": [
+    {
+      "id": "mdma",
+      "label": "mdma",
+      "count": 5,
+      "items": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "ambient temperature",
+      "label": "ambient temperature",
+      "count": 3,
+      "items": [
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "id": "cocaine",
+      "label": "cocaine",
+      "count": 2,
+      "items": [
+        7,
+        8
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "body temperature",
+      "label": "body temperature",
+      "count": 5,
+      "items": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "id": "locomotor activity",
+      "label": "locomotor activity",
+      "count": 3,
+      "items": [
+        7,
+        8,
+        10
+      ]
+    },
+    {
+      "id": "dopamine release",
+      "label": "dopamine release",
+      "count": 1,
+      "items": [
+        11
+      ]
+    },
+    {
+      "id": "methamphetamine self-administration",
+      "label": "methamphetamine self-administration",
+      "count": 1,
+      "items": [
+        9
+      ]
+    }
+  ],
+  "result_comparisons": [
+    {
+      "factor": "MDMA",
+      "outcome": "body temperature",
+      "context": {
+        "drugs": [
+          "MDMA"
+        ],
+        "species": [
+          "rats"
+        ],
+        "species_source": "sentence",
+        "regions": [],
+        "temperatures": [
+          "22°C"
+        ],
+        "doses": [
+          "5mg/kg"
+        ],
+        "routes": [
+          "intraperitoneal"
+        ],
+        "conditions": [],
+        "comparators": [
+          "saline controls"
+        ],
+        "ambiguous_conditions": false,
+        "strains": [],
+        "sex": [],
+        "time_windows": []
+      },
+      "paper_count": 4,
+      "direction_counts": {
+        "decrease": 1,
+        "increase": 3
+      },
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "decrease",
+          "evidence": "MDMA decreased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA decreased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 4,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 3,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 2,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 1,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "minority_directions": [
+        "decrease"
+      ],
+      "interpretation": "Descriptive agreement among matching reported contexts, not a meta-analysis. Minority directions are not statistical outliers; verify protocols and comparators."
+    },
+    {
+      "factor": "Cocaine",
+      "outcome": "locomotor activity",
+      "context": {
+        "drugs": [
+          "Cocaine"
+        ],
+        "species": [
+          "rats"
+        ],
+        "species_source": "sentence",
+        "regions": [],
+        "temperatures": [
+          "22°C"
+        ],
+        "doses": [
+          "5mg/kg"
+        ],
+        "routes": [
+          "intraperitoneal"
+        ],
+        "conditions": [],
+        "comparators": [
+          "saline controls"
+        ],
+        "ambiguous_conditions": false,
+        "strains": [],
+        "sex": [],
+        "time_windows": []
+      },
+      "paper_count": 2,
+      "direction_counts": {
+        "no_detected_change": 2
+      },
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "Cocaine",
+          "outcome": "locomotor activity",
+          "direction": "no_detected_change",
+          "evidence": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "Cocaine"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 8,
+          "paper_title": "Synthetic cocaine locomotion experiment 8 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "Cocaine",
+          "outcome": "locomotor activity",
+          "direction": "no_detected_change",
+          "evidence": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "Cocaine did not alter locomotor activity in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "Cocaine"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 7,
+          "paper_title": "Synthetic cocaine locomotion experiment 7 in rats"
+        }
+      ],
+      "minority_directions": [],
+      "interpretation": "Descriptive agreement among matching reported contexts, not a meta-analysis. Minority directions are not statistical outliers; verify protocols and comparators."
+    }
+  ],
+  "related_outcomes": [
+    {
+      "outcome": "body temperature",
+      "paper_count": 5,
+      "direction_counts": {
+        "increase": 4,
+        "decrease": 1
+      },
+      "findings": [
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 30°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 30°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "30°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 5,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 5 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "decrease",
+          "evidence": "MDMA decreased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA decreased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 4,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 4 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 3,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 3 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 2,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 2 in rats"
+        },
+        {
+          "id": "finding-1",
+          "factor": "MDMA",
+          "outcome": "body temperature",
+          "direction": "increase",
+          "evidence": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "source": "abstract",
+          "clause": "MDMA increased body temperature in rats at 22°C after 5 mg/kg intraperitoneal administration compared with saline controls.",
+          "context": {
+            "drugs": [
+              "MDMA"
+            ],
+            "species": [
+              "rats"
+            ],
+            "species_source": "sentence",
+            "regions": [],
+            "temperatures": [
+              "22°C"
+            ],
+            "doses": [
+              "5mg/kg"
+            ],
+            "routes": [
+              "intraperitoneal"
+            ],
+            "conditions": [],
+            "comparators": [
+              "saline controls"
+            ],
+            "ambiguous_conditions": false,
+            "strains": [],
+            "sex": [],
+            "time_windows": []
+          },
+          "comparison_eligible": true,
+          "interpretation": "Reported direction only; no effect-size or significance inference.",
+          "paper_id": 1,
+          "paper_title": "Synthetic MDMA thermoregulation experiment 1 in rats"
+        }
+      ],
+      "comparison_level": "different_contexts",
+      "interpretation": "Shared outcome across different experiments; directions are not directly comparable."
+    }
+  ],
+  "links": [
+    {
+      "factor": "mdma",
+      "outcome": "body temperature",
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic MDMA thermoregulation experiment 5 in rats",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        },
+        {
+          "id": 4,
+          "title": "Synthetic MDMA thermoregulation experiment 4 in rats",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        },
+        {
+          "id": 3,
+          "title": "Synthetic MDMA thermoregulation experiment 3 in rats",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        },
+        {
+          "id": 2,
+          "title": "Synthetic MDMA thermoregulation experiment 2 in rats",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        },
+        {
+          "id": 1,
+          "title": "Synthetic MDMA thermoregulation experiment 1 in rats",
+          "evidence": "We examined the effect of MDMA on body temperature in rats.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        }
+      ],
+      "kind": "effect",
+      "negated": false,
+      "relation_label": "Research question"
+    },
+    {
+      "factor": "cocaine",
+      "outcome": "locomotor activity",
+      "items": [
+        {
+          "id": 8,
+          "title": "Synthetic cocaine locomotion experiment 8 in rats",
+          "evidence": "We examined the effect of cocaine on locomotor activity.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        },
+        {
+          "id": 7,
+          "title": "Synthetic cocaine locomotion experiment 7 in rats",
+          "evidence": "We examined the effect of cocaine on locomotor activity.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        }
+      ],
+      "kind": "effect",
+      "negated": false,
+      "relation_label": "Research question"
+    },
+    {
+      "factor": "ambient temperature",
+      "outcome": "dopamine release",
+      "items": [
+        {
+          "id": 11,
+          "title": "Temperature effects on dopamine release",
+          "evidence": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        }
+      ],
+      "kind": "effect",
+      "negated": false,
+      "relation_label": "Research question"
+    },
+    {
+      "factor": "ambient temperature",
+      "outcome": "locomotor activity",
+      "items": [
+        {
+          "id": 10,
+          "title": "Ambient temperatures and locomotor activity",
+          "evidence": "We investigated whether ambient temperature alters locomotor activity.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        }
+      ],
+      "kind": "test",
+      "negated": false,
+      "relation_label": "Research question"
+    },
+    {
+      "factor": "ambient temperature",
+      "outcome": "methamphetamine self-administration",
+      "items": [
+        {
+          "id": 9,
+          "title": "Ambient temperature and stimulant self-administration",
+          "evidence": "We examined the effect of ambient temperature on methamphetamine self-administration.",
+          "source": "abstract",
+          "confidence": "explicit",
+          "negated": false,
+          "relation_label": "Research question"
+        }
+      ],
+      "kind": "effect",
+      "negated": false,
+      "relation_label": "Research question"
+    }
+  ],
+  "goal_types": [
+    {
+      "kind": "effect",
+      "count": 9
+    },
+    {
+      "kind": "compare",
+      "count": 1
+    },
+    {
+      "kind": "test",
+      "count": 1
+    },
+    {
+      "kind": "unknown",
+      "count": 1
+    }
+  ],
+  "themes": [
+    {
+      "id": "temperature",
+      "label": "Temperature",
+      "count": 8
+    },
+    {
+      "id": "mdma",
+      "label": "MDMA",
+      "count": 5
+    },
+    {
+      "id": "cognition",
+      "label": "Cognition & behaviour",
+      "count": 4
+    },
+    {
+      "id": "cocaine",
+      "label": "Cocaine",
+      "count": 2
+    },
+    {
+      "id": "dopamine",
+      "label": "Dopamine",
+      "count": 1
+    },
+    {
+      "id": "self_administration",
+      "label": "Self-administration",
+      "count": 1
+    },
+    {
+      "id": "methamphetamine",
+      "label": "Methamphetamine",
+      "count": 1
+    }
+  ],
+  "coverage": {
+    "papers": 12,
+    "explicit_aim": 11,
+    "title_focus": 0,
+    "unavailable": 1,
+    "with_findings": 8,
+    "with_relationships": 10
+  },
+  "insights": {
+    "single_paper_outcomes": [
+      "dopamine release",
+      "methamphetamine self-administration"
+    ],
+    "no_aim_found": [
+      "(untitled)"
+    ]
+  },
+  "limits": {
+    "scope_capped": false,
+    "max_items": 2000,
+    "no_abstract": 1,
+    "fulltext_scan_chars": 60000,
+    "findings_per_paper": 8,
+    "findings_capped": 0,
+    "result_interpretation": "Reported directions are extracted from abstracts and detected Results sections within the indexed-text scan. Compatible comparisons require matching stated drugs, species, temperatures, doses, routes, comparators and remaining detected context; papers reaching the finding limit are excluded. Shared-outcome groups span different experiments and are not direct comparisons. Counts are descriptive; minority directions are not statistical outliers and missing extraction is not evidence of no effect.",
+    "interpretation": "Explicit aims come from abstracts, introductions and unheaded introductory text within the first 60000 indexed characters; explicit retrospective statements of study purpose may also come from Discussion or Conclusion sections. A title-derived focus is labelled separately and is not an invented aim. Relationships are stated links, not proof of causation; papers without a valid pair remain in the atlas."
+  }
+}
