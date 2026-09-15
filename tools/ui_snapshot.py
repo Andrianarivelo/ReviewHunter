@@ -148,7 +148,7 @@ async def check_insights(cdp: "CDP", args: argparse.Namespace, out: Path) -> dic
       const repeat = InsightLayouts.forceLayout(nodes,edges);
       return {nodes:layout.length,seconds:(performance.now()-started)/1000,
         finite:layout.every(n => Number.isFinite(n.x) && Number.isFinite(n.y)),
-        inside:layout.every(n => n.x>=0 && n.x<=1000 && n.y>=0 && n.y<=650),
+        inside:layout.every(n => n.x>=0 && n.x<=1000 && n.y>=0 && n.y<=InsightLayouts.graphHeight(nodes.length)),
         deterministic:JSON.stringify(layout)===JSON.stringify(repeat)};
     })()""")
     if not all(report["stress_layout"][key] for key in ("finite", "inside", "deterministic")):

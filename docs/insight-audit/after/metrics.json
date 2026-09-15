@@ -1,0 +1,269 @@
+{
+  "synthetic": true,
+  "cases": {
+    "concepts-evidence-light-desktop": {
+      "viewport": [
+        1600,
+        900
+      ],
+      "totalPlotLabels": 16,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 16,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 11.3,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 868,
+      "plotIntrinsicWidth": 868,
+      "contentVerticalScroll": false,
+      "clippedControls": [],
+      "evidenceVisible": true,
+      "labelSamples": [
+        "temperature",
+        "3",
+        "ambient temperature",
+        "3",
+        "cognition",
+        "1",
+        "working memory",
+        "1"
+      ]
+    },
+    "words-dark-desktop": {
+      "viewport": [
+        1600,
+        900
+      ],
+      "totalPlotLabels": 16,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 16,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 13.6,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1308,
+      "plotIntrinsicWidth": 1308,
+      "contentVerticalScroll": false,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "ambient",
+        "temperature",
+        "ambient temperature",
+        "attention",
+        "dopamine",
+        "dopamine release",
+        "male",
+        "memory"
+      ]
+    },
+    "goals-light-laptop": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "totalPlotLabels": 10,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 10,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 12.9,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "FACTORS",
+        "OUTCOMES",
+        "ambient temperature",
+        "3 papers",
+        "dopamine release",
+        "1 paper",
+        "locomotor activity",
+        "1 paper"
+      ]
+    },
+    "methods-light-laptop": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "totalPlotLabels": 59,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 43,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 11.9,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "PAPER",
+        "Subjects & models",
+        "Study design",
+        "Manipulations",
+        "Measurements",
+        "Analyses",
+        "Human working memory and",
+        "visual attention"
+      ]
+    },
+    "heatmap-dark-desktop": {
+      "viewport": [
+        1600,
+        900
+      ],
+      "totalPlotLabels": 111,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 111,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 13.9,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1308,
+      "plotIntrinsicWidth": 1308,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "METHOD PREVALENCE",
+        "\u25cf Methods section    \u25d0 Repeated body text    \u25cb Author-stated    \u00b7 Not detected",
+        "Environmental manipulation",
+        "3",
+        "ANOVA",
+        "2",
+        "Rats",
+        "2"
+      ]
+    },
+    "gaps-dark-laptop": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "totalPlotLabels": 59,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 7,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 11.9,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "2021 \u00b7 methods section",
+        "Intravenous drug",
+        "delivery",
+        "Behavioural training /",
+        "conditioning",
+        "Drug",
+        "self-administration"
+      ]
+    },
+    "stress-1": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "totalPlotLabels": 2,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 2,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 11.8,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": false,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "Synthetic concept 0",
+        "1"
+      ]
+    },
+    "stress-80": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "totalPlotLabels": 160,
+      "allLabelOverlaps": 0,
+      "visiblePlotLabels": 72,
+      "labelOverlaps": 0,
+      "overlapExamples": [],
+      "clippedSvgLabels": [],
+      "minLabelPixels": 14,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "Synthetic concept 2",
+        "3",
+        "Synthetic concept 3",
+        "Synthetic concept 5",
+        "2",
+        "Synthetic concept 7",
+        "4",
+        "Synthetic concept 10"
+      ]
+    }
+  },
+  "synthetic_logic_checks": {
+    "signedBars": true,
+    "barGeometry": [
+      {
+        "score": 2,
+        "x": 615,
+        "width": 255
+      },
+      {
+        "score": 0,
+        "x": 615,
+        "width": 0
+      },
+      {
+        "score": -2,
+        "x": 360,
+        "width": 255
+      }
+    ],
+    "phraseFilter": true,
+    "themeToggle": true,
+    "goalEvidence": true
+  }
+}

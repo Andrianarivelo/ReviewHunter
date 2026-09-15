@@ -74,6 +74,11 @@ These are agent-audited development annotations, pending independent human revie
 estimates. The expanded 100-method taxonomy includes additional methods that are explicitly unscored.
 CSV decisions, annotation evidence, and PDF/PNG/SVG figures make that tradeoff inspectable.
 
+The [screenshot audit](docs/insight-audit/README.md) compares laptop and desktop layouts in both
+themes, including evidence panels and an 80-node stress case. Version 2.3.1 improves label wrapping,
+contrast, plot sizing and reporting denominators, and corrects negative-result and trial-design
+detections. Reporting checks distinguish unavailable text from an assessed paper with no detection.
+
 ### First steps
 
 1. Double-click the **ReviewHunter** shortcut (or `ReviewHunter.bat`). The app opens at `http://127.0.0.1:8765`.

@@ -1,0 +1,223 @@
+{
+  "synthetic": true,
+  "cases": {
+    "concepts-evidence-light-desktop": {
+      "viewport": [
+        1600,
+        900
+      ],
+      "visiblePlotLabels": 16,
+      "labelOverlaps": 0,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 8.7,
+      "labelsBelow11px": 8,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 868,
+      "plotIntrinsicWidth": 868,
+      "contentVerticalScroll": false,
+      "clippedControls": [],
+      "evidenceVisible": true,
+      "labelSamples": [
+        "temperature",
+        "3",
+        "ambient temperature",
+        "3",
+        "cognition",
+        "1",
+        "working memory",
+        "1"
+      ]
+    },
+    "words-dark-desktop": {
+      "viewport": [
+        1600,
+        900
+      ],
+      "visiblePlotLabels": 15,
+      "labelOverlaps": 0,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 54.2,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1308,
+      "plotIntrinsicWidth": 1308,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "ambient",
+        "temperature",
+        "ambient temperature",
+        "measured",
+        "attention",
+        "dopamine",
+        "male",
+        "memory"
+      ]
+    },
+    "goals-light-laptop": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "visiblePlotLabels": 10,
+      "labelOverlaps": 0,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 10.7,
+      "labelsBelow11px": 4,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "FACTORS",
+        "OUTCOMES",
+        "ambient temperature",
+        "3 papers",
+        "dopamine release",
+        "1 papers",
+        "locomotor activity",
+        "1 papers"
+      ]
+    },
+    "methods-light-laptop": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "visiblePlotLabels": 43,
+      "labelOverlaps": 0,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 10,
+      "labelsBelow11px": 26,
+      "documentOverflow": false,
+      "plotHorizontalScroll": true,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1150,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "PAPER / EVIDENCE COVERAGE",
+        "Subjects & models",
+        "Study design",
+        "Manipulations",
+        "Measurements",
+        "Analyses",
+        "Human working memory and visu\u2026",
+        "al attention"
+      ]
+    },
+    "heatmap-dark-desktop": {
+      "viewport": [
+        1600,
+        900
+      ],
+      "visiblePlotLabels": 22,
+      "labelOverlaps": 0,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 14.4,
+      "labelsBelow11px": 0,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1308,
+      "plotIntrinsicWidth": 1308,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "Papers \u00d7 methods \u00b7 columns ordered by prevalence",
+        "Environmental manipulation",
+        "ANOVA",
+        "Rats",
+        "Body temperature / thermor\u2026",
+        "Behavioural training / con\u2026",
+        "Intravenous drug delivery",
+        "Systemic drug administrati\u2026"
+      ]
+    },
+    "gaps-dark-laptop": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "visiblePlotLabels": 11,
+      "labelOverlaps": 0,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 10,
+      "labelsBelow11px": 8,
+      "documentOverflow": false,
+      "plotHorizontalScroll": true,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1150,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "Ambient temperature and stimu\u2026",
+        "lant self-administration",
+        "2021 \u00b7 methods section",
+        "Rats",
+        "Not detected",
+        "Environmental manipula\u2026",
+        "Intravenous drug deliv\u2026",
+        "Behavioural training /\u2026"
+      ]
+    },
+    "stress-1": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "visiblePlotLabels": 2,
+      "labelOverlaps": 0,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 10.7,
+      "labelsBelow11px": 1,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "Synthetic concept 0",
+        "1"
+      ]
+    },
+    "stress-80": {
+      "viewport": [
+        1366,
+        768
+      ],
+      "visiblePlotLabels": 122,
+      "labelOverlaps": 30,
+      "clippedSvgLabels": [],
+      "minLabelPixels": 10.7,
+      "labelsBelow11px": 63,
+      "documentOverflow": false,
+      "plotHorizontalScroll": false,
+      "plotVisibleWidth": 1074,
+      "plotIntrinsicWidth": 1074,
+      "contentVerticalScroll": true,
+      "clippedControls": [],
+      "evidenceVisible": false,
+      "labelSamples": [
+        "Synthetic concept 0",
+        "1",
+        "Synthetic concept 1",
+        "2",
+        "Synthetic concept 2",
+        "3",
+        "Synthetic concept 3",
+        "4"
+      ]
+    }
+  }
+}

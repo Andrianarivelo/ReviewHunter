@@ -24,6 +24,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&display=swap" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="stylesheet" href="/static/app.css">
+  <link rel="stylesheet" href="/static/insights.css">
   <script src="/static/vendor/citeproc.js"></script>
   <script src="/static/js/citations.js"></script>
   <script src="/static/js/api.js"></script>
@@ -327,7 +328,7 @@
         <div><div class="rail-label">Insight maps</div><h1 class="font-serif" x-text="insightTitle()"></h1><p x-text="insightDescription()"></p></div>
         <div class="insight-export" x-data="{open:false}" @click.outside="open=false">
           <button class="action-secondary" @click="open=!open" :disabled="insight.loading || !insightHasData()">Export ▾</button>
-          <div x-show="open" class="insight-export-menu"><template x-for="format in ['png','csv','json']" :key="format"><button @click="exportInsight(format); open=false" x-text="format==='png' ? 'PNG · current view' : format.toUpperCase() + ' · complete data'"></button></template></div>
+          <div x-show="open" class="insight-export-menu"><template x-for="format in ['png','csv','json']" :key="format"><button @click="exportInsight(format); open=false" x-text="format==='png' ? 'PNG · current view' : format.toUpperCase() + ' · map data'"></button></template></div>
         </div>
       </header>
       <div class="insight-scope-bar">
@@ -341,6 +342,8 @@
         <div x-show="insight.error" class="insight-notice" role="alert"><span x-text="insight.error"></span> <button @click="loadInsight()">Retry</button></div>
         <div x-show="!insight.loading &amp;&amp; !insight.error &amp;&amp; !insightHasData()" class="insight-empty"><h2 class="font-serif">No evidence to map yet</h2><p>Add abstracts, keywords or indexed PDFs, or choose a different scope.</p></div>
         <div x-show="!insight.loading &amp;&amp; insightHasData()">
+          <div class="insight-summary" aria-label="Map overview"><template x-for="(stat,i) in insightSummary()" :key="i"><div><strong x-text="stat.value"></strong><span x-text="stat.label"></span><button x-show="stat.action" @click="scrollInsightReporting()">Review reporting ↓</button></div></template></div>
+          <div class="insight-limits" x-show="insightLimits()"><strong>Text coverage</strong><span x-text="insightLimits()"></span></div>
           <div class="insight-tools" x-show="insight.kind==='concepts'">
             <span>Node size: papers · Links: co-occurrence</span>
             <label>Zoom <input aria-label="Map zoom" type="range" min="1" max="2.4" step="0.1" x-model.number="insight.zoom"></label>
@@ -349,8 +352,9 @@
           <div class="insight-tools" x-show="insight.kind==='words'">
             <div class="insight-segment"><button @click="insight.view='cloud'; renderInsight()" :class="{'active':insight.view==='cloud'}">Cloud</button><button @click="insight.view='bars'; renderInsight()" :class="{'active':insight.view==='bars'}">Ranked bars</button></div>
             <select aria-label="Word source" x-model="insight.source" @change="loadInsight()"><option value="abstract">Abstracts</option><option value="fulltext">Full text</option></select>
+            <select aria-label="Word terms" x-model="insight.terms" @change="renderInsight()"><option value="all">All terms</option><option value="phrases">Phrases</option><option value="words">Single words</option></select>
             <select aria-label="Word metric" x-model="insight.metric" @change="renderInsight()"><option value="count">Frequency</option><option value="distinct" :disabled="!insight.data.scope?.comparison_available">Distinctiveness</option></select>
-            <span x-show="insight.metric==='distinct'">Log-odds vs the rest of the library; cloud shows positive values.</span>
+            <span x-show="insight.metric==='distinct'">Among frequent terms, compared with the rest of the library. Negative = less distinctive.</span>
           </div>
           <div class="insight-tools" x-show="insight.kind==='methods'">
             <div class="insight-segment"><button @click="insight.methodView='pipeline'; renderInsight()" :class="{'active':insight.methodView==='pipeline'}">Paper pipelines</button><button @click="insight.methodView='matrix'; renderInsight()" :class="{'active':insight.methodView==='matrix'}">Methods heatmap</button></div>
@@ -359,20 +363,19 @@
           <div class="insight-goal-types" x-show="insight.kind==='goals'"><template x-for="type in (insight.data.goal_types || [])" :key="type.kind"><span><b x-text="type.count"></b> <span x-text="goalType(type.kind)"></span></span></template></div>
           <div class="insight-legend" x-show="insight.kind==='concepts'"><template x-for="cluster in (insight.data.clusters || [])" :key="cluster.id"><button @click="insight.cluster=insight.cluster===cluster.id ? null : cluster.id; renderInsight()" :class="{'active': insight.cluster===cluster.id}" :style="'--cluster-color:' + ['#0891b2','#8b5cf6','#d97706','#10b981','#e05d8b','#527de3','#a48544'][cluster.id%7]"><i></i><span x-text="cluster.label"></span><b x-text="cluster.size"></b></button></template></div>
           <div class="insight-visual card" :class="{'insight-wide':insight.kind==='methods'}">
-            <svg id="insight-svg" xmlns="http://www.w3.org/2000/svg" :view-box.camel="'0 0 ' + insight.width + ' ' + insight.height" :style="'width:' + (insight.kind==='concepts' ? insight.zoom*100+'%' : '100%') + ';min-width:' + (insight.kind==='methods' ? insight.width+'px' : '0')" role="group" :aria-label="insightTitle() + ' interactive map'" @click="insightActivate($event)" @keydown.enter.prevent="insightActivate($event)" @keydown.space.prevent="insightActivate($event)" @mouseover="insightHover($event)" @mouseleave="insightHover($event,true)"><g x-html="insight.svg"></g></svg>
+            <svg id="insight-svg" xmlns="http://www.w3.org/2000/svg" :view-box.camel="'0 0 ' + insight.width + ' ' + insight.height" :style="insightChartStyle()" role="group" :aria-label="insightTitle() + ' interactive map'" @click="insightActivate($event)" @keydown.enter.prevent="insightActivate($event)" @keydown.space.prevent="insightActivate($event)" @mouseover="insightHover($event)" @mouseleave="insightHover($event,true)"><g x-html="insight.svg"></g></svg>
           </div>
           <div class="insight-pagination" x-show="insight.kind==='methods' &amp;&amp; insightPageCount()>1"><button @click="insightPage(-1)" :disabled="insight.page===0">Previous papers</button><span x-text="'Page ' + (insight.page+1) + ' of ' + insightPageCount()"></span><button @click="insightPage(1)" :disabled="insight.page+1>=insightPageCount()">Next papers</button></div>
           <section class="insight-diagnostics" x-show="insight.kind==='methods'">
             <div class="insight-diagnostics-title"><div><div class="rail-label">Evidence audit</div><h2 class="font-serif">Gaps &amp; rigour</h2></div><span x-text="(insight.data.scope?.items || 0) + ' papers assessed'"></span></div>
-            <p class="insight-caveat">These checks describe what was detected in available text. An absent statement does not prove a procedure was omitted. Stage order is a study framework, not an inferred experimental timeline.</p>
-            <div class="insight-diagnostic-grid"><div class="insight-reporting"><template x-for="check in (insight.data.checks || [])" :key="check.id"><button class="insight-check" @click="inspectReporting(check)"><span x-text="check.label"></span><b x-text="check.count + '/' + (insight.data.scope?.items || 0)"></b><i><em :style="'width:' + (100*check.count/Math.max(1,insight.data.scope?.items || 0)) + '%'"></em></i></button></template></div><div class="insight-gaps"><h3>Patterns to investigate</h3><template x-for="(gap,i) in (insight.data.insights?.gaps || [])" :key="i"><p><span>↗</span><span x-text="gap"></span></p></template><p x-show="!(insight.data.insights?.gaps || []).length">No structural gaps detected by these rules.</p></div></div>
+            <p class="insight-caveat">Counts describe the available text, not a quality score. A missing statement does not prove a procedure was omitted. The five stages organise methods; they do not reconstruct the experiment's timeline.</p>
+            <div class="insight-diagnostic-grid"><div class="insight-reporting"><template x-for="check in (insight.data.checks || [])" :key="check.id"><button class="insight-check" @click="inspectReporting(check)"><span x-text="check.label"></span><b x-text="check.count + '/' + (check.assessed ?? insight.data.scope?.items ?? 0)"></b><small x-show="check.unavailable" x-text="check.unavailable + ' without text'"></small><i><em :style="'width:' + (100*check.count/Math.max(1,check.assessed ?? insight.data.scope?.items ?? 0)) + '%'"></em></i></button></template></div><div class="insight-gaps"><h3>Patterns to investigate</h3><template x-for="(gap,i) in (insight.data.insights?.gaps || [])" :key="i"><p><span>↗</span><span x-text="gap"></span></p></template><p x-show="!(insight.data.insights?.gaps || []).length">No structural gaps detected by these rules.</p></div></div>
           </section>
           <section class="insight-aims card" x-show="insight.kind==='goals'">
             <h2 class="font-serif">Questions behind the links</h2>
             <p class="insight-caveat"><span x-text="(insight.data.insights?.single_paper_outcomes || []).length + ' outcomes linked to a single paper. '"></span><span x-text="(insight.data.insights?.no_aim_found || []).length + ' papers without a detectable aim.'"></span> An unconnected pair is not evidence of a research gap.</p>
             <template x-for="paper in (insight.data.papers || [])" :key="paper.id"><button class="insight-aim-row" @click="inspectGoalPaper(paper)"><span class="insight-aim-type" x-text="goalType(paper.goal_type)"></span><strong x-text="paper.title"></strong><span x-text="paper.aims?.[0]?.sentence || 'No explicit aim detected in available text.'"></span></button></template>
           </section>
-          <div class="insight-limits" x-show="insightLimits()"><strong>Coverage limits</strong><span x-text="insightLimits()"></span></div>
         </div>
       </div>
     </section>

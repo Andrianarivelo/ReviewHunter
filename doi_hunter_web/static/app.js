@@ -67,6 +67,7 @@ function app() {
       toggleDark() {
         this.dark = !this.dark;
         try { localStorage.dhDark = this.dark; } catch (e) { /* ignore */ }
+        if (this.virtual === 'graph') this.$nextTick(() => this.renderInsight());
       },
 
       toast(text, kind = 'info', ttl = 3500) {

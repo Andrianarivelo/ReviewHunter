@@ -60,6 +60,8 @@ indicated using used use based effect effects level levels group groups signific
 controls analysis analyses method methods approach findings finding may also however although whereas respectively
 et al fig figure table one two three first second three increase increased increases decrease decreased decreases
 higher lower high low large small total number rate rates mean means following respectively various different
+measure measured measuring receive received receiving examine examined examining perform performed performing
+conduct conducted conducting investigate investigated investigating evaluate evaluated evaluating assess assessed assessing
 """.split())
 
 _WORD_RX = re.compile(r"[A-Za-z][A-Za-z0-9\-']{1,}")
@@ -580,6 +582,9 @@ def goals(collection_id: Optional[int] = None, author: Optional[str] = None, tag
 
 _SEQUENCE_RX = re.compile(r"\b(?:first|then|subsequently|after training|on day \d+|finally)\b", re.I)
 _NEGATION_RX = re.compile(r"\b(?:not|never|without|no|neither)\b", re.I)
+_NULL_RESULT_RX = re.compile(
+    r"\b(?:no|not|without)\s+(?:(?:statistically|significant(?:ly)?|any|a|an|detectable|measurable)\s+)*"
+    r"(?:differences?|effects?|changes?|associations?|correlations?|evidence of an? effect)\b", re.I)
 
 
 def _sentence_at(text: str, start: int, end: int) -> str:
@@ -596,11 +601,24 @@ def _sentence_at(text: str, start: int, end: int) -> str:
 
 
 def _negated(text: str, hit: re.Match) -> bool:
-    """Reject explicit local absence rather than attributing the negated method."""
+    """Reject local absence, preserving subjects and assays named in null results.
+
+    This is a conservative lexical check, not grammatical parsing. A null result
+    such as 'no significant differences in rats' describes a result, and must
+    not remove the animals or the assay that produced it. Prefix negation in
+    'non-randomized' still denies the corresponding design/reporting cue.
+    """
     before = re.split(r"[.;,:\n]|\b(?:but|whereas)\b", text[max(0, hit.start() - 70):hit.start()])[-1]
+    if re.search(r"\b(?:non|un)[-\s]?$", before, re.I):
+        return True
+    # Remove only the negated result noun phrase, retaining any separate denial.
+    before = _NULL_RESULT_RX.sub("", before)
     after = text[hit.end():hit.end() + 65]
     return bool(_NEGATION_RX.search(before) or re.match(
-        r"\s+(?:was|were|is|are)\s+(?:not|never)\b|\s+(?:was|were)\s+(?:omitted|excluded)\b", after, re.I))
+        r"\s+(?:was|were|is|are)\s+(?:not|never)\s+"
+        r"(?:(?:actually|routinely|systematically)\s+)?(?:used|performed|conducted|employed|applied|included|"
+        r"recruited|required|obtained|sought|provided|reported|implemented|undertaken|available|carried out)\b|"
+        r"\s+(?:was|were)\s+(?:omitted|excluded)\b", after, re.I))
 
 
 def _detect_methods(text: str, confidence: str, seen: dict[str, dict], scale: int, min_count: int = 1) -> None:
@@ -649,7 +667,8 @@ def _reporting(text: str) -> list[dict]:
         if evidence_hit:
             ev = _sentence_at(text, evidence_hit.start(), evidence_hit.end())
         out.append({"id": chk["id"], "label": chk["label"], "found": bool(hit), "evidence": ev,
-                    "status": "detected" if hit else ("explicitly_absent" if candidates else "not_detected")})
+                    "status": "detected" if hit else ("explicitly_absent" if candidates else
+                              ("not_detected" if (text or "").strip() else "unavailable"))})
     return out
 
 
@@ -662,6 +681,7 @@ def methods(collection_id: Optional[int] = None, author: Optional[str] = None, t
     method_items: dict[str, list[int]] = defaultdict(list)
     stage_items: dict[str, set[int]] = defaultdict(set)
     check_totals: Counter = Counter()
+    check_absent: Counter = Counter()
     for it in items:
         t = texts[it["id"]]
         seen: dict[str, dict] = {}
@@ -669,7 +689,7 @@ def methods(collection_id: Optional[int] = None, author: Optional[str] = None, t
         if t["sections"].get("references"):
             body = body.replace(t["sections"]["references"], " ")
         methods_text = t["sections"].get("methods", "")
-        source = "methods section" if methods_text else ("full text" if body else ("abstract" if t["abstract"] else "none"))
+        source = "methods section" if methods_text else ("full text" if body.strip() else ("abstract" if t["abstract"].strip() else "none"))
         # Author-chosen text (abstract, methods section) counts from one mention; the whole body needs two,
         # so a method named once in the introduction or discussion of another study is not attributed here.
         _detect_methods(t["abstract"], "low", seen, max(1, len(t["abstract"])), min_count=1)
@@ -682,14 +702,17 @@ def methods(collection_id: Optional[int] = None, author: Optional[str] = None, t
         for d in detected:
             method_items[d["id"]].append(it["id"])
             stage_items[d["stage"]].add(it["id"])
-        checks = _reporting(body or t["abstract"])
+        checks = _reporting(body if body.strip() else t["abstract"])
         for c in checks:
             if c["found"]:
                 check_totals[c["id"]] += 1
+            if c["status"] == "explicitly_absent":
+                check_absent[c["id"]] += 1
         papers.append({**_item_brief(it), "source": source, "detected": detected, "pipeline": pipeline, "checks": checks,
                        "missing_stages": [slabel for sid, slabel in STAGES if not any(d["stage"] == sid for d in detected)]})
 
     n = len(items)
+    assessed = sum(1 for p in papers if p["source"] != "none")
     matrix_methods = sorted(method_items.items(), key=lambda kv: (-len(kv[1]), kv[0]))
     matrix = [{"id": mid, "label": next(m["label"] for m in METHODS if m["id"] == mid),
                "stage": next(m["stage"] for m in METHODS if m["id"] == mid), "items": ids, "share": round(len(ids) / max(1, n), 2)}
@@ -719,9 +742,11 @@ def methods(collection_id: Optional[int] = None, author: Optional[str] = None, t
     return {
         "scope": {"label": scope_label(collection_id, author, tag), "items": n, "collection_id": collection_id, "author": author, "tag": tag, "include_sub": include_sub},
         "stages": [{"id": sid, "label": slabel, "items": len(stage_items.get(sid, ()))} for sid, slabel in STAGES],
-        "papers": papers, "matrix": matrix, "checks": [{"id": c["id"], "label": c["label"], "count": check_totals.get(c["id"], 0)} for c in REPORTING_CHECKS],
+        "papers": papers, "matrix": matrix, "checks": [{"id": c["id"], "label": c["label"], "count": check_totals.get(c["id"], 0),
+            "assessed": assessed, "unavailable": n - assessed, "explicitly_absent": check_absent.get(c["id"], 0)} for c in REPORTING_CHECKS],
         "insights": {"gaps": gaps, "common": [m["label"] for m in common][:12], "rare": [m["label"] for m in rare][:12]},
         "limits": {"scope_capped": len(items) >= MAX_ITEMS, "max_items": MAX_ITEMS,
+                   "no_text": n - assessed,
                    "no_fulltext": sum(1 for p in papers if p["source"] in ("abstract", "none")),
                    "no_methods_section": sum(1 for p in papers if p["source"] != "methods section"),
                    "no_abstract": sum(1 for it in items if not texts[it["id"]]["abstract"].strip()),

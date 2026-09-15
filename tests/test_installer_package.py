@@ -26,6 +26,7 @@ REQUIRED_FILES = (
     "doi_hunter_web/catalog.py", "doi_hunter_web/metadata.py",
     "doi_hunter_web/insight.py", "doi_hunter_web/method_taxonomy.py",
     "doi_hunter_web/static/js/insights.js", "doi_hunter_web/static/index.html",
+    "doi_hunter_web/static/insights.css",
     "browser_extension/manifest.json", "browser_extension/src/core/pdf.js",
     "browser_extension/src/core/save.js", "browser_extension/src/core/handoff.js",
     "browser_extension/src/core/shadow.js", "browser_extension/src/shared/identifiers.js",

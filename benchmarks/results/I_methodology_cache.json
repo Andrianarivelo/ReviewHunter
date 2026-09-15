@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-09-15T10:37:28.853831+00:00",
+  "created_utc": "2026-09-15T10:55:37.150452+00:00",
   "dependencies": {
     "benchmarks/fixtures/methodology/annotations.json": "8b17595bd0b8ba509ee70486b9ebaecd112031cebc179f830a64ee98416ad279",
     "benchmarks/fixtures/methodology/baseline/insight.py": "a29ed73c8a8dde1d0e4b28744dec6309f3fcf9a76f847ca5adaead2741c96e9d",
     "benchmarks/fixtures/methodology/baseline/method_taxonomy.py": "dfcb716b278c6ac3325f50cb2068b2725872ce854d72035175467cbe9ff5a4a3",
-    "doi_hunter_web/insight.py": "38de8ea59aa74ad4d0ac57e2a811fe229579b02845b3c24c1279c19b5dce46c9",
-    "doi_hunter_web/method_taxonomy.py": "13576e8bcb8b890ec071620e66fa71ecc705c777bd81539beb91611ddfc6a88e",
+    "doi_hunter_web/insight.py": "7ac2d7025c0442d9a0f75008a2891313012b710f177c96f41698ccec7e553b84",
+    "doi_hunter_web/method_taxonomy.py": "3b28a0138e39a94fafb27512140dcee1f1318f0f4f61fe2e9cdbd760a2436743",
     "benchmark_numeric_functions": "5f1a4ea85231b6eb6b3c9d5bfb634d49941b05fe016ec1158127b4829ab94ce5"
   },
   "n_papers": 5,
@@ -199,13 +199,13 @@
     {
       "version": "baseline",
       "n_papers": 5,
-      "seconds": 0.6102525000023888,
+      "seconds": 0.6617626000079326,
       "protocol": "One local CPU call; descriptive timing, not a stable speed benchmark"
     },
     {
       "version": "current",
       "n_papers": 5,
-      "seconds": 0.22833900000841822,
+      "seconds": 0.2457927999930689,
       "protocol": "One local CPU call; descriptive timing, not a stable speed benchmark"
     }
   ],

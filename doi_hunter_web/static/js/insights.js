@@ -2,31 +2,59 @@
 (() => {
   'use strict';
   // Layout and visual parameters. No network libraries or build step are required.
-  const WIDTH = 1000, HEIGHT = 650, TICKS = 300, PAGE_SIZE = 18;
-  const COLORS = ['#0891b2', '#8b5cf6', '#d97706', '#10b981', '#e05d8b', '#527de3', '#a48544'];
+  const WIDTH = 1000, HEIGHT = 440, TICKS = 300, PAGE_SIZE = 18;
+  const COLORS = ['#087d93', '#7650bd', '#a75e08', '#07815f', '#ba416e', '#476cbd', '#8a702e'];
+  const DARK_COLORS = ['#51c6dc', '#b49aef', '#edb45d', '#5acead', '#e78caa', '#91aaf0', '#d9c385'];
   const STAGES = ['subjects', 'design', 'manipulation', 'measurement', 'analysis'];
   const KINDS = { concepts: 'Concepts', words: 'Words', goals: 'Goals', methods: 'Methodology' };
   const TYPES = { test: 'Test hypothesis', effect: 'Measure effect', mechanism: 'Mechanism', compare: 'Compare', develop: 'Develop method', review: 'Review', describe: 'Describe', unknown: 'No aim detected' };
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const clip = (v, n = 28) => String(v || '').length > n ? String(v).slice(0, n - 1) + '…' : String(v || '');
-  const color = i => COLORS[((Number(i) || 0) % COLORS.length + COLORS.length) % COLORS.length];
+  const color = i => (document.documentElement.classList.contains('dark') ? DARK_COLORS : COLORS)[((Number(i) || 0) % COLORS.length + COLORS.length) % COLORS.length];
   const stageColor = s => color(STAGES.indexOf(s));
   const text = (x, y, value, size = 13, attrs = '') => `<text x="${x}" y="${y}" font-size="${size}" ${attrs}>${esc(value)}</text>`;
   const title = value => `<title>${esc(value)}</title>`;
+  const paperCount = n => `${n} paper${n === 1 ? '' : 's'}`;
+  const graphHeight = count => count > 45 ? Math.max(650, count * 12) : HEIGHT;
   const csvCell = value => { const v = String(value ?? ''); return '"' + (typeof value === 'string' && /^[=+@\-\t\r]/.test(v) ? "'" : '') + v.replace(/"/g, '""') + '"'; };
+
+  /** Measure the same font used in SVG, wrapping at word boundaries without discarding names. */
+  function wrapText(value, width, size = 13, weight = 400) {
+    const context = document.createElement('canvas').getContext('2d');
+    context.font = `${weight} ${size}px Arial`;
+    const lines = [];
+    let line = '';
+    for (const word of String(value || '').split(/\s+/)) {
+      const candidate = line ? line + ' ' + word : word;
+      if (line && context.measureText(candidate).width > width) { lines.push(line); line = ''; }
+      if (context.measureText(word).width > width) {
+        // Exceptionally long identifiers can break at a character boundary, ordinary words cannot.
+        for (const letter of word) {
+          if (context.measureText(line + letter).width > width) { lines.push(line); line = ''; }
+          line += letter;
+        }
+      } else line = line ? line + ' ' + word : word;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+  function textLines(x, y, lines, size = 13, lineHeight = 17, attrs = '') {
+    return lines.map((line, index) => text(x, y + index * lineHeight, line, size, attrs)).join('');
+  }
 
   /** Deterministic velocity-Verlet integration with collision repulsion, springs and centering. */
   function forceLayout(raw, edges) {
+    const height = graphHeight(raw.length);
     const nodes = raw.map((n, i) => {
       const angle = i * 2.39996323, radius = 35 * Math.sqrt(i + 1);
-      return { ...n, x: WIDTH / 2 + Math.cos(angle) * radius, y: HEIGHT / 2 + Math.sin(angle) * radius,
+      return { ...n, x: WIDTH / 2 + Math.cos(angle) * radius, y: height / 2 + Math.sin(angle) * radius,
         vx: 0, vy: 0, ax: 0, ay: 0, r: 7 + Math.sqrt(n.count || 1) * 3 };
     });
     const byId = new Map(nodes.map(n => [n.id, n]));
     const springs = edges.map(e => ({ ...e, a: byId.get(e.source), b: byId.get(e.target) })).filter(e => e.a && e.b);
     for (let tick = 0; tick < TICKS; tick++) {
       const cooling = 0.3 + 0.7 * (1 - tick / TICKS);
-      for (const n of nodes) { n.x += n.vx + n.ax * .5; n.y += n.vy + n.ay * .5; n.vx += n.ax * .5; n.vy += n.ay * .5; n.ax = (WIDTH / 2 - n.x) * .0018; n.ay = (HEIGHT / 2 - n.y) * .0018; }
+      for (const n of nodes) { n.x += n.vx + n.ax * .5; n.y += n.vy + n.ay * .5; n.vx += n.ax * .5; n.vy += n.ay * .5; n.ax = (WIDTH / 2 - n.x) * .0018; n.ay = (height / 2 - n.y) * .0018; }
       for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j], dx = a.x - b.x || .1, dy = a.y - b.y || .1;
         const d2 = Math.max(25, dx * dx + dy * dy), d = Math.sqrt(d2);
@@ -41,7 +69,7 @@
       }
       for (const n of nodes) {
         n.vx = (n.vx + n.ax * .5) * .78 * cooling; n.vy = (n.vy + n.ay * .5) * .78 * cooling;
-        n.x = Math.max(75, Math.min(WIDTH - 75, n.x)); n.y = Math.max(40, Math.min(HEIGHT - 45, n.y));
+        n.x = Math.max(75, Math.min(WIDTH - 75, n.x)); n.y = Math.max(40, Math.min(height - 45, n.y));
       }
     }
     // Relax label rectangles after the physics settles. Labels must remain readable at 80 nodes.
@@ -54,13 +82,39 @@
         if (overlapX / requiredX < overlapY / 43) { const shift = Math.sign(dx) * overlapX * .52; a.x -= shift; b.x += shift; }
         else { const shift = Math.sign(dy) * overlapY * .52; a.y -= shift; b.y += shift; }
       }
-      for (const n of nodes) { n.x = Math.max(78, Math.min(WIDTH - 78, n.x)); n.y = Math.max(30, Math.min(HEIGHT - 50, n.y)); }
+      for (const n of nodes) { n.x = Math.max(78, Math.min(WIDTH - 78, n.x)); n.y = Math.max(30, Math.min(height - 50, n.y)); }
     }
     if (nodes.length > 1) {
       const minX = Math.min(...nodes.map(n => n.x)), maxX = Math.max(...nodes.map(n => n.x));
       const minY = Math.min(...nodes.map(n => n.y)), maxY = Math.max(...nodes.map(n => n.y));
-      const scale = Math.min(2.3, (WIDTH - 180) / Math.max(1, maxX - minX), (HEIGHT - 130) / Math.max(1, maxY - minY));
-      for (const n of nodes) { n.x = WIDTH / 2 + (n.x - (minX + maxX) / 2) * scale; n.y = HEIGHT / 2 - 10 + (n.y - (minY + maxY) / 2) * scale; }
+      const scale = Math.min(2.3, (WIDTH - 180) / Math.max(1, maxX - minX), (height - 110) / Math.max(1, maxY - minY));
+      for (const n of nodes) { n.x = WIDTH / 2 + (n.x - (minX + maxX) / 2) * scale; n.y = height / 2 - 10 + (n.y - (minY + maxY) / 2) * scale; }
+    }
+    // Place measured labels independently of the node centres. Crowded maps gain small leader lines.
+    const context = document.createElement('canvas').getContext('2d');
+    const size = nodes.length > 45 ? 13 : 16;
+    context.font = `${size}px Arial`;
+    const placed = [];
+    for (const node of nodes) {
+      const label = clip(node.label, nodes.length > 45 ? 21 : 32);
+      const width = context.measureText(label).width + 10;
+      const candidates = [{ x: node.x, y: node.y + node.r + 20 }, { x: node.x, y: node.y - node.r - 12 }];
+      for (let step = 0; step < 1200; step++) {
+        const angle = step * 2.39996323, radius = 12 + Math.sqrt(step) * 7;
+        candidates.push({ x: node.x + Math.cos(angle) * radius, y: node.y + Math.sin(angle) * radius });
+      }
+      for (let y = 22; y < height - 14; y += size + 7) {
+        for (let x = width / 2 + 8; x < WIDTH - width / 2 - 8; x += 14) candidates.push({ x, y });
+      }
+      for (const candidate of candidates) {
+        const box = { left: candidate.x - width / 2, right: candidate.x + width / 2, top: candidate.y - size, bottom: candidate.y + 5 };
+        if (box.left < 8 || box.right > WIDTH - 8 || box.top < 8 || box.bottom > height - 8) continue;
+        if (placed.some(other => box.left < other.right && box.right > other.left && box.top < other.bottom && box.bottom > other.top)) continue;
+        if (nodes.some(other => box.left < other.x + other.r + 3 && box.right > other.x - other.r - 3 && box.top < other.y + other.r + 3 && box.bottom > other.y - other.r - 3)) continue;
+        node.labelX = candidate.x; node.labelY = candidate.y;
+        placed.push(box); break;
+      }
+      if (node.labelX === undefined) { node.labelX = node.x; node.labelY = node.y + node.r + 20; }
     }
     return nodes;
   }
@@ -72,7 +126,7 @@
     const sorted = [...words].filter(w => score(w) > 0).sort((a, b) => score(b) - score(a) || a.word.localeCompare(b.word));
     const max = Math.max(1, ...sorted.map(score)), placed = [];
     for (const [i, w] of sorted.slice(0, 90).entries()) {
-      const size = 13 + 45 * Math.sqrt(score(w) / max);
+      const size = 15 + 32 * Math.sqrt(score(w) / max);
       ctx.font = `600 ${size}px Georgia`;
       const width = ctx.measureText(w.word).width + 12, height = size * 1.3;
       if (width > WIDTH - 30) continue;
@@ -97,11 +151,45 @@
   window.insightsPart = function insightsPart() {
     return {
       insight: { kind: 'concepts', loading: false, data: {}, scope: 'all', includeSub: true, source: 'abstract',
-        metric: 'count', view: 'cloud', methodView: 'pipeline', focus: '', cluster: null, selected: null,
+        metric: 'count', terms: 'all', view: 'cloud', methodView: 'pipeline', focus: '', cluster: null, selected: null,
         svg: '', height: HEIGHT, width: WIDTH, actions: [], nodes: [], page: 0, error: '', request: 0, zoom: 1 },
       insightKinds: Object.entries(KINDS).map(([id, label]) => ({ id, label })),
       insightTitle() { return KINDS[this.insight.kind]; },
       insightDescription() { return ({ concepts: 'Themes that connect your literature', words: 'The language of this body of work', goals: 'Factors, outcomes and the questions between them', methods: 'How the science was done, with evidence for every step' })[this.insight.kind]; },
+      insightWords() {
+        return (this.insight.data.words || []).filter(word => this.insight.terms === 'phrases' ? word.bigram : this.insight.terms === 'words' ? !word.bigram : true);
+      },
+      /** Plain-language orientation without inventing research conclusions from co-occurrence. */
+      insightSummary() {
+        const data = this.insight.data, total = data.scope?.items || 0;
+        if (this.insight.kind === 'concepts') {
+          const leading = [...(data.nodes || [])].sort((a, b) => b.count - a.count)[0];
+          return [{ value: data.nodes?.length || 0, label: 'concepts shown' }, { value: data.clusters?.length || 0, label: 'themes' },
+            { value: leading ? `${leading.count}/${total}` : '0', label: leading ? `papers share “${leading.label}”` : 'papers linked' }];
+        }
+        if (this.insight.kind === 'words') {
+          const terms = this.insightWords(), leading = terms[0];
+          return [{ value: terms.length, label: 'frequent terms' }, { value: this.insight.source === 'abstract' ? 'Abstracts' : 'Full text', label: 'text source' },
+            { value: leading?.count || 0, label: leading ? `occurrences of “${leading.word}”` : 'occurrences' }];
+        }
+        if (this.insight.kind === 'goals') return [
+          { value: (data.papers || []).filter(paper => paper.aims?.length).length + '/' + total, label: 'papers with explicit aims' },
+          { value: data.links?.length || 0, label: 'factor–outcome links' },
+          { value: data.insights?.single_paper_outcomes?.length || 0, label: 'outcomes in one paper' }];
+        return [{ value: (data.papers || []).filter(paper => paper.source === 'methods section').length + '/' + total, label: 'Methods sections available' },
+          { value: data.matrix?.length || 0, label: 'distinct methods detected' }, { value: data.checks?.length || 0, label: 'reporting checks', action: true }];
+      },
+      scrollInsightReporting() { document.querySelector('.insight-diagnostics')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
+      insightChartStyle() {
+        const state = this.insight;
+        const fitted = state.kind === 'concepts' || state.kind === 'words' && state.view === 'cloud';
+        if (fitted) {
+          const zoom = state.kind === 'concepts' ? state.zoom : 1;
+          if (state.nodes.length > 45) return `width:${zoom * 100}%;min-width:1000px;height:auto;`;
+          return `width:${zoom * 100}%;min-width:850px;height:calc(clamp(320px, 100vh - 370px, 500px) * ${zoom});`;
+        }
+        return `width:100%;min-width:${state.kind === 'methods' ? state.width : 850}px;`;
+      },
       insightScopeOptions() {
         const options = [{ value: 'all', label: 'Whole library' }, ...this.collections.map(c => ({ value: 'collection:' + c.id, label: 'Collection · ' + c.name }))];
         const authors = new Set([this.selectedAuthor, ...(this.facets?.authors || []).map(a => a.name)].filter(Boolean));
@@ -150,6 +238,8 @@
         const limits = this.insight.data.limits || {};
         const notes = Object.entries(limits).filter(([k, v]) => labels[k] && typeof v === 'number' && v > 0).map(([k, v]) => `${v} ${labels[k]}`);
         if (limits.scope_capped) notes.push(`Scope reached the ${limits.max_items || 2000}-paper analysis limit; narrow the scope for complete coverage.`);
+        if (limits.no_text) notes.push(`${limits.no_text} without assessable text`);
+        if (limits.fulltext_scan_chars) notes.push(`Goal search reads up to ${Number(limits.fulltext_scan_chars).toLocaleString()} indexed characters per paper.`);
         return notes.join(' · ');
       },
       insightHasData() { const d = this.insight.data; return !!(d.nodes?.length || d.words?.length || d.papers?.length); },
@@ -186,6 +276,7 @@
       },
       conceptSVG() {
         const s = this.insight, nodes = s.nodes.filter(n => s.cluster === null || n.cluster === s.cluster), byId = new Map(nodes.map(n => [n.id, n]));
+        s.height = graphHeight(s.nodes.length);
         let svg = '';
         for (const e of s.data.edges || []) {
           const a = byId.get(e.source), b = byId.get(e.target); if (!a || !b) continue;
@@ -193,78 +284,175 @@
         }
         for (const n of nodes) {
           const action = this.insightAction({ label: n.label, items: n.items || [], evidence: n.evidence || [], related: n.related || [], count: n.count });
-          svg += `<g class="insight-node" data-node="${esc(n.id)}" ${action}>${title(n.label + ' · ' + n.count + ' papers')}<circle cx="${n.x}" cy="${n.y}" r="${n.r + 6}" fill="${color(n.cluster)}" opacity=".1"/><circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${color(n.cluster)}"/>${text(n.x, n.y + n.r + 18, clip(n.label, nodes.length > 45 ? 21 : 32), nodes.length > 45 ? 11 : 13, 'text-anchor="middle" class="insight-label"')}${text(n.x, n.y + 4, n.count, 10, 'text-anchor="middle" fill="white"')}</g>`;
+          const labelX = n.labelX ?? n.x, labelY = n.labelY ?? n.y + n.r + 20;
+          const leader = Math.abs(labelX - n.x) > 6 || labelY < n.y ? `<line x1="${n.x}" y1="${n.y}" x2="${labelX}" y2="${labelY - 7}" stroke="${color(n.cluster)}" opacity=".4"/>` : '';
+          svg += `<g class="insight-node" data-node="${esc(n.id)}" ${action}>${title(n.label + ' · ' + paperCount(n.count))}${leader}<circle cx="${n.x}" cy="${n.y}" r="${n.r + 6}" fill="${color(n.cluster)}" opacity=".1"/><circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${color(n.cluster)}"/>${text(labelX, labelY, clip(n.label, nodes.length > 45 ? 21 : 32), nodes.length > 45 ? 13 : 16, 'text-anchor="middle" class="insight-label"')}${text(n.x, n.y + 4.5, n.count, 13, `text-anchor="middle" fill="${document.documentElement.classList.contains('dark') ? '#101522' : '#ffffff'}"`)}</g>`;
         }
         return svg;
       },
+      /** Signed values use a shared zero axis; frequency and distinctiveness never share an encoding. */
       wordSVG() {
-        const s = this.insight, words = s.data.words || [], detail = w => ({ label: w.word, count: w.n_items, items: (w.items || []).map(id => s.data.items?.[id]).filter(Boolean), evidence: w.evidence || [] });
-        if (s.view === 'bars') {
-          const sorted = [...words].sort((a, b) => s.metric === 'distinct' ? b.distinct - a.distinct : b.count - a.count).slice(0, 50);
-          s.height = Math.max(HEIGHT, sorted.length * 34 + 40);
-          const max = Math.max(1, ...sorted.map(w => s.metric === 'distinct' ? Math.abs(w.distinct) : w.count));
-          return sorted.map((w, i) => {
-            const v = s.metric === 'distinct' ? w.distinct : w.count, y = 20 + i * 34, negative = v < 0;
-            return `<g class="insight-node" ${this.insightAction(detail(w))}>${title(`${w.word}: ${w.count} occurrences, log-odds ${w.distinct}`)}${text(20, y + 19, clip(w.word, 33))}<rect x="300" y="${y + 3}" width="${Math.max(2, Math.abs(v) / max * 540)}" height="20" rx="4" fill="${negative ? '#a78bfa' : color(i % 4)}" opacity=".7"/>${text(865, y + 19, s.metric === 'distinct' ? v.toFixed(2) : v)}</g>`;
-          }).join('');
+        const state = this.insight;
+        const words = this.insightWords();
+        const detail = word => ({ label: word.word, count: word.n_items,
+          items: (word.items || []).map(id => state.data.items?.[id]).filter(Boolean), evidence: word.evidence || [] });
+        if (state.view === 'bars') {
+          const distinct = state.metric === 'distinct';
+          const sorted = [...words].sort((a, b) => distinct ? b.distinct - a.distinct : b.count - a.count).slice(0, 50);
+          const max = Math.max(1, ...sorted.map(word => distinct ? Math.abs(word.distinct) : word.count));
+          const zero = distinct ? 615 : 320;
+          const range = distinct ? 255 : 560;
+          state.height = Math.max(220, sorted.length * 36 + 90);
+          let svg = text(20, 27, 'TERM', 12, 'font-weight="600"') +
+            text(935, 27, distinct ? 'LOG-ODDS' : 'COUNT', 12, 'text-anchor="end" font-weight="600"');
+          if (distinct) svg += text(360, 48, 'Less distinctive', 12) + text(725, 48, 'More distinctive', 12);
+          svg += `<line x1="${zero}" y1="55" x2="${zero}" y2="${state.height - 20}" stroke="currentColor" opacity=".3"/>`;
+          sorted.forEach((word, index) => {
+            const value = distinct ? word.distinct : word.count;
+            const length = Math.abs(value) / max * range;
+            const x = value < 0 ? zero - length : zero;
+            const y = 68 + index * 36;
+            svg += `<g class="insight-node" data-score="${value}" ${this.insightAction(detail(word))}>` +
+              title(`${word.word}: ${word.count} occurrences in ${paperCount(word.n_items)}; log-odds ${word.distinct}`) +
+              text(20, y + 18, clip(word.word, 35), 14) +
+              `<rect class="insight-word-bar" x="${x}" y="${y}" width="${length}" height="24" rx="4" fill="${color(value < 0 ? 1 : 0)}" opacity=".78"/>` +
+              text(935, y + 18, distinct ? (value > 0 ? '+' : '') + value.toFixed(2) : value, 13, 'text-anchor="end"') + '</g>';
+          });
+          return svg;
         }
-        const placed = wordLayout(words, s.metric);
-        return placed.map((w, i) => `<g class="insight-node" ${this.insightAction(detail(w))}>${title(`${w.count} occurrences · ${w.n_items} papers · log-odds ${w.distinct}`)}${text(w.x, w.y, w.word, w.size, `text-anchor="middle" dominant-baseline="central" font-family="Georgia,serif" font-weight="600" fill="${color(i % 6)}"`)}</g>`).join('') + text(20, HEIGHT - 6, `${placed.length} of ${words.length} terms placed. Ranked bars show signed distinctiveness.`, 11, 'opacity=".65"');
+        const placed = wordLayout(words, state.metric);
+        if (!placed.length) return text(50, 120, 'No positive distinctive terms in this view. Try ranked bars or another scope.', 16);
+        return placed.map(word => `<g class="insight-node" ${this.insightAction(detail(word))}>` +
+          title(`${word.count} occurrences · ${paperCount(word.n_items)} · log-odds ${word.distinct}`) +
+          text(word.x, word.y, word.word, word.size, `text-anchor="middle" dominant-baseline="central" font-family="Georgia,serif" font-weight="600" fill="${color(word.bigram ? 0 : 1)}"`) + '</g>').join('') +
+          text(20, HEIGHT - 8, `${placed.length} of ${words.length} frequent terms shown. Colour: phrases / single words.`, 12, 'opacity=".8"');
       },
+
+      /** Pair evidence belongs to the selected relation, including title-derived goals. */
       goalSVG() {
-        const s = this.insight, d = s.data, factors = d.factors || [], outcomes = d.outcomes || [];
-        s.height = Math.max(HEIGHT, Math.max(factors.length, outcomes.length) * 60 + 75);
-        const fy = new Map(factors.map((n, i) => [n.id, 75 + i * 60])), oy = new Map(outcomes.map((n, i) => [n.id, 75 + i * 60]));
-        let svg = text(20, 30, 'FACTORS', 12, 'letter-spacing="2" opacity=".65"') + text(725, 30, 'OUTCOMES', 12, 'letter-spacing="2" opacity=".65"');
-        for (const l of d.links || []) {
-          const y1 = fy.get(l.factor), y2 = oy.get(l.outcome); if (y1 === undefined || y2 === undefined) continue;
-          const action = this.insightAction({ label: l.factor + ' → ' + l.outcome, items: l.items, evidence: l.items.map(p => ({ id: p.id, sentence: p.evidence })) });
-          const path = `M 270 ${y1} C 435 ${y1},565 ${y2},715 ${y2}`;
-          svg += `<g class="insight-goal-link" ${action}>${title(`${l.factor} → ${l.outcome}: ${l.items.length} papers`)}<path d="${path}" fill="none" stroke="transparent" stroke-width="18"/><path d="${path}" fill="none" stroke="${color(0)}" opacity=".45" stroke-width="${2 + Math.sqrt(l.items.length) * 2}"/></g>`;
+        const state = this.insight;
+        const data = state.data;
+        const factors = data.factors || [], outcomes = data.outcomes || [];
+        const rows = Math.max(factors.length, outcomes.length);
+        state.height = Math.max(225, rows * 86 + 85);
+        const positions = nodes => new Map(nodes.map((node, index) => [node.id, 83 + index * 86 + Math.max(0, rows - nodes.length) * 43]));
+        const factorY = positions(factors), outcomeY = positions(outcomes);
+        let svg = text(25, 28, 'FACTORS', 13, 'letter-spacing="1.5" font-weight="600"') +
+          text(730, 28, 'OUTCOMES', 13, 'letter-spacing="1.5" font-weight="600"');
+        for (const link of data.links || []) {
+          const y1 = factorY.get(link.factor), y2 = outcomeY.get(link.outcome);
+          if (y1 === undefined || y2 === undefined) continue;
+          const action = this.insightAction({ label: link.factor + ' → ' + link.outcome,
+            items: link.items, evidence: link.items.map(paper => ({ id: paper.id, sentence: paper.evidence, source: 'Stated research question' })) });
+          const path = `M 292 ${y1} C 435 ${y1},565 ${y2},710 ${y2}`;
+          svg += `<g class="insight-goal-link" ${action}>${title(`${link.factor} → ${link.outcome}: ${paperCount(link.items.length)}`)}` +
+            `<path d="${path}" fill="none" stroke="transparent" stroke-width="20"/>` +
+            `<path d="${path}" fill="none" stroke="${color(0)}" opacity=".68" stroke-width="${2 + Math.sqrt(link.items.length) * 2}"/></g>`;
         }
-        for (const [nodes, positions, x] of [[factors, fy, 20], [outcomes, oy, 735]]) for (const n of nodes) {
-          const papers = (d.papers || []).filter(p => n.items.includes(p.id));
-          const action = this.insightAction({ label: n.label, items: papers, evidence: papers.flatMap(p => p.aims.map(a => ({ id: p.id, sentence: a.sentence }))) });
-          svg += `<g class="insight-node" ${action}>${title(n.label)}<rect x="${x - 5}" y="${positions.get(n.id) - 23}" width="245" height="46" rx="9" class="insight-svg-card"/>${text(x + 5, positions.get(n.id) - 2, clip(n.label, 29), 12)}${text(x + 5, positions.get(n.id) + 14, n.count + ' papers', 10, 'opacity=".6"')}</g>`;
+        for (const [nodes, yPositions, x, side] of [[factors, factorY, 20, 'factor'], [outcomes, outcomeY, 725, 'outcome']]) {
+          for (const node of nodes) {
+            const papers = (data.papers || []).filter(paper => node.items.includes(paper.id));
+            const evidence = (data.links || []).filter(link => link[side] === node.id)
+              .flatMap(link => link.items.map(paper => ({ id: paper.id, sentence: paper.evidence, source: 'Stated research question' })));
+            const unique = [...new Map(evidence.map(entry => [entry.id + ':' + entry.sentence, entry])).values()];
+            const lines = wrapText(node.label, 242, 14, 500);
+            const y = yPositions.get(node.id), boxHeight = Math.max(65, lines.length * 17 + 32);
+            svg += `<g class="insight-node" ${this.insightAction({ label: node.label, items: papers, evidence: unique })}>${title(node.label)}` +
+              `<rect x="${x - 5}" y="${y - boxHeight / 2}" width="265" height="${boxHeight}" rx="9" class="insight-svg-card"/>` +
+              textLines(x + 9, y - boxHeight / 2 + 23, lines, 14, 17, 'font-weight="500"') +
+              text(x + 9, y + boxHeight / 2 - 10, paperCount(node.count), 12, 'opacity=".8"') + '</g>';
+          }
         }
-        if (!factors.length) svg += text(35, 115, 'No factor-to-outcome pairs detected. Review the aim sentences below.', 16);
+        if (!rows) svg += text(35, 115, 'No explicit factor-to-outcome pairs found. Read the aim sentences below.', 15);
         return svg;
       },
+
+      /** Keep scientific method names intact; wrap labels and size each paper row to its content. */
       pipelineSVG() {
-        const s = this.insight, papers = (s.data.papers || []).slice(s.page * PAGE_SIZE, (s.page + 1) * PAGE_SIZE), col = 174, left = 250;
-        s.width = 1150; let y = 75, svg = text(20, 30, 'PAPER / EVIDENCE COVERAGE', 11, 'letter-spacing="1" opacity=".6"');
-        for (const [i, stage] of (s.data.stages || []).entries()) svg += text(left + i * col, 30, stage.label, 12, `fill="${stageColor(stage.id)}" font-weight="600"`);
-        for (const p of papers) {
-          const lines = Math.max(2, ...(p.pipeline || []).map(stage => stage.methods.length)), height = lines * 31 + 35;
-          svg += `<rect x="6" y="${y - 22}" width="1138" height="${height}" rx="10" class="insight-svg-card"/>`;
-          const paperAction = this.insightAction({ label: p.title, items: [p], evidence: p.detected.map(m => ({ sentence: m.evidence, source: m.source || m.confidence })) });
-          svg += `<g class="insight-node" ${paperAction}>${title(p.title)}${text(20, y, clip(p.title, 30), 13, 'font-weight="600"')}${text(20, y + 19, clip(p.title.slice(29), 30), 12)}${text(20, y + 42, `${p.year || 'Year unknown'} · ${p.source}`, 10, 'opacity=".65"')}</g>`;
-          for (const [i, stage] of (p.pipeline || []).entries()) {
-            if (!stage.methods.length) svg += text(left + i * col, y + 3, 'Not detected', 11, 'opacity=".4"');
-            for (const [j, m] of stage.methods.entries()) {
-              const x = left + i * col, cy = y - 14 + j * 31, confidence = this.methodConfidence(m);
-              const action = this.insightAction({ label: m.label, items: [p], evidence: [{ id: p.id, sentence: m.evidence, source: confidence }], confidence });
-              svg += `<g class="insight-method-chip" ${action}>${title(m.label + '\n' + confidence + '\n' + m.evidence)}<rect x="${x}" y="${cy}" width="164" height="25" rx="6" fill="${stageColor(stage.stage)}" opacity=".14"/><circle cx="${x + 8}" cy="${cy + 12}" r="3" fill="${stageColor(stage.stage)}" opacity="${m.confidence === 'high' ? 1 : .45}"/>${text(x + 16, cy + 16, clip(m.label, 23), 10.5)}</g>`;
+        const state = this.insight;
+        const papers = (state.data.papers || []).slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
+        const left = 235, column = 157, chipWidth = 147;
+        state.width = 1035;
+        let y = 65;
+        let svg = text(18, 29, 'PAPER', 12, 'letter-spacing="1" font-weight="600"');
+        for (const [index, stage] of (state.data.stages || []).entries()) {
+          const x = left + index * column;
+          svg += `<rect x="${x}" y="12" width="3" height="30" rx="1" fill="${stageColor(stage.id)}"/>` +
+            textLines(x + 9, 24, wrapText(stage.label, 135, 12.5, 600), 12.5, 16, 'font-weight="600"');
+        }
+        for (const paper of papers) {
+          const titleLines = wrapText(paper.title, left - 40, 13, 600);
+          const columns = (paper.pipeline || []).map(stage => stage.methods.map(method => {
+            const lines = wrapText(method.label, chipWidth - 22, 12);
+            return { method, lines, height: lines.length * 16 + 14 };
+          }));
+          const height = Math.max(titleLines.length * 17 + 53, 60, ...columns.map(chips => chips.reduce((total, chip) => total + chip.height + 6, 8))) + 12;
+          svg += `<rect x="6" y="${y}" width="1023" height="${height}" rx="9" class="insight-svg-card"/>`;
+          const detail = { label: paper.title, items: [paper], evidence: paper.detected.map(method => ({ id: paper.id, sentence: method.evidence, source: this.methodConfidence(method) })) };
+          svg += `<g class="insight-node insight-paper-title" ${this.insightAction(detail)}>${title(paper.title)}` +
+            textLines(18, y + 24, titleLines, 13, 17, 'font-weight="600"') +
+            text(18, y + titleLines.length * 17 + 29, `${paper.year || 'Year unknown'} · ${paper.source}`, 11.5, 'opacity=".8"') + '</g>';
+          for (const [index, stage] of (paper.pipeline || []).entries()) {
+            let chipY = y + 10;
+            const x = left + index * column;
+            if (!stage.methods.length) svg += text(x + 3, chipY + 20, 'Not detected', 12, 'opacity=".75"');
+            for (const { method, lines, height: chipHeight } of columns[index]) {
+              const confidence = this.methodConfidence(method);
+              const action = this.insightAction({ label: method.label, items: [paper],
+                evidence: [{ id: paper.id, sentence: method.evidence, source: confidence }], confidence });
+              svg += `<g class="insight-method-chip" ${action}>${title(method.label + '\n' + confidence + '\n' + method.evidence)}` +
+                `<rect x="${x}" y="${chipY}" width="${chipWidth}" height="${chipHeight}" rx="6" fill="${stageColor(stage.stage)}" opacity=".13"/>` +
+                `<circle cx="${x + 8}" cy="${chipY + 15}" r="2.7" fill="${stageColor(stage.stage)}"/>` +
+                textLines(x + 17, chipY + 20, lines, 12, 16) + '</g>';
+              chipY += chipHeight + 6;
             }
           }
-          y += height + 10;
+          y += height + 8;
         }
-        s.height = Math.max(230, y); return svg;
+        state.height = Math.max(180, y + 8);
+        return svg;
       },
+
+      /** Matrix headers retain their complete method name; source confidence uses explicit symbols. */
       matrixSVG() {
-        const s = this.insight, methods = s.data.matrix || [], papers = (s.data.papers || []).slice(s.page * PAGE_SIZE, (s.page + 1) * PAGE_SIZE);
-        const cell = 30, left = 260, top = 180; s.width = Math.max(WIDTH, left + methods.length * cell + 30); s.height = Math.max(270, top + papers.length * 38 + 35);
-        let svg = text(18, 25, 'Papers × methods · columns ordered by prevalence', 14);
-        methods.forEach((m, i) => { svg += `<g transform="translate(${left + i * cell + 15},${top - 16}) rotate(-55)">${title(m.label)}${text(0, 0, clip(m.label, 27), 11, `fill="${stageColor(m.stage)}"`)}</g>`; });
-        papers.forEach((p, row) => {
-          const y = top + row * 38;
-          svg += `<g class="insight-node" ${this.insightAction({ label: p.title, items: [p], evidence: [] })}>${title(p.title)}${text(16, y + 18, clip(p.title, 34), 12)}</g>`;
-          methods.forEach((m, col) => {
-            const found = p.detected.find(d => d.id === m.id), x = left + col * cell;
-            const detail = { label: m.label, items: [p], evidence: found ? [{ sentence: found.evidence, source: this.methodConfidence(found) }] : [{ sentence: 'Not detected in the available text. This does not establish that the method was not used.' }] };
-            svg += `<g class="insight-matrix-cell" ${this.insightAction(detail)}>${title(found ? found.label + ': ' + found.evidence : m.label + ': not detected')}<rect x="${x}" y="${y}" width="25" height="25" rx="4" fill="${stageColor(m.stage)}" opacity="${found ? found.confidence === 'high' ? .9 : .5 : .07}"/></g>`;
-          });
+        const state = this.insight, methods = state.data.matrix || [];
+        const papers = (state.data.papers || []).slice(state.page * PAGE_SIZE, (state.page + 1) * PAGE_SIZE);
+        const cell = 37, left = 265;
+        const context = document.createElement('canvas').getContext('2d');
+        context.font = '12.5px Arial';
+        const lengths = methods.map(method => context.measureText(method.label).width);
+        const angle = 55 * Math.PI / 180;
+        // Reserve the rotated headers' actual extent, including the last column's overhang.
+        const top = Math.max(235, 95 + Math.max(0, ...lengths) * Math.sin(angle));
+        state.width = Math.max(1035, left + methods.length * cell + 35,
+          ...lengths.map((length, index) => left + index * cell + 38 + length * Math.cos(angle)));
+        let svg = text(18, 24, 'METHOD PREVALENCE', 12, 'font-weight="600" letter-spacing="1"');
+        svg += text(18, 48, '● Methods section    ◐ Repeated body text    ○ Author-stated    · Not detected', 12);
+        methods.forEach((method, index) => {
+          const x = left + index * cell + 18;
+          svg += `<g transform="translate(${x},${top - 23}) rotate(-55)">${title(method.label)}` +
+            text(0, 0, method.label, 12.5, `fill="${stageColor(method.stage)}"`) + '</g>' +
+            text(x, top - 7, method.items.length, 11, 'text-anchor="middle" opacity=".8"');
         });
+        let y = top;
+        papers.forEach(paper => {
+          const lines = wrapText(paper.title, left - 34, 12.5, 500);
+          const rowHeight = Math.max(45, lines.length * 16 + 14);
+          svg += `<g class="insight-node insight-paper-title" ${this.insightAction({ label: paper.title, items: [paper], evidence: [] })}>${title(paper.title)}` +
+            textLines(16, y + 18, lines, 12.5, 16) + '</g>';
+          methods.forEach((method, index) => {
+            const found = paper.detected.find(detection => detection.id === method.id), x = left + index * cell;
+            const detail = { label: method.label, items: [paper], evidence: found
+              ? [{ id: paper.id, sentence: found.evidence, source: this.methodConfidence(found) }]
+              : [{ sentence: 'Not detected in the available text. This does not establish that the method was not used.' }] };
+            const symbol = !found ? '·' : found.confidence === 'high' ? '●' : found.confidence === 'medium' ? '◐' : '○';
+            svg += `<g class="insight-matrix-cell" ${this.insightAction(detail)}>${title(found ? found.label + ': ' + found.evidence : method.label + ': not detected')}` +
+              `<rect x="${x}" y="${y + 2}" width="31" height="31" rx="5" fill="${stageColor(method.stage)}" opacity="${found ? .16 : .035}"/>` +
+              text(x + 15.5, y + 23, symbol, 17, `text-anchor="middle" ${found ? 'fill="' + stageColor(method.stage) + '"' : 'opacity=".45"'}`) + '</g>';
+          });
+          y += rowHeight;
+        });
+        state.height = Math.max(300, y + 20);
         return svg;
       },
       /** Reporting drill-down keeps affirmative and absent statements inspectable per paper. */
@@ -286,10 +474,12 @@
           if (format === 'json') return download(new Blob([JSON.stringify(s.data, null, 2)], { type: 'application/json' }), name + '.json');
           if (format === 'csv') return download(new Blob(['\ufeff' + this.insightCSV().map(row => row.map(csvCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }), name + '.csv');
           const background = this.dark ? '#0f111c' : '#f8f9fb', foreground = this.dark ? '#eef0f4' : '#272b3c';
-          const notes = s.kind === 'methods' ? [this.insightLimits(), ...(s.data.checks || []).map(c => `${c.label}: ${c.count}/${s.data.scope?.items || 0} papers`), ...(s.data.insights?.gaps || [])] : [this.insightLimits()];
+          const notes = s.kind === 'methods' ? [this.insightLimits(), 'Reporting checks describe available text, not study quality.',
+            ...(s.data.checks || []).map(c => `${c.label}: ${c.count}/${c.assessed ?? s.data.scope?.items ?? 0} assessed papers${c.unavailable ? `; ${c.unavailable} unavailable` : ''}`),
+            ...(s.data.insights?.gaps || [])] : [this.insightLimits()];
           const footer = notes.filter(Boolean).flatMap(line => String(line).match(/.{1,115}(?:\s|$)|.{1,115}/g) || []);
           const height = s.height + 90 + footer.length * 22;
-          const markup = `<svg xmlns="http://www.w3.org/2000/svg" width="${s.width}" height="${height}" viewBox="0 0 ${s.width} ${height}"><style>text{font-family:Arial,sans-serif}text:not([fill]){fill:${foreground}}.insight-svg-card{fill:${this.dark ? '#181b29' : '#fff'};stroke:${this.dark ? '#272b3c' : '#dde1ea'}}.insight-label{paint-order:stroke;stroke:${background};stroke-width:3px;stroke-linejoin:round}</style><rect width="100%" height="100%" fill="${background}"/>${text(20, 27, this.insightTitle() + ' · ' + (s.data.scope?.label || ''), 20)}${text(20, 49, `${s.data.scope?.items || 0} papers · ${s.kind === 'methods' ? 'Displayed page ' + (s.page + 1) + '; CSV/JSON include every paper. 0 = not detected.' : 'Evidence and complete data in the accompanying JSON.'}`, 11)}<g transform="translate(0,65)">${s.svg}</g>${footer.map((line, i) => text(20, s.height + 90 + i * 22, line, 12)).join('')}</svg>`;
+          const markup = `<svg xmlns="http://www.w3.org/2000/svg" width="${s.width}" height="${height}" viewBox="0 0 ${s.width} ${height}"><style>svg{color:${foreground}}text{font-family:Arial,sans-serif}text:not([fill]){fill:${foreground}}.insight-svg-card{fill:${this.dark ? '#181b29' : '#fff'};stroke:${this.dark ? '#272b3c' : '#dde1ea'}}.insight-label{paint-order:stroke;stroke:${background};stroke-width:3px;stroke-linejoin:round}</style><rect width="100%" height="100%" fill="${background}"/>${text(20, 27, this.insightTitle() + ' · ' + (s.data.scope?.label || ''), 20)}${text(20, 49, `${s.data.scope?.items || 0} papers · ${s.kind === 'methods' ? 'Displayed page ' + (s.page + 1) + '; CSV/JSON include every paper. 0 = not detected.' : 'Evidence and complete data in the accompanying JSON.'}`, 11)}<g transform="translate(0,65)">${s.svg}</g>${footer.map((line, i) => text(20, s.height + 90 + i * 22, line, 12)).join('')}</svg>`;
           const url = URL.createObjectURL(new Blob([markup], { type: 'image/svg+xml' }));
           try {
             const img = new Image(); await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });
@@ -302,5 +492,5 @@
     };
   };
   // Small pure entry points for the browser harness and deterministic layout regression checks.
-  window.InsightLayouts = { forceLayout, wordLayout, csvCell };
+  window.InsightLayouts = { forceLayout, wordLayout, csvCell, wrapText, graphHeight };
 })();

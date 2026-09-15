@@ -213,3 +213,73 @@ def test_api_forwards_scope_and_rejects_unknown_kind(papers):
     with pytest.raises(HTTPException) as caught:
         asyncio.run(api_insight("missing"))
     assert caught.value.status_code == 404
+
+
+@pytest.mark.parametrize("sentence", [
+    "This assay followed the manufacturer's instructions in accordance with the protocol.",
+    "The procedure was approved by the department's equipment manager.",
+])
+def test_reporting_does_not_infer_ethics_review_from_generic_compliance(sentence):
+    """Routine assay instructions and managerial approval are not ethics review."""
+    from doi_hunter_web.insight import _reporting
+
+    assert not next(c for c in _reporting(sentence) if c["id"] == "ethics")["found"]
+    assert next(c for c in _reporting("The institutional review board approved the study.")
+                if c["id"] == "ethics")["found"]
+
+
+def test_statistical_reporting_requires_a_named_test():
+    """A p-value supports significance reporting, not identification of a test."""
+    from doi_hunter_web.insight import _reporting
+
+    assert not next(c for c in _reporting("Differences were significant (p < 0.05).") if c["id"] == "stats")["found"]
+    assert next(c for c in _reporting("We used an analysis of variance.") if c["id"] == "stats")["found"]
+
+
+def test_placebo_control_does_not_establish_random_allocation():
+    """Control treatment and random allocation are separate design properties."""
+    from doi_hunter_web.insight import _detect_methods, _reporting
+
+    for sentence in ("This was a placebo-controlled study.", "This was a non-randomized controlled trial."):
+        found = {}
+        _detect_methods(sentence, "high", found, len(sentence))
+        assert "rct" not in found
+        assert not next(c for c in _reporting(sentence) if c["id"] == "random")["found"]
+    found = {}
+    _detect_methods("This was a randomized controlled trial.", "high", found, 50)
+    assert "rct" in found
+
+
+@pytest.mark.parametrize("sentence", [
+    "No significant differences were found in rats.",
+    "No measurable effects were found using ANOVA in rats.",
+    "Rats were not impaired by the intervention.",
+])
+def test_null_results_do_not_negate_study_subjects(sentence):
+    """A negative finding still provides evidence about the subjects studied."""
+    from doi_hunter_web.insight import _detect_methods
+
+    found = {}
+    _detect_methods(sentence, "high", found, len(sentence))
+    assert "rat" in found
+
+
+def test_reporting_distinguishes_no_text_from_negative_evidence(papers):
+    """Missing abstracts/PDF text cannot be counted as a failed reporting assessment."""
+    from doi_hunter_web import insight
+
+    result = insight.methods()
+    missing = next(p for p in result["papers"] if p["title"] == "Unindexed report")
+    assert all(c["status"] == "unavailable" for c in missing["checks"])
+    assert result["limits"]["no_text"] == 1
+    assert all(c["assessed"] == 3 and c["unavailable"] == 1 for c in result["checks"])
+    assert next(c for c in result["checks"] if c["id"] == "blind")["explicitly_absent"] == 1
+
+
+def test_word_candidates_omit_generic_reporting_verbs():
+    """Reporting language must not outrank the scientific nouns it introduces."""
+    from doi_hunter_web.insight import _phrases
+
+    candidates = _phrases("We measured temperature and examined locomotion. Rats received cocaine.")
+    assert {"temperature", "locomotion", "rats", "cocaine"} <= candidates.keys()
+    assert not {"measured", "examined", "received"} & candidates.keys()
