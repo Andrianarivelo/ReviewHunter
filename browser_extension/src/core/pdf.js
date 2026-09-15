@@ -133,18 +133,29 @@ export function shortUrl(url) {
 export async function fetchInWorker(url, opts = {}) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs || 90000);
+  let failure = { ok: false, error: "PDF download failed" };
   try {
-    const res = await fetch(url, { credentials: "include", redirect: "follow", signal: ctrl.signal, cache: "no-store" });
-    const finalUrl = res.url || url;
-    const len = Number(res.headers.get("content-length") || 0);
-    if (len > MAX_PDF_BYTES) return { ok: false, error: "file larger than 200 MB" };
-    const buf = new Uint8Array(await res.arrayBuffer());
-    if (buf.length > MAX_PDF_BYTES) return { ok: false, error: "file larger than 200 MB" };
-    if (isPdfBytes(buf)) return { ok: true, bytes: buf, finalUrl };
-    const ctype = res.headers.get("content-type") || "";
-    const error = res.ok ? `not a PDF (${ctype.split(";")[0] || "unknown type"})` : `HTTP ${res.status}`;
-    const html = /html|text/i.test(ctype) && buf.length < 3_000_000 ? new TextDecoder().decode(buf) : "";
-    return { ok: false, error, html, finalUrl };
+    // Reuse bytes already loaded by the browser before revalidating a short-lived
+    // signed link. A cached HTML challenge must still get a fresh network retry.
+    for (const cache of ["force-cache", "reload"]) {
+      try {
+        const res = await fetch(url, { credentials: "include", redirect: "follow", signal: ctrl.signal, cache });
+        const finalUrl = res.url || url;
+        const len = Number(res.headers.get("content-length") || 0);
+        if (len > MAX_PDF_BYTES) return { ok: false, error: "file larger than 200 MB" };
+        const buf = new Uint8Array(await res.arrayBuffer());
+        if (buf.length > MAX_PDF_BYTES) return { ok: false, error: "file larger than 200 MB" };
+        if (res.ok && res.status !== 206 && isPdfBytes(buf)) return { ok: true, bytes: buf, finalUrl };
+        const ctype = res.headers.get("content-type") || "";
+        const error = res.status === 206 ? "incomplete PDF response" : res.ok ? `not a PDF (${ctype.split(";")[0] || "unknown type"})` : `HTTP ${res.status}`;
+        const html = /html|text/i.test(ctype) && buf.length < 3_000_000 ? new TextDecoder().decode(buf) : "";
+        failure = { ok: false, error, html: html || failure.html || "", finalUrl };
+      } catch (e) {
+        if (ctrl.signal.aborted) throw e;
+        failure = { ...failure, error: `network error (${(e && e.message) || e})` };
+      }
+    }
+    return failure;
   } catch (e) {
     return { ok: false, error: e && e.name === "AbortError" ? "timed out" : `network error (${(e && e.message) || e})` };
   } finally {
@@ -206,24 +217,41 @@ export async function fetchInTab(tabId, url) {
  * @returns {Promise<object>} {ok, size, finalUrl} or {ok:false, error, html?, finalUrl?}.
  */
 async function pageFetchStart(url, token, maxBytes) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 90000);
+  let failure = { ok: false, error: "PDF download failed" };
   try {
-    const res = await fetch(url, { credentials: "include", redirect: "follow", cache: "no-store" });
-    const finalUrl = res.url || url;
-    const len = Number(res.headers.get("content-length") || 0);
-    if (len > maxBytes) return { ok: false, error: "file larger than 200 MB", finalUrl };
-    const buf = new Uint8Array(await res.arrayBuffer());
-    const isPdf = buf.length >= 5 && buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46 && buf[4] === 0x2d;
-    if (isPdf && buf.length <= maxBytes) {
-      globalThis.__reviewHunterPdf = globalThis.__reviewHunterPdf || {};
-      globalThis.__reviewHunterPdf[token] = buf;
-      return { ok: true, size: buf.length, finalUrl };
+    // This function is serialised into the page, so keep the cache/network loop
+    // self-contained. Never alter query parameters of publisher signatures.
+    for (const cache of ["force-cache", "reload"]) {
+      try {
+        const res = await fetch(url, { credentials: "include", redirect: "follow", cache, signal: ctrl.signal });
+        const finalUrl = res.url || url;
+        const len = Number(res.headers.get("content-length") || 0);
+        if (len > maxBytes) return { ok: false, error: "file larger than 200 MB", finalUrl };
+        const buf = new Uint8Array(await res.arrayBuffer());
+        if (buf.length > maxBytes) return { ok: false, error: "file larger than 200 MB", finalUrl };
+        const isPdf = buf.length >= 5 && buf[0] === 0x25 && buf[1] === 0x50 && buf[2] === 0x44 && buf[3] === 0x46 && buf[4] === 0x2d;
+        if (res.ok && res.status !== 206 && isPdf) {
+          globalThis.__reviewHunterPdf = globalThis.__reviewHunterPdf || {};
+          globalThis.__reviewHunterPdf[token] = buf;
+          return { ok: true, size: buf.length, finalUrl };
+        }
+        const ctype = res.headers.get("content-type") || "";
+        const html = /html|text/i.test(ctype) && buf.length < 3000000 ? new TextDecoder().decode(buf) : "";
+        const error = res.status === 206 ? "incomplete PDF response" : res.ok ? `not a PDF (${ctype.split(";")[0] || "unknown type"})` : `HTTP ${res.status}`;
+        failure = { ok: false, error, html: html || failure.html || "", finalUrl };
+      } catch (e) {
+        if (ctrl.signal.aborted) throw e;
+        failure = { ...failure, error: `blocked in page (${(e && e.message) || e})` };
+      }
     }
-    const ctype = res.headers.get("content-type") || "";
-    const html = /html|text/i.test(ctype) && buf.length < 3000000 ? new TextDecoder().decode(buf) : "";
-    return { ok: false, error: res.ok ? `not a PDF (${ctype.split(";")[0] || "unknown type"})` : `HTTP ${res.status}`, html, finalUrl };
+    return failure;
   } catch (e) {
     // Typical: cross-origin redirect blocked by CORS in the page context.
-    return { ok: false, error: `blocked in page (${(e && e.message) || e})` };
+    return { ok: false, error: e?.name === "AbortError" ? "timed out" : `blocked in page (${(e && e.message) || e})` };
+  } finally {
+    clearTimeout(timer);
   }
 }
 

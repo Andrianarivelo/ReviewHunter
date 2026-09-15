@@ -1,0 +1,2 @@
+analysis,inferential_test,reason,real_cases,synthetic_cases,repeats,raw_pdf_sha256,raw_pdf_unchanged
+Paired deterministic regression outcomes,Not applicable,"Engineered, non-random fixed cases; no population inference or significance claim",1,8,One deterministic run per version; repeat-upload case imports twice,a7feb7668147aceac17b5adbe62cf7dd94a71bc535daab98990dbaea39cb845f,True

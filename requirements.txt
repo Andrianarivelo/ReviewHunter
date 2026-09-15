@@ -5,6 +5,7 @@ uvicorn[standard]>=0.27
 pydantic>=2.5
 python-multipart>=0.0.9
 pypdf>=4.0
+fonttools>=4.0  # Decode embedded publisher CFF fonts during PDF text extraction.
 bibtexparser==1.4.3
 cryptography>=42
 google-auth>=2.29

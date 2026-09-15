@@ -315,6 +315,17 @@ async def attachment(request: Request, item_id: int, title: Optional[str] = None
     else:
         ext = (filename or "file.bin").rsplit(".", 1)[-1][:8] or "bin"
     loop = asyncio.get_running_loop()
+    if ext == "pdf":
+        from .pdf_ingest import ingest_pdf
+        try:
+            result = await asyncio.to_thread(ingest_pdf, data, filename or "file.pdf",
+                                             item_id=item_id, source_url=url, title=title)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        _publish(request, "item_changed", {"id": result["item_id"]})
+        if result.get("merged_from"):
+            _publish(request, "item_changed", {"id": result["merged_from"]})
+        return result
     att = await loop.run_in_executor(
         None, lambda: catalog.store_file_bytes(item_id, data, f"file.{ext}", title=title, kind=kind, url=url)
     )

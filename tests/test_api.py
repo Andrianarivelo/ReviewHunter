@@ -10,6 +10,9 @@ def client(library, monkeypatch):
     from doi_hunter_web import connector
 
     monkeypatch.setattr(connector, "_merge_enriched", lambda payload: payload)
+    from doi_hunter_web import fulltext
+    monkeypatch.setattr(fulltext, "_find_verified_metadata", lambda *a: (None, "", []))
+    monkeypatch.setattr(connector, "_schedule_open_access_fallback", lambda *a, **k: None)
     from fastapi.testclient import TestClient
 
     from doi_hunter_web.server import app
@@ -62,7 +65,7 @@ def test_item_lifecycle_notes_tags(client):
     assert client.get("/api/items?tag=attractor&tag=nope").json() == []
 
 
-def test_connector_save_attach_and_lookup(client):
+def test_connector_save_attach_and_lookup(client, sample_pdf):
     r = client.post("/connector/save", headers=EXT, json={
         "items": [{"item_type": "journalArticle", "title": "Association of elevated ambient temperature",
                    "doi": "10.1016/j.drugalcdep.2017.04.019", "creators": [{"creatorType": "author",
@@ -72,7 +75,7 @@ def test_connector_save_attach_and_lookup(client):
     saved = r.json()["saved"][0]
     assert saved["needs_pdf"] is True and saved["existing"] is False
     # PDF downloaded by the browser (with the user's session) is posted as raw bytes.
-    pdf = b"%PDF-1.4\n%fake but valid header\n"
+    pdf = sample_pdf.read_bytes()
     r = client.post(f"/connector/attachment?item_id={saved['id']}&url=https://x/y.pdf", content=pdf,
                     headers={**EXT, "Content-Type": "application/pdf"})
     assert r.status_code == 200 and r.json()["attachment"]["mime"] == "application/pdf"

@@ -56,9 +56,16 @@ def _download_timeout() -> tuple[int, int]:
 
 # ---------------- Filename construction ----------------
 
-def _short_title(title: str, words: int = 8) -> str:
-    parts = re.findall(r"[A-Za-z0-9]+", title)
-    return " ".join(parts[:words]) or "Untitled"
+FILENAME_MAX_CHARS = 180
+
+
+def _short_title(title: str, max_chars: int = 140) -> str:
+    """Keep readable scientific titles, punctuation, and Unicode within the filename budget."""
+    clean = re.sub(r"\s+", " ", title).strip() or "Untitled"
+    if len(clean) <= max_chars:
+        return clean
+    clipped = clean[:max_chars]
+    return clipped.rsplit(" ", 1)[0] if " " in clipped else clipped
 
 
 def build_filename(item: dict) -> str:
@@ -83,10 +90,11 @@ def build_filename(item: dict) -> str:
         who = "Unknown"
 
     year = item.get("year") or "n.d."
-    title = _short_title(item.get("title") or "Untitled")
     ext = (item.get("extension") or "pdf").lstrip(".").lower()
-    raw = f"{who} - {year} - {title}.{ext}"
-    return sanitize_filename(raw)
+    prefix = sanitize_filename(f"{who} - {year}", max_len=60) + " - "
+    title = _short_title(item.get("title") or "Untitled", max_chars=FILENAME_MAX_CHARS - len(prefix) - len(ext) - 1)
+    # Sanitize the stem separately so truncation can never remove the file extension.
+    return sanitize_filename(prefix + title, max_len=FILENAME_MAX_CHARS - len(ext) - 1) + "." + ext
 
 
 # ---------------- Item CRUD ----------------
@@ -1045,35 +1053,20 @@ def request_browser_handoff(item_id: int, *, progress: Optional[Callable[[str, d
 # ---------------- Bulk import ----------------
 
 def import_pdf_folder(folder: str | Path) -> dict:
-    """Adopt PDFs from a folder into the library: copy/move + create items.
-
-    We use the filename as a starting title; metadata enrichment is a follow-up.
-    """
+    """Copy folder PDFs through the same identity-aware import used by the browser."""
+    from .pdf_ingest import ingest_pdf
     folder = Path(folder)
     if not folder.exists():
         return {"imported": 0, "skipped": 0}
     imported = 0
     skipped = 0
-    for pdf in folder.glob("*.pdf"):
-        target = papers_dir() / pdf.name
-        if target.exists():
-            skipped += 1
-            continue
+    for pdf in list(folder.glob("*.pdf")):
         try:
-            shutil.copy2(pdf, target)
-        except OSError:
+            ingest_pdf(pdf.read_bytes(), pdf.name)
+        except (OSError, ValueError) as exc:
+            log.warning("Could not import %s: %s", pdf.name, exc)
             skipped += 1
             continue
-        title = pdf.stem.replace("_", " ").strip() or "Imported PDF"
-        iid = upsert_item({
-            "title": title,
-            "file_path": str(target),
-            "file_size": target.stat().st_size,
-            "status": "downloaded",
-            "source_query": f"import:{pdf.name}",
-        })
-        catalog.register_file(iid, target)
-        _index_fulltext_async(iid)
         imported += 1
     return {"imported": imported, "skipped": skipped}
 

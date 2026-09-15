@@ -314,6 +314,8 @@ def client(library, monkeypatch):
     from doi_hunter_web import connector
 
     monkeypatch.setattr(connector, "_merge_enriched", lambda payload: payload)
+    from doi_hunter_web import fulltext
+    monkeypatch.setattr(fulltext, "_find_verified_metadata", lambda *a: (None, "", []))
     monkeypatch.setattr(connector, "_schedule_open_access_fallback", lambda *a, **k: None)
     from fastapi.testclient import TestClient
 

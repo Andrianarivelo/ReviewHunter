@@ -13,6 +13,7 @@ import difflib
 import logging
 import re
 import unicodedata
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Optional
 
@@ -108,7 +109,6 @@ def fulltext_stats() -> dict:
 
 # ----------------------------------------------------------------------------- metadata retrieval
 
-HEADER_CHARS = 1500          # a DOI printed in the first 1500 characters of page 1 belongs to the paper itself
 MIN_VERIFIED_TITLE = 15      # shorter titles ("Introduction") are too generic to verify by containment
 # Journal banner lines that precede the real title on many first pages (IEEE, Elsevier, Springer...).
 _BOILERPLATE_LINE_RE = re.compile(
@@ -129,40 +129,163 @@ def _title_in_text(title: str, text: str) -> bool:
     return len(t) >= MIN_VERIFIED_TITLE and t in _compact(text)
 
 
-def _pdf_identifiers(path: str) -> tuple[list[tuple[str, str]], list[str], str]:
-    """Read a PDF's first pages.
+def _pdf_title(value: object) -> str:
+    """Reject common export placeholders before treating embedded text as a title."""
+    title = re.sub(r"\s+", " ", str(value or "")).strip()
+    if len(title) < 8 or len(title) > 1000 or re.search(
+        r"\.(pdf|docx?)$|^(untitled|microsoft word|main|document|full.?text|manuscript)$|^https?://",
+        title, re.I,
+    ):
+        return ""
+    return title
 
-    Returns (identifiers in document info + first pages, title guesses, text of the first two pages).
+
+def _before_references(text: str) -> str:
+    """Exclude bibliography entries from identifier candidates and title guesses."""
+    return re.split(r"(?im)^\s*(?:\d+[.\s]+)?(?:references|bibliography|literature cited)\s*[:.]?\s*$",
+                    text, maxsplit=1)[0]
+
+
+def extract_pdf_evidence(path: str | Path) -> dict:
+    """Read local PDF identity evidence without contacting a metadata service.
+
+    Embedded title/author fields are distinguished from unverified text guesses.
+    ``doi`` is set only for an unambiguous, explicit document Info/XMP identifier;
+    DOIs printed in the first pages remain candidates for title verification by
+    the caller. Failure of one page or XMP packet does not discard other evidence.
+    Password-protected documents return a warning without guessing their identity.
     """
     from pypdf import PdfReader
 
-    reader = PdfReader(path)
-    meta = reader.metadata or {}
-    blob = " ".join(str(v) for v in meta.values() if v)
-    first_pages = []
-    for page in reader.pages[:3]:
+    result = {"title": "", "creators": [], "doi": "", "identifiers": [],
+              "title_guesses": [], "text": "", "first_page_text": "",
+              "metadata_identifiers": [], "metadata_sources": [], "warnings": [], "encrypted": False}
+    try:
+        reader = PdfReader(str(path))
+    except Exception as exc:
+        raise ValueError(f"PDF could not be parsed: {exc}") from exc
+    result["encrypted"] = bool(reader.is_encrypted)
+    if reader.is_encrypted:
         try:
-            first_pages.append(page.extract_text() or "")
-        except Exception:
-            pass
-    ids = identifiers.extract_identifiers(blob + "\n" + "\n".join(first_pages))
-    page_text = identifiers.repair_broken_dois("\n".join(first_pages[:2]))
+            if not reader.decrypt(""):
+                result["warnings"].append("PDF requires a password; metadata could not be read")
+                return result
+        except Exception as exc:
+            result["warnings"].append(f"PDF decryption failed: {exc}")
+            return result
 
-    guesses: list[str] = []
-    meta_title = str(meta.get("/Title") or "").strip()
-    if len(meta_title) >= 12 and not re.search(r"\.(pdf|docx?)$|^untitled|^microsoft word", meta_title, re.I):
-        guesses.append(meta_title)
-    # Heuristic: first non-banner block of page 1, joining the lines of a title that wraps (up to 4 lines).
-    lines = [ln.strip() for ln in (first_pages[0] if first_pages else "").splitlines()]
+    # Trust explicit identifier fields only. A Subject or description can contain
+    # the DOI of a cited article, so those values are merely resolver candidates.
+    try:
+        meta = reader.metadata or {}
+    except Exception as exc:
+        meta = {}
+        result["warnings"].append(f"PDF document metadata could not be read: {exc}")
+    title = _pdf_title(meta.get("/Title"))
+    if title:
+        result["title"] = title
+        result["metadata_sources"].append("info:Title")
+    author = str(meta.get("/Author") or "").strip()
+    if author:
+        # Semicolon, newline and 'and' are clear list separators. Preserve a
+        # comma in 'Family, Given' because splitting that would invent authors.
+        names = re.split(r"\s*(?:;|\n|\s+and\s+)\s*", author)
+        # Publishers also commonly encode 'Given Family, Given Family'.
+        comma_names = [name.strip() for name in author.split(",")]
+        if len(names) == 1 and len(comma_names) > 1 and all(len(n.split()) >= 2 for n in comma_names):
+            names = comma_names
+        result["creators"] = catalog.clean_creators(names)
+        result["metadata_sources"].append("info:Author")
+    for key, value in meta.items():
+        if re.sub(r"[^a-z]", "", str(key).lower()) in {"doi", "prismdoi", "identifier", "dcidentifier"}:
+            found = identifiers.extract_identifiers(str(value))
+            if found:
+                result["metadata_identifiers"].extend(found)
+                result["metadata_sources"].append(f"info:{str(key).lstrip('/')}")
+
+    try:
+        xmp = reader.xmp_metadata
+        if xmp is not None:
+            titles = xmp.dc_title or {}
+            xmp_title = _pdf_title(titles.get("x-default") or next(iter(titles.values()), ""))
+            if xmp_title:
+                if title and _compact(title) != _compact(xmp_title):
+                    result["warnings"].append("PDF Info and XMP titles differ; XMP title preferred")
+                result["title"] = xmp_title
+                result["metadata_sources"].append("xmp:dc_title")
+            if xmp.dc_creator:
+                result["creators"] = catalog.clean_creators(xmp.dc_creator)
+                result["metadata_sources"].append("xmp:dc_creator")
+            xmp_ids = xmp.dc_identifier or []
+            if isinstance(xmp_ids, str):
+                xmp_ids = [xmp_ids]
+            for value in xmp_ids:
+                found = identifiers.extract_identifiers(str(value))
+                if found:
+                    result["metadata_identifiers"].extend(found)
+                    result["metadata_sources"].append("xmp:dc_identifier")
+            # pypdf exposes Dublin Core fields but not publisher PRISM DOI.
+            # Read both element and attribute encodings, restricting namespaces
+            # so dc:relation and arbitrary description text cannot become own DOI.
+            root = ET.fromstring(xmp.stream.get_data())
+            for node in root.iter():
+                for key, value in [(node.tag, node.text or ""), *node.attrib.items()]:
+                    if key.startswith("{http://prismstandard.org/namespaces/basic/") and key.endswith("}doi"):
+                        found = identifiers.extract_identifiers(value)
+                        if found:
+                            result["metadata_identifiers"].extend(found)
+                            result["metadata_sources"].append("xmp:prism_doi")
+    except Exception as exc:
+        result["warnings"].append(f"PDF XMP metadata could not be read: {exc}")
+
+    # Keep page positions stable even if extraction fails, so page two can never
+    # be mistaken for the first-page header by a downstream identity check.
+    first_pages = []
+    try:
+        pages = reader.pages[:2]
+    except Exception as exc:
+        raise ValueError(f"PDF pages could not be read: {exc}") from exc
+    for index, page in enumerate(pages):
+        try:
+            first_pages.append(identifiers.repair_broken_dois(page.extract_text() or "")[:MAX_CHARS])
+        except Exception as exc:
+            first_pages.append("")
+            result["warnings"].append(f"PDF page {index + 1} text could not be read: {exc}")
+    result["first_page_text"] = first_pages[0] if first_pages else ""
+    result["text"] = "\n".join(first_pages)[:MAX_CHARS]
+    if not result["text"].strip():
+        result["warnings"].append("PDF has no extractable text on its first two pages")
+    result["metadata_identifiers"] = list(dict.fromkeys(result["metadata_identifiers"]))
+    result["metadata_sources"] = list(dict.fromkeys(result["metadata_sources"]))
+    own_dois = [value for kind, value in result["metadata_identifiers"] if kind == "doi"]
+    if len(own_dois) == 1:
+        result["doi"] = own_dois[0]
+    elif len(own_dois) > 1:
+        result["warnings"].append("Conflicting embedded DOI identifiers; identity requires verification")
+    blob = "\n".join(str(v) for v in meta.values() if v)
+    candidates = identifiers.extract_identifiers(_before_references(blob) + "\n" + _before_references(result["text"]))
+    result["identifiers"] = list(dict.fromkeys(result["metadata_identifiers"] + candidates))
+
+    guesses = [result["title"]] if result["title"] else []
+    lines = [ln.strip() for ln in _before_references(result["first_page_text"]).splitlines()]
     lines = [ln for ln in lines if len(ln) > 3 and not _BOILERPLATE_LINE_RE.match(ln)]
     if lines:
         block = []
-        for ln in lines[:4]:
-            if block and (re.search(r"\d", ln) or ln.isupper()):  # author lines: affiliations digits / CAPITALS
+        for line in lines[:4]:
+            if block and (line.isupper() or re.match(r"^(abstract|keywords|introduction)\b", line, re.I)
+                          or re.match(r"^\d[\s,]", line)):
                 break
-            block.append(ln)
-        guesses.append(" ".join(block))
-    return ids, guesses, page_text
+            block.append(line)
+        if block:
+            guesses.append(" ".join(block))
+    result["title_guesses"] = list(dict.fromkeys(guesses))
+    return result
+
+
+def _pdf_identifiers(path: str) -> tuple[list[tuple[str, str]], list[str], str]:
+    """Compatibility tuple for verified metadata resolution of existing attachments."""
+    evidence = extract_pdf_evidence(path)
+    return evidence["identifiers"], evidence["title_guesses"], evidence["text"]
 
 
 def _similar(a: str, b: str) -> float:
@@ -186,7 +309,7 @@ def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], 
     """Find metadata for a PDF, accepting a record only when the PDF itself confirms it.
 
     Order: (1) identifiers printed in the PDF, accepted if the resolved title is printed in the
-    PDF or the DOI sits in the page-1 header (otherwise it is probably a cited reference);
+    PDF before the bibliography (a DOI near the top can still be a cited reference);
     (2) CrossRef bibliographic search on the page-1 text and on title guesses, accepted if the
     candidate title is printed in the PDF or is near-identical (>= TITLE_MATCH_THRESHOLD) to a guess.
     Returns (payload or None, human-readable source, title guesses tried).
@@ -194,31 +317,25 @@ def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], 
     from .metadata import search_crossref
 
     ids, guesses, page_text = _pdf_identifiers(pdf_path)
-    header = page_text[:HEADER_CHARS].lower().replace(" ", "")
+    page_text = _before_references(page_text)
     compact_text = _compact(page_text)
     printed: list[tuple[int, dict, str]] = []      # (position of the title in the PDF, payload, source)
-    header_only: list[tuple[dict, str]] = []
     for kind, value in ids[:6]:
         payload = identifiers.resolve_doi(value) if kind == "doi" else identifiers.resolve_arxiv(value)
         if not _is_work(payload):
             continue
         if _title_in_text(payload.get("title", ""), page_text):
             printed.append((compact_text.find(_compact(payload["title"])), payload, f"{kind}:{value}"))
-        elif value.lower() in header:
-            header_only.append((payload, f"{kind}:{value}"))
     # Several DOIs can be verified (a letter quoting the article it answers, an issue bundle):
     # the paper itself is the one whose title is printed first.
     if printed:
         _pos, payload, source = min(printed, key=lambda t: t[0])
         return payload, source, guesses
-    if header_only:
-        return header_only[0][0], header_only[0][1], guesses
 
     # The item's current title may come from the file name ("... Methods. IEEE.pdf"): also a guess.
     item_title = re.sub(r"\.pdf$", "", (item.get("title") or "").strip(), flags=re.I)
-    if item_title and item_title.lower() != "untitled":
-        guesses.append(item_title)
-    queries = [re.sub(r"\s+", " ", page_text[:600])] + guesses
+    # A filename/browser title is a search hint, not independent identity evidence.
+    queries = [re.sub(r"\s+", " ", page_text[:600])] + guesses + [item_title]
     seen: set[str] = set()
     for query in queries:
         if len(query) < MIN_VERIFIED_TITLE:
@@ -234,7 +351,7 @@ def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], 
                 continue
             seen.add(doi)
             verified = _title_in_text(title, page_text)
-            close = any(_similar(title, g) >= TITLE_MATCH_THRESHOLD for g in guesses)
+            close = not page_text.strip() and any(_similar(title, g) >= TITLE_MATCH_THRESHOLD for g in guesses)
             if verified or close:
                 payload = identifiers.resolve_doi(doi)
                 if _is_work(payload):
@@ -252,34 +369,10 @@ def retrieve_metadata(item_id: int) -> dict:
                 and a.get("exists")), None)
     if not pdf:
         return {"ok": False, "reason": "no PDF attachment"}
-    payload, source, guesses = _find_verified_metadata(item, pdf["path"])
+    from .pdf_ingest import _identify, reconcile_existing
+    payload, evidence, source = _identify(pdf["path"], item)
     if not payload:
-        return {"ok": False, "reason": "no identifier or confident title match found", "title_guesses": guesses}
+        return {"ok": False, "reason": "no identifier or confident title match found", "title_guesses": evidence.get("title_guesses", [])}
 
-    # DOI collision: another live item already owns this DOI -> report instead of corrupting.
-    doi = payload.get("doi")
-    if doi:
-        owner = get_conn().execute("SELECT id FROM items WHERE doi=? AND id != ?", (doi, item_id)).fetchone()
-        if owner:
-            return {"ok": False, "reason": "duplicate", "duplicate_of": owner[0], "source": source}
-
-    patch = {
-        "item_type": payload.get("item_type"),
-        "creators": payload.get("creators") or [],
-        "title": payload.get("title"),
-        "field_values": {
-            "DOI": doi or "", "date": payload.get("date") or "",
-            "publicationTitle": payload.get("journal") or "", "volume": payload.get("volume") or "",
-            "issue": payload.get("issue") or "", "pages": payload.get("pages") or "",
-            "abstractNote": catalog.clean_abstract(payload.get("abstract")), "url": payload.get("url") or "",
-            "ISSN": payload.get("issn") or "", "publisher": payload.get("publisher") or "",
-        },
-    }
-    # Only keep field keys valid for the target type, else the value is silently dropped.
-    valid = set(catalog.ITEM_TYPES[catalog.normalize_type(payload.get("item_type"))]["fields"])
-    patch["field_values"] = {k: v for k, v in patch["field_values"].items() if k in valid and v}
-    catalog.patch_item(item_id, patch)
-    get_conn().execute("UPDATE items SET status='downloaded', error_msg=NULL WHERE id=? AND file_path IS NOT NULL",
-                       (item_id,))
-    catalog.regenerate_citation_key(item_id)
-    return {"ok": True, "source": source, "applied_fields": sorted(patch["field_values"])}
+    # A verified orphan belongs on its existing reference, preserving notes and files.
+    return reconcile_existing(item_id, payload, source or "PDF embedded metadata")

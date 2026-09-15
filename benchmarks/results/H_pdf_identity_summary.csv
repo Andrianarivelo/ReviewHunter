@@ -1,0 +1,13 @@
+version,metric,passed,applicable
+baseline,case_pass,0,9
+baseline,correct_target,1,9
+baseline,no_duplicate,2,7
+baseline,metadata_complete,0,7
+baseline,citation_filename,2,7
+baseline,bytes_preserved,7,7
+current,case_pass,9,9
+current,correct_target,9,9
+current,no_duplicate,7,7
+current,metadata_complete,7,7
+current,citation_filename,7,7
+current,bytes_preserved,7,7

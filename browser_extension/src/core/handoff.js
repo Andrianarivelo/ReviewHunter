@@ -220,16 +220,18 @@ export async function runHandoff(rec, opts = {}) {
     }
     if (r.ok) {
       say(`Attaching the PDF from ${step.source}`);
+      let canonicalId = itemId;
       try {
-        await deps.upload(itemId, r.bytes, { url: r.finalUrl || step.url, title: "Full Text PDF", contentType: "application/pdf" });
+        const uploaded = await deps.upload(itemId, r.bytes, { url: r.finalUrl || step.url, title: "Full Text PDF", contentType: "application/pdf" });
+        canonicalId = uploaded?.item_id || itemId;
       } catch (e) {
         attempts.push({ source: step.source, error: `upload failed: ${(e && e.message) || e}` });
         continue;
       }
-      const after = await deps.itemStatus(itemId).catch(() => null);
+      const after = await deps.itemStatus(canonicalId).catch(() => null);
       if (after && after.has_pdf) {
         await deps.report(itemId, "done", `PDF attached from ${step.source}`, step.source);
-        return { ok: true, via: step.source, attempts };
+        return { ok: true, via: step.source, attempts, item_id: canonicalId };
       }
       attempts.push({ source: step.source, error: "the server did not confirm the attachment" });
       continue;

@@ -183,12 +183,13 @@ export function handoffStatus(itemId, body) {
  * @param {number} itemId            Item id.
  * @param {Blob|ArrayBuffer|Uint8Array} bytes  File content.
  * @param {{title?: string, url?: string, kind?: "file"|"snapshot", contentType?: string, filename?: string}} [meta]
- * @returns {Promise<{ok: boolean, attachment: object}>}
+ * @returns {Promise<{ok: boolean, item_id: number, attachment: object}>}
  */
 export function uploadAttachment(itemId, bytes, meta = {}) {
   const params = new URLSearchParams({ item_id: String(itemId), kind: meta.kind || "file" });
   if (meta.title) params.set("title", meta.title);
-  if (meta.url) params.set("url", meta.url.slice(0, 1800));
+  // Signed publisher URLs must remain byte-for-byte intact, including long tokens.
+  if (meta.url) params.set("url", meta.url);
   if (meta.filename) params.set("filename", meta.filename);
   return request(`/connector/attachment?${params}`, {
     body: bytes,
@@ -198,16 +199,21 @@ export function uploadAttachment(itemId, bytes, meta = {}) {
 }
 
 /**
- * POST /api/import/pdfs (multipart): one new item per PDF, metadata retrieved server-side.
+ * POST /api/import/pdfs: identify the PDF, match its reference, then attach it.
  *
  * @param {Blob} pdfBlob         PDF blob.
- * @param {string} filename      File name (becomes the provisional title).
+ * @param {string} filename      Original file name, used only as a fallback.
  * @param {?number} collectionId Optional collection.
- * @returns {Promise<{imported: number, item_ids: number[]}>}
+ * @param {{metadata?: object, sourceUrl?: string, tags?: string[], note?: string}} [options]
+ * @returns {Promise<{imported: number, item_ids: number[], results?: object[]}>}
  */
-export function importPdf(pdfBlob, filename, collectionId) {
+export function importPdf(pdfBlob, filename, collectionId, options = {}) {
   const form = new FormData();
   form.append("files", pdfBlob, filename);
   if (collectionId) form.append("collection_id", String(collectionId));
+  if (options.metadata) form.append("metadata", JSON.stringify(options.metadata));
+  if (options.sourceUrl) form.append("source_url", options.sourceUrl);
+  if (options.tags?.length) form.append("tags", JSON.stringify(options.tags));
+  if (options.note) form.append("note", options.note);
   return request("/api/import/pdfs", { body: form, timeout: 300000 });
 }

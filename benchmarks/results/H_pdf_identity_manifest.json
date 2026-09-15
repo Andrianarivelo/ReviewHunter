@@ -1,0 +1,12 @@
+{
+  "baseline_commit": "9018274",
+  "baseline_catalog_sha256": "40f1410c42a9ca478475684be0d68ab84a4ffa45a4e345d56729114c2f0cbbba",
+  "baseline_fulltext_sha256": "c5d8da3852158b14bf26e2b5903ad11c9989564a57b5d40753772f0e4aa3825d",
+  "source_pdf": "C:\\Users\\andry\\ReviewHunter\\papers\\Unknown - n.d. - main (2).pdf",
+  "source_sha256": "a7feb7668147aceac17b5adbe62cf7dd94a71bc535daab98990dbaea39cb845f",
+  "source_unchanged": true,
+  "scope": "Identity/import only; network, browser session capture and PDF acquisition are not benchmarked",
+  "baseline": "Pinned catalog/fulltext, reconstructed pinned API import callback; shared compatible DB and filename helper",
+  "registry": "Fixed responses for both versions. Real-paper fields transcribed from PDF; eight synthetic controls.",
+  "statistics": "Descriptive counts only; synthetic regressions do not support inferential statistics"
+}

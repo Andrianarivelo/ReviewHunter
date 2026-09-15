@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ReviewHunter Connector",
   "short_name": "ReviewHunter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Save references and their PDFs from any web page into your local ReviewHunter library.",
   "minimum_chrome_version": "116",
   "icons": {

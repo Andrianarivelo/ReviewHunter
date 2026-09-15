@@ -20,6 +20,8 @@ keywords = ["doi", "pubmed", "crossref", "research", "papers", "bibliography", "
 
 [project.optional-dependencies]
 web = [
+    "pypdf>=4.0",
+    "fonttools>=4.0",
     "fastapi>=0.110",
     "uvicorn[standard]>=0.27",
     "pydantic>=2.5",

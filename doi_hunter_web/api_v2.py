@@ -331,6 +331,8 @@ async def retrieve_metadata(item_id: int, request: Request) -> dict:
     except ValueError as e:
         raise HTTPException(404, str(e))
     _publish(request, "item_changed", {"id": item_id})
+    if result.get("item_id") and result["item_id"] != item_id:
+        _publish(request, "item_changed", {"id": result["item_id"]})
     return result
 
 
@@ -501,7 +503,16 @@ async def upload_attachment(item_id: int, request: Request, file: UploadFile = F
     data = await file.read()
     if not data:
         raise HTTPException(400, "empty file")
-    att = catalog.store_file_bytes(item_id, data, file.filename or "file.pdf", title=title)
+    if data[:5] == b"%PDF-" or (file.filename or "").lower().endswith(".pdf"):
+        from .pdf_ingest import ingest_pdf
+        try:
+            result = await asyncio.to_thread(ingest_pdf, data, file.filename or "file.pdf", item_id=item_id, title=title)
+        except ValueError as exc:
+            raise HTTPException(422, str(exc)) from exc
+        att = result["attachment"]
+        item_id = result["item_id"]
+    else:
+        att = catalog.store_file_bytes(item_id, data, file.filename or "file.pdf", title=title)
     from .library import _index_fulltext_async
 
     _index_fulltext_async(item_id)
@@ -800,20 +811,33 @@ def _file_field_paths(value: str) -> list[str]:
 
 @router.post("/import/pdfs")
 async def import_pdfs(request: Request, files: list[UploadFile] = File(...),
-                      collection_id: Optional[int] = Form(None)) -> dict:
-    """Drag-and-drop PDFs: one item per file, then 'Retrieve Metadata for PDF' in the background."""
-    created = []
+                      collection_id: Optional[int] = Form(None), metadata: Optional[str] = Form(None),
+                      source_url: Optional[str] = Form(None), tags: Optional[str] = Form(None),
+                      note: Optional[str] = Form(None)) -> dict:
+    """Identify PDF uploads before creating items; return canonical references synchronously."""
+    from .pdf_ingest import ingest_pdf, MAX_PDF_BYTES
+    try:
+        hints = json.loads(metadata) if metadata else {}
+        tag_list = json.loads(tags) if tags else []
+        if not isinstance(hints, dict) or not isinstance(tag_list, list) or not all(isinstance(t, str) for t in tag_list):
+            raise ValueError("metadata must be an object and tags a list of strings")
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(400, f"Invalid import metadata: {exc}") from exc
+    results, failed = [], []
     for f in files[:500]:
-        data = await f.read()
-        if data[:5] != b"%PDF-":
-            continue
-        title = Path(f.filename or "Imported PDF").stem.replace("_", " ").strip() or "Imported PDF"
-        item = catalog.create_item({"item_type": "document", "title": title, "status": "downloaded",
-                                    "collections": [collection_id] if collection_id else []}, dedupe_doi=False)
-        catalog.store_file_bytes(item["id"], data, f.filename or "file.pdf")
-        created.append(item["id"])
-    asyncio.create_task(_post_pdf_import(request, created))
-    return {"imported": len(created), "item_ids": created}
+        data = await f.read(MAX_PDF_BYTES + 1)
+        try:
+            result = await asyncio.to_thread(ingest_pdf, data, f.filename or "file.pdf", hints=hints,
+                source_url=source_url, tags=tag_list, notes=[f"<p>{html.escape(note)}</p>"] if note else [],
+                collections=[collection_id] if collection_id else [])
+            results.append(result)
+            _publish(request, "item_changed" if result["existing"] else "item_added", {"id": result["item_id"]})
+        except ValueError as exc:
+            failed.append({"filename": f.filename, "reason": str(exc)})
+    if not results and failed:
+        raise HTTPException(422, failed[0]["reason"])
+    return {"imported": len(results), "matched": sum(r["existing"] for r in results),
+            "item_ids": list(dict.fromkeys(r["item_id"] for r in results)), "results": results, "failed": failed}
 
 
 async def _post_pdf_import(request: Request, item_ids: list[int]) -> None:

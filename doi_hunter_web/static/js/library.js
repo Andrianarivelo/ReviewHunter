@@ -475,10 +475,11 @@ window.libraryPart = function libraryPart() {
       this.toast('Retrieving metadata from PDF...', 'info');
       try {
         const r = await api.post(`/api/items/${it.id}/retrieve-metadata`);
-        if (r.ok) this.toast(`Metadata found (${r.source})`, 'ok', 5000);
+        if (r.ok) this.toast(r.merged_from ? 'PDF attached to its existing reference' : `Metadata found (${r.source})`, 'ok', 5000);
         else if (r.reason === 'duplicate') this.toast(`This PDF matches item #${r.duplicate_of} already in the library`, 'error', 7000);
         else this.toast(`No metadata found: ${r.reason}`, 'error', 6000);
         await this.reloadAll();
+        if (r.ok && r.item_id) await this.openItem(r.item_id);
       } catch (e) { this.toast(e.message, 'error'); }
     },
     async duplicateItem(it) {

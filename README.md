@@ -11,6 +11,28 @@ collect papers and books, find legal PDFs, organise them in nested collections a
 PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Everything runs on your computer
 (SQLite + your files); Google Drive is optional for storage and backups.
 
+### PDF imports and reference matching (2.2.1)
+
+Save an open PDF with browser extension 1.2.1, drag a PDF into the library, or import a PDF
+folder. ReviewHunter reads embedded Info/XMP metadata and the first pages, verifies available
+registry metadata against the document, and attaches the file to its existing DOI or unique
+matching title. If there is no matching reference, it creates one from the available metadata.
+Unknown fields remain incomplete. Original PDF bytes are preserved.
+
+Files are named `First Author et al - Year - Title.pdf`, with safe length limits. Re-importing
+the same PDF reuses its reference and attachment. **Retrieve Metadata for PDF** also repairs
+older standalone document entries: a verified match moves their files, notes and tags onto
+the existing reference and puts the old entry in Trash. Different explicit DOIs are never
+merged automatically.
+
+After updating, restart ReviewHunter and reload its extension at `chrome://extensions`.
+The extension first tries cached PDF bytes, then a fresh request. If an expired publisher link
+still cannot be read, reopen it from the article page or use the viewer's Download button and
+import that local PDF. The file is identified through the same matching pipeline.
+
+Validation includes isolated Python tests, browser regression tests, real Chromium imports,
+and [the PDF identity benchmark](benchmarks/results/H_pdf_identity_notes.md).
+
 ## What you get (v2)
 
 | Area | Features |

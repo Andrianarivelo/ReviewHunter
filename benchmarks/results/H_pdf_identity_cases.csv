@@ -1,0 +1,19 @@
+case,case_kind,version,live_references,attachments,rejected,detail,correct_target,no_duplicate,metadata_complete,citation_filename,bytes_preserved,saved_filename,metadata_differences,case_pass
+Reported Aarde PDF,real PDF + fixed metadata,baseline,2,1,0,doi:10.1016/j.pbb.2017.10.008,0,0,0,0,1,Unknown - n.d - main.pdf,doi;title;year;journal;volume;pages;publisher;creators,0
+Reported Aarde PDF,real PDF + fixed metadata,current,1,1,0,doi:10.1016/j.pbb.2017.10.008,1,1,1,1,1,"Aarde et al - 2017 - High ambient temperature facilitates the acquisition of 3,4-methylenedioxymethamphetamine (MDMA) self-administration.pdf",,1
+Existing DOI,synthetic,baseline,2,1,0,doi:10.9999/rh.synthetic.own,0,0,0,0,1,Unknown - n.d - main.pdf,doi;title;year;journal;volume;pages;publisher;creators,0
+Existing DOI,synthetic,current,1,1,0,doi:10.9999/rh.synthetic.own,1,1,1,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,,1
+"Existing title, no DOI",synthetic,baseline,2,1,0,doi:10.9999/rh.synthetic.own,0,0,0,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,publisher,0
+"Existing title, no DOI",synthetic,current,1,1,0,doi:10.9999/rh.synthetic.own,1,1,1,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,,1
+New rich reference,synthetic,baseline,1,1,0,doi:10.9999/rh.synthetic.own,1,1,0,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,publisher,0
+New rich reference,synthetic,current,1,1,0,doi:10.9999/rh.synthetic.own,1,1,1,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,,1
+Repeated identical upload,synthetic,baseline,2,2,0,doi:10.9999/rh.synthetic.own,0,0,0,0,1,Unknown - n.d - main.pdf,doi;title;year;journal;volume;pages;publisher;creators,0
+Repeated identical upload,synthetic,current,1,1,0,doi:10.9999/rh.synthetic.own,1,1,1,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,,1
+XMP-only document,synthetic,baseline,1,1,0,no identifier or confident title match found,0,1,0,0,1,Unknown - n.d - main.pdf,doi;title;year;journal;volume;pages;publisher;creators,0
+XMP-only document,synthetic,current,1,1,0,title match: Synthetic neural reward identity benchmark article,1,1,1,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,,1
+Explicit wrong target,synthetic,baseline,1,1,0,attached without identity validation,0,,,,,,,0
+Explicit wrong target,synthetic,current,1,0,1,PDF identifies a different DOI than the selected reference,1,,,,,,,1
+Malformed PDF bytes,synthetic,baseline,1,1,0,background metadata failed: PdfStreamError,0,,,,,,,0
+Malformed PDF bytes,synthetic,current,0,0,1,PDF could not be parsed: Stream has ended unexpectedly,1,,,,,,,1
+Offline title recognition,synthetic,baseline,2,1,0,no identifier or confident title match found,0,0,0,0,1,Unknown - n.d - main.pdf,doi;title;year;journal;volume;pages;publisher;creators,0
+Offline title recognition,synthetic,current,1,1,0,PDF embedded metadata / existing library,1,1,1,1,1,Test - 2024 - Synthetic neural reward identity benchmark article.pdf,,1

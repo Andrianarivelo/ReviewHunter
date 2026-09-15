@@ -153,8 +153,11 @@ async function attachPdfTo(progress, stepId, saved, candidates, opts) {
   const upId = `${stepId}-upload`;
   progress.set(upId, { state: "running", label: "Attaching PDF" });
   try {
-    await api.uploadAttachment(saved.id, res.bytes, { url: res.finalUrl, title: "Full Text PDF", contentType: "application/pdf" });
-    await removePending(saved.id);
+    const previousId = saved.id;
+    const uploaded = await api.uploadAttachment(saved.id, res.bytes, { url: res.finalUrl, title: "Full Text PDF", contentType: "application/pdf" });
+    saved.id = uploaded.item_id || saved.id;
+    await removePending(previousId);
+    if (saved.id !== previousId) await removePending(saved.id);
     progress.set(upId, { state: "done", label: "PDF attached" });
     return true;
   } catch (e) {
@@ -231,8 +234,8 @@ export async function runSave(req, onProgress) {
 }
 
 /**
- * The tab shows a PDF: download it in the browser, then either save metadata
- * (DOI / arXiv id in the URL) and attach, or import it as a new PDF item.
+ * Download a PDF and let the server identify its contents before choosing the
+ * reference. URL metadata is a hint, never a reason to create a provisional item.
  *
  * @param {SaveRequest} req  Request.
  * @param {Progress} progress  Tracker.
@@ -241,38 +244,31 @@ export async function runSave(req, onProgress) {
  */
 async function savePdfTab(req, progress, common) {
   const det = req.detection;
-  const item = { ...det.items[0], ...(req.overrides || {}) };
+  const item = { ...(det.items || [])[0], ...(req.overrides || {}) };
+  const settings = await getSettings();
   progress.set("pdf", { state: "running", label: "Downloading this PDF" });
-  const res = await acquirePdf([det.url], { tabId: req.tabId, allowBackgroundTab: false, onStep: (t) => progress.set("pdf", { detail: t }) });
+  const candidates = [...new Set([det.url, ...(item._pdfCandidates || []), item.pdf_url].filter(Boolean))];
+  const res = await acquirePdf(candidates, { tabId: req.tabId, allowBackgroundTab: !!settings.useBackgroundTab, onStep: (t) => progress.set("pdf", { detail: t }) });
   if (!res.ok) {
     const last = res.attempts[res.attempts.length - 1];
-    progress.set("pdf", { state: "error", label: "Couldn't read this PDF", detail: last ? `${last.via}: ${last.error}` : "" });
-    return { ok: false, itemIds: [], message: "PDF download failed" };
+    const fallback = "Reopen the PDF from the article page to refresh its link, or save it with the PDF viewer's download button and import that file into ReviewHunter.";
+    progress.set("pdf", { state: "error", label: "Couldn't read this PDF", detail: `${last ? `${last.via}: ${last.error}. ` : ""}${fallback}` });
+    return { ok: false, itemIds: [], message: fallback };
   }
   progress.set("pdf", { state: "done", label: `PDF downloaded via ${res.via}`, detail: formatBytes(res.bytes.length) });
 
-  if (item.doi || item.arxiv_id) {
-    progress.set("meta", { state: "running", label: `Resolving ${item.doi ? "DOI" : "arXiv id"} metadata` });
-    const payload = toPayload(item);
-    delete payload.pdf_url;
-    const { saved } = await api.saveItems({ items: [payload], ...common, enrich: true });
-    const s = saved[0];
-    progress.set("meta", { state: "done", label: s.existing ? "Matched existing item" : "Metadata saved", detail: s.title });
-    if (!s.needs_pdf) {
-      progress.set("up", { state: "skipped", label: "A file is already attached to this item" });
-      return { ok: true, itemIds: [s.id], message: "Already had a PDF" };
-    }
-    progress.set("up", { state: "running", label: "Attaching PDF" });
-    await api.uploadAttachment(s.id, res.bytes, { url: res.finalUrl, title: "Full Text PDF" });
-    await removePending(s.id);
-    progress.set("up", { state: "done", label: "PDF attached" });
-    return { ok: true, itemIds: [s.id], message: "Saved" };
-  }
-  progress.set("up", { state: "running", label: "Importing PDF (metadata will be retrieved)" });
-  const out = await api.importPdf(new Blob([res.bytes], { type: "application/pdf" }), fileNameFromUrl(res.finalUrl), common.collection_id);
-  if (!out.imported) throw new Error("the server rejected the file");
-  progress.set("up", { state: "done", label: "PDF imported", detail: "ReviewHunter is retrieving its metadata in the background" });
-  return { ok: true, itemIds: out.item_ids, message: "Imported" };
+  progress.set("up", { state: "running", label: "Reading PDF metadata and matching its reference" });
+  const metadata = toPayload(item);
+  delete metadata.pdf_url;
+  const out = await api.importPdf(new Blob([res.bytes], { type: "application/pdf" }), fileNameFromUrl(res.finalUrl || det.url), common.collection_id, {
+    metadata, sourceUrl: res.finalUrl || det.url, tags: common.tags, note: common.note,
+  });
+  if (!out.imported || !out.item_ids?.length) throw new Error("the server did not confirm the PDF import");
+  for (const id of out.item_ids) await removePending(id);
+  const result = out.results?.[0];
+  const message = result?.metadata_status === "partial" ? "PDF saved; some metadata could not be verified" : "PDF saved";
+  progress.set("up", { state: "done", label: result?.metadata_status === "partial" ? message : "PDF attached to its reference", detail: result?.title || "" });
+  return { ok: true, itemIds: out.item_ids, message };
 }
 
 /**
@@ -323,7 +319,8 @@ async function saveMultiple(req, progress, common) {
       const res = await acquirePdf(candidates, { tabId: req.tabId, allowBackgroundTab: false });
       if (res.ok) {
         try {
-          await api.uploadAttachment(r.saved.id, res.bytes, { url: res.finalUrl, title: "Full Text PDF" });
+          const uploaded = await api.uploadAttachment(r.saved.id, res.bytes, { url: res.finalUrl, title: "Full Text PDF" });
+          r.saved.id = uploaded.item_id || r.saved.id;
           attached += 1;
         } catch (_) {
           /* counted as not attached */
@@ -347,12 +344,13 @@ async function saveMultiple(req, progress, common) {
 export async function runAttachPending(req, onProgress) {
   const progress = new Progress(onProgress);
   try {
-    const ok = await attachPdfTo(progress, "pdf", { id: req.itemId, title: req.title }, [req.url], {
+    const saved = { id: req.itemId, title: req.title };
+    const ok = await attachPdfTo(progress, "pdf", saved, [req.url], {
       tabId: req.tabId,
       allowBackgroundTab: false,
       rememberFailure: false,
     });
-    return { ok, itemIds: [req.itemId], message: ok ? "PDF attached" : "PDF not attached" };
+    return { ok, itemIds: [saved.id], message: ok ? "PDF attached" : "PDF not attached" };
   } catch (e) {
     progress.set("fatal", { state: "error", label: "Attaching failed", detail: e.message });
     return { ok: false, itemIds: [], message: e.message };
