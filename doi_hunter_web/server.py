@@ -76,8 +76,7 @@ async def _startup() -> None:
     await asyncio.to_thread(_ensure_citation_keys)
     if config.get_settings().get("auto_retrieve_pdf_metadata", True):
         threading.Thread(target=_retrieve_missing_metadata, daemon=True, name="metadata-backfill").start()
-    if config.get_settings().get("auto_retrieve_impact_factor", True):
-        threading.Thread(target=_backfill_impact_factors, daemon=True, name="impact-factor-backfill").start()
+    threading.Thread(target=_impact_factor_loop, args=(_scheduler_stop,), daemon=True, name="impact-factor-loop").start()
     threading.Thread(target=gdrive.scheduler_loop, args=(_scheduler_stop,), daemon=True,
                      name="backup-scheduler").start()
     # First-run nicety: if the user has the legacy ./downloads/ folder, adopt those PDFs.
@@ -134,35 +133,52 @@ def _retrieve_missing_metadata() -> None:
         config.update_settings({"metadata_backfill_attempted": sorted(attempted)})
 
 
-def _backfill_impact_factors() -> None:
-    """Background pass: fill journal impact metrics for items that have a journal but no value yet.
+# How often the periodic pass looks for items still missing a journal impact metric. Cheap when there
+# is nothing to do (one indexed SQL query); a paper added mid-session gets its value on the next tick
+# instead of waiting for the app to be restarted or for someone to click "Retrieve impact factors".
+IMPACT_FACTOR_POLL_INTERVAL_S = 60
 
-    One network call per distinct journal (see journal_metrics.refresh_many), so this costs little even
-    on a large library. A journal OpenAlex does not recognise is remembered in settings so it is not
-    retried on every single startup; it is still retried by the periodic 'Retrieve impact factors'
-    button and by journal_metrics' own shorter not-found cache TTL.
+
+def _backfill_impact_factors() -> None:
+    """One pass: fill journal impact metrics for every item that has a journal but no value yet.
+
+    One network call per distinct journal (see journal_metrics.refresh_many). A journal OpenAlex does
+    not recognise is protected from repeated network calls by journal_metrics' own per-journal cache
+    (a short not-found TTL) rather than by remembering item ids here, so a journal that starts resolving
+    later (a typo fixed, a new OpenAlex source, a transient error) is picked up again automatically on a
+    later pass, and a newly added paper is never skipped just because an older paper's journal once failed.
     """
     from . import journal_metrics
     from .db import get_conn
 
-    attempted = set(config.get_settings().get("impact_factor_backfill_attempted") or [])
     rows = get_conn().execute(
         "SELECT id FROM items WHERE deleted_at IS NULL AND impact_factor IS NULL "
         "AND (journal IS NOT NULL AND journal != '' OR issn IS NOT NULL AND issn != '')"
     ).fetchall()
-    todo = [r[0] for r in rows if r[0] not in attempted]
-    if not todo:
+    if not rows:
         return
     try:
-        result = journal_metrics.refresh_many(todo)
-        log.info(f"impact-factor backfill: {result}")
+        result = journal_metrics.refresh_many([r[0] for r in rows])
         if result.get("items_updated"):
+            log.info(f"impact-factor backfill: {result}")
             bus.publish("items_bulk_changed", {"count": result["items_updated"]})
     except Exception as e:  # background best effort: never crash the server
         log.warning(f"impact-factor backfill failed: {e}")
-        return
-    attempted.update(todo)
-    config.update_settings({"impact_factor_backfill_attempted": sorted(attempted)})
+
+
+def _impact_factor_loop(stop: threading.Event, interval_s: int = IMPACT_FACTOR_POLL_INTERVAL_S) -> None:
+    """Repeat the backfill pass for the life of the server (mirrors gdrive.scheduler_loop).
+
+    The 'auto_retrieve_impact_factor' setting is re-read every tick, so turning it off in Settings takes
+    effect immediately, and turning it back on resumes without a restart.
+    """
+    while not stop.is_set():
+        if config.get_settings().get("auto_retrieve_impact_factor", True):
+            try:
+                _backfill_impact_factors()
+            except Exception as e:
+                log.warning(f"impact-factor loop failed: {e}")
+        stop.wait(interval_s)
 
 
 app.include_router(api_v2.router)
