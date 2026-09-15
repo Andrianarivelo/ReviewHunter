@@ -482,7 +482,7 @@
             </button>
             <div x-show="open" x-transition.opacity class="menu-pop right-0 w-52">
               <div class="rail-label px-3 pt-2 pb-1">Columns</div>
-              <template x-for="col in [['creator','Creator'],['year','Year'],['publication','Publication'],['type','Item Type'],['key','Citation Key'],['added','Date Added']]" :key="col[0]">
+              <template x-for="col in [['creator','Creator'],['year','Year'],['publication','Publication'],['impact','Impact Factor'],['type','Item Type'],['key','Citation Key'],['added','Date Added']]" :key="col[0]">
                 <label class="context-row cursor-pointer"><input type="checkbox" :checked="columns[col[0]]" @change="toggleColumn(col[0])" class="rounded w-3.5 h-3.5"><span x-text="col[1]"></span></label>
               </template>
               <div class="border-t border-ink-200 dark:border-ink-800 my-1"></div>
@@ -499,6 +499,7 @@
         <button x-show="columns.creator" @click="setSort('creator')" class="th">Creator <span x-text="sortIndicator('creator')"></span></button>
         <button x-show="columns.year" @click="setSort('year')" class="th">Year <span x-text="sortIndicator('year')"></span></button>
         <button x-show="columns.publication" @click="setSort('publication')" class="th">Publication <span x-text="sortIndicator('publication')"></span></button>
+        <button x-show="columns.impact" @click="setSort('impact')" class="th text-center" title="Journal impact metric (OpenAlex 2-year mean citedness, or a manually entered value)">IF <span x-text="sortIndicator('impact')"></span></button>
         <button x-show="columns.type" @click="setSort('type')" class="th">Type <span x-text="sortIndicator('type')"></span></button>
         <div x-show="columns.key" class="th">Citation key</div>
         <button x-show="columns.added" @click="setSort('added')" class="th">Added <span x-text="sortIndicator('added')"></span></button>
@@ -532,6 +533,9 @@
               <div x-show="columns.creator" class="cell truncate text-ink-600 dark:text-ink-300" x-text="formatCreators(it)"></div>
               <div x-show="columns.year" class="cell text-ink-500" x-text="it.year || ''"></div>
               <div x-show="columns.publication" class="cell truncate italic text-ink-500" x-text="it.journal || it.publisher || ''"></div>
+              <div x-show="columns.impact" class="cell justify-center">
+                <button @click.stop="openJournalMetrics(it)" class="impact-pill" :class="it.impact_factor_source === 'manual' ? 'impact-pill-manual' : (it.impact_factor != null ? 'impact-pill-auto' : 'impact-pill-empty')" :title="impactFactorTitle(it)" x-text="impactFactorLabel(it) || '—'"></button>
+              </div>
               <div x-show="columns.type" class="cell truncate text-ink-500" x-text="it.type_label"></div>
               <div x-show="columns.key" class="cell truncate font-mono text-[11px] text-ink-500" x-text="it.citation_key || ''"></div>
               <div x-show="columns.added" class="cell text-ink-400 text-[11.5px]" x-text="formatDate(it.added_at)"></div>
@@ -696,6 +700,12 @@
                 </div>
               </div>
             </template>
+          </div>
+
+          <div x-show="(selectedItem.journal || selectedItem.issn) && selectedItem.item_type !== 'book'" class="flex items-center gap-2 text-xs">
+            <span class="rail-label">Impact factor</span>
+            <button @click="openJournalMetrics(selectedItem)" class="impact-pill" :class="selectedItem.impact_factor_source === 'manual' ? 'impact-pill-manual' : (selectedItem.impact_factor != null ? 'impact-pill-auto' : 'impact-pill-empty')" x-text="impactFactorLabel(selectedItem) || 'Look up'"></button>
+            <span class="text-ink-400 truncate" x-text="impactFactorTitle(selectedItem)"></span>
           </div>
 
           <div>
@@ -988,7 +998,7 @@
             <select x-model="c.value" class="dlg-input"><option value="true">yes</option><option value="false">no</option></select>
           </template>
           <template x-if="!['collection','itemType','hasAttachment','starred'].includes(c.field)">
-            <input x-model="c.value" :type="c.field==='dateAdded' ? 'date' : 'text'" @keydown.enter="runAdvanced()" class="dlg-input">
+            <input x-model="c.value" :type="c.field==='dateAdded' ? 'date' : (c.field==='impactFactor' ? 'number' : 'text')" step="0.1" @keydown.enter="runAdvanced()" class="dlg-input">
           </template>
           <div class="flex gap-1"><button @click="removeCondition(i)" class="mini-tool">&#8722;</button><button @click="addCondition(i)" class="mini-tool">+</button></div>
         </div>
@@ -997,6 +1007,59 @@
     <div class="mt-4 flex justify-end gap-2">
       <button @click="saveAdvanced()" class="action-secondary h-9 px-3 text-sm">Save search</button>
       <button @click="runAdvanced()" class="action-primary h-9 px-4 text-sm">Search</button>
+    </div>
+  </div>
+
+  <!-- Journal impact metrics -->
+  <div x-show="dialog==='journalMetrics'" class="dialog w-[min(560px,96vw)] p-5">
+    <div class="dlg-head"><h3>Journal impact metrics</h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+    <div class="mt-1 text-sm text-ink-600 dark:text-ink-300 truncate" x-text="journalMetrics.journal || journalMetrics.issn || '(no journal on this item)'"></div>
+    <p class="mt-2 text-xs text-ink-500 leading-relaxed">The real Journal Impact Factor is a paid Clarivate metric ReviewHunter cannot legally fetch. Shown instead is OpenAlex's free <b>2-year mean citedness</b>: a correlated but differently-scaled proxy. If your institution gives you the real value (Journal Citation Reports), enter it below as a manual override; it then takes priority everywhere and applies to every item in this journal.</p>
+
+    <template x-if="journalMetrics.loading"><div class="mt-4 text-sm text-ink-400">Loading...</div></template>
+
+    <template x-if="!journalMetrics.loading && journalMetrics.data">
+      <div class="mt-3 space-y-3">
+        <div class="card p-3 grid grid-cols-2 gap-2 text-sm">
+          <template x-if="journalMetrics.data.metrics && journalMetrics.data.metrics.citations_2yr != null">
+            <template x-for="row in [['OpenAlex 2-yr citedness', journalMetrics.data.metrics.citations_2yr.toFixed(2)],['h-index', journalMetrics.data.metrics.h_index],['Works indexed', journalMetrics.data.metrics.works_count],['Matched name', journalMetrics.data.metrics.name]]" :key="row[0]">
+              <div class="contents"><span class="text-ink-500" x-text="row[0]"></span><span class="font-medium truncate" x-text="row[1] ?? '—'"></span></div>
+            </template>
+          </template>
+          <template x-if="!journalMetrics.data.metrics || journalMetrics.data.metrics.citations_2yr == null">
+            <div class="col-span-2 text-ink-500">Not matched in OpenAlex yet.</div>
+          </template>
+        </div>
+        <button @click="refreshOneJournalMetric(!!journalMetrics.data.metrics)" class="action-secondary h-8 px-3 text-xs">
+          <span x-text="journalMetrics.data.metrics && journalMetrics.data.metrics.citations_2yr != null ? 'Re-check on OpenAlex' : 'Look up on OpenAlex'"></span>
+        </button>
+
+        <div class="border-t border-ink-200 dark:border-ink-800 pt-3">
+          <div class="rail-label mb-1.5">Wrong match? Search a different journal</div>
+          <input x-model="journalMetrics.query" @input.debounce.400ms="searchJournalMetrics()" placeholder="Journal name" class="dlg-input">
+          <div class="mt-1.5 max-h-40 overflow-y-auto space-y-1">
+            <template x-for="c in journalMetrics.results" :key="c.openalex_id"><button @click="useJournalMetricsMatch(c)" class="w-full text-left px-2 py-1 rounded-md hover:bg-ink-100 dark:hover:bg-ink-800 text-xs flex items-center gap-2"><span class="flex-1 truncate" x-text="c.name"></span><span class="text-ink-400" x-text="c.citations_2yr != null ? c.citations_2yr.toFixed(1) : '—'"></span></button></template>
+            <div x-show="journalMetrics.searching" class="text-xs text-ink-400 px-2">Searching...</div>
+          </div>
+        </div>
+
+        <div class="border-t border-ink-200 dark:border-ink-800 pt-3">
+          <div class="rail-label mb-1.5">Manual value (e.g. real JIF from Journal Citation Reports)</div>
+          <div class="grid grid-cols-[1fr_100px] gap-2">
+            <input x-model="journalMetrics.manualValue" type="number" step="0.001" placeholder="e.g. 4.263" class="dlg-input">
+            <input x-model="journalMetrics.manualYear" type="number" placeholder="Year" class="dlg-input">
+          </div>
+          <input x-model="journalMetrics.manualNote" placeholder="Note (optional, e.g. JCR 2024)" class="dlg-input mt-1.5">
+        </div>
+      </div>
+    </template>
+
+    <div class="mt-4 flex justify-between gap-2">
+      <button @click="resetImpactFactor()" x-show="journalMetrics.data?.display?.source === 'manual'" class="action-secondary h-9 px-3 text-sm text-rose-500">Remove manual value</button>
+      <div class="ml-auto flex gap-2">
+        <button @click="closeDialog()" class="action-secondary h-9 px-3 text-sm">Close</button>
+        <button @click="saveManualImpactFactor()" class="action-primary h-9 px-4 text-sm">Save manual value</button>
+      </div>
     </div>
   </div>
 
@@ -1057,6 +1120,12 @@
           <label class="set-row"><input type="checkbox" :checked="settings.auto_rename_files" @change="saveSetting('auto_rename_files', $event.target.checked)" class="rounded"><span>Rename downloaded and attached files from item metadata <span class="text-ink-400">(Author - Year - Title.pdf)</span></span></label>
           <label class="set-row"><input type="checkbox" :checked="settings.auto_index_fulltext" @change="saveSetting('auto_index_fulltext', $event.target.checked)" class="rounded"><span>Index the text of PDFs for "Everything" search</span></label>
           <label class="set-row"><input type="checkbox" :checked="settings.auto_retrieve_pdf_metadata" @change="saveSetting('auto_retrieve_pdf_metadata', $event.target.checked)" class="rounded"><span>Retrieve metadata automatically for imported PDFs</span></label>
+          <h4 class="set-h">Journal impact metrics</h4>
+          <label class="set-row"><input type="checkbox" :checked="settings.auto_retrieve_impact_factor" @change="saveSetting('auto_retrieve_impact_factor', $event.target.checked)" class="rounded"><span>Look up journal impact metrics automatically for new items <span class="text-ink-400">(free OpenAlex 2-year citedness proxy - see the Impact Factor column; set a real value manually per journal when you have one)</span></span></label>
+          <div class="flex items-center gap-2">
+            <button @click="refreshImpactFactors()" :disabled="impactRefresh.active" class="action-secondary h-8 px-3 text-xs">Retrieve impact factors for the whole library</button>
+            <span x-show="impactRefresh.active" class="text-xs text-ink-500" x-text="`Journal ${impactRefresh.index} of ${impactRefresh.total}: ${impactRefresh.journal}`"></span>
+          </div>
           <h4 class="set-h">Appearance</h4>
           <label class="set-row"><input type="checkbox" :checked="dark" @change="toggleDark()" class="rounded"><span>Dark mode</span></label>
           <h4 class="set-h">Keyboard shortcuts</h4>

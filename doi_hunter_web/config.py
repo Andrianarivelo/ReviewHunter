@@ -145,6 +145,9 @@ DEFAULT_SETTINGS: dict = {
     "scihub_mirrors": [],                    # custom Sci-Hub mirrors (empty = built-in list)
     "scidb_bases": [],                       # custom Anna's Archive bases (empty = built-in list)
     "ezproxy_prefix": "",                    # e.g. https://ezproxy.example.edu/login?url=  (browser-only variant)
+    # ---- Journal impact metrics (journal_metrics.py)
+    "auto_retrieve_impact_factor": True,     # backfill journal metrics for new / unrated items at startup
+    "impact_factor_backfill_attempted": [],  # item ids already tried by the startup backfill (unmatched journals)
 }
 
 

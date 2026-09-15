@@ -46,6 +46,7 @@ and [the PDF identity benchmark](benchmarks/results/H_pdf_identity_notes.md).
 | Word | **Word add-in** (`word_addin/`): live citations and bibliography that renumber as you edit, footnotes for note styles, works offline from copies stored in the document |
 | Storage | Google Drive for desktop folder mode or Google Drive API mode (`drive.file` scope), verified automatic backups with staged restore |
 | Security | The local server rejects cross-site writes and DNS rebinding; only the app and browser extensions can modify the library |
+| Impact factor | A free, OpenAlex-based journal impact metric next to the Publication column (sortable, filterable), with a per-journal search dialog and a manual override for a real Journal Impact Factor when you have one |
 
 ### Insight maps (v2.4)
 
@@ -121,6 +122,22 @@ Failures are explained precisely, for example "blocked by the FortiClient web fi
 (an organisation policy on the computer: no client-side trick gets past a block page, use another network or
 ask IT), "domain no longer exists" (checked against public DNS-over-HTTPS) versus "blocked by your DNS
 resolver", "mirror presents DDoS-Guard's self-signed certificate". Certificate verification is never disabled.
+
+### Journal impact metrics (v2.3)
+
+The **Impact Factor** column sits next to Publication in the item list (toggle it from the columns menu),
+sortable and usable in Advanced Search (`Impact factor` field, "is at least" / "is at most"). The real Journal
+Impact Factor is a paid Clarivate metric behind Journal Citation Reports and cannot legally be scraped, so what
+is shown instead is OpenAlex's free, openly licensed **2-year mean citedness**: a correlated but
+differently-scaled proxy, matched by ISSN (exact) or by journal name (similarity-matched, rejecting a weak
+match rather than guessing). New items are looked up automatically in the background (Settings > General;
+"Retrieve impact factors for the whole library" runs it on demand, one network call per distinct journal, so a
+library with many papers in the same venue costs almost nothing extra).
+
+Click the pill (list column, or the item pane's "Impact factor" row) to open **Journal impact metrics**: the
+matched name, h-index and works indexed, a **search box** to fix a wrong auto-match against any other journal
+name, and a **manual value** field for when your institution gives you the real JIF (Journal Citation Reports) -
+it then takes priority everywhere and applies to every item in that journal at once.
 
 ### Tests and benchmarks
 

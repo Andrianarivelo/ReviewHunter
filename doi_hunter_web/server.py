@@ -76,6 +76,8 @@ async def _startup() -> None:
     await asyncio.to_thread(_ensure_citation_keys)
     if config.get_settings().get("auto_retrieve_pdf_metadata", True):
         threading.Thread(target=_retrieve_missing_metadata, daemon=True, name="metadata-backfill").start()
+    if config.get_settings().get("auto_retrieve_impact_factor", True):
+        threading.Thread(target=_backfill_impact_factors, daemon=True, name="impact-factor-backfill").start()
     threading.Thread(target=gdrive.scheduler_loop, args=(_scheduler_stop,), daemon=True,
                      name="backup-scheduler").start()
     # First-run nicety: if the user has the legacy ./downloads/ folder, adopt those PDFs.
@@ -130,6 +132,37 @@ def _retrieve_missing_metadata() -> None:
             log.warning(f"metadata backfill failed for item {item_id}: {e}")
         attempted.add(item_id)
         config.update_settings({"metadata_backfill_attempted": sorted(attempted)})
+
+
+def _backfill_impact_factors() -> None:
+    """Background pass: fill journal impact metrics for items that have a journal but no value yet.
+
+    One network call per distinct journal (see journal_metrics.refresh_many), so this costs little even
+    on a large library. A journal OpenAlex does not recognise is remembered in settings so it is not
+    retried on every single startup; it is still retried by the periodic 'Retrieve impact factors'
+    button and by journal_metrics' own shorter not-found cache TTL.
+    """
+    from . import journal_metrics
+    from .db import get_conn
+
+    attempted = set(config.get_settings().get("impact_factor_backfill_attempted") or [])
+    rows = get_conn().execute(
+        "SELECT id FROM items WHERE deleted_at IS NULL AND impact_factor IS NULL "
+        "AND (journal IS NOT NULL AND journal != '' OR issn IS NOT NULL AND issn != '')"
+    ).fetchall()
+    todo = [r[0] for r in rows if r[0] not in attempted]
+    if not todo:
+        return
+    try:
+        result = journal_metrics.refresh_many(todo)
+        log.info(f"impact-factor backfill: {result}")
+        if result.get("items_updated"):
+            bus.publish("items_bulk_changed", {"count": result["items_updated"]})
+    except Exception as e:  # background best effort: never crash the server
+        log.warning(f"impact-factor backfill failed: {e}")
+        return
+    attempted.update(todo)
+    config.update_settings({"impact_factor_backfill_attempted": sorted(attempted)})
 
 
 app.include_router(api_v2.router)
@@ -357,6 +390,95 @@ async def api_diagnose_sources(doi: str) -> dict:
                 "proxy": transport.proxy_for(True) or ""}
 
     return await asyncio.get_running_loop().run_in_executor(None, run)
+
+
+# ----------- Journal impact metrics -----------
+
+class ImpactFactorIn(BaseModel):
+    value: Optional[float] = None    # None (with reset=False omitted) is rejected; pair with reset=True to clear
+    year: Optional[int] = None
+    note: Optional[str] = None
+    reset: bool = False              # true: drop the manual override and fall back to the OpenAlex value
+
+
+class ImpactFactorRefreshIn(BaseModel):
+    item_ids: Optional[list[int]] = None   # None = every item in the library missing a value
+    force: bool = False                    # re-query even journals with a fresh cache entry
+
+
+@app.get("/api/journal-metrics/search")
+async def api_journal_metrics_search(q: str) -> dict:
+    """Live OpenAlex candidates for a journal name, used to fix a wrong auto-match or look one up."""
+    from . import journal_metrics
+
+    results = await asyncio.get_running_loop().run_in_executor(None, journal_metrics.search, q)
+    return {"query": q, "results": results}
+
+
+@app.get("/api/items/{item_id}/journal-metrics")
+async def api_item_journal_metrics(item_id: int) -> dict:
+    """Full journal metrics record for the item pane (citations_2yr, h_index, works_count, manual value)."""
+    from . import journal_metrics
+    from dataclasses import asdict
+
+    item = catalog.get_item(item_id, full=False)
+    if not item:
+        raise HTTPException(404, "item not found")
+    loop = asyncio.get_running_loop()
+    row = await loop.run_in_executor(None, journal_metrics.get_cached, item.get("issn"), item.get("journal"))
+    return {"journal": item.get("journal") or "", "issn": item.get("issn") or "",
+            "metrics": asdict(row) if row else None, "display": row.display() if row else None}
+
+
+@app.patch("/api/items/{item_id}/impact-factor")
+async def api_set_impact_factor(item_id: int, body: ImpactFactorIn) -> dict:
+    """Set (or clear) a manual impact-factor value for the item's journal; applies to every item sharing it."""
+    from . import journal_metrics
+
+    item = catalog.get_item(item_id, full=False)
+    if not item:
+        raise HTTPException(404, "item not found")
+    if not (item.get("journal") or "").strip() and not journal_metrics.normalize_issn(item.get("issn")):
+        raise HTTPException(400, "this item has no journal to attach a value to")
+    if not body.reset and body.value is None:
+        raise HTTPException(400, "value is required unless reset is true")
+    loop = asyncio.get_running_loop()
+    value = None if body.reset else body.value
+    row = await loop.run_in_executor(
+        None, lambda: journal_metrics.set_manual(item.get("issn"), item.get("journal"), value=value,
+                                                 year=None if body.reset else body.year,
+                                                 note=None if body.reset else body.note))
+    n = await loop.run_in_executor(None, journal_metrics.apply_to_items_of_journal, item.get("issn"), item.get("journal"), row)
+    bus.publish("items_bulk_changed", {"count": n})
+    return {"ok": True, "display": row.display(), "items_updated": n}
+
+
+@app.post("/api/journal-metrics/refresh")
+async def api_journal_metrics_refresh(body: ImpactFactorRefreshIn) -> dict:
+    """Look up (or re-look-up) impact metrics: ``item_ids`` for a selection, or the whole library.
+
+    One OpenAlex call per distinct journal. Progress and the summary are published on the live socket
+    (``impact_factor_progress`` / ``impact_factor_done``) so a bulk run can be watched, like a download.
+    """
+    asyncio.create_task(_run_impact_refresh(body.item_ids or None, body.force))
+    return {"queued": True}
+
+
+async def _run_impact_refresh(item_ids: Optional[list[int]], force: bool) -> None:
+    from . import journal_metrics
+
+    def on_progress(stage: str, data: dict) -> None:
+        bus.publish("impact_factor_progress", data)
+
+    loop = asyncio.get_running_loop()
+    try:
+        result = await loop.run_in_executor(
+            None, lambda: journal_metrics.refresh_many(item_ids, force=force, progress=on_progress))
+        bus.publish("impact_factor_done", result)
+        if result.get("items_updated"):
+            bus.publish("items_bulk_changed", {"count": result["items_updated"]})
+    except Exception as e:
+        bus.publish("failed", {"error": f"impact factor refresh: {e}"})
 
 
 @app.post("/api/items/{item_id}/open-folder")

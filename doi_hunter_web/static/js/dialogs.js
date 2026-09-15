@@ -20,9 +20,65 @@ window.dialogsPart = function dialogsPart() {
     bulkTags: { add: '', remove: '' },
     tagColorTarget: null,
     confirmState: { title: '', body: '', action: null },
+    journalMetrics: { itemId: null, journal: '', issn: '', loading: false, data: null, query: '', results: [],
+                      searching: false, manualValue: '', manualYear: '', manualNote: '' },
 
     openDialog(name) { this.dialog = name; this.closeContextMenu(); },
     closeDialog() { this.dialog = ''; },
+
+    // ------------------------------------------------------------ journal impact metrics
+
+    /** Open the metrics dialog for an item: current match, OpenAlex stats, and a way to fix or override it. */
+    async openJournalMetrics(it) {
+      this.journalMetrics = { itemId: it.id, journal: it.journal || '', issn: it.issn || '', loading: true,
+                              data: null, query: '', results: [], searching: false,
+                              manualValue: it.impact_factor_source === 'manual' ? it.impact_factor : '',
+                              manualYear: it.impact_factor_year || '', manualNote: '' };
+      this.openDialog('journalMetrics');
+      try {
+        this.journalMetrics.data = await api.get(`/api/items/${it.id}/journal-metrics`);
+      } catch (e) { this.toast(e.message, 'error', 6000); } finally { this.journalMetrics.loading = false; }
+    },
+    /** Look up (or re-look-up, ``force``) just this item's journal. */
+    async refreshOneJournalMetric(force = false) {
+      const jm = this.journalMetrics;
+      await this.refreshImpactFactors([jm.itemId], force);
+      setTimeout(() => this.openJournalMetrics({ id: jm.itemId }), 900); // gives the background job a moment to land
+    },
+    /** Search OpenAlex by name, e.g. to fix an auto-match that picked the wrong sister journal. */
+    async searchJournalMetrics() {
+      const jm = this.journalMetrics;
+      if (!jm.query.trim()) { jm.results = []; return; }
+      jm.searching = true;
+      try { jm.results = (await api.get('/api/journal-metrics/search', { q: jm.query.trim() })).results; }
+      catch (e) { this.toast(e.message, 'error'); } finally { jm.searching = false; }
+    },
+    /** Adopt a chosen OpenAlex candidate as a manual value (so it sticks even if the auto-match differs). */
+    useJournalMetricsMatch(candidate) {
+      this.journalMetrics.manualValue = candidate.citations_2yr != null ? Number(candidate.citations_2yr.toFixed(3)) : '';
+      this.journalMetrics.manualNote = `Matched manually to "${candidate.name}" (OpenAlex ${candidate.openalex_id})`;
+    },
+    async saveManualImpactFactor() {
+      const jm = this.journalMetrics;
+      const value = parseFloat(jm.manualValue);
+      if (!Number.isFinite(value)) return this.toast('Enter a numeric value', 'error');
+      try {
+        const r = await api.patch(`/api/items/${jm.itemId}/impact-factor`,
+          { value, year: jm.manualYear ? parseInt(jm.manualYear, 10) : null, note: jm.manualNote || null });
+        this.toast(`Saved (updated ${r.items_updated} item${r.items_updated === 1 ? '' : 's'} in this journal)`, 'ok');
+        this.closeDialog();
+        await this.reloadAll();
+      } catch (e) { this.toast(e.message, 'error', 6000); }
+    },
+    async resetImpactFactor() {
+      const jm = this.journalMetrics;
+      try {
+        const r = await api.patch(`/api/items/${jm.itemId}/impact-factor`, { reset: true });
+        this.toast(`Reverted to the OpenAlex value (${r.items_updated} item${r.items_updated === 1 ? '' : 's'})`, 'ok');
+        this.closeDialog();
+        await this.reloadAll();
+      } catch (e) { this.toast(e.message, 'error', 6000); }
+    },
 
     // ------------------------------------------------------------ add by identifier
 
@@ -248,9 +304,11 @@ window.dialogsPart = function dialogsPart() {
       { id: 'doi', label: 'DOI' }, { id: 'citationKey', label: 'Citation key' }, { id: 'extra', label: 'Extra' },
       { id: 'language', label: 'Language' }, { id: 'dateAdded', label: 'Date added' },
       { id: 'hasAttachment', label: 'Has file attachment' }, { id: 'starred', label: 'Starred' },
+      { id: 'impactFactor', label: 'Impact factor' },
     ],
     opsFor(field) {
       if (field === 'year') return [['is', 'is'], ['isLessThan', 'is before'], ['isGreaterThan', 'is after'], ['contains', 'contains']];
+      if (field === 'impactFactor') return [['isGreaterThan', 'is at least'], ['isLessThan', 'is at most'], ['is', 'is exactly']];
       if (field === 'dateAdded') return [['isAfter', 'is after'], ['isBefore', 'is before'], ['is', 'is']];
       if (field === 'hasAttachment' || field === 'starred') return [['is', 'is']];
       if (field === 'collection' || field === 'itemType') return [['is', 'is'], ['isNot', 'is not']];

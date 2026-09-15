@@ -113,6 +113,11 @@ V2_ITEM_COLUMNS = [
     ("fields", "TEXT", None),          # JSON dict of type-specific extra fields
     ("deleted_at", "TEXT", None),      # trash timestamp (NULL = live)
     ("drive_file_id", "TEXT", None),   # Google Drive API id of the primary file
+    # Journal impact metrics (journal_metrics.py): denormalised onto the item so list views can sort /
+    # filter with a plain column, the same way citation_key is kept in sync from its own logic.
+    ("impact_factor", "REAL", None),
+    ("impact_factor_source", "TEXT", None),   # 'openalex' | 'manual'
+    ("impact_factor_year", "INTEGER", None),  # only set for a manual value (the JCR year it applies to)
 ]
 
 _SCHEMA_V2 = """
@@ -196,8 +201,29 @@ CREATE TABLE IF NOT EXISTS drive_files (
     uploaded_at TEXT DEFAULT (datetime('now'))
 );
 
+-- One row per journal (keyed by ISSN, or by a normalised name when no ISSN is known). See
+-- journal_metrics.py. `found`=0 means the last OpenAlex lookup found nothing (still cached, with a
+-- shorter TTL, so an unmatched journal is not re-queried on every list render).
+CREATE TABLE IF NOT EXISTS journal_metrics (
+    key TEXT PRIMARY KEY,
+    issn TEXT,
+    name TEXT,
+    openalex_id TEXT,
+    citations_2yr REAL,        -- OpenAlex 2-year mean citedness: a free, differently-scaled proxy for JIF
+    h_index INTEGER,
+    works_count INTEGER,
+    cited_by_count INTEGER,
+    manual_value REAL,         -- user-entered real value (e.g. from a licensed Journal Citation Reports)
+    manual_year INTEGER,
+    manual_note TEXT,
+    fetched_at TEXT,
+    found INTEGER DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_journal_metrics_issn ON journal_metrics(issn);
+
 CREATE INDEX IF NOT EXISTS idx_items_deleted ON items(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_items_citekey ON items(citation_key);
+CREATE INDEX IF NOT EXISTS idx_items_impact ON items(impact_factor);
 """
 
 # items_fts is rebuilt in v2 with more searchable columns.

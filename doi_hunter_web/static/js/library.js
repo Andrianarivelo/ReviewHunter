@@ -37,7 +37,10 @@ window.libraryPart = function libraryPart() {
     sortBy: LS.get('rh.sortBy', 'added'),
     sortDir: LS.get('rh.sortDir', 'desc'),
     includeSub: LS.get('rh.includeSub', true),
-    columns: LS.get('rh.columns', { creator: true, year: true, publication: true, added: true, type: false, key: false }),
+    // Spread over the saved value (not passed as the LS.get fallback) so a column added in a later
+    // version - like 'impact' here - still defaults to visible for libraries with an older saved layout.
+    columns: { creator: true, year: true, publication: true, impact: true, added: true, type: false, key: false,
+              ...LS.get('rh.columns', {}) },
 
     tagFilter: [],
     tagQuery: '',
@@ -345,6 +348,7 @@ window.libraryPart = function libraryPart() {
       if (this.columns.creator) cols.push('minmax(110px, 1.2fr)');
       if (this.columns.year) cols.push('58px');
       if (this.columns.publication) cols.push('minmax(110px, 1.2fr)');
+      if (this.columns.impact) cols.push('76px');
       if (this.columns.type) cols.push('120px');
       if (this.columns.key) cols.push('130px');
       if (this.columns.added) cols.push('92px');
@@ -481,6 +485,26 @@ window.libraryPart = function libraryPart() {
         await this.reloadAll();
         if (r.ok && r.item_id) await this.openItem(r.item_id);
       } catch (e) { this.toast(e.message, 'error'); }
+    },
+    /** Look up (or re-look-up) journal impact metrics for a set of items, or the whole library when omitted. */
+    async refreshImpactFactors(itemIds = null, force = false) {
+      this.toast(itemIds ? `Looking up impact factor${itemIds.length === 1 ? '' : 's'}...` : 'Looking up impact factors for the whole library...', 'info');
+      try {
+        await api.post('/api/journal-metrics/refresh', itemIds ? { item_ids: itemIds, force } : { force });
+        // Progress and the final toast arrive over the live socket (impact_factor_progress / _done).
+      } catch (e) { this.toast(e.message, 'error', 6000); }
+    },
+    /** Formatted value for the list column and item pane ("4.3" / "12 (manual)"). */
+    impactFactorLabel(it) {
+      if (it.impact_factor === null || it.impact_factor === undefined) return '';
+      const v = it.impact_factor >= 10 ? Math.round(it.impact_factor) : it.impact_factor.toFixed(1);
+      return it.impact_factor_source === 'manual' ? `${v}*` : String(v);
+    },
+    impactFactorTitle(it) {
+      if (it.impact_factor === null || it.impact_factor === undefined) return 'No impact metric yet - click to look one up';
+      return it.impact_factor_source === 'manual'
+        ? `Manual value${it.impact_factor_year ? ` (${it.impact_factor_year})` : ''}: ${it.impact_factor}`
+        : `OpenAlex 2-year mean citedness: ${it.impact_factor} (a free, differently-scaled proxy for the Journal Impact Factor - click to inspect or override)`;
     },
     async duplicateItem(it) {
       const copy = await api.post(`/api/items/${it.id}/duplicate`);
@@ -648,6 +672,7 @@ window.libraryPart = function libraryPart() {
             sep,
             { label: 'Find Available PDF', action: () => this.selectedItemsList().forEach(i => this.downloadItem(i)) },
             { label: 'Retrieve Metadata for PDF', action: () => this.retrieveMetadata(t), disabled: many || !pdf },
+            { label: many ? `Retrieve Impact Factors (${this.selectedIds.length})` : 'Retrieve Impact Factor', action: () => this.refreshImpactFactors(this.selectedItemsList().map(i => i.id)) },
             { label: 'Rename File from Parent Metadata', action: async () => { const r = await api.post(`/api/items/${t.id}/rename-files`); this.toast(`Renamed ${r.renamed} file(s)`, 'ok'); this.reloadAll(); }, disabled: many || !pdf },
             sep,
             { label: 'Add to Collection...', action: () => this.openFolderChooser() },

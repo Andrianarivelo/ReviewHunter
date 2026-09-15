@@ -18,6 +18,7 @@ function app() {
       ws: null,
       online: true,
       batch: { active: false, index: 0, total: 0, query: '' },
+      impactRefresh: { active: false, index: 0, total: 0, journal: '' },
       /** Chrome connector detected on this page (its content script answers window messages). */
       connector: { present: false, version: '' },
       /** Live hand-off state per item id: {state, message}. */
@@ -184,6 +185,17 @@ function app() {
             case 'batch_done':
               this.batch = { active: false, index: 0, total: 0, query: '' };
               this.toast(`Finished (${m.total})`, 'ok');
+              scheduleRefresh();
+              break;
+            case 'items_bulk_changed':
+              scheduleRefresh();
+              break;
+            case 'impact_factor_progress':
+              this.impactRefresh = { active: true, index: m.index, total: m.total, journal: m.journal };
+              break;
+            case 'impact_factor_done':
+              this.impactRefresh = { active: false, index: 0, total: 0, journal: '' };
+              this.toast(`Impact factors: ${m.matched} of ${m.journals} journal(s) matched, ${m.items_updated} item(s) updated`, 'ok', 7000);
               scheduleRefresh();
               break;
             default: break;

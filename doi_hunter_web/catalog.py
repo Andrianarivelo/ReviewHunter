@@ -1197,6 +1197,14 @@ def _condition_sql(cond: dict) -> tuple[str, list[Any]]:
                 else "i.id NOT IN (SELECT item_id FROM attachments WHERE kind != 'link')"), []
     if field == "starred":
         return ("i.starred=1" if value in ("1", "true", "yes") else "COALESCE(i.starred,0)=0"), []
+    if field == "impactFactor":
+        try:
+            num = float(value)
+        except (TypeError, ValueError):
+            return "0", []
+        # "at least" / "at most" (>=, <=) rather than strict, so a threshold search includes the boundary.
+        cmp = {"isLessThan": "<=", "isGreaterThan": ">="}.get(op, "=")
+        return f"i.impact_factor {cmp} ?", [num]
     col = _TEXT_COLUMNS.get(field, "i.title")
     if field == "year" and op in ("isLessThan", "isGreaterThan"):
         return f"i.year {'<' if op == 'isLessThan' else '>'} ?", [int(value or 0)]
@@ -1311,8 +1319,12 @@ def query_items(
         "added": "i.added_at", "modified": "i.updated_at", "year": "COALESCE(i.year, 0)",
         "title": "i.title COLLATE NOCASE", "creator": "i.authors COLLATE NOCASE",
         "publication": "i.journal COLLATE NOCASE", "type": "i.item_type",
-        "deleted": "i.deleted_at",
+        "deleted": "i.deleted_at", "impact": "i.impact_factor",
+        # SQLite sorts NULL before every value in both directions of a plain ORDER BY; for ASC that
+        # buries rated items behind every unrated one, so ASC explicitly pushes NULLs to the end instead.
     }.get(sort, "i.added_at")
+    if sort == "impact" and direction.lower() != "desc":
+        order = "(i.impact_factor IS NULL), i.impact_factor"
     direction = "ASC" if direction.lower() == "asc" else "DESC"
     # Compact lists skip large text columns entirely (less I/O and JSON decoding than SELECT *).
     select = "i.*" if not compact else ", ".join(f"i.{c}" for c in _LIST_COLUMNS)
@@ -1337,7 +1349,8 @@ def query_items(
 # by the item pane through GET /api/items/{id}.
 _LIST_COLUMNS = ("id", "doi", "title", "authors", "creators", "year", "date", "journal", "publisher", "status",
                  "starred", "added_at", "updated_at", "item_type", "extension", "citation_key", "file_path",
-                 "deleted_at", "error_msg", "volume", "pages", "url")
+                 "deleted_at", "error_msg", "volume", "pages", "url", "issn",
+                 "impact_factor", "impact_factor_source", "impact_factor_year")
 
 # Columns the list views never display; dropped from list payloads (the item pane loads the full item).
 _HEAVY_LIST_COLUMNS = ("abstract", "mirrors", "source_query", "subjects", "fields")
