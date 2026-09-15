@@ -13,7 +13,7 @@ PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Every
 
 ### PDF imports and reference matching (2.2.1)
 
-Save an open PDF with browser extension 1.2.1, drag a PDF into the library, or import a PDF
+Save an open PDF with browser extension 1.2.2, drag a PDF into the library, or import a PDF
 folder. ReviewHunter reads embedded Info/XMP metadata and the first pages, verifies available
 registry metadata against the document, and attaches the file to its existing DOI or unique
 matching title. If there is no matching reference, it creates one from the available metadata.
@@ -98,13 +98,23 @@ Download **ReviewHunter.zip** from the [latest release](https://github.com/Andri
 | **Linux** (Ubuntu, Debian, Fedora, openSUSE, Arch) | `bash install.sh` | installs `python3-venv` / `python3-tk` with your confirmation if missing, then opens the setup window (terminal mode without a display) |
 
 The setup window shows each step with a progress bar: system check, file copy, private Python environment,
-dependencies, optional semantic clustering, a **self-test that really starts the app**, shortcuts
+dependencies, optional semantic clustering, a **self-test that really starts the app**, Chrome extension setup, shortcuts
 (Desktop + Start menu / applications menu). Nothing needs administrator rights: the program goes to
 `%LOCALAPPDATA%\Programs\ReviewHunter` (Windows) or `~/.local/share/reviewhunter` (Linux), and your library
 in `~/ReviewHunter` is never touched, not even by the uninstaller.
 
+**Chrome extension setup is selected by default.** The installer bundles and validates the current
+connector alongside the PDF metadata, reference matching, and citation filename features. At the end it
+opens Chrome's extensions page and the installed extension folder (the folder path is copied on Windows).
+Enable **Developer mode**, click **Load unpacked**, and select that folder. Chrome requires this final
+manual step for extensions distributed outside the Chrome Web Store. For an existing connector loaded
+from the same folder, click **Reload** instead. On Windows, **ReviewHunter Chrome Extension** in the Start
+menu, or **Install Chrome Extension.cmd** in the installation folder, reopens setup later.
+
 ```bash
-bash install.sh --cli --yes                                        # unattended install (servers, scripts)
+bash install.sh --cli --yes --no-launch                            # unattended install, no app/browser launch
+python installer/reviewhunter_installer.py --setup-chrome          # reopen Chrome setup for the installed app
+python installer/reviewhunter_installer.py --no-chrome-extension   # skip Chrome setup
 python installer/reviewhunter_installer.py --uninstall             # remove program + shortcuts, keep library
 python installer/reviewhunter_installer.py --help                  # all options
 ```
@@ -113,6 +123,11 @@ python installer/reviewhunter_installer.py --help                  # all options
 latest release. While the repository is private this needs the [GitHub CLI](https://cli.github.com/) signed in
 (`gh auth login`); otherwise download the zip from the Releases page while signed in to GitHub.
 Setup log: `%TEMP%\reviewhunter-install.log` or `/tmp/reviewhunter-install.log`.
+
+Every installer CI run packages `ReviewHunter.zip` and `ReviewHunter-Chrome-Extension.zip` from its exact
+commit. The **ReviewHunter-installer** workflow artifact contains both ZIPs and the Windows/Linux
+launchers. Automated clean installations use this same packaged app and verify its PDF dependencies
+and connector files before reporting success.
 
 ## Launching the Web App - no install required
 

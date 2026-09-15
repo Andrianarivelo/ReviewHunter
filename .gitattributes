@@ -12,3 +12,8 @@ travis.yml            export-ignore
 error.log             export-ignore
 failed_downloads.txt  export-ignore
 paper_titles.txt      export-ignore
+**/__pycache__         export-ignore
+**/__pycache__/**      export-ignore
+secret/               export-ignore
+certs/                export-ignore
+PROJECT_MEMORY.md      export-ignore

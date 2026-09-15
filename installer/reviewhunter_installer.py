@@ -10,8 +10,9 @@ What it does, step by step (every step reports progress to a window or to the te
     5. Optional extras    semantic clustering (sentence-transformers, CPU build of PyTorch)
     6. Self-test          imports + starts the app on a free port with a throw-away library and
                           waits for ``/connector/ping`` to answer (a real end-to-end check)
-    7. Shortcuts          Windows: Desktop + Start menu (.lnk); Linux: application menu + Desktop (.desktop)
-    8. Finish             writes ``install.json`` (used by upgrade and uninstall)
+    7. Chrome extension   validate bundled connector, prepare setup launcher and instructions
+    8. Shortcuts          Windows: Desktop + Start menu (.lnk); Linux: application menu + Desktop (.desktop)
+    9. Finish             writes ``install.json`` and opens Chrome setup when requested
 
 Your library (``~/ReviewHunter``: database, PDFs, settings) is never created, modified or deleted by
 the installer or the uninstaller: only the program folder and the shortcuts are managed here.
@@ -34,7 +35,7 @@ MIN_FREE_GB_SEMANTIC = 4.0         # PyTorch CPU + sentence-transformers models
 SELFTEST_TIMEOUT_S = 90            # first start compiles bytecode and creates the database
 PIP_EXPECTED_PACKAGES = 60         # rough count of resolved packages, only used to scale the progress bar
 REQUIRED_MODULES = ("fastapi", "uvicorn", "requests", "bs4", "pydantic", "libgen", "multipart", "pypdf",
-                    "bibtexparser", "cryptography", "google_auth_oauthlib", "googleapiclient")
+                    "fontTools", "curl_cffi", "bibtexparser", "cryptography", "google_auth_oauthlib", "googleapiclient")
 # Files and folders never copied into the install folder (dev artefacts, secrets, local data).
 COPY_EXCLUDE = {".git", ".venv", "venv", "secret", "build", "dist", "downloads", "__pycache__", ".pytest_cache",
                 "certs", "PROJECT_MEMORY.md", "error.log", "failed_downloads.txt", "paper_titles.txt",
@@ -48,11 +49,12 @@ UI = {
     "bg": "#f8fafc", "panel": "#ffffff", "text": "#0f172a", "muted": "#64748b", "accent": "#0284c7",
     "accent_dark": "#0369a1", "ok": "#059669", "error": "#dc2626", "border": "#e2e8f0",
     "font": ("Segoe UI", 10), "font_title": ("Segoe UI Semibold", 18), "font_step": ("Segoe UI", 10),
-    "font_mono": ("Consolas", 9), "width": 760, "height": 560,
+    "font_mono": ("Consolas", 9), "width": 760, "height": 650,
 }
 # ============================================================================
 
 import argparse
+import hashlib
 import json
 import os
 import platform
@@ -163,6 +165,7 @@ class Options:
     desktop_shortcut: bool = True
     menu_shortcut: bool = True
     word_addin: bool = False               # Windows only: opens the add-in setup window at the end
+    chrome_extension: bool = True          # bundle/setup now, final Load unpacked action belongs to Chrome
     launch: bool = True
 
 
@@ -201,6 +204,7 @@ class Installer:
         self.created_shortcuts: list[str] = []
         self.in_place = False              # True when installing inside the downloaded/cloned folder itself
         self.warnings: list[str] = []
+        self.extension: dict = {"status": "not_selected"}
         # (title, weight in the overall bar, function)
         self.steps: list[tuple[str, float, Callable[[], Optional[str]]]] = [
             ("Check the system", 3, self.check_system),
@@ -209,6 +213,7 @@ class Installer:
             ("Install dependencies", 52, self.install_dependencies),
             ("Install optional extras", 10, self.install_extras),
             ("Test that ReviewHunter starts", 14, self.self_test),
+            ("Set up the Chrome extension", 3, self.prepare_chrome_extension),
             ("Create shortcuts", 4, self.create_shortcuts),
             ("Finish", 2, self.finish),
         ]
@@ -438,7 +443,7 @@ class Installer:
 
     def self_test(self) -> str:
         py = venv_python(self.o.target)
-        probe = "; ".join(f"import {m}" for m in REQUIRED_MODULES) + "; import doi_hunter_web.server"
+        probe = "; ".join(f"import {m}" for m in REQUIRED_MODULES) + "; import doi_hunter_web.server; import doi_hunter_web.pdf_ingest"
         self.sub_progress(0.1, "Checking imports")
         self.run_cmd([str(py), "-c", probe], cwd=self.o.target, timeout=300)
 
@@ -461,7 +466,7 @@ class Installer:
                 try:
                     with urllib.request.urlopen(f"http://127.0.0.1:{port}/connector/ping", timeout=3) as resp:
                         data = json.loads(resp.read().decode("utf-8"))
-                    if data.get("app") == APP_NAME:
+                    if data.get("app") == APP_NAME and data.get("version") == self.version:
                         return f"app answered (version {data.get('version')})"
                 except Exception:
                     pass
@@ -475,6 +480,28 @@ class Installer:
             except subprocess.TimeoutExpired:
                 proc.kill()
             shutil.rmtree(home, ignore_errors=True)
+
+    def prepare_chrome_extension(self) -> str:
+        """Prepare a stable, validated unpacked extension without editing browser preferences."""
+        if not self.o.chrome_extension:
+            return "not selected"
+        self.extension = validate_chrome_extension(self.o.target)
+        help_path = self.o.target / "ChromeExtensionSetup.txt"
+        help_path.write_text(
+            f"ReviewHunter Chrome connector {self.extension['version']}\n\n"
+            + EXTENSION_HELP.format(folder=self.extension["folder"])
+            + "\n\nChrome requires you to confirm loading this local extension.\n"
+            + "On upgrades, click Reload on the existing ReviewHunter extension.\n"
+            + "If Chrome requests approval for new permissions, review and accept them in Chrome.\n"
+            + "Keep this installed folder in place; Chrome loads the extension from it.\n", encoding="utf-8")
+        if IS_WINDOWS:
+            # Relative paths keep this launcher usable even when the installation moves.
+            launcher = self.o.target / "Install Chrome Extension.cmd"
+            launcher.write_text('@echo off\nsetlocal\ncd /d "%~dp0"\n'
+                '".venv\\Scripts\\python.exe" "installer\\reviewhunter_installer.py" --setup-chrome --target "%~dp0."\n'
+                'if errorlevel 1 pause\n', encoding="utf-8")
+        self.log(f"Chrome connector {self.extension['version']} prepared in {self.extension['folder']}")
+        return f"v{self.extension['version']} ready; confirm in Chrome"
 
     def create_shortcuts(self) -> str:
         if not (self.o.desktop_shortcut or self.o.menu_shortcut):
@@ -495,6 +522,12 @@ class Installer:
                                       "ReviewHunter reference manager", minimized=True)
                 self.created_shortcuts.append(str(lnk))
             if self.o.menu_shortcut:
+                if self.o.chrome_extension:
+                    setup_link = places[-1] / f"{APP_NAME} Chrome Extension.lnk"
+                    make_windows_shortcut(setup_link, venv_python(self.o.target),
+                        f'"{self.o.target / "installer" / "reviewhunter_installer.py"}" --setup-chrome --target "{self.o.target}"',
+                        self.o.target, icon, "Install or update the ReviewHunter Chrome extension", minimized=True)
+                    self.created_shortcuts.append(str(setup_link))
                 base = Path(getattr(sys, "_base_executable", sys.executable))
                 lnk = places[-1] / f"Uninstall {APP_NAME}.lnk"
                 make_windows_shortcut(lnk, base, f'"{self.o.target / "installer" / "reviewhunter_installer.py"}" --uninstall',
@@ -525,6 +558,7 @@ class Installer:
             "app": APP_NAME, "version": self.version, "installed_at": datetime.now().isoformat(timespec="seconds"),
             "target": str(self.o.target), "python": sys.executable, "shortcuts": self.created_shortcuts,
             "semantic": self.o.semantic, "platform": platform.platform(), "in_place": self.in_place,
+            "chrome_extension": self.extension,
         }
         (self.o.target / "install.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         if self.o.word_addin and IS_WINDOWS:
@@ -601,31 +635,79 @@ def launch_app(target: Path) -> None:
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 
-def open_extension_setup(target: Path) -> None:
-    """Show the extension folder; Chrome only allows unpacked extensions to be loaded by the user."""
-    folder = target / "browser_extension"
+def validate_chrome_extension(target: Path) -> dict:
+    """Check the complete bundled runtime before offering it for installation in Chrome."""
+    folder = (target / "browser_extension").resolve()
+    manifest_path = folder / "manifest.json"
+    try:
+        raw = manifest_path.read_bytes()
+        manifest = json.loads(raw)
+    except (OSError, ValueError) as exc:
+        raise InstallError(f"The bundled Chrome extension is missing or unreadable: {exc}") from exc
+    if manifest.get("manifest_version") != 3 or manifest.get("name") != "ReviewHunter Connector":
+        raise InstallError("The installer requires the ReviewHunter Manifest V3 Chrome connector.")
+    version = manifest.get("version", "")
+    if not re.fullmatch(r"\d+(?:\.\d+){1,3}", version):
+        raise InstallError("The bundled Chrome extension has an invalid version.")
+    paths = ["src/core/pdf.js", "src/core/save.js", "src/core/handoff.js", "src/api.js"]
+    paths += list((manifest.get("icons") or {}).values())
+    paths += [manifest.get("background", {}).get("service_worker", ""),
+              manifest.get("action", {}).get("default_popup", ""),
+              manifest.get("options_ui", {}).get("page", "")]
+    for script in manifest.get("content_scripts", []):
+        paths += script.get("js", []) + script.get("css", [])
+    # Imports, HTML scripts and CSS are all shipped from these runtime folders.
+    # Verifying local JS imports catches an archive that forgot a newly added module.
+    for script in (folder / "src").rglob("*.js"):
+        for imported in re.findall(r'(?:from\s*|import\s*)[\'\"]([^\'\"]+)[\'\"]', script.read_text("utf-8")):
+            if imported.startswith("."):
+                dependency = (script.parent / imported).resolve()
+                if not dependency.is_relative_to(folder) or not dependency.is_file():
+                    raise InstallError(f"Chrome extension dependency is missing: {script.name}: {imported}")
+    for relative in paths:
+        candidate = (folder / relative).resolve()
+        if not relative or not candidate.is_relative_to(folder) or not candidate.is_file():
+            raise InstallError(f"Chrome extension file is missing: {relative or '(manifest entry)'}")
+    return {"version": version, "folder": str(folder), "status": "ready_for_chrome",
+            "requires_confirmation": True, "manifest_sha256": hashlib.sha256(raw).hexdigest()}
+
+
+def find_chrome() -> Optional[str]:
+    """Find Chrome explicitly; chrome:// URLs must not be sent to a different default browser."""
     if IS_WINDOWS:
+        for base in ("LOCALAPPDATA", "ProgramFiles", "ProgramFiles(x86)"):
+            if os.environ.get(base):
+                path = Path(os.environ[base]) / "Google/Chrome/Application/chrome.exe"
+                if path.is_file():
+                    return str(path)
+    for name in ("chrome", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser"):
+        found = shutil.which(name)
+        if found:
+            return found
+    return None
+
+
+def open_extension_setup(target: Path) -> bool:
+    """Open the supported Chrome loading flow, without changing policies or profile files."""
+    folder = Path(validate_chrome_extension(target)["folder"])
+    chrome = find_chrome()
+    if IS_WINDOWS:
+        _powershell("Set-Clipboard -Value $env:RH_EXTENSION_FOLDER", {"RH_EXTENSION_FOLDER": str(folder)})
         os.startfile(str(folder))  # type: ignore[attr-defined]
-        for chrome in (Path(os.environ.get("ProgramFiles", "")) / "Google/Chrome/Application/chrome.exe",
-                       Path(os.environ.get("LOCALAPPDATA", "")) / "Google/Chrome/Application/chrome.exe"):
-            if chrome.exists():
-                subprocess.Popen([str(chrome), "chrome://extensions"])
-                break
     else:
         if shutil.which("xdg-open"):
             subprocess.Popen(["xdg-open", str(folder)])
-        for browser in ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser"):
-            if shutil.which(browser):
-                subprocess.Popen([browser, "chrome://extensions"], start_new_session=True,
-                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                break
+    if chrome:
+        subprocess.Popen([chrome, "chrome://extensions/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    return bool(chrome)
 
 
 EXTENSION_HELP = (
     "1. In Chrome, open chrome://extensions\n"
     "2. Switch on 'Developer mode' (top right)\n"
     "3. Click 'Load unpacked' and choose the folder:\n   {folder}\n"
-    "4. Pin the ReviewHunter button next to the address bar"
+    "4. Pin the ReviewHunter button next to the address bar\n"
+    "Already installed? Click Reload on its card to apply this update."
 )
 
 
@@ -672,7 +754,7 @@ class TerminalReporter(Reporter):
     def __init__(self, verbose: bool = False) -> None:
         self.tty = sys.stdout.isatty()
         self.verbose = verbose
-        self.total = 8
+        self.total = 9
         self._last = ""
 
     def step(self, index: int, title: str) -> None:
@@ -724,7 +806,11 @@ def run_cli(args: argparse.Namespace, options: Options) -> int:
         options.semantic = options.semantic or ask_yes_no("Also install semantic clustering (~2 GB)?", False)
     ok = Installer(options, TerminalReporter(verbose=args.verbose)).run()
     if ok:
-        print("\nBrowser extension:\n" + EXTENSION_HELP.format(folder=options.target / "browser_extension"))
+        if options.chrome_extension:
+            print("\nChrome extension ready. Confirm loading it in Chrome:\n" + EXTENSION_HELP.format(folder=options.target / "browser_extension"))
+            if options.launch and (IS_WINDOWS or os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+                if not open_extension_setup(options.target):
+                    print("Chrome was not found. Install Chrome, then run the Chrome extension setup shortcut.")
         if options.launch and (IS_WINDOWS or os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
             launch_app(options.target)
             print("\nReviewHunter is starting in your browser.")
@@ -813,11 +899,13 @@ def run_gui(options: Options) -> int:
             "menu_shortcut": tk.BooleanVar(value=options.menu_shortcut),
             "semantic": tk.BooleanVar(value=options.semantic),
             "word_addin": tk.BooleanVar(value=options.word_addin),
+            "chrome_extension": tk.BooleanVar(value=options.chrome_extension),
             "launch": tk.BooleanVar(value=options.launch),
         }
         labels = [
             ("desktop_shortcut", "Desktop shortcut"),
             ("menu_shortcut", "Start menu entry" if IS_WINDOWS else "Applications menu entry"),
+            ("chrome_extension", "Set up the Chrome extension (finish by confirming Load unpacked in Chrome)"),
             ("semantic", "Semantic clustering and similarity (optional, about 2 GB download)"),
         ]
         if IS_WINDOWS:
@@ -826,7 +914,7 @@ def run_gui(options: Options) -> int:
         for key, text in labels:
             ttk.Checkbutton(card, text=text, variable=vars_[key]).pack(anchor="w", padx=20, pady=3)
 
-        tk.Label(card, text=f"Google Drive, the Chrome extension and Zotero import are configured inside the app.\n"
+        tk.Label(card, text=f"Google Drive and Zotero import are configured inside the app.\n"
                             f"Setup log: {LOG_FILE}",
                  bg=UI["panel"], fg=UI["muted"], font=(UI["font"][0], 9), justify="left").pack(anchor="w", padx=20,
                                                                                             pady=(14, 16))
@@ -934,13 +1022,28 @@ def run_gui(options: Options) -> int:
         msg.insert("1.0", message)
         msg.config(state="disabled")
         msg.pack(fill="x", padx=20)
-        if ok:
+        if ok and options.chrome_extension:
+            def show_chrome_setup() -> None:
+                """Keep setup instructions available if Chrome or the desktop shell cannot open."""
+                try:
+                    if not open_extension_setup(options.target):
+                        messagebox.showinfo("Chrome extension setup", "Chrome was not found. Install Chrome, then reopen "
+                                            "the extension setup shortcut and follow the instructions shown here.")
+                except (OSError, InstallError) as exc:
+                    messagebox.showinfo("Chrome extension setup", f"Could not open Chrome setup automatically: {exc}\n\n"
+                                        "Follow the instructions shown here to load the extension manually.")
+
             tk.Label(card, text="Save references from Chrome", bg=UI["panel"], fg=UI["text"],
                      font=(UI["font"][0], 10, "bold")).pack(anchor="w", padx=20, pady=(12, 2))
             tk.Label(card, text=EXTENSION_HELP.format(folder=options.target / "browser_extension"), bg=UI["panel"],
-                     fg=UI["muted"], font=UI["font"], justify="left").pack(anchor="w", padx=20)
-            button(card, "Open the extension folder and Chrome", lambda: open_extension_setup(options.target)).pack(
+                     fg=UI["muted"], font=UI["font"], justify="left", wraplength=UI["width"] - 90).pack(anchor="w", padx=20)
+            button(card, "Open the extension folder and Chrome", show_chrome_setup).pack(
                 anchor="w", padx=20, pady=(8, 16))
+            tk.Label(card, text="Chrome needs your final confirmation. On Windows, the folder path is copied for you.",
+                     bg=UI["panel"], fg=UI["muted"], font=(UI["font"][0], 9)).pack(anchor="w", padx=20, pady=(0, 8))
+            if options.launch:
+                root.after(150, show_chrome_setup)
+        if ok:
             if options.launch:
                 launch_app(options.target)
             button(footer, "Close", root.destroy, primary=True).pack(side="right")
@@ -1004,10 +1107,24 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--download", action="store_true", help="always download the latest release")
     parser.add_argument("--with-semantic", action="store_true", help="also install semantic clustering (~2 GB)")
     parser.add_argument("--no-shortcuts", action="store_true")
-    parser.add_argument("--no-launch", action="store_true", help="do not start the app at the end")
+    parser.add_argument("--no-launch", action="store_true", help="do not start the app or open Chrome setup at the end")
+    parser.add_argument("--no-chrome-extension", action="store_true", help="skip the Chrome setup step and shortcut")
+    parser.add_argument("--setup-chrome", action="store_true", help="set up the bundled Chrome extension without reinstalling the app")
     parser.add_argument("--uninstall", action="store_true", help="remove the program folder and shortcuts")
     parser.add_argument("--verbose", "-v", action="store_true", help="print every command output line")
     args = parser.parse_args(argv)
+
+    if args.setup_chrome:
+        target = (args.target or default_install_dir()).expanduser().resolve()
+        try:
+            print(EXTENSION_HELP.format(folder=target / "browser_extension"))
+            if not open_extension_setup(target):
+                print("Chrome was not found. Install Chrome and run this setup again.")
+                return 1
+            return 0
+        except (OSError, InstallError) as exc:
+            print(f"Chrome setup could not open: {exc}")
+            return 1
 
     if args.uninstall:
         if args.cli or args.yes or not gui_available():
@@ -1023,6 +1140,7 @@ def main(argv: Optional[list[str]] = None) -> int:
         desktop_shortcut=not args.no_shortcuts,
         menu_shortcut=not args.no_shortcuts,
         launch=not args.no_launch,
+        chrome_extension=not args.no_chrome_extension,
     )
     if args.cli or args.yes or not gui_available():
         if not (args.cli or args.yes):

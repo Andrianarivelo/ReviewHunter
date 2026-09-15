@@ -12,13 +12,44 @@ on:
   push:
     branches: [main]
     paths: ["installer/**", "install.sh", "Install-ReviewHunter.bat", "requirements.txt", "run.py",
-            ".github/workflows/installer.yml"]
+            "doi_hunter/**", "doi_hunter_web/**", "browser_extension/**", "word_addin/**",
+            "scripts/**", "tools/**", "pyproject.toml", "setup.py", "MANIFEST.in", ".gitattributes",
+            "tests/test_installer*.py", ".github/workflows/installer.yml"]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
+  package:
+    name: Package current app and Chrome connector
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build installable archives from this commit
+        run: |
+          mkdir -p dist
+          git archive --format=zip --prefix=ReviewHunter/ --output=dist/ReviewHunter.zip HEAD
+          git archive --format=zip --output=dist/ReviewHunter-Chrome-Extension.zip HEAD:browser_extension
+          cp Install-ReviewHunter.bat install.sh dist/
+      - name: Verify packaged app, extension resources and PDF dependencies
+        env:
+          RH_RELEASE_ARCHIVE: ${{ github.workspace }}/dist/ReviewHunter.zip
+          RH_EXTENSION_ARCHIVE: ${{ github.workspace }}/dist/ReviewHunter-Chrome-Extension.zip
+        run: python -m unittest discover -s tests -p test_installer_package.py -v
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ReviewHunter-installer
+          path: dist/*
+          if-no-files-found: error
+
   linux:
     name: ${{ matrix.image }} / ${{ matrix.method }} / ${{ matrix.scenario }}
     runs-on: ubuntu-latest
+    needs: package
     container: ${{ matrix.image }}
     timeout-minutes: 30
     strategy:
@@ -33,6 +64,10 @@ jobs:
           - {image: "fedora:41", method: installer, scenario: bare}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ReviewHunter-installer
+          path: packaged
 
       - name: Baseline system (curl, and python3 for the "python" scenario)
         shell: bash
@@ -64,11 +99,20 @@ jobs:
             tail -20 legacy.log
             kill $pid 2>/dev/null
           else
-            bash install.sh --cli --yes --no-launch && ok=true
+            # Exercise the downloadable archive, including the bundled Chrome extension.
+            if command -v apt-get >/dev/null; then
+              apt-get install -y -qq unzip >/dev/null
+            else
+              dnf install -y -q unzip >/dev/null
+            fi
+            unzip -q packaged/ReviewHunter.zip -d packaged
+            bash packaged/ReviewHunter/install.sh --cli --yes --no-launch && ok=true
             # the installer self-test already started the app; also check the files it promised
             test -f "$HOME/.local/share/reviewhunter/install.json" || ok=false
             test -f "$HOME/.local/share/applications/reviewhunter.desktop" || ok=false
-            "$HOME/.local/share/reviewhunter/.venv/bin/python" -c "import doi_hunter_web.server" || ok=false
+            (cd "$HOME/.local/share/reviewhunter" && .venv/bin/python -c "import doi_hunter_web.server, doi_hunter_web.pdf_ingest, fontTools, curl_cffi") || ok=false
+            test -f "$HOME/.local/share/reviewhunter/browser_extension/manifest.json" || ok=false
+            test -f "$HOME/.local/share/reviewhunter/ChromeExtensionSetup.txt" || ok=false
           fi
           seconds=$(( $(date +%s) - start ))
           py=$(python3 -c 'import platform; print(platform.python_version())' 2>/dev/null || echo none)
@@ -100,19 +144,30 @@ jobs:
           path: result/result.json
           if-no-files-found: ignore
 
+      - name: Require successful installation
+        if: always()
+        shell: bash
+        run: test '${{ steps.run.outputs.ok }}' = true
+
   linux-gui:
     name: Linux graphical installer screenshots
     runs-on: ubuntu-24.04
+    needs: package
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ReviewHunter-installer
+          path: packaged
       - name: Virtual display, Tk and screenshot tools
         run: sudo apt-get update -qq && sudo apt-get install -y -qq xvfb python3-tk python3-venv imagemagick >/dev/null
       - name: Run the window with auto-start and capture it
         run: |
           export DISPLAY=:99
           Xvfb :99 -screen 0 1100x800x24 & sleep 2
-          RH_INSTALLER_AUTOSTART=1 python3 installer/reviewhunter_installer.py --target /tmp/rhgui --no-shortcuts --no-launch &
+          python3 -m zipfile -e packaged/ReviewHunter.zip packaged
+          RH_INSTALLER_AUTOSTART=1 python3 packaged/ReviewHunter/installer/reviewhunter_installer.py --target /tmp/rhgui --no-shortcuts --no-launch &
           sleep 12; import -window root gui-linux-progress.png
           for i in $(seq 1 300); do [ -f /tmp/rhgui/install.json ] && break; sleep 1; done
           sleep 3; import -window root gui-linux-done.png
@@ -126,6 +181,7 @@ jobs:
   windows:
     name: windows / ${{ matrix.method }}
     runs-on: windows-latest
+    needs: package
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -133,13 +189,17 @@ jobs:
         method: [legacy, installer]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ReviewHunter-installer
+          path: packaged
       - name: Install and start (${{ matrix.method }})
         id: run
         shell: pwsh
         run: |
           $start = Get-Date; $ok = $false
           if ("${{ matrix.method }}" -eq "legacy") {
-            $p = Start-Process python -ArgumentList "run.py","--","--no-browser","--no-https" -PassThru -RedirectStandardOutput legacy.log -RedirectStandardError legacy.err
+            $p = Start-Process python -ArgumentList "run.py","--","--no-browser","--no-https" -WindowStyle Hidden -PassThru -RedirectStandardOutput legacy.log -RedirectStandardError legacy.err
             for ($i = 0; $i -lt 600; $i++) {
               try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/connector/ping -TimeoutSec 2 | Out-Null; $ok = $true; break } catch {}
               if ($p.HasExited) { break }
@@ -148,11 +208,21 @@ jobs:
             Get-Content legacy.err -Tail 20 -ErrorAction SilentlyContinue
             Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue
           } else {
-            cmd /c "Install-ReviewHunter.bat --yes --no-launch"
+            Expand-Archive -LiteralPath packaged/ReviewHunter.zip -DestinationPath packaged
+            & "./packaged/ReviewHunter/Install-ReviewHunter.bat" --cli --yes --no-launch
             $rc = $LASTEXITCODE
             $target = "$env:LOCALAPPDATA\Programs\ReviewHunter"
             $ok = ($rc -eq 0) -and (Test-Path "$target\install.json") -and `
-                  (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\ReviewHunter.lnk")
+                  (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\ReviewHunter.lnk") -and `
+                  (Test-Path "$target\browser_extension\manifest.json") -and `
+                  (Test-Path "$target\ChromeExtensionSetup.txt")
+            if ($ok) {
+              Push-Location $target
+              try {
+                & "$target\.venv\Scripts\python.exe" -c "import doi_hunter_web.pdf_ingest, fontTools, curl_cffi"
+                $ok = $LASTEXITCODE -eq 0
+              } finally { Pop-Location }
+            }
           }
           $seconds = [int]((Get-Date) - $start).TotalSeconds
           $py = (python -c "import platform; print(platform.python_version())")
@@ -176,3 +246,9 @@ jobs:
           name: result-windows-${{ matrix.method }}-python
           path: result/result.json
           if-no-files-found: ignore
+
+      - name: Require successful installation
+        if: always()
+        shell: pwsh
+        run: |
+          if ('${{ steps.run.outputs.ok }}' -ne 'true') { throw 'Installation or startup failed. See result artifact and logs.' }
