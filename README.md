@@ -47,6 +47,33 @@ and [the PDF identity benchmark](benchmarks/results/H_pdf_identity_notes.md).
 | Storage | Google Drive for desktop folder mode or Google Drive API mode (`drive.file` scope), verified automatic backups with staged restore |
 | Security | The local server rejects cross-site writes and DNS rebinding; only the app and browser extensions can modify the library |
 
+### Insight maps (v2.3)
+
+Open **Concepts**, **Words**, **Goals**, or **Methodology** in the sidebar. Opening a map from a
+collection inherits that collection; the scope bar also supports subcollections, authors, tags, and the
+whole library. Concepts show clustered co-occurrence, Words offers a cloud or ranked bars with
+subset distinctiveness, and Goals connects factors to outcomes with the authors' aim sentences.
+
+Methodology arranges each paper across subjects/models, design, manipulations, measurements, and
+analyses, with a prevalence-sorted heatmap and reporting/gaps dashboard. Click any chip, cell, term,
+or goal link to inspect its source evidence and open its paper. Missing evidence means **not detected**,
+not that a procedure was never performed. Confidence describes the source of the evidence, not a
+probability that the claim is correct. Layouts and extraction run locally without a new runtime dependency.
+
+**Export** saves the displayed map as PNG or its data as CSV/JSON. The methodology CSV contains every
+analysed paper and method (1 = detected, 0 = not detected); JSON retains evidence and reporting details.
+Pipelines and heatmaps paginate long scopes; PNG exports the displayed page with reporting checks.
+Scopes are capped at 2,000 papers, and goal extraction scans up to 60,000 indexed characters per paper.
+Semantic embedding clustering is not enabled; the deterministic rule-based path works offline.
+
+Validation: `pytest tests -q`; `tools/insight_fixture.py` creates an isolated synthetic library for
+`tools/ui_snapshot.py --insights --fixture <fixture.json> --url http://127.0.0.1:8775 --out <image.png>`.
+Benchmark I (`benchmarks/benchmark_methodology.py`) compares the initial and current detector on five
+available real papers: precision 75.6% to 100%, recall 83.1% to 74.6%, for the fixed initial taxonomy.
+These are agent-audited development annotations, pending independent human review, not general accuracy
+estimates. The expanded 100-method taxonomy includes additional methods that are explicitly unscored.
+CSV decisions, annotation evidence, and PDF/PNG/SVG figures make that tradeoff inspectable.
+
 ### First steps
 
 1. Double-click the **ReviewHunter** shortcut (or `ReviewHunter.bat`). The app opens at `http://127.0.0.1:8765`.

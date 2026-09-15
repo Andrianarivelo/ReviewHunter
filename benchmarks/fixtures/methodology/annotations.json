@@ -1,0 +1,343 @@
+{
+  "schema_version": 1,
+  "annotation_date": "2026-09-15",
+  "annotator": "Coding agent manual evidence audit; independent human review pending",
+  "selection": "All five nondeleted library papers with indexed full text on 2026-09-15. No synthetic papers.",
+  "unit": "Paper-method presence, not sentence detection or number of mentions.",
+  "scope": "All methods in the frozen initial taxonomy. Unlisted labels are negative after reading Methods and relevant Results. New taxonomy labels are reported separately and unscored.",
+  "rules": [
+    "Label methods actually used in the focal experiments, not cited work, background biology, or discussion proposals.",
+    "Ordinary housing, ad libitum feeding, serum storage vials and surgical guide cannulae do not establish diet, pharmacokinetic or intracranial-drug manipulations.",
+    "Temperature measured but not analysed in Gannon2023 counts as a measurement, with its sentence retained.",
+    "Repeated experiments, counterbalanced interventions, and sampled time courses are labelled by study design even when the exact taxonomy word is absent.",
+    "Dose-response requires a deliberate dose comparison, not just a dose printed in a methods sentence.",
+    "No inferential significance tests: small convenience corpus and non-independent method labels only support descriptive accuracy."
+  ],
+  "notes": "The library metadata date for the Lomax paper differs from the PDF (1990); source metadata is left untouched. Labels use DOI, title and text hashes.",
+  "papers": [
+    {
+      "doi": "10.1159/000138648",
+      "title": "Cocaine and Body Temperature in the Rat: Effects of Ambient Temperature",
+      "indexed_fulltext_sha256": "a2b951c151b9f5a836859c7dd23953363a0f79175450a3cb5a3e9d26559d62dd",
+      "abstract_sha256": "fbeb710d515f2a57bbde15a64683275d96f4fe4e2ac61d13459df6ffc15ef22a",
+      "labels": [
+        {
+          "method_id": "rat",
+          "evidence": "Sprague-Dawley rats, with an initial body weight of about 150 g, were housed at 20 ± 1 0 C and am­ bient humidity (30-60% under normal weather Downloaded by: Stockholm University Library 130.237.165.40 - 2/2/2019 5:57:21 PM Cocaine and Body Temperature 105 conditions) on a standard 12-hour light/dark cycle."
+        },
+        {
+          "method_id": "longitudinal",
+          "evidence": "Repeated injection of cocaine (40 mg/kg at Ta 20 °C or 20 mg/kg at Ta 40 °C) on days 1 , 3, 8, 15, and 23 did not alter the magnitude of the temperature change compared to that following the first injection, i.e., neither tolerance nor potentiation occurred."
+        },
+        {
+          "method_id": "betweensubject",
+          "evidence": "Cocaine (0, 10, 20, 30 or 40 mg/kg i.p.) was injected into groups of 5-10 rats at each of these environ­ mental temperatures."
+        },
+        {
+          "method_id": "doseresponse",
+          "evidence": "Cocaine (0, 10, 20, 30 or 40 mg/kg i.p.) was injected into groups of 5-10 rats at each of these environ­ mental temperatures."
+        },
+        {
+          "method_id": "drug_systemic",
+          "evidence": "Cocaine (0, 10, 20, 30 or 40 mg/kg i.p.) was injected into groups of 5-10 rats at each of these environ­ mental temperatures."
+        },
+        {
+          "method_id": "environment",
+          "evidence": "A temperature-controlled cabinet was used when higher than ambient tempera­ tures were investigated."
+        },
+        {
+          "method_id": "temperature",
+          "evidence": "Deep body temperature was measured with a small animal thermistor probe, inserted through the rectum for at least 6 cm, and connected to a telcther- mometer."
+        },
+        {
+          "method_id": "timeseries",
+          "evidence": "The readings were generally taken at 15- min intervals with at least a 30-min stabilization period prior to treatment."
+        },
+        {
+          "method_id": "regression",
+          "evidence": "The mean initial core temperatures in groups of rats after 45 min at Ta 20, 30, 35 or 40 °C were not significantly different (linear regression of slope, y = 37.05 + 0.040x; p = 0.426) although there was greater variation between individual animals at Ta > 30 °C."
+        }
+      ]
+    },
+    {
+      "doi": "10.1016/j.drugalcdep.2023.110917",
+      "title": "Effects of ambient temperature on locomotor activity and place conditioning elicited by abused psychostimulants in mice: Role of 3,4-methylenedioxy moiety",
+      "indexed_fulltext_sha256": "e787293c58ad8b7392e6e79206b87bd0d12700484ddcd37d85dd5fe447730bce",
+      "abstract_sha256": "2561d92607bcb224fd5a2efb2180b150bbeabb07109d1165ff8e8e38a9d1fd30",
+      "labels": [
+        {
+          "method_id": "mouse",
+          "evidence": "Adult male NIH Swiss mice (Charles River Laboratories, Inc., Wilmington MA, USA) were delivered to the UAMS Association for Assessment and Accreditation of Laboratory Animals Care accredited facility weighing 25–30 grams upon delivery."
+        },
+        {
+          "method_id": "drug_systemic",
+          "evidence": "Intraperitoneal (i.p.) injections were administered at a volume of 0.1 cc/10 g."
+        },
+        {
+          "method_id": "locomotor",
+          "evidence": "Implanted probes transmitted activity-modulated and temperature-modulated signals to a receiver (model ER-4000 Receiver; Mini Mitter) and the computer collected these two data updates from the probes every 5 minutes (core temperature in °C and locomotor activity in arbitrary units)."
+        },
+        {
+          "method_id": "temperature",
+          "evidence": "Implanted probes transmitted activity-modulated and temperature-modulated signals to a receiver (model ER-4000 Receiver; Mini Mitter) and the computer collected these two data updates from the probes every 5 minutes (core temperature in °C and locomotor activity in arbitrary units)."
+        },
+        {
+          "method_id": "timeseries",
+          "evidence": "Implanted probes transmitted activity-modulated and temperature-modulated signals to a receiver (model ER-4000 Receiver; Mini Mitter) and the computer collected these two data updates from the probes every 5 minutes (core temperature in °C and locomotor activity in arbitrary units)."
+        },
+        {
+          "method_id": "environment",
+          "evidence": "Warm air space heaters mounted outside the telemetry chambers stably maintained the desired elevated temperature of 29±2°C."
+        },
+        {
+          "method_id": "betweensubject",
+          "evidence": "For these experiments, mice were divided into 10 groups (n=8 per group)."
+        },
+        {
+          "method_id": "longitudinal",
+          "evidence": "These experiments consisted of a 20 min pre-conditioning test (pre-test) on day 1, 2 1-hour pairing sessions a day for 4 pairing days occurring day 4–7, and a 20 min post-conditioning test (posttest) on day 8."
+        },
+        {
+          "method_id": "withinsubject",
+          "evidence": "These experiments consisted of a 20 min pre-conditioning test (pre-test) on day 1, 2 1-hour pairing sessions a day for 4 pairing days occurring day 4–7, and a 20 min post-conditioning test (posttest) on day 8."
+        },
+        {
+          "method_id": "training",
+          "evidence": "These experiments consisted of a 20 min pre-conditioning test (pre-test) on day 1, 2 1-hour pairing sessions a day for 4 pairing days occurring day 4–7, and a 20 min post-conditioning test (posttest) on day 8."
+        },
+        {
+          "method_id": "cpp",
+          "evidence": "Assessment of post-conditioning preference was conducted in the same manner as the pre- test."
+        },
+        {
+          "method_id": "video",
+          "evidence": "Briefly, animals were placed into the connecting hallway and recorded in the preference chambers for 20 min via overhead video camera."
+        },
+        {
+          "method_id": "doseresponse",
+          "evidence": "Doses tested ranged from 0.1 mg/kg of drug to 30 mg/kg of drug and these doses varied for each drug (Table 1)."
+        },
+        {
+          "method_id": "anova",
+          "evidence": "Locomotor activity data were subjected to a two-factor ANOV A, and the derived ED50 and Emax values are listed in Table 2 alongside the corresponding 95% confidence intervals."
+        },
+        {
+          "method_id": "effectsize",
+          "evidence": "Locomotor activity data were subjected to a two-factor ANOV A, and the derived ED50 and Emax values are listed in Table 2 alongside the corresponding 95% confidence intervals."
+        },
+        {
+          "method_id": "ttest",
+          "evidence": "Dose response curves for place conditioning were subjected to a one-way ANOV A with Dunnett’s multiple comparison test, and elevated temperature place conditioning data were subjected to an unpaired t-test."
+        }
+      ]
+    },
+    {
+      "doi": "10.1016/j.pbb.2017.10.008",
+      "title": "High ambient temperature facilitates the acquisition of 3,4-methylenedioxymethamphetamine (MDMA) self-administration",
+      "indexed_fulltext_sha256": "6d0256f20c4ca4362fb8089e4d16727dd4f2e8ef4d8df60428352a75a56764b0",
+      "abstract_sha256": "9dac08faa1f24985c108637e7c2be859cf3793792d7754db7e5aa9b365cb9ce5",
+      "labels": [
+        {
+          "method_id": "rat",
+          "evidence": "Male Sprague-Dawley (Harlan, Livermore, CA; Experiment 1: N = 24) and Wistar rats (Charles River; Experiment 2, N = 10); were housed in humidity and temperature-controlled (23 ± 1 °C) vivaria on 12:12 h light:dark cycles."
+        },
+        {
+          "method_id": "drug_iv",
+          "evidence": "Catheter tubing was passed subcutaneously from the animal's back to the right jugular vein."
+        },
+        {
+          "method_id": "temperature",
+          "evidence": "In brief, the temperature was sampled every 5 min and the activity re ﬂects a rate (of arbitrary counts of movement per 5 min) of the transmitter across the receiver plate that is placed under the cage."
+        },
+        {
+          "method_id": "locomotor",
+          "evidence": "In brief, the temperature was sampled every 5 min and the activity re ﬂects a rate (of arbitrary counts of movement per 5 min) of the transmitter across the receiver plate that is placed under the cage."
+        },
+        {
+          "method_id": "timeseries",
+          "evidence": "In brief, the temperature was sampled every 5 min and the activity re ﬂects a rate (of arbitrary counts of movement per 5 min) of the transmitter across the receiver plate that is placed under the cage."
+        },
+        {
+          "method_id": "stimulation",
+          "evidence": "Each electrical stimulation (reinforcer) had a train duration of 500 ms during which 0.1 ms cathodal pulses were delivered at 50– 100 Hz, with current-in- tensity thresholds within 50– 200 μA."
+        },
+        {
+          "method_id": "selfadmin",
+          "evidence": "Subsequently, rats began a sequence two-hour self- administration sessions (run ~ 5 days per week) in which drug infusions (1.0 mg/kg/inf; ~ 0.1 ml/inf; ~ 4 s/inf) were made available on an FR5 schedule of reinforcement."
+        },
+        {
+          "method_id": "training",
+          "evidence": "Subsequently, rats began a sequence two-hour self- administration sessions (run ~ 5 days per week) in which drug infusions (1.0 mg/kg/inf; ~ 0.1 ml/inf; ~ 4 s/inf) were made available on an FR5 schedule of reinforcement."
+        },
+        {
+          "method_id": "environment",
+          "evidence": "For the next 14 sessions, rats were split into two groups (balanced for infusions over the 1st three sessions); one group was trained in sessions under an T A of 30 °C ( “Hot-trained” group) and the other group trained under an T A of 20 °C ( “Cold-trained” group)."
+        },
+        {
+          "method_id": "doseresponse",
+          "evidence": "The T A was either 20 °C or 30 °C (order counterbalanced) and the per-session dose ranged from 1 mg/kg to 5 mg/kg (in an escalating dose order)."
+        },
+        {
+          "method_id": "drug_systemic",
+          "evidence": "Animals were introduced to the testing temperature 30 min prior to the second session and injected (s.c.) 10 min prior to the start of the second session with either 2.5 mg/kg MDMA or saline vehicle."
+        },
+        {
+          "method_id": "betweensubject",
+          "evidence": "IVSA measures of drug intake (total infusions per 2-hour session), lever discrimination (% correct), body weight, body temperature (°C), and activity rate (counts/min) were analyzed as functions of the be- tween-subjects factor of T A group (Hot-trained or Cold-trained) and within-subjects factors of session."
+        },
+        {
+          "method_id": "withinsubject",
+          "evidence": "IVSA measures of drug intake (total infusions per 2-hour session), lever discrimination (% correct), body weight, body temperature (°C), and activity rate (counts/min) were analyzed as functions of the be- tween-subjects factor of T A group (Hot-trained or Cold-trained) and within-subjects factors of session."
+        },
+        {
+          "method_id": "intake",
+          "evidence": "IVSA measures of drug intake (total infusions per 2-hour session), lever discrimination (% correct), body weight, body temperature (°C), and activity rate (counts/min) were analyzed as functions of the be- tween-subjects factor of T A group (Hot-trained or Cold-trained) and within-subjects factors of session."
+        },
+        {
+          "method_id": "longitudinal",
+          "evidence": "All analyses were performed using repeated-measures analysis of variance (rmANOVA)."
+        },
+        {
+          "method_id": "anova",
+          "evidence": "All analyses were performed using repeated-measures analysis of variance (rmANOVA)."
+        }
+      ]
+    },
+    {
+      "doi": "10.1177/0269881107082286",
+      "title": "High ambient temperature increases intravenous methamphetamine self-administration on fixed and progressive ratio schedules in rats",
+      "indexed_fulltext_sha256": "e5793163622f655b97ea2d15e8e17bae8b38654b9aa50c146dcdfabd3138eb71",
+      "abstract_sha256": "02ca77af18c0c1856eacde0de016037add7f7f21cdf6c73016fb9a3046f9c8e3",
+      "labels": [
+        {
+          "method_id": "rat",
+          "evidence": "A total of 59 male Hooded Wistar rats (90–150 days, 350–450 g at the start of the experiment) were used as subjects."
+        },
+        {
+          "method_id": "drug_iv",
+          "evidence": "Rats used in the intravenous self-administration experiments (Experiments 1–3) underwent surgery to implant an indwelling catheter into the right external jugular vein and to ﬁt a screw- assembly head mount."
+        },
+        {
+          "method_id": "longitudinal",
+          "evidence": "After 5–7 days recovery from surgery the rats began daily 2 h methamphetamine self-administration sessions conducted during the 12-h light cycle."
+        },
+        {
+          "method_id": "selfadmin",
+          "evidence": "After 5–7 days recovery from surgery the rats began daily 2 h methamphetamine self-administration sessions conducted during the 12-h light cycle."
+        },
+        {
+          "method_id": "training",
+          "evidence": "All rats in Experiments 1–3 were initially trained to self-administer intravenous infusions of methamphetamine (0.1 mg/kg/infusion) on a FR1 reinforcement schedule."
+        },
+        {
+          "method_id": "crossover",
+          "evidence": "Following this test, rats in the FR1 group were then trained on a PR schedule of reinforcement, whereas rats trained on the PR schedule were returned to a FR1 schedule of reinforcement."
+        },
+        {
+          "method_id": "environment",
+          "evidence": "High ambient temperature was maintained either by an oil ﬁlled radiator heater in conjunction with two fan heaters, or by reverse cycle air conditioning."
+        },
+        {
+          "method_id": "withinsubject",
+          "evidence": "The order of availability of saline was counterbalanced across rats."
+        },
+        {
+          "method_id": "temperature",
+          "evidence": "Pre- and post-session body temperatures of the rats were meas- ured with a Braun Thermoscan Instant Thermometer (IRT 1020) inserted into the left ear of the rat."
+        },
+        {
+          "method_id": "betweensubject",
+          "evidence": "The 30 rats were split into six groups of rats (n /H110055 per group)."
+        },
+        {
+          "method_id": "drug_systemic",
+          "evidence": "After recording their body temper- ature (as above), the rats were then given a methamphetamine injection (3 mg/kg, i.p.) and placed in the test chamber for 0.5, 2 or 6 h period ( n /H110055 per time interval)."
+        },
+        {
+          "method_id": "timeseries",
+          "evidence": "After recording their body temper- ature (as above), the rats were then given a methamphetamine injection (3 mg/kg, i.p.) and placed in the test chamber for 0.5, 2 or 6 h period ( n /H110055 per time interval)."
+        },
+        {
+          "method_id": "pk",
+          "evidence": "The bloods were collected in 10 ml ethylenediaminetetraacetic acid (EDTA)-treated glass tubes and were then analysed for metham- phetamine content using Gas Chromatography–Mass Spectrometry (GC–MS)."
+        },
+        {
+          "method_id": "intake",
+          "evidence": "In Experiments 1–3, four dependent variables were measured: (1) number of infusions delivered, (2) number of responses on the active lever, (3) number of responses on the inactive lever and (4) locomotor activity."
+        },
+        {
+          "method_id": "locomotor",
+          "evidence": "In Experiments 1–3, four dependent variables were measured: (1) number of infusions delivered, (2) number of responses on the active lever, (3) number of responses on the inactive lever and (4) locomotor activity."
+        },
+        {
+          "method_id": "anova",
+          "evidence": "Pre- and post-session body temperatures were also compared for all treatments by a one-way ANOV A."
+        },
+        {
+          "method_id": "ttest",
+          "evidence": "The effect of high ambient temperature on the amount of isotonic saline consumed was assessed using a paired t-test."
+        }
+      ]
+    },
+    {
+      "doi": "10.1038/sj.npp.1300673",
+      "title": "Elevation of Ambient Room Temperature has Differential Effects on MDMA-Induced 5-HT and Dopamine Release in Striatum and Nucleus Accumbens of Rats",
+      "indexed_fulltext_sha256": "4d0382adadf81dd9e58caf0669bf1a368ec4edc79f7f235138ab37d83fba43bf",
+      "abstract_sha256": "d28507951a58dfa6ef2b6fbf205049d430b0ea1d595c260e3ecff882a0e71f52",
+      "labels": [
+        {
+          "method_id": "rat",
+          "evidence": "Male Dark Agouti rats (175–200 g, Interfauna, Barcelona) were used."
+        },
+        {
+          "method_id": "doseresponse",
+          "evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure."
+        },
+        {
+          "method_id": "environment",
+          "evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure."
+        },
+        {
+          "method_id": "drug_systemic",
+          "evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure."
+        },
+        {
+          "method_id": "temperature",
+          "evidence": "Immediately before and up to 5 h after MDMA injection, temperature was measured every 30 min by use of a digital readout thermocouple (Type K thermometer, Portec, UK) with a resolution of70.11C and accuracy of70.21C attached to a CAC-005 Rodent Sensor, which was inserted 2.5 cm into the rectum of the rat, the animal being lightly restrained by holding in the hand."
+        },
+        {
+          "method_id": "timeseries",
+          "evidence": "Immediately before and up to 5 h after MDMA injection, temperature was measured every 30 min by use of a digital readout thermocouple (Type K thermometer, Portec, UK) with a resolution of70.11C and accuracy of70.21C attached to a CAC-005 Rodent Sensor, which was inserted 2.5 cm into the rectum of the rat, the animal being lightly restrained by holding in the hand."
+        },
+        {
+          "method_id": "locomotor",
+          "evidence": "The locomotor activity measurement consisted of the total number of photocell beam breaks (upper and lower beams) recorded in 30 min analyzed by a personal computer."
+        },
+        {
+          "method_id": "microdialysis",
+          "evidence": "On the day of the experiment, the dialysis probes (membrane length: 2.0 mm /C2500 mm for the NAc and 4.0 mm /C2500 mm for the striatum; CMA/12, Sweden) were inserted in the guide cannulae such that the membrane protruded its full length from the end of the probe."
+        },
+        {
+          "method_id": "pk",
+          "evidence": "Brain concentrations of MDMA were determined following a previously described method with minor modifications (Sanchez et al , 2001)."
+        },
+        {
+          "method_id": "anova",
+          "evidence": "Data from the locomotor activity experiments were analyzed using one-way ANOVA followed by Tukey’s multiple comparison test where significant differences occurred."
+        },
+        {
+          "method_id": "ttest",
+          "evidence": "Data from brain MDMA levels were analyzed by Student’s t-test."
+        },
+        {
+          "method_id": "longitudinal",
+          "evidence": "Data were analyzed by analysis of variance (ANOVA) with repeated measures (program 2V)"
+        },
+        {
+          "method_id": "betweensubject",
+          "evidence": "Both used treatment as the between subjects factor and time as the repeated measure."
+        }
+      ]
+    }
+  ]
+}

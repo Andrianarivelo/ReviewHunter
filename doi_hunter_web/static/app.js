@@ -201,5 +201,6 @@ function app() {
     dialogsPart(),
     settingsPart(),
     discoverPart(),
+    insightsPart(),
   );
 }

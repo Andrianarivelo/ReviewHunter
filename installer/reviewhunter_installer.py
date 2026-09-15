@@ -443,7 +443,7 @@ class Installer:
 
     def self_test(self) -> str:
         py = venv_python(self.o.target)
-        probe = "; ".join(f"import {m}" for m in REQUIRED_MODULES) + "; import doi_hunter_web.server; import doi_hunter_web.pdf_ingest"
+        probe = "; ".join(f"import {m}" for m in REQUIRED_MODULES) + "; import doi_hunter_web.server; import doi_hunter_web.pdf_ingest; import doi_hunter_web.insight"
         self.sub_progress(0.1, "Checking imports")
         self.run_cmd([str(py), "-c", probe], cwd=self.o.target, timeout=300)
 

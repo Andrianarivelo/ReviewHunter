@@ -1,0 +1,13 @@
+version,stage,n_papers,TP,FP,FN,TN,positive_labels,predicted_labels,precision,recall,f1,inference
+baseline,subjects,5,5,3,0,42,5,8,0.625,1.0,0.7692307692307693,Descriptive only; no independent human annotations or held-out papers
+baseline,design,5,14,1,9,31,23,15,0.9333333333333333,0.6086956521739131,0.7368421052631579,Descriptive only; no independent human annotations or held-out papers
+baseline,manipulation,5,17,11,1,41,18,28,0.6071428571428571,0.9444444444444444,0.7391304347826086,Descriptive only; no independent human annotations or held-out papers
+baseline,measurement,5,15,2,1,77,16,17,0.8823529411764706,0.9375,0.9090909090909091,Descriptive only; no independent human annotations or held-out papers
+baseline,analysis,5,8,2,1,49,9,10,0.8,0.8888888888888888,0.8421052631578947,Descriptive only; no independent human annotations or held-out papers
+baseline,all,5,59,19,12,240,71,78,0.7564102564102564,0.8309859154929577,0.7919463087248322,Descriptive only; no independent human annotations or held-out papers
+current,subjects,5,5,0,0,45,5,5,1.0,1.0,1.0,Descriptive only; no independent human annotations or held-out papers
+current,design,5,9,0,14,32,23,9,1.0,0.391304347826087,0.5625,Descriptive only; no independent human annotations or held-out papers
+current,manipulation,5,18,0,0,52,18,18,1.0,1.0,1.0,Descriptive only; no independent human annotations or held-out papers
+current,measurement,5,13,0,3,79,16,13,1.0,0.8125,0.896551724137931,Descriptive only; no independent human annotations or held-out papers
+current,analysis,5,8,0,1,51,9,8,1.0,0.8888888888888888,0.9411764705882353,Descriptive only; no independent human annotations or held-out papers
+current,all,5,53,0,18,259,71,53,1.0,0.7464788732394366,0.8548387096774194,Descriptive only; no independent human annotations or held-out papers
