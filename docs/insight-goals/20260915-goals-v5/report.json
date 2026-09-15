@@ -1,0 +1,1586 @@
+{
+  "synthetic": true,
+  "fixture": {
+    "home": "C:\\Users\\andry\\AppData\\Local\\Temp\\claude\\insight-ui-cn5anblw",
+    "synthetic": true,
+    "items": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "collections": {
+      "parent": 1,
+      "child": 2,
+      "sibling": 3
+    },
+    "titles": [
+      "MDMA fails to elicit reward facilitation during intracranial self-stimulation",
+      "Synthetic study: methamphetamine and tetrode reward recordings",
+      "Visual calcium transients during learning",
+      "Synthetic study: contextual analysis of MDMA behavior",
+      "Effects of ambient temperature and dose on stimulant intake",
+      "",
+      "Synthetic study: human attention and scalp EEG",
+      "Synthetic study: neural networks and visual decoding",
+      "Ambient temperature and stimulant self-administration",
+      "Ambient temperatures and locomotor activity",
+      "Temperature effects on dopamine release",
+      "Human working memory and visual attention"
+    ],
+    "detailed": false,
+    "goals": true,
+    "parent_items": [
+      4,
+      5,
+      9,
+      10
+    ],
+    "descendant_items": [
+      1,
+      2,
+      4,
+      5,
+      9,
+      10,
+      11
+    ],
+    "port": 8775,
+    "sibling_items": [
+      3,
+      7,
+      8,
+      12
+    ],
+    "union_items": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "goal_expectations": {
+      "negative": 1,
+      "passive": 2,
+      "title_focus": 3,
+      "malformed": 4,
+      "groups": 5,
+      "unavailable": 6,
+      "statuses": {
+        "1": "title_focus",
+        "2": "explicit_aim",
+        "3": "title_focus",
+        "4": "explicit_aim",
+        "6": "unavailable"
+      }
+    }
+  },
+  "url": "http://127.0.0.1:8775/",
+  "runs": {
+    "desktop-light": {
+      "provenance": {
+        "12": "explicit_aim",
+        "11": "explicit_aim",
+        "10": "explicit_aim",
+        "9": "explicit_aim",
+        "8": "explicit_aim",
+        "7": "explicit_aim",
+        "6": "unavailable",
+        "5": "explicit_aim",
+        "4": "explicit_aim",
+        "3": "title_focus",
+        "2": "explicit_aim",
+        "1": "title_focus"
+      },
+      "views": {
+        "atlas-all": {
+          "cards": 12,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "unavailable",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-negative": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-evidence": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": true,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "connections-negative": {
+          "cards": 0,
+          "cardIds": [],
+          "statuses": [],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-fallbacks": {
+          "cards": 3,
+          "cardIds": [
+            6,
+            3,
+            1
+          ],
+          "statuses": [
+            "unavailable",
+            "title_focus",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-union": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "collection-picker": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      },
+      "method_design_checks": {
+        "1": [
+          "anova",
+          "drug_mdma",
+          "drug_systemic",
+          "longitudinal",
+          "rat",
+          "stimulation",
+          "tool_icss"
+        ],
+        "5": [
+          "anova",
+          "betweensubject",
+          "doseresponse",
+          "drug_methamphetamine",
+          "environment",
+          "factorial",
+          "intake",
+          "rat",
+          "temperature",
+          "training"
+        ]
+      },
+      "scope_maps": {
+        "concepts": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "focus": "",
+          "include_sub": true
+        },
+        "words": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "source": "abstract",
+          "include_sub": true,
+          "comparison_available": false,
+          "comparison_items": 1,
+          "comparison_items_with_text": 0
+        },
+        "methods": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        },
+        "goals": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        }
+      },
+      "legacy_scope_controls": [
+        {
+          "value": "collection:1",
+          "state": "collection:1",
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 7,
+            "collection_id": 1,
+            "collection_ids": [
+              1
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        {
+          "value": "author:Example, Alice",
+          "state": "author:Example, Alice",
+          "scope": {
+            "label": "Example, Alice",
+            "items": 2,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": "Example, Alice",
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      ],
+      "console_errors": []
+    },
+    "desktop-dark": {
+      "provenance": {
+        "12": "explicit_aim",
+        "11": "explicit_aim",
+        "10": "explicit_aim",
+        "9": "explicit_aim",
+        "8": "explicit_aim",
+        "7": "explicit_aim",
+        "6": "unavailable",
+        "5": "explicit_aim",
+        "4": "explicit_aim",
+        "3": "title_focus",
+        "2": "explicit_aim",
+        "1": "title_focus"
+      },
+      "views": {
+        "atlas-all": {
+          "cards": 12,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "unavailable",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-negative": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-evidence": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": true,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "connections-negative": {
+          "cards": 0,
+          "cardIds": [],
+          "statuses": [],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-fallbacks": {
+          "cards": 3,
+          "cardIds": [
+            6,
+            3,
+            1
+          ],
+          "statuses": [
+            "unavailable",
+            "title_focus",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-union": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "collection-picker": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      },
+      "method_design_checks": {
+        "1": [
+          "anova",
+          "drug_mdma",
+          "drug_systemic",
+          "longitudinal",
+          "rat",
+          "stimulation",
+          "tool_icss"
+        ],
+        "5": [
+          "anova",
+          "betweensubject",
+          "doseresponse",
+          "drug_methamphetamine",
+          "environment",
+          "factorial",
+          "intake",
+          "rat",
+          "temperature",
+          "training"
+        ]
+      },
+      "scope_maps": {
+        "concepts": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "focus": "",
+          "include_sub": true
+        },
+        "words": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "source": "abstract",
+          "include_sub": true,
+          "comparison_available": false,
+          "comparison_items": 1,
+          "comparison_items_with_text": 0
+        },
+        "methods": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        },
+        "goals": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        }
+      },
+      "legacy_scope_controls": [
+        {
+          "value": "collection:1",
+          "state": "collection:1",
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 7,
+            "collection_id": 1,
+            "collection_ids": [
+              1
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        {
+          "value": "author:Example, Alice",
+          "state": "author:Example, Alice",
+          "scope": {
+            "label": "Example, Alice",
+            "items": 2,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": "Example, Alice",
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      ],
+      "console_errors": []
+    },
+    "laptop-light": {
+      "provenance": {
+        "12": "explicit_aim",
+        "11": "explicit_aim",
+        "10": "explicit_aim",
+        "9": "explicit_aim",
+        "8": "explicit_aim",
+        "7": "explicit_aim",
+        "6": "unavailable",
+        "5": "explicit_aim",
+        "4": "explicit_aim",
+        "3": "title_focus",
+        "2": "explicit_aim",
+        "1": "title_focus"
+      },
+      "views": {
+        "atlas-all": {
+          "cards": 12,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "unavailable",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-negative": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-evidence": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": true,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "connections-negative": {
+          "cards": 0,
+          "cardIds": [],
+          "statuses": [],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-fallbacks": {
+          "cards": 3,
+          "cardIds": [
+            6,
+            3,
+            1
+          ],
+          "statuses": [
+            "unavailable",
+            "title_focus",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-union": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "collection-picker": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      },
+      "method_design_checks": {
+        "1": [
+          "anova",
+          "drug_mdma",
+          "drug_systemic",
+          "longitudinal",
+          "rat",
+          "stimulation",
+          "tool_icss"
+        ],
+        "5": [
+          "anova",
+          "betweensubject",
+          "doseresponse",
+          "drug_methamphetamine",
+          "environment",
+          "factorial",
+          "intake",
+          "rat",
+          "temperature",
+          "training"
+        ]
+      },
+      "scope_maps": {
+        "concepts": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "focus": "",
+          "include_sub": true
+        },
+        "words": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "source": "abstract",
+          "include_sub": true,
+          "comparison_available": false,
+          "comparison_items": 1,
+          "comparison_items_with_text": 0
+        },
+        "methods": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        },
+        "goals": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        }
+      },
+      "legacy_scope_controls": [
+        {
+          "value": "collection:1",
+          "state": "collection:1",
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 7,
+            "collection_id": 1,
+            "collection_ids": [
+              1
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        {
+          "value": "author:Example, Alice",
+          "state": "author:Example, Alice",
+          "scope": {
+            "label": "Example, Alice",
+            "items": 2,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": "Example, Alice",
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      ],
+      "console_errors": []
+    },
+    "laptop-dark": {
+      "provenance": {
+        "12": "explicit_aim",
+        "11": "explicit_aim",
+        "10": "explicit_aim",
+        "9": "explicit_aim",
+        "8": "explicit_aim",
+        "7": "explicit_aim",
+        "6": "unavailable",
+        "5": "explicit_aim",
+        "4": "explicit_aim",
+        "3": "title_focus",
+        "2": "explicit_aim",
+        "1": "title_focus"
+      },
+      "views": {
+        "atlas-all": {
+          "cards": 12,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "unavailable",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-negative": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-evidence": {
+          "cards": 1,
+          "cardIds": [
+            1
+          ],
+          "statuses": [
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": true,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "connections-negative": {
+          "cards": 0,
+          "cardIds": [],
+          "statuses": [],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-fallbacks": {
+          "cards": 3,
+          "cardIds": [
+            6,
+            3,
+            1
+          ],
+          "statuses": [
+            "unavailable",
+            "title_focus",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "all",
+          "scopeState": "all",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "atlas-union": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        "collection-picker": {
+          "cards": 11,
+          "cardIds": [
+            12,
+            11,
+            10,
+            9,
+            8,
+            7,
+            5,
+            4,
+            3,
+            2,
+            1
+          ],
+          "statuses": [
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "explicit_aim",
+            "title_focus",
+            "explicit_aim",
+            "title_focus"
+          ],
+          "clipped": [],
+          "overlaps": 0,
+          "scopeControl": "collections",
+          "scopeState": "collections",
+          "documentOverflow": false,
+          "selected": false,
+          "scope": {
+            "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+            "items": 11,
+            "collection_id": null,
+            "collection_ids": [
+              1,
+              3
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      },
+      "method_design_checks": {
+        "1": [
+          "anova",
+          "drug_mdma",
+          "drug_systemic",
+          "longitudinal",
+          "rat",
+          "stimulation",
+          "tool_icss"
+        ],
+        "5": [
+          "anova",
+          "betweensubject",
+          "doseresponse",
+          "drug_methamphetamine",
+          "environment",
+          "factorial",
+          "intake",
+          "rat",
+          "temperature",
+          "training"
+        ]
+      },
+      "scope_maps": {
+        "concepts": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "focus": "",
+          "include_sub": true
+        },
+        "words": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "source": "abstract",
+          "include_sub": true,
+          "comparison_available": false,
+          "comparison_items": 1,
+          "comparison_items_with_text": 0
+        },
+        "methods": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        },
+        "goals": {
+          "label": "Temperature_addiction (synthetic) + Visual cognition (synthetic)",
+          "items": 11,
+          "collection_id": null,
+          "collection_ids": [
+            1,
+            3
+          ],
+          "author": null,
+          "tag": null,
+          "include_sub": true
+        }
+      },
+      "legacy_scope_controls": [
+        {
+          "value": "collection:1",
+          "state": "collection:1",
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 7,
+            "collection_id": 1,
+            "collection_ids": [
+              1
+            ],
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          }
+        },
+        {
+          "value": "author:Example, Alice",
+          "state": "author:Example, Alice",
+          "scope": {
+            "label": "Example, Alice",
+            "items": 2,
+            "collection_id": null,
+            "collection_ids": [],
+            "author": "Example, Alice",
+            "tag": null,
+            "include_sub": true
+          }
+        }
+      ],
+      "console_errors": []
+    }
+  },
+  "source_sha256": {
+    "doi_hunter_web/insight.py": "17699dc441c8652c78a15408fdf4d2e9aeb1894083d11ddba882a22bb809e2c6",
+    "doi_hunter_web/goal_extraction.py": "9407651c3fc6a016f060212be422da3b33f2c6f99ba4c7ff2cdc43b432362a3c",
+    "doi_hunter_web/static/js/goal_views.js": "580b0f06fcf88c834d7d221775d32b4b7549c758aec9c424e5caa898ea72a4e9",
+    "doi_hunter_web/static/js/insights.js": "27496111b15101d4576b9833fe0df019c67960b6f9bb55aa8c9b39825b7f3c2f"
+  },
+  "exports": {
+    "json": {
+      "name": "ReviewHunter-goals-Whole_library.json",
+      "type": "application/json",
+      "size": 21685
+    },
+    "csv": {
+      "name": "ReviewHunter-goals-Whole_library.csv",
+      "type": "text/csv;charset=utf-8",
+      "size": 3858,
+      "rows": 14
+    },
+    "png": {
+      "name": "ReviewHunter-goals-Whole_library.png",
+      "type": "image/png",
+      "size": 182191
+    },
+    "complete_paper_count": 12,
+    "visible_filter": "fails to elicit",
+    "columns": [
+      "factor",
+      "outcome",
+      "goal_type",
+      "paper_id",
+      "paper_title",
+      "evidence",
+      "focus",
+      "focus_status",
+      "source",
+      "relationship_type",
+      "negated"
+    ]
+  }
+}

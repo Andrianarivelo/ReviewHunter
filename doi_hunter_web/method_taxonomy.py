@@ -162,6 +162,18 @@ for _index, (_mid, _label, _stage, _patterns) in enumerate(_RAW):
         # A separate drug-identity chip identifies the compound when explicit.
         _label = "Self-administration"
         _patterns = [r"\bself[- ]?administ(?:ration|ered|er)\b"]
+    elif _mid == "betweensubject":
+        _patterns = [*_patterns, r"\bseparate groups (?:were|received|underwent)\b", r"\bper dose group\b"]
+    elif _mid == "doseresponse":
+        # Three or more explicit dose levels of the same treatment support a
+        # dose comparison. Two anaesthetic drugs at different doses do not.
+        _label = "Dose comparison / dose-response"
+        _patterns = [*_patterns, r"\bdoses? of\s*\d+(?:\.\d+)?(?:\s*,\s*\d+(?:\.\d+)?){1,}"
+                     r"\s*,?\s*(?:or|and)\s*\d+(?:\.\d+)?\s*(?:g/kg|mg/kg|µg/kg|ug/kg|mg|µM|uM|nM|mM)\b"]
+    elif _mid == "withinsubject":
+        _patterns = [*_patterns, r"\beach (?:rat|mouse|animal|participant|subject)\b[^.;]{0,65}"
+                     r"\b(?:exposed to|completed|underwent|received) (?:two|three|four|five|six|[2-9]\d*) "
+                     r"(?:drug |treatment |test |recording )?sessions\b"]
     elif _mid == "intracranial":
         _patterns = [r"\bintracranial (?:infusion|injection|administration)\b", r"\bmicroinjection\b",
                      r"\bintracerebroventricular\b"]

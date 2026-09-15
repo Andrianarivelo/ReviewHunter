@@ -1,3 +1,3 @@
 version,n_papers,seconds,protocol
-baseline,5,0.5598643999983324,"One local CPU call; descriptive timing, not a stable speed benchmark"
-current,5,0.3457417000026908,"One local CPU call; descriptive timing, not a stable speed benchmark"
+baseline,5,0.582783300007577,"One local CPU call; descriptive timing, not a stable speed benchmark"
+current,5,0.3583608000044478,"One local CPU call; descriptive timing, not a stable speed benchmark"

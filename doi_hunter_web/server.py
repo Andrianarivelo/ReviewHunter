@@ -9,9 +9,9 @@ import logging
 import re
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Query, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -359,19 +359,25 @@ async def api_download(item_id: int) -> dict:
 @app.get("/api/insight/{kind}")
 async def api_insight(kind: str, collection_id: Optional[int] = None, author: Optional[str] = None,
                       tag: Optional[str] = None, source: str = "abstract", limit: int = 80,
-                      focus: Optional[str] = None, include_sub: bool = True) -> dict:
+                      focus: Optional[str] = None, include_sub: bool = True,
+                      collection_ids: Annotated[Optional[list[int]], Query()] = None) -> dict:
     """Insight maps over a scope: concepts | words | goals | methods (see insight.py)."""
     from . import insight
 
     fns = {
-        "concepts": lambda: insight.concepts(collection_id, author, tag, limit=limit, focus=focus, include_sub=include_sub),
-        "words": lambda: insight.words(collection_id, author, tag, source=source, limit=max(limit, 100), include_sub=include_sub),
-        "goals": lambda: insight.goals(collection_id, author, tag, include_sub=include_sub),
-        "methods": lambda: insight.methods(collection_id, author, tag, include_sub=include_sub),
+        "concepts": lambda: insight.concepts(collection_id, author, tag, limit=limit, focus=focus, include_sub=include_sub, collection_ids=collection_ids),
+        "words": lambda: insight.words(collection_id, author, tag, source=source, limit=max(limit, 100), include_sub=include_sub, collection_ids=collection_ids),
+        "goals": lambda: insight.goals(collection_id, author, tag, include_sub=include_sub, collection_ids=collection_ids),
+        "methods": lambda: insight.methods(collection_id, author, tag, include_sub=include_sub, collection_ids=collection_ids),
     }
     if kind not in fns:
         raise HTTPException(404, "unknown insight map")
-    return await asyncio.get_running_loop().run_in_executor(None, fns[kind])
+    try:
+        return await asyncio.get_running_loop().run_in_executor(None, fns[kind])
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @app.post("/api/items/{item_id}/handoff")

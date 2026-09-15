@@ -48,12 +48,21 @@ and [the PDF identity benchmark](benchmarks/results/H_pdf_identity_notes.md).
 | Security | The local server rejects cross-site writes and DNS rebinding; only the app and browser extensions can modify the library |
 | Impact factor | A free, OpenAlex-based journal impact metric next to the Publication column (sortable, filterable), with a per-journal search dialog and a manual override for a real Journal Impact Factor when you have one |
 
-### Insight maps (v2.4)
+### Insight maps (v2.5)
 
 Open **Concepts**, **Words**, **Goals**, or **Methodology** in the sidebar. Opening a map from a
-collection inherits that collection; the scope bar also supports subcollections, authors, tags, and the
-whole library. Concepts show clustered co-occurrence, Words offers a cloud or ranked bars with
-subset distinctiveness, and Goals connects factors to outcomes with the authors' aim sentences.
+collection inherits that collection; **Select collections** combines any checked collections, with
+optional subcollections. Overlapping papers are counted once. The selection carries across all four
+maps. The scope bar also supports authors, tags, and the whole library. Concepts shows clustered
+co-occurrence and Words offers a cloud or ranked bars with subset distinctiveness.
+
+Goals opens a **Question atlas** with every scoped paper represented. Each visual card includes a
+complete explicit aim, a clearly labelled title-derived focus, or an unavailable-text status. Cards
+show supported factor/outcome relationships and preserve negative statements. Filter by question
+type, theme, or search text; switch to **Factor–outcome connections** to compare relationships.
+Click a card for its complete source evidence and all extracted relations. Both views paginate long
+scopes; CSV and JSON retain every paper, including those without a reliable pair.
+[Goal extraction audit](docs/goal-extraction-audit.md) records the read-only ten-paper comparison.
 
 Words uses a stronger size range and stable colours for lexical concept groups. **Very rare** shows
 terms occurring exactly once, with gold underlining. **Unusual in this scope** shows repeated terms
@@ -73,6 +82,9 @@ The vocabulary includes cocaine, amphetamine, methamphetamine and MDMA; spikes, 
 voltage and neurotransmitter signals; Neuropixels, tetrodes, patch-clamp, two-photon microscopy,
 fiber photometry and specific optical sensors. Instruments do not automatically imply a measured
 signal, and drug names require procedural context. [Taxonomy and sources](docs/method-detail-taxonomy.md).
+ICSS now has its own assay chip. Specific design cues capture temperature-condition comparisons,
+dose groups, randomised condition order and repeated treatment sessions. Random order does not
+imply random allocation. [Source-text audit](docs/design-detail-audit.md) records the reported cases.
 
 **Export** saves the displayed map as PNG or its data as CSV/JSON. The methodology CSV contains every
 analysed paper and method (1 = detected, 0 = not detected); JSON retains evidence and reporting details.
@@ -83,9 +95,9 @@ Semantic embedding clustering is not enabled; the deterministic rule-based path 
 Validation: `pytest tests -q`; `tools/insight_fixture.py` creates an isolated synthetic library for
 `tools/ui_snapshot.py --insights --fixture <fixture.json> --url http://127.0.0.1:8775 --out <image.png>`.
 Benchmark I (`benchmarks/benchmark_methodology.py`) compares the initial and current detector on five
-available real papers: precision 75.6% to 100%, recall 83.1% to 74.6%, for the fixed initial taxonomy.
+available real papers: precision 75.6% to 100%, recall 83.1% to 76.1%, for the fixed initial taxonomy.
 These are agent-audited development annotations, pending independent human review, not general accuracy
-estimates. The expanded 215-entry taxonomy includes additional details that are explicitly unscored.
+estimates. The expanded 219-entry taxonomy includes additional details that are explicitly unscored.
 CSV decisions, annotation evidence, and PDF/PNG/SVG figures make that tradeoff inspectable.
 
 The [screenshot audit](docs/insight-audit/README.md) compares laptop and desktop layouts in both
@@ -300,4 +312,3 @@ Failed downloads are logged and can be retried later.
 ## Contributors
 
 - [@Faisal-PCB](https://github.com/Faisal-PCB)
-

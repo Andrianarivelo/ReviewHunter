@@ -1,0 +1,11 @@
+item_id,year,title,baseline_revision,before_aim_count,before_pair_count,before_reported_bad_fragment,after_aim_count,after_focus_status,after_pair_count,after_bad_fragment_count,after_title_pair_count,after_negated_pair_count
+3,2008,Cocaine and Body Temperature in the Rat: Effects of Ambient Temperature,fe60485,3,1,1,1,explicit_aim,1,0,1,0
+4,2023,"Effects of ambient temperature on locomotor activity and place conditioning elicited by abused psychostimulants in mice: Role of 3,4-methylenedioxy moiety",fe60485,0,0,0,0,title_focus,1,0,1,0
+5,2017,"High ambient temperature facilitates the acquisition of 3,4-methylenedioxymethamphetamine (MDMA) self-administration",fe60485,3,0,0,3,explicit_aim,2,0,1,0
+8,2007,High ambient temperature increases intravenous methamphetamine self-administration on fixed and progressive ratio schedules in rats,fe60485,1,1,0,1,explicit_aim,1,0,0,0
+9,2005,Elevation of Ambient Room Temperature has Differential Effects on MDMA-Induced 5-HT and Dopamine Release in Striatum and Nucleus Accumbens of Rats,fe60485,1,0,0,1,explicit_aim,2,0,1,0
+10,1998,"Small Changes in Ambient Temperature Cause Large Changes in 3,4-Methylenedioxymethamphetamine (MDMA)-Induced Serotonin Neurotoxicity and Core Body Temperature in the Rat",fe60485,0,0,0,0,title_focus,1,0,1,0
+11,1998,Enhancement of Cocaine-Induced Hyperthermia Fails to Elicit Neurotoxicity,fe60485,1,0,0,1,explicit_aim,1,0,1,1
+12,2017,"Brain temperature effects of intravenous heroin: State dependency, environmental modulation, and the effects of dose",fe60485,3,0,0,3,explicit_aim,2,0,1,0
+13,1986,Temperature dependence of ethanol depression in rats,fe60485,0,0,0,1,explicit_aim,2,0,1,0
+14,1990,Thermoregulation at a high ambient temperature following the oral administration of ethanol in the rat,fe60485,1,0,0,1,explicit_aim,2,0,1,0

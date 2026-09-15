@@ -19,6 +19,8 @@
   const STAGES = ['subjects', 'design', 'manipulation', 'measurement', 'analysis'];
   const KINDS = { concepts: 'Concepts', words: 'Words', goals: 'Goals', methods: 'Methodology' };
   const TYPES = { test: 'Test hypothesis', effect: 'Measure effect', mechanism: 'Mechanism', compare: 'Compare', develop: 'Develop method', review: 'Review', describe: 'Describe', unknown: 'No aim detected' };
+  const GOAL_PAGE_SIZE = 12;
+  const GOAL_COLORS = { test: 1, effect: 0, mechanism: 3, compare: 2, develop: 5, review: 4, describe: 6, unknown: 5 };
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   const clip = (v, n = 28) => String(v || '').length > n ? String(v).slice(0, n - 1) + '…' : String(v || '');
   const color = i => (document.documentElement.classList.contains('dark') ? DARK_COLORS : COLORS)[((Number(i) || 0) % COLORS.length + COLORS.length) % COLORS.length];
@@ -165,11 +167,13 @@
   window.insightsPart = function insightsPart() {
     return {
       insight: { kind: 'concepts', loading: false, data: {}, scope: 'all', includeSub: true, source: 'abstract',
+        collectionIds: [], collectionDraft: [], collectionQuery: '', collectionPicker: false,
+        goalView: 'atlas', goalKind: '', goalTheme: '', goalQuery: '', goalPage: 0,
         metric: 'count', terms: 'all', wordPool: 'frequent', wordConcept: '', view: 'cloud', methodView: 'pipeline', focus: '', cluster: null, selected: null,
         svg: '', height: HEIGHT, width: WIDTH, actions: [], nodes: [], page: 0, error: '', request: 0, zoom: 1 },
       insightKinds: Object.entries(KINDS).map(([id, label]) => ({ id, label })),
       insightTitle() { return KINDS[this.insight.kind]; },
-      insightDescription() { return ({ concepts: 'Themes that connect your literature', words: 'The language of this body of work', goals: 'Factors, outcomes and the questions between them', methods: 'How the science was done, with evidence for every step' })[this.insight.kind]; },
+      insightDescription() { return ({ concepts: 'Themes that connect your literature', words: 'The language of this body of work', goals: 'Research questions, shared themes and evidence across every paper', methods: 'How the science was done, with evidence for every step' })[this.insight.kind]; },
       insightWords() {
         const state = this.insight;
         const pool = state.wordPool === 'rare' ? state.data.rare_words : state.wordPool === 'unusual' ? state.data.outlier_words : state.data.words;
@@ -223,15 +227,16 @@
             { value: leading?.count || 0, label: leading ? `occurrence${leading.count === 1 ? '' : 's'} of “${leading.word}”` : 'occurrences' }];
         }
         if (this.insight.kind === 'goals') return [
-          { value: (data.papers || []).filter(paper => paper.aims?.length).length + '/' + total, label: 'papers with explicit aims' },
-          { value: data.links?.length || 0, label: 'factor–outcome links' },
-          { value: data.insights?.single_paper_outcomes?.length || 0, label: 'outcomes in one paper' }];
+          { value: (data.papers || []).length + '/' + total, label: 'papers represented' },
+          { value: (data.papers || []).filter(paper => paper.focus_status === 'explicit_aim' || paper.aims?.length).length, label: 'with explicit aims' },
+          { value: (data.papers || []).filter(paper => paper.focus_status === 'title_focus').length, label: 'with title-based focuses' }];
         return [{ value: (data.papers || []).filter(paper => paper.source === 'methods section').length + '/' + total, label: 'Methods sections available' },
           { value: data.matrix?.length || 0, label: 'distinct methods detected' }, { value: data.checks?.length || 0, label: 'reporting checks', action: true }];
       },
       scrollInsightReporting() { document.querySelector('.insight-diagnostics')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); },
       insightChartStyle() {
         const state = this.insight;
+        if (state.kind === 'goals' && state.goalView === 'atlas') return `width:100%;min-width:${state.selected ? 580 : 850}px;`;
         const fitted = state.kind === 'concepts' || state.kind === 'words' && state.view === 'cloud';
         if (fitted) {
           const zoom = state.kind === 'concepts' ? state.zoom : 1;
@@ -241,18 +246,53 @@
         return `width:100%;min-width:${state.kind === 'methods' ? state.width : 850}px;`;
       },
       insightScopeOptions() {
-        const options = [{ value: 'all', label: 'Whole library' }, ...this.collections.map(c => ({ value: 'collection:' + c.id, label: 'Collection · ' + c.name }))];
+        const options = this.collections.map(c => ({ value: 'collection:' + c.id, label: 'Collection · ' + c.name }));
         const authors = new Set([this.selectedAuthor, ...(this.facets?.authors || []).map(a => a.name)].filter(Boolean));
         for (const a of authors) options.push({ value: 'author:' + a, label: 'Author · ' + a });
         for (const t of this.allTags || []) options.push({ value: 'tag:' + t.name, label: 'Tag · ' + t.name });
-        if (!options.some(o => o.value === this.insight.scope)) options.push({ value: this.insight.scope, label: this.insight.scope.replace(':', ' · ') });
+        if (!['all', 'collections'].includes(this.insight.scope) && !options.some(o => o.value === this.insight.scope)) options.push({ value: this.insight.scope, label: this.insight.scope.replace(':', ' · ') });
         return options;
+      },
+      /** A draft selection applies as one union request, never as repeated additive counts. */
+      insightCollectionIds() {
+        return this.insight.scope === 'collections' ? this.insight.collectionIds :
+          this.insight.scope.startsWith('collection:') ? [Number(this.insight.scope.split(':')[1])] : [];
+      },
+      insightSelectedCollections() {
+        const selected = new Set(this.insightCollectionIds());
+        return this.collections.filter(collection => selected.has(collection.id));
+      },
+      insightCollectionChoices() {
+        const query = this.insight.collectionQuery.trim().toLowerCase();
+        return this.collections.filter(collection => !query || collection.name.toLowerCase().includes(query));
+      },
+      openInsightCollections() {
+        this.insight.collectionDraft = [...this.insightCollectionIds()];
+        this.insight.collectionQuery = ''; this.insight.collectionPicker = true;
+      },
+      toggleInsightCollection(id) {
+        const draft = this.insight.collectionDraft;
+        this.insight.collectionDraft = draft.includes(id) ? draft.filter(value => value !== id) : [...draft, id];
+      },
+      async applyInsightCollections() {
+        const ids = [...new Set(this.insight.collectionDraft.map(Number))];
+        if (!ids.length) return;
+        this.insight.collectionIds = ids;
+        this.insight.scope = ids.length === 1 ? 'collection:' + ids[0] : 'collections';
+        this.insight.collectionPicker = false; this.insight.focus = '';
+        return this.loadInsight();
+      },
+      async changeInsightScope() {
+        this.insight.collectionIds = this.insightCollectionIds();
+        this.insight.collectionPicker = false; this.insight.focus = '';
+        return this.loadInsight();
       },
       /** Capture navigation context before entering the map; switching map kinds keeps that scope. */
       async openInsight(kind = 'concepts', explicit = null) {
         if (!KINDS[kind]) kind = 'concepts';
         if (explicit !== null) {
-          this.insight.scope = explicit.collection_id ? 'collection:' + explicit.collection_id : explicit.author ? 'author:' + explicit.author : explicit.tag || explicit.subject ? 'tag:' + (explicit.tag || explicit.subject) : 'all';
+          this.insight.scope = explicit.collection_ids?.length ? 'collections' : explicit.collection_id ? 'collection:' + explicit.collection_id : explicit.author ? 'author:' + explicit.author : explicit.tag || explicit.subject ? 'tag:' + (explicit.tag || explicit.subject) : 'all';
+          this.insight.collectionIds = explicit.collection_ids?.length ? [...explicit.collection_ids] : this.insightCollectionIds();
         } else if (this.virtual !== 'graph') {
           this.insight.scope = this.virtual === 'collection' && this.selectedCollectionId ? 'collection:' + this.selectedCollectionId : this.virtual === 'author' && this.selectedAuthor ? 'author:' + this.selectedAuthor : this.virtual === 'subject' && this.selectedSubject ? 'tag:' + this.selectedSubject : this.tagFilter?.length === 1 ? 'tag:' + this.tagFilter[0] : 'all';
           this.insight.includeSub = this.includeSub !== false;
@@ -266,14 +306,17 @@
       openGraphFromCurrent() { return this.openInsight('concepts'); },
       loadSubjectGraph(extra = {}) { if ('focus' in extra) this.insight.focus = extra.focus; return this.loadInsight(); },
       resetGraphFocus() { this.insight.focus = ''; this.insight.cluster = null; return this.loadInsight(); },
-      async resetInsightScope() { this.insight.scope = 'all'; this.insight.focus = ''; this.insight.cluster = null; return this.loadInsight(); },
+      async resetInsightScope() { this.insight.scope = 'all'; this.insight.collectionIds = []; this.insight.collectionPicker = false; this.insight.focus = ''; this.insight.cluster = null; return this.loadInsight(); },
       async loadInsight() {
         const s = this.insight, request = ++s.request, params = { include_sub: s.includeSub ? 'true' : 'false', source: s.source, limit: s.kind === 'concepts' ? 80 : 150, focus: s.focus };
-        const colon = s.scope.indexOf(':'), type = s.scope.slice(0, colon), value = s.scope.slice(colon + 1);
+        const colon = s.scope.indexOf(':');
+        const type = colon >= 0 ? s.scope.slice(0, colon) : s.scope;
+        const value = colon >= 0 ? s.scope.slice(colon + 1) : '';
         if (type === 'collection') params.collection_id = Number(value);
+        if (s.scope === 'collections') params.collection_ids = s.collectionIds;
         if (type === 'author') params.author = value;
         if (type === 'tag') params.tag = value;
-        s.loading = true; s.error = ''; s.selected = null; s.page = 0; s.cluster = null;
+        s.loading = true; s.error = ''; s.selected = null; s.page = 0; s.goalPage = 0; s.cluster = null;
         try {
           const data = await api.get('/api/insight/' + s.kind, params);
           if (s.request !== request) return;
@@ -311,7 +354,10 @@
         const element = event.target.closest('[data-index]');
         if (!element) return;
         const detail = this.insight.actions[Number(element.getAttribute('data-index'))];
-        if (detail) { this.insight.selected = detail; this.clearItem(); }
+        if (detail) {
+          this.insight.selected = detail; this.clearItem();
+          if (this.insight.kind === 'goals') this.$nextTick(() => this.renderInsight());
+        }
       },
       insightHover(event, clear = false) {
         if (this.insight.kind !== 'concepts') return;
@@ -327,6 +373,35 @@
       insightEvidence(detail) { return (detail?.evidence || []).map(e => typeof e === 'string' ? { sentence: e } : e); },
       methodConfidence(method) { return method.confidence === 'low' ? 'Author-stated' : method.confidence === 'high' ? 'High · Methods section' : 'Medium · repeated body mentions'; },
       goalType(kind) { return TYPES[kind] || kind; },
+      goalColour(kind) { return color(GOAL_COLORS[kind] ?? 5); },
+      /** Keep every scoped paper eligible, including clearly labelled title-only focuses. */
+      goalFilteredPapers() {
+        const state = this.insight, query = state.goalQuery.trim().toLowerCase();
+        return (state.data.papers || []).filter(paper => (!state.goalKind || paper.goal_type === state.goalKind) &&
+          (!state.goalTheme || (paper.themes || []).some(theme => theme.id === state.goalTheme)) &&
+          (!query || [paper.title, paper.focus, ...(paper.aims || []).map(aim => aim.sentence)].join(' ').toLowerCase().includes(query)));
+      },
+      goalThemes() {
+        const themes = new Map();
+        for (const paper of this.insight.data.papers || []) for (const theme of paper.themes || []) {
+          if (!themes.has(theme.id)) themes.set(theme.id, { ...theme, count: 0 });
+          themes.get(theme.id).count++;
+        }
+        return [...themes.values()].sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+      },
+      goalVisiblePapers() { return this.goalFilteredPapers().slice(this.insight.goalPage * GOAL_PAGE_SIZE, (this.insight.goalPage + 1) * GOAL_PAGE_SIZE); },
+      goalPageCount() { return Math.max(1, Math.ceil(this.goalFilteredPapers().length / GOAL_PAGE_SIZE)); },
+      filterGoals() { this.insight.goalPage = 0; this.renderInsight(); },
+      goalPage(delta) { this.insight.goalPage = Math.max(0, Math.min(this.goalPageCount() - 1, this.insight.goalPage + delta)); this.renderInsight(); },
+      clearGoalFilters() { this.insight.goalKind = ''; this.insight.goalTheme = ''; this.insight.goalQuery = ''; this.filterGoals(); },
+      goalPaperDetail(paper) {
+        const evidence = (paper.aims || []).map(aim => ({ id: paper.id, sentence: aim.sentence, source: aim.source || paper.focus_source || 'Available text' }));
+        if (!evidence.length && paper.focus) evidence.push({ id: paper.id, sentence: paper.focus, source: paper.focus_source === 'title' ? 'Title-derived focus, not an explicit aim' : paper.focus_source });
+        for (const pair of paper.pairs || []) if (!evidence.some(entry => entry.sentence === pair.evidence)) evidence.push({ id: paper.id, sentence: pair.evidence, source: pair.source || 'Relation evidence' });
+        return { label: paper.title, items: [paper], evidence, goalPairs: paper.pairs || [],
+          description: `${paper.focus_label || 'Research focus'} · ${this.goalType(paper.goal_type)}. ${(paper.pairs || []).length} supported factor–outcome ${(paper.pairs || []).length === 1 ? 'relation' : 'relations'}.` };
+      },
+      closeInsightEvidence() { this.insight.selected = null; if (this.insight.kind === 'goals') this.$nextTick(() => this.renderInsight()); },
       /** Construct the active map once; Alpine does not rerun expensive layouts on hover. */
       renderInsight() {
         const s = this.insight; s.actions = []; s.height = HEIGHT; s.width = WIDTH;
@@ -395,32 +470,54 @@
           text(20, HEIGHT - 8, `${placed.length} of ${words.length} ${this.insightWordPoolLabel()} shown. Size: ${state.metric === 'distinct' ? 'positive distinctiveness' : 'frequency'} (expanded scale).`, 12, 'opacity=".8"');
       },
 
-      /** Pair evidence belongs to the selected relation, including title-derived goals. */
       goalSVG() {
+        if (this.insight.goalView === 'connections') return this.goalRelationsSVG();
+        const width = this.insight.selected ? 600 : 1000;
+        const rendered = window.InsightGoalViews.atlas(this.goalVisiblePapers(), {
+          width, columns: this.insight.selected ? 1 : 2, text, textLines, wrapText, esc,
+          color: kind => this.goalColour(kind), goalType: kind => this.goalType(kind),
+          detail: paper => this.goalPaperDetail(paper), action: value => this.insightAction(value),
+        });
+        this.insight.width = rendered.width; this.insight.height = rendered.height;
+        return rendered.svg;
+      },
+      /** The connection view uses the same page and filters as the paper atlas. */
+      goalRelationsSVG() {
         const state = this.insight;
-        const data = state.data;
+        state.width = 1000;
+        const visible = new Set(this.goalVisiblePapers().map(paper => paper.id));
+        const links = (state.data.links || []).map(link => ({ ...link, items: link.items.filter(paper => visible.has(paper.id)) })).filter(link => link.items.length);
+        const connected = (nodes, field) => (nodes || []).filter(node => links.some(link => link[field] === node.id))
+          .map(node => ({ ...node, items: node.items.filter(id => visible.has(id)), count: node.items.filter(id => visible.has(id)).length }));
+        const data = { ...state.data, links, factors: connected(state.data.factors, 'factor'), outcomes: connected(state.data.outcomes, 'outcome') };
         const factors = data.factors || [], outcomes = data.outcomes || [];
         const rows = Math.max(factors.length, outcomes.length);
-        state.height = Math.max(225, rows * 86 + 85);
-        const positions = nodes => new Map(nodes.map((node, index) => [node.id, 83 + index * 86 + Math.max(0, rows - nodes.length) * 43]));
+        const stride = Math.max(86, ...[...factors, ...outcomes].map(node => wrapText(node.label, 242, 14, 500).length * 17 + 50));
+        state.height = Math.max(225, rows * stride + 85);
+        const positions = nodes => new Map(nodes.map((node, index) => [node.id, 83 + index * stride + Math.max(0, rows - nodes.length) * stride / 2]));
         const factorY = positions(factors), outcomeY = positions(outcomes);
         let svg = text(25, 28, 'FACTORS', 13, 'letter-spacing="1.5" font-weight="600"') +
           text(730, 28, 'OUTCOMES', 13, 'letter-spacing="1.5" font-weight="600"');
+        if (links.some(link => link.items.every(paper => paper.negated))) {
+          svg += '<path d="M 355 25 h 30" stroke="currentColor" stroke-width="2" stroke-dasharray="7 5" opacity=".65"/>' +
+            text(395, 29, 'No effect reported', 12, 'opacity=".8"');
+        }
         for (const link of data.links || []) {
           const y1 = factorY.get(link.factor), y2 = outcomeY.get(link.outcome);
           if (y1 === undefined || y2 === undefined) continue;
           const action = this.insightAction({ label: link.factor + ' → ' + link.outcome,
-            items: link.items, evidence: link.items.map(paper => ({ id: paper.id, sentence: paper.evidence, source: 'Stated research question' })) });
+            items: link.items, description: link.relation_label || 'Source-stated relationship; not proof of a causal effect.',
+            evidence: link.items.map(paper => ({ id: paper.id, sentence: paper.evidence, source: paper.source || 'Stated research question' })) });
           const path = `M 292 ${y1} C 435 ${y1},565 ${y2},710 ${y2}`;
           svg += `<g class="insight-goal-link" ${action}>${title(`${link.factor} → ${link.outcome}: ${paperCount(link.items.length)}`)}` +
             `<path d="${path}" fill="none" stroke="transparent" stroke-width="20"/>` +
-            `<path d="${path}" fill="none" stroke="${color(0)}" opacity=".68" stroke-width="${2 + Math.sqrt(link.items.length) * 2}"/></g>`;
+            `<path d="${path}" fill="none" stroke="${this.goalColour(link.kind)}" opacity=".68" stroke-width="${2 + Math.sqrt(link.items.length) * 2}" ${link.items.every(paper => paper.negated) ? 'stroke-dasharray="7 5"' : ''}/></g>`;
         }
         for (const [nodes, yPositions, x, side] of [[factors, factorY, 20, 'factor'], [outcomes, outcomeY, 725, 'outcome']]) {
           for (const node of nodes) {
             const papers = (data.papers || []).filter(paper => node.items.includes(paper.id));
             const evidence = (data.links || []).filter(link => link[side] === node.id)
-              .flatMap(link => link.items.map(paper => ({ id: paper.id, sentence: paper.evidence, source: 'Stated research question' })));
+              .flatMap(link => link.items.map(paper => ({ id: paper.id, sentence: paper.evidence, source: paper.source || 'Available text' })));
             const unique = [...new Map(evidence.map(entry => [entry.id + ':' + entry.sentence, entry])).values()];
             const lines = wrapText(node.label, 242, 14, 500);
             const y = yPositions.get(node.id), boxHeight = Math.max(65, lines.length * 17 + 32);
@@ -430,7 +527,7 @@
               text(x + 9, y + boxHeight / 2 - 10, paperCount(node.count), 12, 'opacity=".8"') + '</g>';
           }
         }
-        if (!rows) svg += text(35, 115, 'No explicit factor-to-outcome pairs found. Read the aim sentences below.', 15);
+        if (!rows) svg += text(35, 115, 'No reliable pairs on this page. The question atlas still includes these papers.', 15);
         return svg;
       },
 
@@ -543,7 +640,7 @@
         const papers = (this.insight.data.papers || []).filter(p => p.checks.some(c => c.id === check.id && c.evidence));
         this.insight.selected = { label: check.label, items: papers, evidence: papers.map(p => { const c = p.checks.find(c => c.id === check.id); return { id: p.id, sentence: c.evidence, source: c.status || (c.found ? 'detected' : 'not detected') }; }) }; this.clearItem();
       },
-      inspectGoalPaper(paper) { this.insight.selected = { label: paper.title, items: [paper], evidence: paper.aims.map(a => ({ sentence: a.sentence, source: this.goalType(a.kind) })) }; this.clearItem(); },
+      inspectGoalPaper(paper) { this.insight.selected = this.goalPaperDetail(paper); this.clearItem(); this.$nextTick(() => this.renderInsight()); },
       insightCSV() {
         const d = this.insight.data, kind = this.insight.kind;
         if (kind === 'methods') return [['paper_id', 'title', 'year', 'text_source', ...(d.matrix || []).map(m => m.label)], ...(d.papers || []).map(p => [p.id, p.title, p.year, p.source, ...(d.matrix || []).map(m => p.detected.some(x => x.id === m.id) ? 1 : 0)])];
@@ -554,7 +651,10 @@
             ...[...terms.values()].map(word => [word.word, word.count, word.n_items, word.distinct, word.items.join(';'),
               word.concept_label || '', word.rarity || '', !!word.unusual, word.rest_count ?? ''])];
         }
-        if (kind === 'goals') return [['factor', 'outcome', 'goal_type', 'paper_id', 'paper_title', 'evidence'], ...(d.links || []).flatMap(l => l.items.map(p => [l.factor, l.outcome, l.kind, p.id, p.title, p.evidence]))];
+        if (kind === 'goals') return [['factor', 'outcome', 'goal_type', 'paper_id', 'paper_title', 'evidence', 'focus', 'focus_status', 'source', 'relationship_type', 'negated'],
+          ...(d.papers || []).flatMap(paper => (paper.pairs?.length ? paper.pairs : [null]).map(pair =>
+            [pair?.factor || '', pair?.outcome || '', pair?.kind || paper.goal_type, paper.id, paper.title,
+              pair?.evidence || paper.focus || '', paper.focus || '', paper.focus_status || '', pair?.source || paper.focus_source || '', pair?.relation_label || '', pair?.negated ?? '']))];
         return [['record_type', 'id_or_source', 'label_or_target', 'paper_count_or_weight', 'cluster', 'paper_ids'], ...(d.nodes || []).map(n => ['node', n.id, n.label, n.count, n.cluster, n.items.map(p => p.id).join(';')]), ...(d.edges || []).map(e => ['edge', e.source, e.target, e.weight, '', ''])];
       },
       async exportInsight(format) {
@@ -568,6 +668,9 @@
             ...(s.data.insights?.gaps || [])] : s.kind === 'words'
               ? [this.insightLimits(), 'Colours: lexical concept groups; gold and underlining = exactly one occurrence; pink = unusual in this scope.',
                 'Unusual: at least two occurrences, absent from available comparison text, and log-odds >= 1. Not a novelty claim.']
+              : s.kind === 'goals' ? [this.insightLimits(),
+                `Question atlas / connections: page ${s.goalPage + 1} of ${this.goalPageCount()}; ${paperCount(this.goalFilteredPapers().length)} matching. CSV/JSON include every scoped paper.`,
+                'Explicit aims and title-derived focuses are labelled separately. Dashed relationships indicate a reported negative statement, not a positive effect.']
               : [this.insightLimits()];
           const footer = notes.filter(Boolean).flatMap(line => String(line).match(/.{1,115}(?:\s|$)|.{1,115}/g) || []);
           const legend = s.kind === 'words' ? this.insightWordLegend() : [];

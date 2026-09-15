@@ -101,6 +101,7 @@ SIGNALS = [
 ]
 
 TOOLS = [
+    ("icss", "Intracranial self-stimulation (ICSS)", r"intracranial self[- ]stimulation|ICSS"),
     ("neuropixels", "Neuropixels probes", r"Neuropixels?(?:\s*[12]\.0)?(?: probes?)?"),
     ("tetrodes", "Tetrodes", r"tetrodes?"),
     ("silicon_probe", "Silicon probes", r"silicon (?:probes?|electrodes?)"),
@@ -137,7 +138,21 @@ TOOLS = [
     ("voltage_dye", "Voltage-sensitive dye", r"voltage[- ]sensitive dyes?|voltage[- ]sensitive dye imaging"),
 ]
 
-_PAST_STUDY = re.compile(r"\b(?:previous(?:ly)?|prior|earlier|published|other) (?:\w+\s+){0,3}(?:studies|study|reports?|work|research)|\b(?:et al|has been shown|have been shown|literature|reviewed|cited|according to)\b", re.I)
+# Design descriptions remain specific to what is stated. In particular random
+# presentation order is not random allocation, and varying a dose/temperature
+# alone does not prove a crossed factorial experiment.
+DESIGNS = [
+    ("temperature_conditions", "Temperature-condition comparison",
+     r"(?:one of (?:\w+|\d+) ambient temperatures|(?:chamber|ambient temperature)[^.;]{0,100}?"
+     r"(?:maintained|set|tested) at\s*-?\d+(?:\.\d+)?(?:\s*,\s*-?\d+(?:\.\d+)?){1,}"
+     r"\s*,?\s*(?:or|and)\s*-?\d+(?:\.\d+)?\s*°?\s*C)"),
+    ("random_order", "Randomised condition order", r"(?:in (?:a )?random(?:ized|ised)? order|random(?:ized|ised) (?:condition|treatment|dose|test) order)"),
+    ("repeated_exposure", "Repeated treatment sessions",
+     r"each (?:rat|mouse|animal|participant|subject)[^.;]{0,70}?(?:exposed to|completed|underwent|received) "
+     r"(?:two|three|four|five|six|seven|eight|nine|ten|[2-9]\d*) (?:drug |treatment |test |recording )?sessions"),
+]
+
+_PAST_STUDY = re.compile(r"\b(?:previous(?:ly)?|prior|earlier|published|other) (?:\w+\s+){0,3}(?:studies|study|reports?|work|research)|\b(?:et al|has been shown|have been shown|literature|reviewed|cited|according to)\b|\b(?:this|the|a|our) review\b", re.I)
 _FUTURE = re.compile(r"\b(?:future|could|would|might|propos(?:e|ed)|plan(?:ned)? to)\b", re.I)
 _ACTION = r"(?:administer(?:ed|ing|ation)?|inject(?:ed|ing|ion)?|infus(?:ed|ing|ion)|receiv(?:ed|ing)|treat(?:ed|ment)|expos(?:ed|ure)|self[- ]administ(?:ered|ration)|bath[- ]appl(?:ied|ication)|perfus(?:ed|ion)|ana?estheti[sz]ed)"
 _DRUG_BEFORE = re.compile(r"\b" + _ACTION + r"\b[^.;!?]{0,95}$", re.I)
@@ -172,6 +187,12 @@ def detail_has_context(sentence: str, matched: str, category: str, confidence: s
         return bool(procedure or _DRUG_AFTER.search(after))
     if category == "signals":
         return bool(_MEASUREMENT.search(sentence))
+    if category == "design":
+        if re.search(r"\brandom(?:ized|ised)? order\b", matched, re.I) and not re.search(
+                r"\b(?:conditions?|treatments?|doses?|tests?|temperatures?|sessions?|animals?|rats?|mice|subjects?|participants?)\b", sentence, re.I):
+            return False
+        return confidence == "high" or bool(re.search(
+            r"\b(?:rats?|mice|animals?|participants?|subjects?|groups?|we|our|this study)\b", sentence, re.I))
     return confidence == "high" or bool(_MEASUREMENT.search(sentence) or re.search(r"\b(?:used|implanted|inserted|expressed)\b", sentence, re.I))
 
 
@@ -180,7 +201,8 @@ def detail_methods() -> list[dict]:
     out = []
     for prefix, stage, category, rows in (("drug", "manipulation", "drugs", DRUGS),
                                           ("signal", "measurement", "signals", SIGNALS),
-                                          ("tool", "measurement", "techniques_tools", TOOLS)):
+                                          ("tool", "measurement", "techniques_tools", TOOLS),
+                                          ("design", "design", "design", DESIGNS)):
         for ident, label, pattern in rows:
             out.append({"id": f"{prefix}_{ident}", "label": label, "stage": stage,
                         "category": category, "context_required": True,

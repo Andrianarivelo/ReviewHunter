@@ -1,6 +1,6 @@
 """Insight maps over a set of papers: concepts, words, goals and methodology.
 
-All four maps take the same *scope* (whole library, one collection with its subcollections, an
+All four maps take the same *scope* (whole library, a collection union with its subcollections, an
 author, a tag) and read the text ReviewHunter already holds for each item: title, abstract, tags,
 keywords / subjects, and the full text of indexed PDFs (``fulltext_fts``).
 
@@ -76,21 +76,80 @@ _HEADING_RX = re.compile(
 
 # ---------------------------------------------------------------------------- scope & text
 
+def selected_collection_ids(collection_id: Optional[int] = None,
+                            collection_ids: Optional[list[int]] = None) -> list[int]:
+    """Normalize the requested union; an explicitly supplied list overrides the legacy scalar."""
+    values = collection_ids if collection_ids is not None else ([collection_id] if collection_id is not None else [])
+    if any(type(value) is not int or value <= 0 for value in values):
+        raise ValueError("Collection IDs must be positive integers")
+    return sorted(set(values))
+
+
+class ScopedItems(list):
+    """An ordinary item list retaining whether the SQL query omitted further matches."""
+
+    def __init__(self, items: list[dict], *, capped: bool = False):
+        super().__init__(items)
+        self.capped = capped
+
+
+def _scope_predicate(collection_id: Optional[int], author: Optional[str], tag: Optional[str],
+                     include_sub: bool, collection_ids: Optional[list[int]]) -> tuple[str, list]:
+    """Build one parameterized predicate for both selected papers and their true complement."""
+    selected = selected_collection_ids(collection_id, collection_ids)
+    conditions = ["i.deleted_at IS NULL"]
+    parameters: list = []
+    if selected:
+        known = {collection["id"] for collection in catalog.list_collections()}
+        missing = set(selected) - known
+        if missing:
+            raise LookupError("Unknown collection IDs: " + ", ".join(map(str, sorted(missing))))
+        expanded = sorted({descendant for cid in selected for descendant in
+                           (catalog.collection_descendants(cid) if include_sub else [cid])})
+        marks = ",".join("?" for _ in expanded)
+        conditions.append(f"EXISTS (SELECT 1 FROM item_collections ic WHERE ic.item_id=i.id AND ic.collection_id IN ({marks}))")
+        parameters.extend(expanded)
+    if author:
+        conditions.append("(i.authors LIKE ? OR i.creators LIKE ?)")
+        parameters.extend([f"%{author}%", f"%{author}%"])
+    if tag:
+        conditions.append("EXISTS (SELECT 1 FROM item_tags it JOIN tags t ON t.id=it.tag_id "
+                          "WHERE it.item_id=i.id AND t.name=? COLLATE NOCASE)")
+        parameters.append(tag)
+    return " AND ".join(conditions), parameters
+
+
 def scope_items(collection_id: Optional[int] = None, author: Optional[str] = None, tag: Optional[str] = None,
-                include_sub: bool = True) -> list[dict]:
-    """Items of a scope, with abstracts and tag names."""
-    items = catalog.query_items(collection_id=collection_id, include_subcollections=include_sub, author=author,
-                                tags=[tag] if tag else None, limit=MAX_ITEMS, compact=False)
+                include_sub: bool = True, *, collection_ids: Optional[list[int]] = None) -> list[dict]:
+    """Return the collection union intersected with author/tag filters, capped after deduplication."""
+    predicate, parameters = _scope_predicate(collection_id, author, tag, include_sub, collection_ids)
+    # EXISTS deduplicates before the global limit, rather than capping each collection independently.
+    rows = get_conn().execute("SELECT i.* FROM items i WHERE " + predicate +
+                              " ORDER BY i.added_at DESC, i.id DESC LIMIT ?", [*parameters, MAX_ITEMS + 1]).fetchall()
+    items = ScopedItems(catalog.decorate_many(catalog.rows_to_dicts(rows[:MAX_ITEMS]), compact=False), capped=len(rows) > MAX_ITEMS)
     for it in items:
         it["tag_names"] = [t["name"] if isinstance(t, dict) else str(t) for t in (it.get("tags") or [])]
     return items
 
 
-def scope_label(collection_id: Optional[int], author: Optional[str], tag: Optional[str]) -> str:
+def _comparison_items(collection_id: Optional[int], author: Optional[str], tag: Optional[str],
+                      include_sub: bool, collection_ids: Optional[list[int]]) -> ScopedItems:
+    """Exclude the complete selected scope before capping comparison papers, including unanalysed members."""
+    predicate, parameters = _scope_predicate(collection_id, author, tag, include_sub, collection_ids)
+    rows = get_conn().execute("SELECT i.* FROM items i WHERE i.deleted_at IS NULL AND i.id NOT IN "
+                              "(SELECT i.id FROM items i WHERE " + predicate + ") "
+                              "ORDER BY i.added_at DESC, i.id DESC LIMIT ?", [*parameters, MAX_ITEMS + 1]).fetchall()
+    return ScopedItems(catalog.decorate_many(catalog.rows_to_dicts(rows[:MAX_ITEMS]), compact=False), capped=len(rows) > MAX_ITEMS)
+
+
+def scope_label(collection_id: Optional[int], author: Optional[str], tag: Optional[str], *,
+                collection_ids: Optional[list[int]] = None) -> str:
+    """Name every selected collection and the intersecting metadata filters."""
     parts = []
-    if collection_id is not None:
-        col = next((c for c in catalog.list_collections() if c["id"] == collection_id), None)
-        parts.append(col["name"] if col else "Collection")
+    selected = selected_collection_ids(collection_id, collection_ids)
+    if selected:
+        names = {c["id"]: c["name"] for c in catalog.list_collections()}
+        parts.append(" + ".join(names.get(cid, f"Collection {cid}") for cid in selected))
     if author:
         parts.append(author)
     if tag:
@@ -261,9 +320,10 @@ def _term_evidence(iid: int, term: str, text: dict, *, normalized: bool = False,
 
 
 def concepts(collection_id: Optional[int] = None, author: Optional[str] = None, tag: Optional[str] = None,
-             limit: int = MAX_CONCEPT_NODES, focus: Optional[str] = None, include_sub: bool = True) -> dict:
+             limit: int = MAX_CONCEPT_NODES, focus: Optional[str] = None, include_sub: bool = True,
+             collection_ids: Optional[list[int]] = None) -> dict:
     """Concept co-occurrence graph with clusters."""
-    items = scope_items(collection_id, author, tag, include_sub)
+    items = scope_items(collection_id, author, tag, include_sub, collection_ids=collection_ids)
     texts = _texts(items, with_fulltext=False)
     limit = max(10, min(limit, 160))
 
@@ -386,24 +446,26 @@ def concepts(collection_id: Optional[int] = None, author: Optional[str] = None, 
                           key=lambda e: -e["weight"])[:400]
     unique = [label_by_key[k] for k, c in counts.items() if c == 1 and k in curated][:20]
     return {
-        "scope": {"label": scope_label(collection_id, author, tag), "items": len(items), "collection_id": collection_id,
+        "scope": {"label": scope_label(collection_id, author, tag, collection_ids=collection_ids), "items": len(items), "collection_id": collection_id,
+                  "collection_ids": selected_collection_ids(collection_id, collection_ids),
                   "author": author, "tag": tag, "focus": focus or "", "include_sub": include_sub},
         "nodes": nodes, "edges": edge_payload, "clusters": cluster_payload, "total_terms": len(counts),
         "insights": {"unique_terms": unique,
                      "isolated_items": [_item_brief(it) for it in items if not per_item.get(it["id"])][:10]},
         "limits": {"no_abstract": sum(1 for it in items if not (it.get("abstract") or "").strip()),
-                   "scope_capped": len(items) >= MAX_ITEMS, "max_items": MAX_ITEMS},
+                   "scope_capped": getattr(items, "capped", False), "max_items": MAX_ITEMS},
     }
 
 
 # ---------------------------------------------------------------------------- words
 
 def words(collection_id: Optional[int] = None, author: Optional[str] = None, tag: Optional[str] = None,
-          source: str = "abstract", limit: int = MAX_WORDS, include_sub: bool = True) -> dict:
+          source: str = "abstract", limit: int = MAX_WORDS, include_sub: bool = True,
+          collection_ids: Optional[list[int]] = None) -> dict:
     """Map source terms with lexical themes and separate frequent, rare and local-outlier lists."""
     from .word_concepts import categories, classify_term, semantics, term_flags
 
-    items = scope_items(collection_id, author, tag, include_sub)
+    items = scope_items(collection_id, author, tag, include_sub, collection_ids=collection_ids)
     use_full = source == "fulltext"
     texts = _texts(items, with_fulltext=use_full)
     limit = max(20, min(limit, 400))
@@ -423,16 +485,14 @@ def words(collection_id: Optional[int] = None, author: Optional[str] = None, tag
         for w in c:
             per_word_items[w].add(it["id"])
     # drop a bigram's unigrams when the bigram carries most of their occurrences? keep both; UI can filter by length.
-    scoped_ids = {it["id"] for it in items}
     rest_counts: Counter = Counter()
     rest_word_items: Counter = Counter()
     others = []
     comparison_capped = False
-    subset = bool(collection_id is not None or author or tag)
+    subset = bool(selected_collection_ids(collection_id, collection_ids) or author or tag)
     if subset:
-        comparison_candidates = catalog.query_items(limit=MAX_ITEMS, compact=False)
-        comparison_capped = len(comparison_candidates) >= MAX_ITEMS
-        others = [it for it in comparison_candidates if it["id"] not in scoped_ids]
+        others = _comparison_items(collection_id, author, tag, include_sub, collection_ids)
+        comparison_capped = others.capped
         texts.update(_texts(others, with_fulltext=use_full))
         for o in others:
             counts = _phrases(text_of(o["id"]), max_n=2)
@@ -470,7 +530,8 @@ def words(collection_id: Optional[int] = None, author: Optional[str] = None, tag
                     **classify_term(w), **flags[w]}
     briefs = {it["id"]: _item_brief(it) for it in items}
     return {
-        "scope": {"label": scope_label(collection_id, author, tag), "items": len(items), "collection_id": collection_id,
+        "scope": {"label": scope_label(collection_id, author, tag, collection_ids=collection_ids), "items": len(items), "collection_id": collection_id,
+                  "collection_ids": selected_collection_ids(collection_id, collection_ids),
                   "author": author, "tag": tag, "source": "fulltext" if use_full else "abstract", "include_sub": include_sub,
                   "comparison_available": comparison_available, "comparison_items": len(others),
                   "comparison_items_with_text": sum(bool(text_of(it["id"]).strip()) for it in others)},
@@ -479,7 +540,7 @@ def words(collection_id: Optional[int] = None, author: Optional[str] = None, tag
         "outlier_words": [payloads[w] for w in unusual[:limit]],
         "items": briefs, "concept_categories": categories(), "semantics": semantics(),
         "candidate_counts": {"frequent": len(frequent), "rare": len(rare), "unusual": len(unusual), "total": len(total)},
-        "limits": {"scope_capped": len(items) >= MAX_ITEMS, "max_items": MAX_ITEMS,
+        "limits": {"scope_capped": getattr(items, "capped", False), "max_items": MAX_ITEMS,
                    "comparison_capped": comparison_capped,
                    "list_limit": limit, "frequent_capped": len(frequent) > limit,
                    "rare_capped": len(rare) > limit, "outlier_capped": len(unusual) > limit,
@@ -490,120 +551,81 @@ def words(collection_id: Optional[int] = None, author: Optional[str] = None, tag
 
 # ---------------------------------------------------------------------------- goals
 
-_AIM_CUES: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\b(?:we |authors )?(?:tested|test|examined|examine) (?:the hypothesis|whether|if)\b|\bhypothesi[sz]e[ds]?\b|\bwhether\b", re.I), "test"),
-    (re.compile(r"\b(?:effects?|influence|impact|consequences?) of\b|\bmodulat(?:e|es|ed|ion)\b|\balter(?:s|ed)?\b", re.I), "effect"),
-    (re.compile(r"\bmechanism(?:s)?\b|\bmediat(?:e|es|ed|ion)\b|\brole of\b|\bunderlying\b|\bcontribut(?:e|es|ion) of\b", re.I), "mechanism"),
-    (re.compile(r"\bcompar(?:e|ed|ing|ison)\b|\bversus\b|\bdifferences? between\b|\brelative to\b", re.I), "compare"),
-    (re.compile(r"\b(?:we )?(?:develop(?:ed)?|propose[ds]?|present|introduce[ds]?|validate[ds]?|design(?:ed)?) (?:a |an |the )?(?:novel |new )?(?:method|model|approach|framework|tool|protocol|assay|paradigm|algorithm|pipeline)\b", re.I), "develop"),
-    (re.compile(r"\bsystematic(?:ally)? review(?:ed)?\b|\bmeta-?analys[ie]s\b|\bwe review\b|\bthis review\b|\boverview of\b", re.I), "review"),
-    (re.compile(r"\bcharacteri[sz]e[ds]?\b|\bdescribe[ds]?\b|\binvestigat(?:e|ed|es|ion)\b|\bexamin(?:e|ed|es)\b|\bexplor(?:e|ed|es)\b|\bdetermin(?:e|ed|es)\b|\bassess(?:ed|es)?\b|\bevaluat(?:e|ed|es)\b|\bquantif(?:y|ied|ies)\b|\bmeasur(?:e|ed|es)\b|\bidentif(?:y|ied|ies)\b", re.I), "describe"),
-]
-_AIM_SENTENCE_RX = re.compile(
-    r"\b(?:aim(?:ed|s)?|objectives?|purpose|goal|the present (?:study|experiments?|work|paper)|this (?:study|paper|work|article|experiment)|"
-    r"here,? we|in this (?:paper|study|work|article|report)|we (?:investigated|examined|tested|determined|explored|assessed|evaluated|"
-    r"characteri[sz]ed|studied|sought|hypothesi[sz]ed|asked|compared|measured|quantified|examine|investigate|test|"
-    r"propose|develop|present)|our hypothesis|designed to|sought to|to (?:determine|investigate|examine|test|assess|evaluate|characteri[sz]e|explore|elucidate|"
-    r"identify|quantify|establish|clarify|understand|compare) )", re.I)
-_PAIR_RXS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"\b(?:effects?|influence|impact|consequences?|contribution) of (?P<x>[^,.;]{3,90}?) (?:on|upon) (?P<y>[^,.;]{3,90}?)(?=[,.;:]|\s+(?:was|were|during|under|using|among|at|across|remains?|is|are)\b)", re.I), "effect"),
-    (re.compile(r"\b(?:role|involvement) of (?P<x>[^,.;]{3,70}?) in (?P<y>[^,.;]{3,90}?)(?=[,.;:]|\s+(?:was|were|during|under|using|among|at|remains?|is|are)\b)", re.I), "mechanism"),
-    (re.compile(r"\bwhether (?P<x>[^,.;]{3,90}?) (?:alters?|altered|affects?|affected|changes?|changed|modulates?|modulated|increases?|increased|"
-                r"decreases?|decreased|reduces?|reduced|enhances?|enhanced|influences?|influenced|impairs?|impaired|facilitates?|facilitated|"
-                r"promotes?|promoted|induces?|induced|predicts?|predicted|drives?|mediates?|contributes? to|is (?:required|necessary|sufficient) for) (?P<y>[^,.;]{3,90}?)(?=[,.;:]|\s+(?:under|during|at|among|using|when|after|following)\b)", re.I), "test"),
-    (re.compile(r"\b(?:relationship|relation|association|link|interaction) between (?P<x>[^,.;]{3,70}?) and (?P<y>[^,.;]{3,70}?)(?=[,.;:]|\s+(?:in|was|were|among|of|at|remains?|is|are)\b)", re.I), "describe"),
-    (re.compile(r"\b(?P<x>[A-Z]?[^,.;]{3,60}?) (?:as a (?:predictor|marker|determinant) of|predicts?) (?P<y>[^,.;]{3,80}?)(?=[,.;:]|\s+(?:in|was|were|among|of|at)\b)", re.I), "describe"),
-]
-_TRIM_RX = re.compile(r"^(?:the |a |an |such |these |those |this |that |its |their |our |whether )+", re.I)
-_METHOD_CLAUSE_RX = re.compile(r"\s+(?:using|measured (?:by|with)|assessed (?:by|with)|as measured|by means of|"
-                               r"in (?:rats?|mice|humans?|participants|patients)|during|after|following|under)\b", re.I)
-_GOAL_SYNONYMS = ((r"\bmeth self[- ]administration\b", "methamphetamine self-administration"),
-                  (r"\bself administration\b", "self-administration"),
-                  (r"\blocomo(?:tion|tor activity)\b", "locomotor activity"))
-
-
 def _clean_phrase(s: str) -> str:
-    """Remove explicit trailing method clauses; merge only curated, unambiguous aliases."""
-    s = re.sub(r"\s+", " ", s).strip(" \"'()")
-    s = _TRIM_RX.sub("", s)
-    s = _METHOD_CLAUSE_RX.split(s, maxsplit=1)[0]
-    for pattern, replacement in _GOAL_SYNONYMS:
-        s = re.sub(pattern, replacement, s, flags=re.I)
-    words_ = s.split(" ")
-    if len(words_) > 8:
-        return ""  # A truncated noun phrase could reverse or invent the stated relationship.
-    return s.strip().rstrip(",;:").lower()
+    """Compatibility helper for validated, source-derived goal noun phrases."""
+    from .goal_extraction import clean_phrase
+    return clean_phrase(s)
 
 
 def _goal_type(sentence: str) -> str:
-    for rx, kind in _AIM_CUES:
-        if rx.search(sentence):
-            return kind
-    return "describe"
+    """Compatibility helper for explicit-aim classification."""
+    from .goal_extraction import goal_type
+    return goal_type(sentence)
 
 
 def goals(collection_id: Optional[int] = None, author: Optional[str] = None, tag: Optional[str] = None,
-          include_sub: bool = True) -> dict:
-    """Goal map: aim sentences, goal types and factor -> outcome pairs per paper, aggregated into a bipartite map."""
-    items = scope_items(collection_id, author, tag, include_sub)
+          include_sub: bool = True, collection_ids: Optional[list[int]] = None) -> dict:
+    """Represent every paper's research focus, with optional source-backed relationships."""
+    from .goal_extraction import extract_goal
+
+    items = scope_items(collection_id, author, tag, include_sub, collection_ids=collection_ids)
     texts = _texts(items, with_fulltext=True, max_fulltext_chars=GOAL_TEXT_CHARS)
     papers = []
     factors: dict[str, dict] = {}
     outcomes: dict[str, dict] = {}
     links: dict[tuple[str, str], dict] = {}
     type_counts: Counter = Counter()
-    for it in items:
-        t = texts[it["id"]]
-        pool = [t["title"]] + sentences(t["abstract"])
-        intro = t["sections"].get("introduction", "")
-        if intro:
-            pool += sentences(intro)[-8:]  # aims usually close an introduction
-        elif t["fulltext"] and not t["abstract"]:
-            pool += sentences(t["fulltext"][:6000])
-        aims = [s for s in pool[1:] if _AIM_SENTENCE_RX.search(s)]
-        confidence = "high" if aims else "none"
-        aims = aims[:MAX_GOAL_SENTENCES]
-        kinds = [_goal_type(s) for s in aims]
-        main_type = kinds[0] if kinds else "unknown"
-        type_counts[main_type] += 1
-        pairs = []
-        for s in [t["title"], *aims]:
-            for rx, kind in _PAIR_RXS:
-                for m in rx.finditer(s.rstrip(" .") + "."):
-                    x, y = _clean_phrase(m.group("x")), _clean_phrase(m.group("y"))
-                    if len(x) < 3 or len(y) < 3 or x == y or len(x) > 90 or len(y) > 90:
-                        continue
-                    pairs.append({"factor": x, "outcome": y, "kind": kind, "evidence": _evidence(s)})
-        seen_pairs = set()
-        for p in pairs:
-            key = (p["factor"], p["outcome"])
-            if key in seen_pairs:
-                continue
-            seen_pairs.add(key)
-            factors.setdefault(p["factor"], {"id": p["factor"], "label": p["factor"], "items": set()})["items"].add(it["id"])
-            outcomes.setdefault(p["outcome"], {"id": p["outcome"], "label": p["outcome"], "items": set()})["items"].add(it["id"])
-            link = links.setdefault(key, {"factor": p["factor"], "outcome": p["outcome"], "items": [], "kind": p["kind"]})
-            link["items"].append({"id": it["id"], "title": it.get("title") or "", "evidence": p["evidence"]})
-        papers.append({**_item_brief(it), "goal_type": main_type, "confidence": confidence,
-                       "aims": [{"sentence": _evidence(s), "kind": k} for s, k in zip(aims, kinds)],
-                       "pairs": pairs[:6]})
+    theme_counts: Counter = Counter()
+    theme_labels = {}
+    for item in items:
+        text = texts[item["id"]]
+        extracted = extract_goal(text["title"], text["abstract"], text["sections"].get("introduction", ""),
+                                 text["fulltext"], splitter=sentences, max_aims=MAX_GOAL_SENTENCES)
+        paper = {**_item_brief(item), **extracted}
+        papers.append(paper)
+        type_counts[paper["goal_type"]] += 1
+        for theme in paper["themes"]:
+            theme_counts[theme["id"]] += 1
+            theme_labels[theme["id"]] = theme["label"]
+        for pair in paper["pairs"]:
+            key = (pair["factor"], pair["outcome"])
+            factors.setdefault(key[0], {"id": key[0], "label": key[0], "items": set()})["items"].add(item["id"])
+            outcomes.setdefault(key[1], {"id": key[1], "label": key[1], "items": set()})["items"].add(item["id"])
+            link = links.setdefault(key, {"factor": key[0], "outcome": key[1], "items": [], "kind": pair["kind"]})
+            link["items"].append({"id": item["id"], "title": item.get("title") or "", "evidence": pair["evidence"],
+                                  "source": pair["source"], "confidence": pair["confidence"],
+                                  "negated": pair["negated"], "relation_label": pair["relation_label"]})
 
-    def _nodes(d: dict) -> list[dict]:
-        return sorted(({"id": v["id"], "label": v["label"], "count": len(v["items"]), "items": sorted(v["items"])} for v in d.values()),
-                      key=lambda n: (-n["count"], n["label"]))
+    for link in links.values():
+        polarities = {member["negated"] for member in link["items"]}
+        labels = {member["relation_label"] for member in link["items"]}
+        link["negated"] = polarities == {True}
+        link["relation_label"] = next(iter(labels)) if len(labels) == 1 else "Mixed statements"
+
+    def nodes(values: dict) -> list[dict]:
+        """Aggregate only validated relationships, leaving unpaired papers in the atlas."""
+        return sorted(({"id": value["id"], "label": value["label"], "count": len(value["items"]),
+                        "items": sorted(value["items"])} for value in values.values()),
+                      key=lambda node: (-node["count"], node["label"]))
 
     return {
-        "scope": {"label": scope_label(collection_id, author, tag), "items": len(items), "collection_id": collection_id,
+        "scope": {"label": scope_label(collection_id, author, tag, collection_ids=collection_ids), "items": len(items),
+                  "collection_id": collection_id, "collection_ids": selected_collection_ids(collection_id, collection_ids),
                   "author": author, "tag": tag, "include_sub": include_sub},
-        "papers": papers, "factors": _nodes(factors), "outcomes": _nodes(outcomes),
-        "links": sorted(links.values(), key=lambda l: (-len(l["items"]), l["factor"])),
-        "goal_types": [{"kind": k, "count": c} for k, c in type_counts.most_common()],
-        "insights": {"single_paper_outcomes": [o["label"] for o in _nodes(outcomes) if o["count"] == 1],
-                     "no_aim_found": [p["title"] for p in papers if p["confidence"] != "high"]},
-        "limits": {"scope_capped": len(items) >= MAX_ITEMS, "max_items": MAX_ITEMS,
-                   "no_abstract": sum(1 for it in items if not texts[it["id"]]["abstract"].strip()),
+        "papers": papers, "factors": nodes(factors), "outcomes": nodes(outcomes),
+        "links": sorted(links.values(), key=lambda link: (-len(link["items"]), link["factor"], link["outcome"])),
+        "goal_types": [{"kind": kind, "count": count} for kind, count in type_counts.most_common()],
+        "themes": [{"id": key, "label": theme_labels[key], "count": count} for key, count in theme_counts.most_common()],
+        "coverage": {"papers": len(papers), "explicit_aim": sum(p["focus_status"] == "explicit_aim" for p in papers),
+                     "title_focus": sum(p["focus_status"] == "title_focus" for p in papers),
+                     "unavailable": sum(p["focus_status"] == "unavailable" for p in papers),
+                     "with_relationships": sum(bool(p["pairs"]) for p in papers)},
+        "insights": {"single_paper_outcomes": [node["label"] for node in nodes(outcomes) if node["count"] == 1],
+                     "no_aim_found": [paper["title"] for paper in papers if paper["focus_status"] != "explicit_aim"]},
+        "limits": {"scope_capped": getattr(items, "capped", False), "max_items": MAX_ITEMS,
+                   "no_abstract": sum(not texts[item["id"]]["abstract"].strip() for item in items),
                    "fulltext_scan_chars": GOAL_TEXT_CHARS,
-                   "interpretation": "Aims are extracted from metadata abstracts and the first 60000 indexed full-text characters. Later aims may be missed."},
+                   "interpretation": "Explicit aims come from abstracts and introductions within the first 60000 indexed characters. A title-derived focus is labelled separately and is not an invented aim. Relationships are stated links, not proof of causation; papers without a valid pair remain in the atlas."},
     }
 
 
@@ -669,6 +691,10 @@ def _detect_methods(text: str, confidence: str, seen: dict[str, dict], scale: in
         return
     from .method_details import detail_has_context
 
+    # PDF layout line endings are not grammatical boundaries. Match an
+    # ephemeral normalized view, leaving indexed text and metadata untouched.
+    text = re.sub(r"(?<=\w)-\s*\n\s*(?=[a-z])", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
     spans = _sentence_spans(text)
     for m in METHODS:
         hits = [hit for hit in m["regex"].finditer(text) if not _negated(text, hit)
@@ -714,9 +740,9 @@ def _reporting(text: str) -> list[dict]:
 
 
 def methods(collection_id: Optional[int] = None, author: Optional[str] = None, tag: Optional[str] = None,
-            include_sub: bool = True) -> dict:
+            include_sub: bool = True, collection_ids: Optional[list[int]] = None) -> dict:
     """Methodology map: per-paper pipelines with evidence, reporting checks, matrix and gaps for the scope."""
-    items = scope_items(collection_id, author, tag, include_sub)
+    items = scope_items(collection_id, author, tag, include_sub, collection_ids=collection_ids)
     texts = _texts(items, with_fulltext=True)
     papers = []
     method_items: dict[str, list[int]] = defaultdict(list)
@@ -783,12 +809,14 @@ def methods(collection_id: Optional[int] = None, author: Optional[str] = None, t
         if rare:
             gaps.append("Detected in one paper only: " + ", ".join(m["label"] for m in rare[:8]) + ".")
     return {
-        "scope": {"label": scope_label(collection_id, author, tag), "items": n, "collection_id": collection_id, "author": author, "tag": tag, "include_sub": include_sub},
+        "scope": {"label": scope_label(collection_id, author, tag, collection_ids=collection_ids), "items": n,
+                  "collection_id": collection_id, "collection_ids": selected_collection_ids(collection_id, collection_ids),
+                  "author": author, "tag": tag, "include_sub": include_sub},
         "stages": [{"id": sid, "label": slabel, "items": len(stage_items.get(sid, ()))} for sid, slabel in STAGES],
         "papers": papers, "matrix": matrix, "checks": [{"id": c["id"], "label": c["label"], "count": check_totals.get(c["id"], 0),
             "assessed": assessed, "unavailable": n - assessed, "explicitly_absent": check_absent.get(c["id"], 0)} for c in REPORTING_CHECKS],
         "insights": {"gaps": gaps, "common": [m["label"] for m in common][:12], "rare": [m["label"] for m in rare][:12]},
-        "limits": {"scope_capped": len(items) >= MAX_ITEMS, "max_items": MAX_ITEMS,
+        "limits": {"scope_capped": getattr(items, "capped", False), "max_items": MAX_ITEMS,
                    "no_text": n - assessed,
                    "no_fulltext": sum(1 for p in papers if p["source"] in ("abstract", "none")),
                    "no_methods_section": sum(1 for p in papers if p["source"] != "methods section"),

@@ -1,15 +1,16 @@
 {
   "schema_version": 1,
-  "created_utc": "2026-09-15T11:55:48.129921+00:00",
+  "created_utc": "2026-09-15T12:40:29.016511+00:00",
   "dependencies": {
     "benchmarks/fixtures/methodology/annotations.json": "8b17595bd0b8ba509ee70486b9ebaecd112031cebc179f830a64ee98416ad279",
     "benchmarks/fixtures/methodology/baseline/insight.py": "a29ed73c8a8dde1d0e4b28744dec6309f3fcf9a76f847ca5adaead2741c96e9d",
     "benchmarks/fixtures/methodology/baseline/method_taxonomy.py": "dfcb716b278c6ac3325f50cb2068b2725872ce854d72035175467cbe9ff5a4a3",
-    "doi_hunter_web/insight.py": "19a3869fa021811f866e6d5896677b8f29bf1c0bc40195d6b53eaa633906294f",
-    "doi_hunter_web/method_taxonomy.py": "48e42ee8a59664a5c4327833a963ac7d067c8e504898eda0debeba112f825b18",
-    "doi_hunter_web/method_details.py": "4af9f58de6ee9c95d58750838ea4511081e8cea7df0f67158748ff3d574356fb",
+    "doi_hunter_web/insight.py": "17699dc441c8652c78a15408fdf4d2e9aeb1894083d11ddba882a22bb809e2c6",
+    "doi_hunter_web/method_taxonomy.py": "01a7652b7407281cdee27a4587fbfc4fb776c9d425fb399a26e08444986360a9",
+    "doi_hunter_web/method_details.py": "2c83b62b141903989da2733b2f65da2c828083abbbae07aba5922a0b3036e6e5",
     "doi_hunter_web/word_concepts.py": "651a91aa3651525f682d553e072ae067fdad288cfbc2e095a265d9c9d4083cbe",
-    "benchmark_numeric_functions": "956ae974780600017e40abf05179fa968180ce79f08940486a3a86af41b3411d"
+    "doi_hunter_web/goal_extraction.py": "9407651c3fc6a016f060212be422da3b33f2c6f99ba4c7ff2cdc43b432362a3c",
+    "benchmark_numeric_functions": "abc79460e8b78e1c570a3164dae40f8cb52b76e090b18bef6549c8ac2b44ba81"
   },
   "n_papers": 5,
   "annotation_status": "Coding agent manual evidence audit; independent human review pending",
@@ -125,15 +126,15 @@
       "version": "current",
       "stage": "design",
       "n_papers": 5,
-      "TP": 9,
+      "TP": 10,
       "FP": 0,
-      "FN": 14,
+      "FN": 13,
       "TN": 32,
       "positive_labels": 23,
-      "predicted_labels": 9,
+      "predicted_labels": 10,
       "precision": 1.0,
-      "recall": 0.391304347826087,
-      "f1": 0.5625,
+      "recall": 0.43478260869565216,
+      "f1": 0.6060606060606061,
       "inference": "Descriptive only; no independent human annotations or held-out papers"
     },
     {
@@ -185,15 +186,15 @@
       "version": "current",
       "stage": "all",
       "n_papers": 5,
-      "TP": 53,
+      "TP": 54,
       "FP": 0,
-      "FN": 18,
+      "FN": 17,
       "TN": 259,
       "positive_labels": 71,
-      "predicted_labels": 53,
+      "predicted_labels": 54,
       "precision": 1.0,
-      "recall": 0.7464788732394366,
-      "f1": 0.8548387096774194,
+      "recall": 0.7605633802816901,
+      "f1": 0.864,
       "inference": "Descriptive only; no independent human annotations or held-out papers"
     }
   ],
@@ -201,13 +202,13 @@
     {
       "version": "baseline",
       "n_papers": 5,
-      "seconds": 0.5598643999983324,
+      "seconds": 0.582783300007577,
       "protocol": "One local CPU call; descriptive timing, not a stable speed benchmark"
     },
     {
       "version": "current",
       "n_papers": 5,
-      "seconds": 0.3457417000026908,
+      "seconds": 0.3583608000044478,
       "protocol": "One local CPU call; descriptive timing, not a stable speed benchmark"
     }
   ],
@@ -6187,7 +6188,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "Warm air space heaters mounted outside the telemetry chambers stably maintained the desired elevated temperature of 29±2°C.",
-      "detector_evidence": "During data collection, animals remained inside their home cage and the home cage was placed on top of the receiver located inside standard light- and sound- attenuating chambers (Model ENV-022M; Med Associates) that were equipped with a house light (to maintain the 12-hr light/dark cycle), an exhaust fan, and a warm air heater (to control the ambient temperature).",
+      "detector_evidence": "During data collection, animals remained inside their home cage and the home cage was placed on top of the receiver located inside standard lightand sound- attenuating chambers (Model ENV-022M; Med Associates) that were equipped with a house light (to maintain the 12-hr light/dark cycle), an exhaust fan, and a warm air heater (to control the ambient temperature).",
       "confidence": "high"
     },
     {
@@ -6912,11 +6913,11 @@
       "method_id": "betweensubject",
       "method": "Between-groups design",
       "expected": 1,
-      "predicted": 0,
-      "outcome": "FN",
+      "predicted": 1,
+      "outcome": "TP",
       "reference_evidence": "IVSA measures of drug intake (total infusions per 2-hour session), lever discrimination (% correct), body weight, body temperature (°C), and activity rate (counts/min) were analyzed as functions of the be- tween-subjects factor of T A group (Hot-trained or Cold-trained) and within-subjects factors of session.",
-      "detector_evidence": "",
-      "confidence": ""
+      "detector_evidence": "Designs and data analyses IVSA measures of drug intake (total infusions per 2-hour session), lever discrimination (% correct), body weight, body temperature (°C), and activity rate (counts/min) were analyzed as functions of the between-subjects factor of T A group (Hot-trained or Cold-trained) and within-subjects factors of session.",
+      "confidence": "high"
     },
     {
       "version": "current",
@@ -7083,7 +7084,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "Each electrical stimulation (reinforcer) had a train duration of 500 ms during which 0.1 ms cathodal pulses were delivered at 50– 100 Hz, with current-in- tensity thresholds within 50– 200 μA.",
-      "detector_evidence": "Intracranial self-stimulation electrode implantation Rats were anesthetized with an iso ﬂurane/oxygen vapor mixture (isoﬂurane 5% induction, 1– 3% maintenance) and prepared with sti- mulation electrodes as described in ( Markou and Koob, 1992).",
+      "detector_evidence": "Intracranial self-stimulation electrode implantation Rats were anesthetized with an iso ﬂurane/oxygen vapor mixture (isoﬂurane 5% induction, 1– 3% maintenance) and prepared with stimulation electrodes as described in ( Markou and Koob, 1992).",
       "confidence": "high"
     },
     {
@@ -7783,7 +7784,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "After 5–7 days recovery from surgery the rats began daily 2 h methamphetamine self-administration sessions conducted during the 12-h light cycle.",
-      "detector_evidence": "In Experiment 1, for both PR and FR schedules of reinforce- ment, the effect of high ambient temperature on these four depend- ent variables was analysed using a one-way repeated measures analysis of variance (ANOV A) with ambient temperature as the fac- tor.",
+      "detector_evidence": "In Experiment 1, for both PR and FR schedules of reinforcement, the effect of high ambient temperature on these four dependent variables was analysed using a one-way repeated measures analysis of variance (ANOV A) with ambient temperature as the factor.",
       "confidence": "high"
     },
     {
@@ -7937,7 +7938,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "After 5–7 days recovery from surgery the rats began daily 2 h methamphetamine self-administration sessions conducted during the 12-h light cycle.",
-      "detector_evidence": "Surgery Rats used in the intravenous self-administration experiments (Experiments 1–3) underwent surgery to implant an indwelling catheter into the right external jugular vein and to ﬁt a screw- assembly head mount.",
+      "detector_evidence": "Surgery Rats used in the intravenous self-administration experiments (Experiments 1–3) underwent surgery to implant an indwelling catheter into the right external jugular vein and to ﬁt a screwassembly head mount.",
       "confidence": "high"
     },
     {
@@ -8035,7 +8036,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "High ambient temperature was maintained either by an oil ﬁlled radiator heater in conjunction with two fan heaters, or by reverse cycle air conditioning.",
-      "detector_evidence": "Once the number of drug infusions self-administered each day had stabilized in each group at normal room temperature (23 /H110061°C), rats received their daily self-administration session at a high ambient temperature (30 /H110061°C) and the effect of this manipulation on self-administration behaviour was determined.",
+      "detector_evidence": "Experiment 1: the effect of high ambient temperature on intravenous methamphetamine self-administration Sixteen rats acquired methamphetamine self-administration behaviour on a FR1 schedule of reinforcement.",
       "confidence": "high"
     },
     {
@@ -8119,7 +8120,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "Pre- and post-session body temperatures of the rats were meas- ured with a Braun Thermoscan Instant Thermometer (IRT 1020) inserted into the left ear of the rat.",
-      "detector_evidence": "Experiment 3: the effect of fluid availability on the self-administration and hyperthermic effects of methamphetamine In Experiment 3, ﬁve rats were trained to self-administer metham- phetamine (PR) and were given access to isotonic (0.9%) saline in the chamber during the self-administration session.",
+      "detector_evidence": "Experiment 3: the effect of fluid availability on the self-administration and hyperthermic effects of methamphetamine In Experiment 3, ﬁve rats were trained to self-administer methamphetamine (PR) and were given access to isotonic (0.9%) saline in the chamber during the self-administration session.",
       "confidence": "high"
     },
     {
@@ -8175,7 +8176,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "In Experiments 1–3, four dependent variables were measured: (1) number of infusions delivered, (2) number of responses on the active lever, (3) number of responses on the inactive lever and (4) locomotor activity.",
-      "detector_evidence": "The number of drug infusions, active lever presses, inactive lever presses and 102 Methamphetamine and high temperatures locomotor activity counts were recorded during the 2 h self-admin- istration sessions.",
+      "detector_evidence": "The number of drug infusions, active lever presses, inactive lever presses and 102 Methamphetamine and high temperatures locomotor activity counts were recorded during the 2 h self-administration sessions.",
       "confidence": "high"
     },
     {
@@ -8189,7 +8190,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "The bloods were collected in 10 ml ethylenediaminetetraacetic acid (EDTA)-treated glass tubes and were then analysed for metham- phetamine content using Gas Chromatography–Mass Spectrometry (GC–MS).",
-      "detector_evidence": "Experiment 4: the effect of high ambient temperature on blood levels of methamphetamine Experiment 4 involved 30 experimentally naïve Hooded Wistar rats and was designed to establish whether blood levels of methamphet- amine varied with ambient temperature.",
+      "detector_evidence": "Experiment 4: the effect of high ambient temperature on blood levels of methamphetamine Experiment 4 involved 30 experimentally naïve Hooded Wistar rats and was designed to establish whether blood levels of methamphetamine varied with ambient temperature.",
       "confidence": "high"
     },
     {
@@ -8371,7 +8372,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "Pre- and post-session body temperatures were also compared for all treatments by a one-way ANOV A.",
-      "detector_evidence": "In Experiment 1, for both PR and FR schedules of reinforce- ment, the effect of high ambient temperature on these four depend- ent variables was analysed using a one-way repeated measures analysis of variance (ANOV A) with ambient temperature as the fac- tor.",
+      "detector_evidence": "In Experiment 1, for both PR and FR schedules of reinforcement, the effect of high ambient temperature on these four dependent variables was analysed using a one-way repeated measures analysis of variance (ANOV A) with ambient temperature as the factor.",
       "confidence": "high"
     },
     {
@@ -8833,7 +8834,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure.",
-      "detector_evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure.",
+      "detector_evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experimental procedure.",
       "confidence": "high"
     },
     {
@@ -8959,7 +8960,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure.",
-      "detector_evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure.",
+      "detector_evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experimental procedure.",
       "confidence": "high"
     },
     {
@@ -9029,7 +9030,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "The locomotor activity measurement consisted of the total number of photocell beam breaks (upper and lower beams) recorded in 30 min analyzed by a personal computer.",
-      "detector_evidence": "Rectal temperature data and microdia- lysate data were obtained from the same animals and separate animals were used for the locomotor activity assessment.",
+      "detector_evidence": "Rectal temperature data and microdialysate data were obtained from the same animals and separate animals were used for the locomotor activity assessment.",
       "confidence": "high"
     },
     {
@@ -9043,7 +9044,7 @@
       "predicted": 1,
       "outcome": "TP",
       "reference_evidence": "Immediately before and up to 5 h after MDMA injection, temperature was measured every 30 min by use of a digital readout thermocouple (Type K thermometer, Portec, UK) with a resolution of70.11C and accuracy of70.21C attached to a CAC-005 Rodent Sensor, which was inserted 2.5 cm into the rectum of the rat, the animal being lightly restrained by holding in the hand.",
-      "detector_evidence": "Rectal temperature data and microdia- lysate data were obtained from the same animals and separate animals were used for the locomotor activity assessment.",
+      "detector_evidence": "Rectal temperature data and microdialysate data were obtained from the same animals and separate animals were used for the locomotor activity assessment.",
       "confidence": "high"
     },
     {
@@ -9459,7 +9460,7 @@
       "doi": "10.1159/000138648",
       "method_id": "drug_cocaine",
       "stage": "manipulation",
-      "evidence": "Cocaine hydrochloride was dissolved in pyrogen- free NaCl (0.9%) solution to the appropriate concen­ tration to allow an injection volume of 0.1 ml/lOOg body weight.",
+      "evidence": "Cocaine hydrochloride was dissolved in pyrogenfree NaCl (0.9%) solution to the appropriate concen­ tration to allow an injection volume of 0.1 ml/lOOg body weight.",
       "status": "New taxonomy label, outside frozen annotation universe"
     },
     {
@@ -9523,7 +9524,15 @@
       "doi": "10.1016/j.pbb.2017.10.008",
       "method_id": "drug_mdma",
       "stage": "manipulation",
-      "evidence": "Two rats from the “Hot-trained” group were excluded from the 2nd sub- stitution (one due to loss of patency; the other due to exceeding a body temperature of 40 °C – it self-administered 15 mg/kg of MDMA at a rate of 22 mg/kg/h on that particular session).",
+      "evidence": "Two rats from the “Hot-trained” group were excluded from the 2nd substitution (one due to loss of patency; the other due to exceeding a body temperature of 40 °C – it self-administered 15 mg/kg of MDMA at a rate of 22 mg/kg/h on that particular session).",
+      "status": "New taxonomy label, outside frozen annotation universe"
+    },
+    {
+      "version": "current",
+      "doi": "10.1016/j.pbb.2017.10.008",
+      "method_id": "tool_icss",
+      "stage": "measurement",
+      "evidence": "Intracranial self-stimulation electrode implantation Rats were anesthetized with an iso ﬂurane/oxygen vapor mixture (isoﬂurane 5% induction, 1– 3% maintenance) and prepared with stimulation electrodes as described in ( Markou and Koob, 1992).",
       "status": "New taxonomy label, outside frozen annotation universe"
     },
     {
@@ -9539,7 +9548,7 @@
       "doi": "10.1177/0269881107082286",
       "method_id": "tool_gcms",
       "stage": "measurement",
-      "evidence": "The bloods were collected in 10 ml ethylenediaminetetraacetic acid (EDTA)-treated glass tubes and were then analysed for metham- phetamine content using Gas Chromatography–Mass Spectrometry (GC–MS).",
+      "evidence": "The bloods were collected in 10 ml ethylenediaminetetraacetic acid (EDTA)-treated glass tubes and were then analysed for methamphetamine content using Gas Chromatography–Mass Spectrometry (GC–MS).",
       "status": "New taxonomy label, outside frozen annotation universe"
     },
     {
@@ -9547,7 +9556,7 @@
       "doi": "10.1177/0269881107082286",
       "method_id": "tool_mass_spec",
       "stage": "measurement",
-      "evidence": "The bloods were collected in 10 ml ethylenediaminetetraacetic acid (EDTA)-treated glass tubes and were then analysed for metham- phetamine content using Gas Chromatography–Mass Spectrometry (GC–MS).",
+      "evidence": "The bloods were collected in 10 ml ethylenediaminetetraacetic acid (EDTA)-treated glass tubes and were then analysed for methamphetamine content using Gas Chromatography–Mass Spectrometry (GC–MS).",
       "status": "New taxonomy label, outside frozen annotation universe"
     },
     {
@@ -9563,7 +9572,7 @@
       "doi": "10.1038/sj.npp.1300673",
       "method_id": "drug_mdma",
       "stage": "manipulation",
-      "evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experi- mental procedure.",
+      "evidence": "In order to habituate the animals to the different ambient temperatures studied, on the day of the experiment, rats were maintained at an ambient room temperature between either 19 and 21 1C (referred to in the text as 20 1C) or 30 and 32 1C (referred to as 30 1C) for 2.5 h before MDMA (2.5 or 5 mg/kg, i.p.) administration and these conditions were maintained for the entire experimental procedure.",
       "status": "New taxonomy label, outside frozen annotation universe"
     },
     {
@@ -9579,7 +9588,7 @@
       "doi": "10.1038/sj.npp.1300673",
       "method_id": "tool_hplc",
       "stage": "measurement",
-      "evidence": "Dopamine, 5-HT and the metabolites, 3,4-dihydroxyphe- nylacetic acid (DOPAC), homovanillic acid (HVA), and 5-hydroxyindole acetic acid (5-HIAA) were measured in the dialysate by HPLC and electrochemical detection.",
+      "evidence": "Dopamine, 5-HT and the metabolites, 3,4-dihydroxyphenylacetic acid (DOPAC), homovanillic acid (HVA), and 5-hydroxyindole acetic acid (5-HIAA) were measured in the dialysate by HPLC and electrochemical detection.",
       "status": "New taxonomy label, outside frozen annotation universe"
     },
     {

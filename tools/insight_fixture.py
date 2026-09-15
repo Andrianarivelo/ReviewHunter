@@ -8,6 +8,7 @@ implying that these invented teaching examples are published research.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import os
 import sys
@@ -126,7 +127,30 @@ DETAIL_PAPERS = [
 ]
 
 
-def create_fixture(destination: Path, *, detailed: bool = False) -> dict:
+def goal_fixture_papers() -> list[dict]:
+    """Create 12 synthetic cases with known focus provenance and overlapping collection scopes."""
+    papers = copy.deepcopy([*DETAIL_PAPERS, *PAPERS])
+    papers[0].update({
+        "title": "MDMA fails to elicit reward facilitation during intracranial self-stimulation",
+        "abstract": "Adult rats received MDMA. No reward facilitation was observed in this synthetic example.",
+        "methods": "Male rats (n = 20) received MDMA intraperitoneally at 5 mg/kg. Intracranial self-stimulation (ICSS) thresholds were measured using a rate-frequency procedure. Electrodes delivered electrical stimulation to the medial forebrain bundle. A repeated-measures ANOVA compared reward thresholds.",
+        "keywords": ["MDMA", "intracranial self-stimulation"],
+    })
+    papers[1]["abstract"] = "The effects of ambient temperature on methamphetamine self-administration were investigated. Male rats received methamphetamine. Drug intake was recorded at two ambient temperatures."
+    papers[2].update({"title": "Visual calcium transients during learning", "abstract": "Calcium activity was recorded in visual cortex. Mice completed visual training sessions.", "collection": "sibling"})
+    papers[3].update({"title": "Synthetic study: contextual analysis of MDMA behavior", "abstract": "We examined the effect of ambient temperature on whether it was modified by the chamber. MDMA was administered to mice."})
+    papers[4].update({
+        "title": "Effects of ambient temperature and dose on stimulant intake",
+        "abstract": "We examined the effect of ambient temperature on stimulant intake and compared three dose groups. Thermal responses were quantified in this synthetic factorial experiment.",
+        "methods": "Male rats (n = 30) received methamphetamine. Rats were assigned to three groups maintained at 20, 25 or 30 degrees C. Separate groups received methamphetamine doses of 0.5, 1 or 2 mg/kg. Core temperature was measured by telemetry and drug intake was measured in operant chambers. A two-way ANOVA compared the temperature and dose groups.",
+    })
+    papers[5].update({"title": "", "abstract": "", "methods": "", "keywords": [], "no_fulltext": True, "collection": None})
+    for index in (6, 7, 11):
+        papers[index]["collection"] = "sibling"
+    return papers
+
+
+def create_fixture(destination: Path, *, detailed: bool = False, goals: bool = False) -> dict:
     """Seed a new temporary library and return reproducible scope identifiers."""
     destination = destination.resolve()
     if not destination.is_relative_to(TEMP_ROOT.resolve()):
@@ -144,9 +168,11 @@ def create_fixture(destination: Path, *, detailed: bool = False) -> dict:
     parent = library.create_collection("Temperature_addiction (synthetic)")
     child = library.create_collection("Dopamine (synthetic)", parent_id=parent["id"])
     collections = {"parent": parent["id"], "child": child["id"]}
-    papers = [*DETAIL_PAPERS, *PAPERS] if detailed else PAPERS
+    if goals:
+        collections["sibling"] = library.create_collection("Visual cognition (synthetic)")["id"]
+    papers = goal_fixture_papers() if goals else [*DETAIL_PAPERS, *PAPERS] if detailed else PAPERS
     ids = []
-    parent_items, descendant_items = [], []
+    parent_items, descendant_items, sibling_items = [], [], []
     for index, paper in enumerate(papers, 1):
         item_id = library.upsert_item({
             "title": paper["title"], "authors": paper["authors"],
@@ -155,13 +181,17 @@ def create_fixture(destination: Path, *, detailed: bool = False) -> dict:
         })
         path = destination / f"synthetic-paper-{index}.txt"
         text = f"{paper['title']}\nAbstract\n{paper['abstract']}\nIntroduction\nA monkey study is cited once for context.\nMaterials and methods\n{paper['methods']}\nResults\nSynthetic results are provided only to test the interface.\nReferences\n"
-        path.write_text(text, encoding="utf-8")
-        catalog.register_file(item_id, path, title="Synthetic Methods-section text")
-        if fulltext.index_item(item_id) < 100:
-            raise RuntimeError("Synthetic document was not indexed")
+        if not paper.get("no_fulltext"):
+            path.write_text(text, encoding="utf-8")
+            catalog.register_file(item_id, path, title="Synthetic Methods-section text")
+            if fulltext.index_item(item_id) < 100:
+                raise RuntimeError("Synthetic document was not indexed")
         if paper["collection"]:
             library.assign_to_collection(item_id, collections[paper["collection"]])
-            descendant_items.append(item_id)
+            if paper["collection"] == "sibling":
+                sibling_items.append(item_id)
+            else:
+                descendant_items.append(item_id)
             if paper["collection"] == "parent":
                 parent_items.append(item_id)
         catalog.add_tag(item_id, paper.get("tag") or ("temperature" if paper["collection"] else "cognition"))
@@ -169,9 +199,9 @@ def create_fixture(destination: Path, *, detailed: bool = False) -> dict:
             catalog.add_tag(item_id, "detail-stress")
         ids.append(item_id)
     result = {"home": str(destination), "synthetic": True, "items": ids, "collections": collections,
-              "titles": [paper["title"] for paper in papers], "detailed": detailed,
+              "titles": [paper["title"] for paper in papers], "detailed": detailed, "goals": goals,
               "parent_items": parent_items, "descendant_items": descendant_items, "port": 8775}
-    if detailed:
+    if detailed and not goals:
         result["detail_expectations"] = {
             "first_paper": ids[0], "stress_tag": "detail-stress", "single_occurrence_word": "alliesthesia", "subset_word": "hysteresis",
             "method_ids": ["drug_cocaine", "drug_methamphetamine", "drug_mdma", "tool_neuropixels", "tool_tetrodes",
@@ -185,6 +215,13 @@ def create_fixture(destination: Path, *, detailed: bool = False) -> dict:
                 {"id": ids[3], "present": ["drug_mdma", "tool_dlight", "tool_fiber_photometry", "signal_dopamine"], "absent": ["signal_calcium"]},
             ],
         }
+    if goals:
+        result["sibling_items"] = sibling_items
+        result["union_items"] = sorted(set(descendant_items + sibling_items))
+        result["goal_expectations"] = {"negative": ids[0], "passive": ids[1], "title_focus": ids[2],
+            "malformed": ids[3], "groups": ids[4], "unavailable": ids[5],
+            "statuses": {str(ids[0]): "title_focus", str(ids[1]): "explicit_aim", str(ids[2]): "title_focus",
+                         str(ids[3]): "explicit_aim", str(ids[5]): "unavailable"}}
     (destination / "fixture.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
     db.reset_connections()
     return result
@@ -195,10 +232,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--home", type=Path)
     parser.add_argument("--detailed", action="store_true", help="Use 12 synthetic papers with detailed methods and rare words")
+    parser.add_argument("--goals", action="store_true", help="Use 12 synthetic goal-provenance and multi-collection cases")
     args = parser.parse_args()
     TEMP_ROOT.mkdir(parents=True, exist_ok=True)
     destination = args.home or Path(tempfile.mkdtemp(prefix="insight-ui-", dir=TEMP_ROOT))
-    print(json.dumps(create_fixture(destination, detailed=args.detailed), indent=2))
+    print(json.dumps(create_fixture(destination, detailed=args.detailed, goals=args.goals), indent=2))
 
 
 if __name__ == "__main__":

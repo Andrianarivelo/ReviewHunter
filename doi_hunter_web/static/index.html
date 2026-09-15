@@ -33,6 +33,7 @@
   <script src="/static/js/dialogs.js"></script>
   <script src="/static/js/settings.js"></script>
   <script src="/static/js/discover.js"></script>
+  <script src="/static/js/goal_views.js"></script>
   <script src="/static/js/insights.js"></script>
   <script src="/static/app.js"></script>
   <script defer src="/static/vendor/alpine.min.js"></script>
@@ -332,11 +333,33 @@
         </div>
       </header>
       <div class="insight-scope-bar">
-        <label>Scope <select aria-label="Insight scope" x-model="insight.scope" @change="insight.focus=''; loadInsight()"><template x-for="option in insightScopeOptions()" :key="option.value"><option :value="option.value" x-text="option.label"></option></template></select></label>
-        <label class="insight-sub-toggle" x-show="insight.scope.startsWith('collection:')"><input type="checkbox" x-model="insight.includeSub" @change="loadInsight()"> Subcollections</label>
+        <label>Scope
+          <select aria-label="Insight scope" x-model="insight.scope"
+                  x-effect="const scope = insight.scope; $nextTick(() => { $el.value = scope })"
+                  @change="changeInsightScope()">
+            <option value="all">Whole library</option>
+            <option value="collections" x-show="insight.collectionIds.length > 1"
+                    :disabled="insight.collectionIds.length < 2"
+                    x-text="insight.collectionIds.length + ' selected collections'"></option>
+            <template x-for="option in insightScopeOptions()" :key="option.value">
+              <option :value="option.value" x-text="option.label"></option>
+            </template>
+          </select>
+        </label>
+        <div class="insight-collection-selector" @click.outside="insight.collectionPicker=false" @keydown.escape="insight.collectionPicker=false">
+          <button class="insight-collection-trigger" @click="openInsightCollections()" :aria-expanded="insight.collectionPicker" aria-controls="insight-collection-picker">Select collections <span x-show="insightCollectionIds().length" x-text="'(' + insightCollectionIds().length + ')'"></span> ▾</button>
+          <div id="insight-collection-picker" class="insight-collection-picker" x-show="insight.collectionPicker" x-cloak>
+            <strong>Combine collections</strong><p>Papers in overlapping collections are counted once.</p>
+            <input type="search" aria-label="Search collections" placeholder="Find a collection…" x-model="insight.collectionQuery">
+            <div class="insight-collection-choices"><template x-for="collection in insightCollectionChoices()" :key="collection.id"><label><input type="checkbox" :checked="insight.collectionDraft.includes(collection.id)" @change="toggleInsightCollection(collection.id)"><span x-text="collection.name"></span></label></template><p x-show="!insightCollectionChoices().length">No matching collections.</p></div>
+            <div class="insight-collection-actions"><span x-text="insight.collectionDraft.length + ' selected'"></span><button @click="insight.collectionPicker=false">Cancel</button><button class="insight-apply-collections" :disabled="!insight.collectionDraft.length" @click="applyInsightCollections()">Apply selection</button></div>
+          </div>
+        </div>
+        <label class="insight-sub-toggle" x-show="insightCollectionIds().length"><input type="checkbox" x-model="insight.includeSub" @change="loadInsight()"> Subcollections</label>
         <span class="insight-count" x-text="paperCount(insight.data.scope?.items || 0)"></span>
         <button class="insight-reset" @click="resetInsightScope()">Reset</button>
       </div>
+      <div class="insight-selected-collections" x-show="insightCollectionIds().length>1"><span>Combined:</span><template x-for="collection in insightSelectedCollections()" :key="collection.id"><button @click="openInsightCollections()" x-text="collection.name"></button></template></div>
       <div class="insight-scroll">
         <div x-show="insight.loading" class="insight-loading" role="status">Reading the evidence…</div>
         <div x-show="insight.error" class="insight-notice" role="alert"><span x-text="insight.error"></span> <button @click="loadInsight()">Retry</button></div>
@@ -367,12 +390,18 @@
             <div class="insight-segment"><button @click="insight.methodView='pipeline'; renderInsight()" :class="{'active':insight.methodView==='pipeline'}">Paper pipelines</button><button @click="insight.methodView='matrix'; renderInsight()" :class="{'active':insight.methodView==='matrix'}">Methods heatmap</button></div>
             <span>Click a chip or cell to inspect its evidence.</span>
           </div>
-          <div class="insight-goal-types" x-show="insight.kind==='goals'"><template x-for="type in (insight.data.goal_types || [])" :key="type.kind"><span><b x-text="type.count"></b> <span x-text="goalType(type.kind)"></span></span></template></div>
+          <div class="insight-goal-controls" x-show="insight.kind==='goals'">
+            <div class="insight-tools"><div class="insight-segment"><button @click="insight.goalView='atlas'; renderInsight()" :class="{'active':insight.goalView==='atlas'}">Question atlas</button><button @click="insight.goalView='connections'; renderInsight()" :class="{'active':insight.goalView==='connections'}">Factor–outcome connections</button></div><input aria-label="Search research questions" type="search" placeholder="Find a paper or research question…" x-model="insight.goalQuery" @input.debounce.180ms="filterGoals()"><button @click="clearGoalFilters()" x-show="insight.goalKind || insight.goalTheme || insight.goalQuery">Clear filters</button></div>
+            <div class="insight-goal-types"><button @click="insight.goalKind=''; filterGoals()" :class="{'active':!insight.goalKind}">All question types</button><template x-for="type in (insight.data.goal_types || [])" :key="type.kind"><button @click="insight.goalKind=insight.goalKind===type.kind ? '' : type.kind; filterGoals()" :class="{'active':insight.goalKind===type.kind}" :style="'--goal-colour:' + goalColour(type.kind)"><i></i><span x-text="goalType(type.kind)"></span><b x-text="type.count"></b></button></template></div>
+            <div class="insight-goal-themes" x-show="goalThemes().length"><span>Explore a theme</span><template x-for="theme in goalThemes()" :key="theme.id"><button @click="insight.goalTheme=insight.goalTheme===theme.id ? '' : theme.id; filterGoals()" :class="{'active':insight.goalTheme===theme.id}"><span x-text="theme.label"></span><b x-text="theme.count"></b></button></template></div>
+            <p class="insight-goal-coverage"><strong x-text="goalFilteredPapers().length + ' of ' + (insight.data.papers || []).length + ' papers'"></strong><span x-show="insight.goalView==='atlas'">Each card shows an explicit aim or a clearly labelled title-based focus. Click to inspect the source.</span><span x-show="insight.goalView==='connections'">Connections show supported pairs on this page. Papers without a reliable pair remain in the atlas.</span></p>
+          </div>
           <div class="insight-legend" x-show="insight.kind==='concepts'"><template x-for="cluster in (insight.data.clusters || [])" :key="cluster.id"><button @click="insight.cluster=insight.cluster===cluster.id ? null : cluster.id; renderInsight()" :class="{'active': insight.cluster===cluster.id}" :style="'--cluster-color:' + ['#0891b2','#8b5cf6','#d97706','#10b981','#e05d8b','#527de3','#a48544'][cluster.id%7]"><i></i><span x-text="cluster.label"></span><b x-text="cluster.size"></b></button></template></div>
           <div class="insight-visual card" :class="{'insight-wide':insight.kind==='methods'}">
             <svg id="insight-svg" xmlns="http://www.w3.org/2000/svg" :view-box.camel="'0 0 ' + insight.width + ' ' + insight.height" :style="insightChartStyle()" role="group" :aria-label="insightTitle() + ' interactive map'" @click="insightActivate($event)" @keydown.enter.prevent="insightActivate($event)" @keydown.space.prevent="insightActivate($event)" @mouseover="insightHover($event)" @mouseleave="insightHover($event,true)"><g x-html="insight.svg"></g></svg>
           </div>
           <div class="insight-pagination" x-show="insight.kind==='methods' &amp;&amp; insightPageCount()>1"><button @click="insightPage(-1)" :disabled="insight.page===0">Previous papers</button><span x-text="'Page ' + (insight.page+1) + ' of ' + insightPageCount()"></span><button @click="insightPage(1)" :disabled="insight.page+1>=insightPageCount()">Next papers</button></div>
+          <div class="insight-pagination" x-show="insight.kind==='goals' &amp;&amp; goalPageCount()>1"><button @click="goalPage(-1)" :disabled="insight.goalPage===0">Previous papers</button><span x-text="'Page ' + (insight.goalPage+1) + ' of ' + goalPageCount()"></span><button @click="goalPage(1)" :disabled="insight.goalPage+1>=goalPageCount()">Next papers</button></div>
           <section class="insight-rare-discoveries" x-show="insight.kind==='words' &amp;&amp; insight.wordPool==='frequent' &amp;&amp; insightRareSuggestions().length">
             <div><h2>Rare terms to explore</h2><p>Each appears exactly once in this scope and text source. A rare mention may be useful, incidental or a text-extraction error.</p></div>
             <div class="insight-rare-chips"><template x-for="word in insightRareSuggestions()" :key="word.word"><button @click="inspectWord(word)" :style="'--word-colour:' + wordColour(word)"><span>◆</span><span x-text="word.word"></span><small>1×</small></button></template><button @click="setInsightWordPool('rare')">Explore rare terms →</button></div>
@@ -382,11 +411,7 @@
             <p class="insight-caveat">Counts describe the available text, not a quality score. A missing statement does not prove a procedure was omitted. The five stages organise methods; they do not reconstruct the experiment's timeline.</p>
             <div class="insight-diagnostic-grid"><div class="insight-reporting"><template x-for="check in (insight.data.checks || [])" :key="check.id"><button class="insight-check" @click="inspectReporting(check)"><span x-text="check.label"></span><b x-text="check.count + '/' + (check.assessed ?? insight.data.scope?.items ?? 0)"></b><small x-show="check.unavailable" x-text="check.unavailable + ' without text'"></small><i><em :style="'width:' + (100*check.count/Math.max(1,check.assessed ?? insight.data.scope?.items ?? 0)) + '%'"></em></i></button></template></div><div class="insight-gaps"><h3>Patterns to investigate</h3><template x-for="(gap,i) in (insight.data.insights?.gaps || [])" :key="i"><p><span>↗</span><span x-text="gap"></span></p></template><p x-show="!(insight.data.insights?.gaps || []).length">No structural gaps detected by these rules.</p></div></div>
           </section>
-          <section class="insight-aims card" x-show="insight.kind==='goals'">
-            <h2 class="font-serif">Questions behind the links</h2>
-            <p class="insight-caveat"><span x-text="(insight.data.insights?.single_paper_outcomes || []).length + ' outcomes linked to a single paper. '"></span><span x-text="(insight.data.insights?.no_aim_found || []).length + ' papers without a detectable aim.'"></span> An unconnected pair is not evidence of a research gap.</p>
-            <template x-for="paper in (insight.data.papers || [])" :key="paper.id"><button class="insight-aim-row" @click="inspectGoalPaper(paper)"><span class="insight-aim-type" x-text="goalType(paper.goal_type)"></span><strong x-text="paper.title"></strong><span x-text="paper.aims?.[0]?.sentence || 'No explicit aim detected in available text.'"></span></button></template>
-          </section>
+          <p class="insight-goal-note" x-show="insight.kind==='goals'">Shared themes and question types help compare papers. A missing connection does not establish a research gap. CSV and JSON include every scoped paper, including title-based focuses.</p>
         </div>
       </div>
     </section>
@@ -603,9 +628,10 @@
   <!-- Insight evidence rail -->
   <template x-if="!note.open &amp;&amp; virtual === 'graph' &amp;&amp; insight.selected">
     <div class="insight-detail p-5 space-y-4 overflow-y-auto">
-      <div class="flex items-center justify-between"><div class="rail-label">Evidence explorer</div><button @click="insight.selected=null" aria-label="Close evidence">×</button></div>
+      <div class="flex items-center justify-between"><div class="rail-label">Evidence explorer</div><button @click="closeInsightEvidence()" aria-label="Close evidence">×</button></div>
       <h2 class="font-serif text-2xl leading-tight" x-text="insight.selected.label"></h2>
       <p class="text-xs text-ink-500" x-text="insight.selected.description || insight.selected.confidence || 'Trace this pattern to its source papers.'"></p>
+      <div class="insight-goal-pair-evidence" x-show="insight.selected.goalPairs?.length"><div class="rail-label">Extracted relationships</div><template x-for="(pair,i) in (insight.selected.goalPairs || [])" :key="i"><p><strong x-text="pair.factor + ' → ' + pair.outcome"></strong><span x-text="(pair.relation_label || 'Research question') + ' · ' + (pair.source || 'available text')"></span></p></template></div>
       <button x-show="insight.kind==='concepts'" @click="focusInsight()" class="action-primary h-9 px-3 text-sm">Focus on this concept</button>
       <div class="insight-related" x-show="insight.selected.related?.length"><div class="rail-label">Related concepts</div><template x-for="related in (insight.selected.related || [])" :key="related.label"><button @click="insight.focus=related.label; loadInsight()"><span x-text="related.label"></span><b x-text="related.weight"></b></button></template></div>
       <div><div class="rail-label mb-2">Source evidence</div><template x-for="(e,i) in insightEvidence(insight.selected)" :key="i"><blockquote class="insight-quote"><span x-text="e.source || 'Available text'"></span><p x-text="e.sentence || e.evidence"></p><button x-show="e.id" @click="openInsightPaper({id:e.id})">Open source paper ↗</button></blockquote></template><p class="text-xs text-ink-500" x-show="!insightEvidence(insight.selected).length">No extracted evidence sentence available. Inspect the source papers.</p></div>
