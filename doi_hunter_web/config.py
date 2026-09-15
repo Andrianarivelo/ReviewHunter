@@ -136,6 +136,15 @@ DEFAULT_SETTINGS: dict = {
     "last_backup_at": "",
     "last_drive_sync_at": "",
     "https_port": 8766,
+    # ---- PDF sources & network (see transport.py / sources.py)
+    "unpaywall_email": "",                   # enables Unpaywall and OpenAlex's polite pool (any e-mail you own)
+    "network_proxy": "",                     # e.g. socks5h://127.0.0.1:9150 (Tor Browser) or http://proxy:3128
+    "proxy_scope": "shadow",                 # shadow: Sci-Hub / SciDB requests only | all: every download
+    "use_system_certificates": True,         # trust the OS certificate store in addition to certifi (like Chrome)
+    "browser_handoff": True,                 # hand failed downloads to the Chrome extension (user's session)
+    "scihub_mirrors": [],                    # custom Sci-Hub mirrors (empty = built-in list)
+    "scidb_bases": [],                       # custom Anna's Archive bases (empty = built-in list)
+    "ezproxy_prefix": "",                    # e.g. https://ezproxy.example.edu/login?url=  (browser-only variant)
 }
 
 

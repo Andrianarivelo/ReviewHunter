@@ -18,9 +18,14 @@ function app() {
       ws: null,
       online: true,
       batch: { active: false, index: 0, total: 0, query: '' },
+      /** Chrome connector detected on this page (its content script answers window messages). */
+      connector: { present: false, version: '' },
+      /** Live hand-off state per item id: {state, message}. */
+      handoffs: {},
 
       /** Boot: load reference data, first view, WebSocket, global shortcuts. */
       async init() {
+        this.listenToConnector();
         try {
           await Promise.all([this.loadItemTypes(), this.loadSettings(), this.refreshSidebar()]);
           this.loadStyles().catch(() => null);
@@ -71,6 +76,46 @@ function app() {
         setTimeout(() => { this.toasts = this.toasts.filter(x => x.id !== t.id); }, ttl);
       },
 
+      /**
+       * Bridge to the Chrome connector. The extension's content script answers {type:'ping'} with
+       * {type:'hello', version} and relays {type:'handoff'} to its service worker, which fetches the
+       * PDF with the browser session (see browser_extension/src/bridge/app_bridge.js).
+       */
+      listenToConnector() {
+        addEventListener('message', (ev) => {
+          if (ev.source !== window || !ev.data || ev.data.source !== 'reviewhunter-connector') return;
+          const m = ev.data;
+          if (m.type === 'hello') {
+            const wasPresent = this.connector.present;
+            this.connector = { present: true, version: m.version || '' };
+            if (!wasPresent) this.flushPendingHandoffs();
+          } else if (m.type === 'handoff-ack') {
+            if (m.accepted) this.toast('Chrome is fetching the PDF with your browser session...', 'info', 4000);
+            else this.toast(`Chrome connector declined: ${m.error || 'hand-off disabled in the extension options'}`, 'error', 7000);
+          }
+        });
+        // The content script may have run before this listener existed: it also leaves a DOM marker.
+        const marker = document.documentElement.getAttribute('data-reviewhunter-connector');
+        if (marker) this.connector = { present: true, version: marker === 'unknown' ? '' : marker };
+        postMessage({ source: 'reviewhunter-app', type: 'ping' }, location.origin);
+      },
+      /** Hand a failed download to the Chrome extension (queued until the connector answers). */
+      sendHandoff(rec) {
+        if (!rec || !rec.item_id) return;
+        this.handoffs[rec.item_id] = { state: 'pending', message: `${(rec.plan || []).length} source(s) to try in Chrome` };
+        if (this.connector.present) {
+          postMessage({ source: 'reviewhunter-app', type: 'handoff', handoff: rec }, location.origin);
+          return;
+        }
+        this._pendingHandoffs = [...(this._pendingHandoffs || []).filter(r => r.item_id !== rec.item_id), rec];
+        postMessage({ source: 'reviewhunter-app', type: 'ping' }, location.origin);
+        this.toast('Server could not fetch the PDF. Install or enable the ReviewHunter Chrome extension: it retries with your browser session (Settings > Browser Connector).', 'error', 9000);
+      },
+      flushPendingHandoffs() {
+        for (const rec of this._pendingHandoffs || []) postMessage({ source: 'reviewhunter-app', type: 'handoff', handoff: rec }, location.origin);
+        this._pendingHandoffs = [];
+      },
+
       /** Live job events (downloads, imports, connector saves) from the server. */
       connectWS() {
         // Exactly one live socket: a second one would duplicate every toast and refresh.
@@ -99,6 +144,23 @@ function app() {
               break;
             case 'failed':
               this.toast(m.error || 'Operation failed', 'error', 6000);
+              scheduleRefresh();
+              break;
+            case 'browser_handoff':
+              this.sendHandoff(m);
+              break;
+            case 'handoff_progress':
+              this.handoffs[m.id] = { state: m.state, message: m.message };
+              this.toast(`Chrome: ${m.message}`, 'info', 2500);
+              break;
+            case 'handoff_done':
+              this.handoffs[m.id] = { state: 'done', message: m.message };
+              this.toast(`Chrome: ${m.message}${m.title ? ` (${m.title})` : ''}`, 'ok', 6000);
+              scheduleRefresh();
+              break;
+            case 'handoff_failed':
+              this.handoffs[m.id] = { state: 'failed', message: m.message };
+              this.toast(`Chrome: ${m.message}`, 'error', 8000);
               scheduleRefresh();
               break;
             case 'zotero_progress':

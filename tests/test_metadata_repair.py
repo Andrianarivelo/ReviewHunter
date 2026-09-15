@@ -112,7 +112,8 @@ def test_open_access_fallback_attaches_only_real_pdf(library, monkeypatch, sampl
     ])
     bodies = {"https://repo.example/landing": b"<html>login</html>",
               "https://repo.example/paper.pdf": sample_pdf.read_bytes()}
-    monkeypatch.setattr(lib.requests, "get",
+    # The fallback downloads through the browser-like transport (transport.get), not plain requests.
+    monkeypatch.setattr(lib.transport, "get",
                         lambda url, **kw: SimpleNamespace(status_code=200, content=bodies[url]))
     result = lib.fetch_open_access_pdf(item["id"])
     assert result["ok"] and result["url"] == "https://repo.example/paper.pdf"

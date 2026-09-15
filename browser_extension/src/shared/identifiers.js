@@ -311,9 +311,42 @@ export function findPdfLinkInHtml(html, baseUrl, opts = {}) {
  * @returns {boolean} True for challenge pages.
  */
 export function isBotChallengeHtml(html) {
+  return classifyWall(html) !== null;
+}
+
+/** Walls a real browser passes on its own (JavaScript checks), with a label for progress lines. */
+const AUTO_WALLS = [
+  [/just a moment\.\.\.|cf-chl|challenge-platform|cf-challenge|_cf_chl_opt/i, "Cloudflare browser check"],
+  [/ddos-guard/i, "DDoS-Guard browser check"],
+  [/preparing to download/i, "NCBI download page"],
+  [/recaptcha\/challengepage|checking your browser - recaptcha/i, "reCAPTCHA browser check"],
+  [/antibot solution|<title[^>]*>\s*loading\.\.\.\s*<\/title>/i, "antibot loading page"],
+  [/checking your browser|checking if the site connection is secure/i, "browser check"],
+];
+
+/**
+ * Classify a wall page. Mirrors transport.classify_challenge on the server.
+ *
+ * @param {string} html  HTML source (only the first 20 kB are inspected).
+ * @returns {?{kind: "auto"|"interactive"|"blocked", label: string}} Null for real content.
+ *   auto: clears by itself in a tab (Cloudflare, DDoS-Guard, NCBI cookie page, invisible reCAPTCHA);
+ *   interactive: the user must act (ALTCHA "are you a robot", hCaptcha);
+ *   blocked: a web-filter block page (FortiGuard "Site bloque", "Web Page Blocked").
+ */
+export function classifyWall(html) {
   const head = String(html || "").slice(0, 20000);
-  if (/<title[^>]*>\s*loading\.\.\.\s*<\/title>/i.test(head)) return true;
-  return /altcha|êtes-vous un robot|etes-vous un robot|are you a robot|ddos-guard|antibot solution|cf-challenge|challenge-platform|just a moment\.\.\.|verify you are human/i.test(head);
+  if (!head.trim()) return null;
+  const titleMatch = head.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const title = titleMatch ? titleMatch[1].replace(/\s+/g, " ").trim() : "";
+  const blockRx = /site bloqu|web page blocked|fortiguard|fortinet|access to this site is blocked|this website is blocked|url blocked|blocked by your (?:organization|administrator)/i;
+  if (blockRx.test(title) || (blockRx.test(head) && /fortinet/i.test(head))) {
+    return { kind: "blocked", label: `web filter block page${title ? ` (${title})` : ""}` };
+  }
+  if (/altcha|êtes-vous un robot|etes-vous un robot|are you a robot|hcaptcha|verify you are human|confirm you are human|press and hold|slide to verify/i.test(head)) {
+    return { kind: "interactive", label: "human verification (ALTCHA / CAPTCHA)" };
+  }
+  for (const [rx, label] of AUTO_WALLS) if (rx.test(head)) return { kind: "auto", label };
+  return null;
 }
 
 /**

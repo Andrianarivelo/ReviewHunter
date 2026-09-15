@@ -158,6 +158,26 @@ export function saveIdentifiers(body) {
 }
 
 /**
+ * GET /connector/handoffs: PDFs the server could not fetch, waiting for the browser.
+ *
+ * @returns {Promise<{handoffs: Array<{item_id: number, doi: string, title: string, plan: Array<object>, created_at: number, state: string}>}>}
+ */
+export function handoffs() {
+  return request("/connector/handoffs", { timeout: 8000 });
+}
+
+/**
+ * POST /connector/handoffs/{itemId}/status: progress of a hand-off (relayed to the app as live events).
+ *
+ * @param {number} itemId  Item id.
+ * @param {{state: "running"|"waiting"|"done"|"failed", message?: string, step?: string}} body  Status.
+ * @returns {Promise<{ok: boolean, state: string}>}
+ */
+export function handoffStatus(itemId, body) {
+  return request(`/connector/handoffs/${encodeURIComponent(itemId)}/status`, { json: body, timeout: 8000 });
+}
+
+/**
  * POST /connector/attachment with raw bytes.
  *
  * @param {number} itemId            Item id.

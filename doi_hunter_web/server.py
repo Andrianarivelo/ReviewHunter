@@ -7,6 +7,7 @@ import os
 import threading
 import logging
 import re
+import time
 from pathlib import Path
 from typing import Any, Optional
 
@@ -304,6 +305,40 @@ def api_get_file(item_id: int):
 async def api_download(item_id: int) -> dict:
     asyncio.create_task(_run_download(item_id))
     return {"queued": item_id}
+
+
+@app.post("/api/items/{item_id}/handoff")
+async def api_handoff(item_id: int) -> dict:
+    """Ask the Chrome extension to fetch the PDF with the user's browser session ("Retry in Chrome").
+
+    The plan (pages and PDF links to try) is built from the resolvers without downloading on the
+    server, registered for the extension and announced on the live socket.
+    """
+    loop = asyncio.get_running_loop()
+    result = await loop.run_in_executor(None, lambda: library.request_browser_handoff(item_id, progress=_on_progress))
+    return result
+
+
+@app.get("/api/pdf-sources/diagnose")
+async def api_diagnose_sources(doi: str) -> dict:
+    """Run every resolver for a DOI and report candidates, diagnostics and browser steps (Settings > Test)."""
+    from . import transport
+    from .sources import collect_browser_steps, collect_notes, iter_pdf_urls
+
+    clean = catalog.normalize_doi(doi)
+    if not re.fullmatch(r"10\.\d{4,9}/\S+", clean or ""):
+        raise HTTPException(400, "a DOI is required")
+
+    def run() -> dict:
+        t0 = time.perf_counter()
+        with collect_notes() as notes, collect_browser_steps() as steps:
+            found = [{"source": r.source, "url": r.url, "needs_browser": r.needs_browser, "referer": r.referer,
+                      "note": r.note} for r in iter_pdf_urls(clean)]
+        return {"doi": clean, "candidates": found, "notes": list(notes), "browser_steps": list(steps),
+                "elapsed_s": round(time.perf_counter() - t0, 2), "transport": transport.transport_name(),
+                "proxy": transport.proxy_for(True) or ""}
+
+    return await asyncio.get_running_loop().run_in_executor(None, run)
 
 
 @app.post("/api/items/{item_id}/open-folder")

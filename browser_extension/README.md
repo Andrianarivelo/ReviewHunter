@@ -84,6 +84,19 @@ page, open-access URL returned by the server), best first:
    - **Auto attach**: opening a Sci-Hub / SciDB article page for a DOI that is in
      your library without a PDF attaches that PDF automatically.
 
+6. **Hand-off from the app** (Options: *Fetch PDFs the ReviewHunter app could not
+   download*, on by default): when "Find PDF" fails in the app, the server builds a
+   plan (open-access copies behind a JavaScript check, PubMed Central, publisher
+   PDFs needing your institutional session, Sci-Hub proxies whose PDF host wants
+   the article page as Referer, SciDB pages behind DDoS-Guard). The app page posts
+   it to this extension through a content script (`src/bridge/app_bridge.js`, only
+   on the ReviewHunter address) and the extension also polls `/connector/handoffs`
+   once a minute. Each step is fetched from the service worker or **from a
+   background tab showing the source page** (same cookies and Referer as a click
+   there; Cloudflare / DDoS-Guard checks clear on their own, the tab waits up to
+   40 s). Human checks open for you as in 5. Progress is reported to the server
+   (`/connector/handoffs/{id}/status`) and shown as toasts in the app.
+
 Bytes are uploaded only if they start with `%PDF-` and are at most 200 MB (the
 server checks the same). If everything fails the popup says so, and the item is
 remembered for 24 h: open the PDF yourself and click the button to attach it.
@@ -96,7 +109,9 @@ remembered for 24 h: open the PDF yourself and click the button to attach it.
 | `tabs` | Badge per tab, PDF-tab detection, last-resort background tab, focusing the ReviewHunter window. |
 | `storage` | Settings, last collection, pending PDF attachments (session only). |
 | `contextMenus` | Right-click save actions. |
-| `notifications` | "PDF saved" confirmation for saves that finish outside the popup (auto attach, context menu). |
+| `notifications` | "PDF saved" confirmation for saves that finish outside the popup (auto attach, context menu, hand-off). |
+| `alarms` | Poll `/connector/handoffs` once a minute so a hand-off made while the app tab was closed is still run. |
+| content script on `127.0.0.1:8765` / `localhost:8765` | The app page hands failed downloads to the extension through `window.postMessage`; nothing else is read from the page. |
 | `http://127.0.0.1/*`, `http://localhost/*` | Talk to the local ReviewHunter server. |
 | `<all_urls>` | Download PDFs **with your browser session** from whichever publisher hosts them (this is what makes closed-access downloads work), and count references for the badge. |
 
@@ -116,6 +131,8 @@ src/core/detect.js     injects the extractor into a tab (dynamic import in the i
 src/core/pdf.js        in-browser PDF acquisition strategies
 src/core/save.js       save orchestration with a progress checklist
 src/core/shadow.js     Sci-Hub / SciDB fallback in the browser (walls detected, never solved)
+src/core/handoff.js    runs the plans the app hands over (worker fetch, page-context fetch from a background tab)
+src/bridge/app_bridge.js  content script on the ReviewHunter page: relays hand-offs, announces the version
 src/extract/           translator-lite: meta tags, JSON-LD, COinS, DOI discovery, site rules, multi-item pages
 src/shared/identifiers.js  DOI / arXiv / PMID / PII helpers, interstitial parser, %PDF- check
 src/popup/, src/options/, src/ui/common.css   user interface
@@ -131,6 +148,9 @@ test/                  browser harnesses, fixtures, API smoke test
 #   open http://127.0.0.1:8799/test/test.html
 #   open http://127.0.0.1:8799/test/pdf_test.html
 #   open http://127.0.0.1:8799/test/shadow_test.html  (fake mirrors: wall, alias, article page)
+#   open http://127.0.0.1:8799/test/handoff_test.html (hand-off runner: direct PDF, Referer, DDoS-Guard clearing, human check, block page)
+# Headless run of all four pages: tools/ui_snapshot.py --url <page> --step "JSON.stringify(window.__results)"
+# Real Chrome with the extension loaded (hand-off end to end): .venv/Scripts/python.exe tools/extension_e2e.py --server http://127.0.0.1:8785
 #   open http://127.0.0.1:8799/test/popup_preview.html   (visual check of popup states, mocked chrome API)
 #        ?s=scihub-wall,saved-pdf,progress,progress-watch  for the saved / verified states
 

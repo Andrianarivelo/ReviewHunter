@@ -22,7 +22,7 @@ from fastapi import APIRouter, File, Form, HTTPException, Query, Request, Upload
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel
 
-from . import __version__
+from . import __version__, transport
 from . import catalog, config, duplicates, formats, fulltext, gdrive, identifiers, zotero_import
 from .csl import item_to_csl
 from .db import get_conn
@@ -1146,6 +1146,8 @@ def system_info(request: Request) -> dict:
         "extension_dir": str(root / "browser_extension"),
         "word_addin": addin.status(),
         "https_port": config.get_settings().get("https_port"),
+        "transport": transport.transport_name(),
+        "proxy_active": transport.proxy_for(True) or "",
     }
 
 

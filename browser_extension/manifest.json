@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ReviewHunter Connector",
   "short_name": "ReviewHunter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Save references and their PDFs from any web page into your local ReviewHunter library.",
   "minimum_chrome_version": "116",
   "icons": {
@@ -29,8 +29,20 @@
     "page": "src/options/options.html",
     "open_in_tab": true
   },
-  "permissions": ["activeTab", "scripting", "storage", "contextMenus", "tabs", "notifications"],
-  "host_permissions": ["http://127.0.0.1/*", "http://localhost/*", "<all_urls>"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "contextMenus",
+    "tabs",
+    "notifications",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "<all_urls>"
+  ],
   "commands": {
     "_execute_action": {
       "suggested_key": {
@@ -42,11 +54,30 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/extract/*.js", "src/shared/*.js"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "src/extract/*.js",
+        "src/shared/*.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://127.0.0.1:8765/*",
+        "http://localhost:8765/*",
+        "https://127.0.0.1:8766/*",
+        "https://localhost:8766/*"
+      ],
+      "js": [
+        "src/bridge/app_bridge.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
 }

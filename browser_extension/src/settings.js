@@ -17,6 +17,9 @@ export const DEFAULTS = Object.freeze({
   // Same sources as the ReviewHunter app (Sci-Hub, SciDB), fetched with the browser session when the
   // publisher PDF is not reachable. Human checks are never automated: the page is opened for the user.
   useShadowLibraries: true,
+  // Fetch, with the browser session, the PDFs the ReviewHunter server could not download
+  // (asked live by the app page, and polled once a minute).
+  acceptHandoffs: true,
 });
 
 /**

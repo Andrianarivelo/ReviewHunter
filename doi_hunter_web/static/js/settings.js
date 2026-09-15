@@ -16,9 +16,27 @@ window.settingsPart = function settingsPart() {
     remoteBackups: [],
     system: null,
     fulltextStats: null,
+    /** "Test the sources" panel (Settings > PDF Sources). */
+    sourcesTest: { doi: '', running: false, result: null },
 
     async loadSettings() {
       this.settings = await api.get('/api/settings');
+    },
+    /** Save a list setting typed as lines or a comma-separated string (mirror lists). */
+    async saveListSetting(key, text) {
+      const items = String(text || '').split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+      await this.saveSetting(key, items);
+    },
+    /** Run every PDF resolver for a DOI and show candidates + diagnostics. */
+    async testSources() {
+      const doi = (this.sourcesTest.doi || '').trim();
+      if (!doi) return this.toast('Enter a DOI first', 'error');
+      this.sourcesTest.running = true;
+      this.sourcesTest.result = null;
+      try {
+        this.sourcesTest.result = await api.get(`/api/pdf-sources/diagnose?doi=${encodeURIComponent(doi)}`);
+      } catch (e) { this.toast(e.message, 'error', 6000); }
+      this.sourcesTest.running = false;
     },
     async saveSetting(key, value) {
       this.settings = await api.patch('/api/settings', { [key]: value });

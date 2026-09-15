@@ -103,6 +103,7 @@ async function init() {
   $("opt-snapshot").checked = s.saveSnapshot;
   $("opt-bgtab").checked = s.useBackgroundTab;
   $("opt-shadow").checked = s.useShadowLibraries;
+  $("opt-handoff").checked = s.acceptHandoffs;
   await loadCollections(s.defaultCollectionId);
 
   $("btn-test").addEventListener("click", testConnection);
@@ -119,7 +120,7 @@ async function init() {
     await setSettings({ defaultCollectionId: e.target.value ? Number(e.target.value) : null });
     flagSaved();
   });
-  const toggles = { "opt-pdf": "attachPdf", "opt-enrich": "improveMetadata", "opt-snapshot": "saveSnapshot", "opt-bgtab": "useBackgroundTab", "opt-shadow": "useShadowLibraries" };
+  const toggles = { "opt-pdf": "attachPdf", "opt-enrich": "improveMetadata", "opt-snapshot": "saveSnapshot", "opt-bgtab": "useBackgroundTab", "opt-shadow": "useShadowLibraries", "opt-handoff": "acceptHandoffs" };
   for (const [id, key] of Object.entries(toggles)) {
     $(id).addEventListener("change", async (e) => {
       await setSettings({ [key]: e.target.checked });

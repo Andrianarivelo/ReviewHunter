@@ -15,3 +15,5 @@ https://files.pythonhosted.org/packages/5c/44/70be9e0e536dc80d5d7412c8deb2193c4e
 # Optional - uncomment for semantic clustering & similarity:
 # sentence-transformers>=2.5
 # numpy>=1.24
+
+curl_cffi>=0.7          # Chrome TLS impersonation for Cloudflare-protected PDF sources (optional at runtime)

@@ -21,13 +21,13 @@ from datetime import datetime
 from itertools import combinations
 from pathlib import Path
 from typing import Any, Callable, Optional
+from urllib.parse import urlsplit
 
 import requests
 
-from doi_hunter.netinfo import get_headers
 from doi_hunter.utils import sanitize_filename
 
-from . import catalog, config
+from . import catalog, config, handoff, transport
 from .config import papers_dir
 from .db import get_conn, row_to_dict, rows_to_dicts, tx
 from .metadata import (
@@ -37,7 +37,7 @@ from .metadata import (
     search_crossref,
     suggest_collections,
 )
-from .sources import collect_notes, iter_pdf_urls
+from .sources import Resolved, browser_plan, collect_browser_steps, collect_notes, iter_pdf_urls
 from .freebooks import resolve_book_url
 
 log = logging.getLogger("doihunter.library")
@@ -818,36 +818,54 @@ def _download_url_to_target(
     progress: Optional[Callable[[str, dict], None]],
     *,
     expect_pdf: bool,
+    referer: str = "",
+    shadow: bool = False,
 ) -> int:
-    """Stream one candidate into target atomically. Raises if it is not usable."""
+    """Stream one candidate into target atomically. Raises if it is not usable.
+
+    The download uses the browser-like transport (Chrome TLS fingerprint, OS trust store, optional
+    proxy) and the Referer the PDF host requires. A response that is not a PDF is classified: a
+    Cloudflare / DDoS-Guard check, a login page or a block page each produce a precise error, and
+    checks a real browser passes on its own are recorded for the Chrome extension.
+    """
+    from .sources import browser_step
+    from .transport import classify_challenge
+
     target.parent.mkdir(parents=True, exist_ok=True)
     tmp = target.with_name(f"{target.name}.part")
     if tmp.exists():
         tmp.unlink()
 
-    try:
-        with requests.get(url, headers=get_headers(), stream=True, timeout=_download_timeout(), allow_redirects=True) as r:
-            r.raise_for_status()
-            total = int(r.headers.get("Content-Length") or 0)
-            written = 0
-            with open(tmp, "wb") as f:
-                for chunk in r.iter_content(chunk_size=64 * 1024):
-                    if not chunk:
-                        continue
-                    f.write(chunk)
-                    written += len(chunk)
-                    if progress and total:
-                        progress("progress", {"id": item_id, "loaded": written, "total": total})
+    def on_progress(written: int, total: int) -> None:
+        if progress and total:
+            progress("progress", {"id": item_id, "loaded": written, "total": total})
 
-        size = tmp.stat().st_size
+    try:
+        try:
+            r = transport.download(url, tmp, referer=referer or None, timeout=_download_timeout()[1], shadow=shadow,
+                                   progress=on_progress)
+        except transport.TransportError as e:
+            raise ValueError(transport.describe_failure(e, url, _download_timeout()[1])) from e
+        size = tmp.stat().st_size if tmp.exists() else 0
         if size <= 0:
             raise ValueError("empty response")
-        if expect_pdf:
+        if expect_pdf and r.content[:5] != b"%PDF-":
             with open(tmp, "rb") as f:
-                head = f.read(1024)
-            if b"%PDF" not in head:
-                raise ValueError("response was not a PDF")
-
+                head = f.read(20000)
+            text = head.decode("utf-8", errors="replace")
+            challenge = classify_challenge(text, r.status_code)
+            if challenge and challenge.kind != "blocked":
+                browser_step(referer or url, f"{urlsplit(url).netloc}", kind="pdf" if not referer else "page",
+                             referer=referer, wall=challenge.kind, note=challenge.label)
+            if challenge:
+                raise ValueError(f"{challenge.label} instead of the PDF")
+            if r.status_code >= 400:
+                raise ValueError(f"HTTP {r.status_code}")
+            if re.search(r"(sign in|log in|login|purchase|access denied|subscribe)", text, re.I):
+                raise ValueError("login page instead of the PDF (institutional access needed)")
+            raise ValueError("response was not a PDF")
+        if r.status_code >= 400:
+            raise ValueError(f"HTTP {r.status_code}")
         tmp.replace(target)
         return size
     except Exception:
@@ -895,7 +913,7 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
         source_options = _download_book_options(item, item_id, progress)
         no_source_msg = "no working LibGen mirror"
     else:
-        source_options = ((r.source, r.url) for r in iter_pdf_urls(item["doi"]))
+        source_options = iter_pdf_urls(item["doi"])
         no_source_msg = "no source (Publisher + Sci-Hub + SciDB)"
 
     target = papers_dir() / build_filename(item)
@@ -907,18 +925,33 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
     expect_pdf = target.suffix.lower() == ".pdf"
     attempted = 0
     total_options = len(source_options) if isinstance(source_options, list) else None
+    skipped: list[Resolved] = []               # copies only a browser can fetch (PubMed Central, EZproxy)
+    failed: list[tuple[Resolved, str]] = []    # candidates the server tried and lost
     # Resolver diagnostics (dead mirrors, human-verification walls) are collected while the lazy
-    # generator runs, so a failure tells the user why nothing was found.
-    with collect_notes() as source_notes:
-        for index, (source, url) in enumerate(source_options, start=1):
-            attempted = index
+    # generator runs, so a failure tells the user why nothing was found, and the pages / PDFs a
+    # browser session could still fetch are collected for the Chrome extension.
+    with collect_notes() as source_notes, collect_browser_steps() as browser_steps:
+        for index, option in enumerate(source_options, start=1):
+            if isinstance(option, Resolved):
+                source, url, resolved = option.source, option.url, option
+            else:
+                source, url = option
+                resolved = Resolved(url=url, source=source)
+            if resolved.needs_browser:
+                skipped.append(resolved)
+                if progress:
+                    progress("source", {"id": item_id, "source": f"{source}: left to the Chrome extension"})
+                continue
+            attempted += 1
             if progress:
                 label = f"{source} ({index}/{total_options})" if total_options else f"{source} (attempt {index})"
                 progress("source", {"id": item_id, "source": label})
             try:
-                size = _download_url_to_target(url, target, item_id, progress, expect_pdf=expect_pdf)
+                size = _download_url_to_target(url, target, item_id, progress, expect_pdf=expect_pdf,
+                                               referer=resolved.referer, shadow="Sci-Hub" in source or "SciDB" in source)
             except Exception as e:
                 last_error = f"{source}: {e}"
+                failed.append((resolved, str(e)))
                 log.warning(f"download option failed for item {item_id} via {source}: {e}")
                 if progress:
                     progress("source_failed", {"id": item_id, "source": source, "error": str(e)})
@@ -931,6 +964,7 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
             )
             catalog.register_file(item_id, target, url=url)
             _index_fulltext_async(item_id)
+            handoff.clear(item_id)
             if progress:
                 progress("done", {"id": item_id, "path": str(target), "size": size})
             return get_item(item_id)
@@ -940,12 +974,24 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
         no_source_msg = f"{no_source_msg}. {detail}"
         last_error = f"{last_error}. {detail}" if last_error else detail
 
+    handed = None
+    if not is_book and config.get_settings().get("browser_handoff", True):
+        plan = browser_plan(item["doi"], browser_steps, skipped, failed)
+        if plan:
+            reason = last_error or no_source_msg
+            handed = handoff.register(item_id, item["doi"], item.get("title") or "", plan, reason)
+            summary = f"Chrome extension asked to try {len(plan)} source{'s' if len(plan) > 1 else ''} with your browser session"
+            no_source_msg = f"{no_source_msg}. {summary}"
+            last_error = f"{last_error}. {summary}" if last_error else summary
+
     if attempted == 0:
         get_conn().execute(
             "UPDATE items SET status='failed', error_msg=? WHERE id=?", (no_source_msg[:500], item_id)
         )
         if progress:
             progress("failed", {"id": item_id, "error": no_source_msg})
+            if handed:
+                progress("browser_handoff", handed)
         return get_item(item_id)
 
     error = f"all sources failed: {last_error}" if last_error else "all sources failed"
@@ -960,7 +1006,40 @@ def download_item(item_id: int, *, progress: Optional[Callable[[str, dict], None
     )
     if progress:
         progress("failed", {"id": item_id, "error": error})
+        if handed:
+            progress("browser_handoff", handed)
     return get_item(item_id)
+
+
+def request_browser_handoff(item_id: int, *, progress: Optional[Callable[[str, dict], None]] = None) -> dict:
+    """Build (or reuse) the browser plan for an item and announce it, without downloading on the server.
+
+    Used by the "Retry in Chrome" button and by the extension's poll. Returns the registry record or
+    {"ok": False, "reason": ...}.
+    """
+    item = get_item(item_id)
+    if not item:
+        return {"ok": False, "reason": "item not found"}
+    if not item.get("doi"):
+        return {"ok": False, "reason": "no DOI"}
+    if item.get("file_path") and Path(item["file_path"]).exists():
+        return {"ok": False, "reason": "already has a file"}
+    existing = handoff.get(item_id)
+    if existing and existing["state"] in ("pending", "running", "waiting"):
+        if progress:
+            progress("browser_handoff", existing)
+        return {"ok": True, **existing}
+    skipped: list[Resolved] = []
+    with collect_notes() as notes, collect_browser_steps() as steps:
+        for r in iter_pdf_urls(item["doi"]):
+            skipped.append(r)  # nothing is downloaded here: every candidate goes to the browser
+    plan = browser_plan(item["doi"], steps, skipped, [])
+    if not plan:
+        return {"ok": False, "reason": "; ".join(notes[:4]) or "no source found"}
+    rec = handoff.register(item_id, item["doi"], item.get("title") or "", plan, "; ".join(notes[:4]))
+    if progress:
+        progress("browser_handoff", rec)
+    return {"ok": True, **rec}
 
 
 # ---------------- Bulk import ----------------
@@ -1069,10 +1148,13 @@ def fetch_open_access_pdf(item_id: int) -> dict:
     except Exception as e:  # network trouble: report, do not raise into a background thread
         return {"ok": False, "reason": f"open-access lookup failed: {e}"}
     for cand in candidates:
+        if cand.needs_browser:
+            continue
         try:
-            r = requests.get(cand.url, headers=get_headers(), timeout=OA_TIMEOUT_S, allow_redirects=True)
-        except requests.RequestException as e:
-            log.info(f"OA candidate failed {cand.url}: {e}")
+            r = transport.get(cand.url, referer=cand.referer or None, accept="application/pdf,*/*;q=0.8",
+                              timeout=OA_TIMEOUT_S, max_bytes=OA_MAX_BYTES + 1)
+        except transport.TransportError as e:
+            log.info(f"OA candidate failed {cand.url}: {e.detail}")
             continue
         data = r.content
         if r.status_code != 200 or data[:5] != b"%PDF-" or len(data) > OA_MAX_BYTES:

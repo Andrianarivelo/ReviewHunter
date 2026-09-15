@@ -682,6 +682,11 @@
             <div x-text="`Date added: ${formatDate(selectedItem.added_at)}`"></div>
             <div x-text="`Modified: ${formatDate(selectedItem.updated_at)}`"></div>
             <div x-show="selectedItem.error_msg" class="text-rose-500" x-text="`Last PDF search: ${selectedItem.error_msg}`"></div>
+            <div x-show="handoffs[selectedItem.id]" class="text-sky-600 dark:text-sky-400" x-text="handoffs[selectedItem.id] ? `Chrome: ${handoffs[selectedItem.id].message}` : ''"></div>
+            <div x-show="selectedItem.error_msg && !selectedItem.attachment_count && selectedItem.doi" class="flex items-center gap-2 pt-1">
+              <button @click="retryInChrome(selectedItem)" class="action-secondary h-7 px-2.5 text-xs" title="The Chrome extension fetches the PDF with your own browser session (institutional access, Cloudflare and DDoS-Guard checks, Sci-Hub proxies)">Retry in Chrome</button>
+              <span class="text-ink-400" x-text="connector.present ? `connector ${connector.version} detected` : 'Chrome connector not detected on this page'"></span>
+            </div>
           </div>
         </div>
 
@@ -991,13 +996,13 @@
   <div x-show="dialog==='settings'" class="dialog w-[min(980px,97vw)] h-[min(760px,94vh)] flex overflow-hidden">
     <nav class="settings-nav">
       <div class="font-serif text-lg px-3 pt-4 pb-3">Settings</div>
-      <template x-for="t in [['general','General'],['citations','Citations'],['sync','Google Drive & Backup'],['connector','Browser Connector'],['word','Word Add-in'],['advanced','Advanced']]" :key="t[0]">
+      <template x-for="t in [['general','General'],['citations','Citations'],['sources','PDF Sources'],['sync','Google Drive & Backup'],['connector','Browser Connector'],['word','Word Add-in'],['advanced','Advanced']]" :key="t[0]">
         <button @click="settingsTab = t[0]" :class="settingsTab===t[0] ? 'nav-active' : 'nav-idle'" class="nav-row w-full" x-text="t[1]"></button>
       </template>
     </nav>
     <div class="flex-1 min-w-0 flex flex-col">
       <div class="flex items-center px-6 h-12 border-b border-ink-200 dark:border-ink-800">
-        <h3 class="font-serif text-lg" x-text="({general:'General', citations:'Citations', sync:'Google Drive & Backup', connector:'Browser Connector', word:'Word Add-in', advanced:'Advanced'})[settingsTab]"></h3>
+        <h3 class="font-serif text-lg" x-text="({general:'General', citations:'Citations', sources:'PDF Sources', sync:'Google Drive & Backup', connector:'Browser Connector', word:'Word Add-in', advanced:'Advanced'})[settingsTab]"></h3>
         <button @click="closeDialog()" class="ml-auto dlg-x">&#215;</button>
       </div>
       <div class="flex-1 min-h-0 overflow-y-auto px-6 py-5">
@@ -1016,6 +1021,59 @@
               <div class="contents"><kbd class="kbd" x-text="k[0]"></kbd><span class="text-ink-500" x-text="k[1]"></span></div>
             </template>
           </div>
+        </section>
+
+        <!-- PDF sources & network -->
+        <section x-show="settingsTab==='sources'" class="space-y-5 text-sm">
+          <p class="text-ink-600 dark:text-ink-300 leading-relaxed">"Find PDF" tries, in order: legal open-access copies (OpenAlex, Unpaywall, Semantic Scholar, Europe PMC, PubMed Central, bioRxiv, arXiv), the publisher page, Sci-Hub mirrors and Anna's Archive SciDB. Requests look like Chrome (TLS fingerprint) and trust the same certificates as Chrome. What the server still cannot fetch (JavaScript checks, institutional access, human verification) is handed to the Chrome extension, which retries with your own browser session.</p>
+          <div class="text-xs text-ink-500">HTTP client: <span x-text="system ? system.transport : ''"></span><span x-show="system && system.proxy_active" x-text="system ? ` via proxy ${system.proxy_active}` : ''"></span></div>
+
+          <h4 class="set-h">Open access</h4>
+          <div class="grid grid-cols-[10rem_minmax(0,1fr)] gap-x-3 gap-y-2 items-center">
+            <label class="text-ink-500">Your e-mail</label>
+            <input :value="settings.unpaywall_email" @change="saveSetting('unpaywall_email', $event.target.value.trim())" placeholder="you@university.edu (enables Unpaywall, polite pool at OpenAlex)" class="dlg-input">
+            <label class="text-ink-500">EZproxy prefix</label>
+            <input :value="settings.ezproxy_prefix" @change="saveSetting('ezproxy_prefix', $event.target.value.trim())" placeholder="https://ezproxy.example.edu/login?url=   (library proxy: opened in Chrome only)" class="dlg-input">
+          </div>
+
+          <h4 class="set-h">Network</h4>
+          <div class="grid grid-cols-[10rem_minmax(0,1fr)] gap-x-3 gap-y-2 items-center">
+            <label class="text-ink-500">Proxy</label>
+            <input :value="settings.network_proxy" @change="saveSetting('network_proxy', $event.target.value.trim())" placeholder="socks5h://127.0.0.1:9150 (Tor Browser) or http://proxy:3128 - empty = direct" class="dlg-input">
+            <label class="text-ink-500">Proxy scope</label>
+            <select :value="settings.proxy_scope" @change="saveSetting('proxy_scope', $event.target.value)" class="dlg-input">
+              <option value="shadow">Sci-Hub and SciDB requests only</option>
+              <option value="all">Every download</option>
+            </select>
+          </div>
+          <label class="set-row"><input type="checkbox" :checked="settings.use_system_certificates" @change="saveSetting('use_system_certificates', $event.target.checked)" class="rounded"><span>Trust the operating-system certificate store as well as the built-in bundle <span class="text-ink-400">(like Chrome; needed behind a corporate proxy whose certificate IT installed on this computer)</span></span></label>
+          <label class="set-row"><input type="checkbox" :checked="settings.browser_handoff" @change="saveSetting('browser_handoff', $event.target.checked)" class="rounded"><span>Hand failed downloads to the Chrome extension automatically <span class="text-ink-400">(it fetches with your browser session in a background tab; human checks are opened for you, never solved)</span></span></label>
+
+          <h4 class="set-h">Mirrors <span class="normal-case font-normal tracking-normal text-ink-400">(one per line or comma separated, empty = built-in list)</span></h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><div class="text-xs text-ink-500 mb-1">Sci-Hub mirrors</div>
+              <textarea :value="(settings.scihub_mirrors || []).join('\n')" @change="saveListSetting('scihub_mirrors', $event.target.value)" rows="4" placeholder="https://sci-hub.ren&#10;https://sci-hub.fr" class="dlg-input font-mono text-xs"></textarea></div>
+            <div><div class="text-xs text-ink-500 mb-1">Anna's Archive bases</div>
+              <textarea :value="(settings.scidb_bases || []).join('\n')" @change="saveListSetting('scidb_bases', $event.target.value)" rows="4" placeholder="https://annas-archive.li" class="dlg-input font-mono text-xs"></textarea></div>
+          </div>
+
+          <h4 class="set-h">Test the sources</h4>
+          <div class="flex items-center gap-2">
+            <input x-model="sourcesTest.doi" @keydown.enter="testSources()" placeholder="DOI, e.g. 10.1038/nature14539" class="dlg-input flex-1">
+            <button @click="testSources()" :disabled="sourcesTest.running" class="action-secondary h-8 px-3 text-xs" x-text="sourcesTest.running ? 'Testing...' : 'Test'"></button>
+          </div>
+          <template x-if="sourcesTest.result">
+            <div class="card p-3 space-y-2 text-xs">
+              <div class="text-ink-500" x-text="`${sourcesTest.result.candidates.length} candidate(s) in ${sourcesTest.result.elapsed_s} s; ${sourcesTest.result.browser_steps.length} page(s) left to Chrome`"></div>
+              <template x-for="c in sourcesTest.result.candidates" :key="c.url">
+                <div class="flex items-start gap-2"><span :class="c.needs_browser ? 'text-amber-600' : 'text-emerald-600'" x-text="c.needs_browser ? 'Chrome' : 'server'" class="w-12 shrink-0 font-semibold"></span><span class="font-medium w-48 shrink-0 truncate" :title="c.source" x-text="c.source"></span><a :href="c.url" target="_blank" rel="noopener" class="truncate text-accent-600 hover:underline" x-text="c.url"></a></div>
+              </template>
+              <template x-for="n in sourcesTest.result.notes" :key="n">
+                <div class="text-rose-600 dark:text-rose-400" x-text="n"></div>
+              </template>
+              <div x-show="!sourcesTest.result.candidates.length && !sourcesTest.result.notes.length" class="text-ink-500">Nothing found and no diagnostic: the DOI may be unknown to every index.</div>
+            </div>
+          </template>
         </section>
 
         <!-- Citations -->
@@ -1159,6 +1217,10 @@
               <button @click="copyText(system.extension_dir, 'Folder path copied')" class="action-secondary h-7 px-2.5 text-xs">Copy path</button>
               <button @click="openPath(system.extension_dir)" class="action-secondary h-7 px-2.5 text-xs">Open folder</button>
             </div>
+          </div>
+          <div class="card p-3 flex items-center gap-2 text-xs">
+            <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="connector.present ? 'bg-emerald-500' : 'bg-ink-300'"></span>
+            <span x-text="connector.present ? `Connector ${connector.version} is active in this browser: failed downloads are retried in Chrome automatically.` : 'Connector not detected in this browser tab: install it (steps above) or reload this page after enabling it.'"></span>
           </div>
           <p class="text-xs text-ink-500">ReviewHunter must be running for the connector to save (the icon turns grey otherwise). The server only accepts writes from the app itself and from browser extensions, never from ordinary websites.</p>
         </section>

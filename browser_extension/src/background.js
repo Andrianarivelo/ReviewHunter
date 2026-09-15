@@ -17,6 +17,7 @@ import * as api from "./api.js";
 import { detectInTab } from "./core/detect.js";
 import { runSave, runAttachPending } from "./core/save.js";
 import { acquirePdf } from "./core/pdf.js";
+import { runHandoff } from "./core/handoff.js";
 import { getSettings, setSettings, getPending, matchPending, removePending } from "./settings.js";
 import { identifiersInText, isLikelyPdfUrl, fileNameFromUrl, doiFromUrl, shadowLibraryKind } from "./shared/identifiers.js";
 
@@ -304,20 +305,111 @@ chrome.windows.onFocusChanged.addListener(async (windowId) => {
 // Popup messages and save ports
 // ------------------------------------------------------------------------------------------
 
-chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+// ------------------------------------------------------------------------------------------
+// Browser hand-off: PDFs the ReviewHunter server could not fetch, tried here with the user's session
+// ------------------------------------------------------------------------------------------
+
+/** Queue of hand-off records (one runs at a time: each may open a background tab). */
+const handoffQueue = [];
+/** Records already queued or run, keyed by item id -> created_at (a re-registered plan runs again). */
+const handoffSeen = new Map();
+let handoffRunning = false;
+
+/**
+ * Queue a hand-off record and start the runner.
+ *
+ * @param {{item_id: number, created_at: number, plan: Array<object>}} rec  Record from the server.
+ * @returns {boolean} True when queued (false: duplicate, disabled, or nothing to try).
+ */
+function enqueueHandoff(rec) {
+  if (!rec || !rec.item_id || !Array.isArray(rec.plan) || !rec.plan.length) return false;
+  if (handoffSeen.get(rec.item_id) === rec.created_at) return false;
+  handoffSeen.set(rec.item_id, rec.created_at);
+  handoffQueue.push(rec);
+  drainHandoffs().catch(() => {});
+  return true;
+}
+
+/**
+ * Run queued hand-offs one after the other; notify the user of the outcome.
+ *
+ * @returns {Promise<void>}
+ */
+async function drainHandoffs() {
+  if (handoffRunning) return;
+  handoffRunning = true;
+  try {
+    while (handoffQueue.length) {
+      const rec = handoffQueue.shift();
+      const settings = await getSettings();
+      if (!settings.acceptHandoffs) continue;
+      let res;
+      try {
+        res = await runHandoff(rec, { onStep: (t) => console.info(`[handoff ${rec.item_id}] ${t}`) });
+      } catch (e) {
+        res = { ok: false, error: (e && e.message) || String(e) };
+      }
+      invalidateSaved();
+      if (res.ok && res.via !== "already attached") notify("PDF saved in ReviewHunter", `${rec.title || "Item"}\nvia ${res.via}`);
+      else if (res.waiting) notify("ReviewHunter needs you", `A site asks you to confirm you are human. Complete the check in the tab that just opened; the PDF will be attached automatically.`);
+    }
+  } finally {
+    handoffRunning = false;
+  }
+}
+
+/**
+ * Ask the server for hand-offs it still holds (the app page may have been closed when they were made).
+ *
+ * @returns {Promise<void>}
+ */
+async function pollHandoffs() {
+  const settings = await getSettings();
+  if (!settings.acceptHandoffs) return;
+  const status = await getStatus();
+  if (!status.online) return;
+  try {
+    const { handoffs } = await api.handoffs();
+    for (const rec of handoffs || []) if (rec.state === "pending") enqueueHandoff(rec);
+  } catch (_) {
+    /* server not reachable right now */
+  }
+}
+
+chrome.alarms.create("rh-handoffs", { periodInMinutes: 1 });
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === "rh-handoffs") pollHandoffs().catch(() => {});
+});
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Failures travel in a dedicated key: normal payloads (e.g. an offline status) may carry their own "error" field.
-  handleMessage(msg).then(sendResponse, (e) => sendResponse({ __rhError: (e && e.message) || String(e) }));
+  handleMessage(msg, sender).then(sendResponse, (e) => sendResponse({ __rhError: (e && e.message) || String(e) }));
   return true; // async response
 });
 
 /**
- * Route one-shot messages from the popup / options page.
+ * Route one-shot messages from the popup / options page and the app-page bridge.
  *
  * @param {{type: string, [key: string]: any}} msg  Message.
+ * @param {chrome.runtime.MessageSender} [sender]  Sender (a tab for the content-script bridge).
  * @returns {Promise<any>} Response payload.
  */
-async function handleMessage(msg) {
+async function handleMessage(msg, sender) {
   switch (msg && msg.type) {
+    case "handoff": {
+      // Only the ReviewHunter app page (configured address) may hand work to the extension.
+      const { serverUrl, acceptHandoffs } = await getSettings();
+      const from = (sender && sender.url) || "";
+      let sameApp = false;
+      try {
+        sameApp = new URL(from).origin === new URL(serverUrl).origin;
+      } catch (_) {
+        sameApp = false;
+      }
+      if (!sender || !sender.tab || !sameApp) throw new Error("hand-offs are accepted from the ReviewHunter app page only");
+      if (!acceptHandoffs) return { accepted: false, reason: "disabled in the extension options" };
+      return { accepted: enqueueHandoff(msg.handoff) };
+    }
     case "status":
       return getStatus({ force: !!msg.force });
     case "detect": {
@@ -406,11 +498,11 @@ function createMenus() {
 
 chrome.runtime.onInstalled.addListener(() => {
   createMenus();
-  getStatus({ force: true }).catch(() => {});
+  getStatus({ force: true }).then(() => pollHandoffs()).catch(() => {});
 });
 chrome.runtime.onStartup.addListener(() => {
   createMenus();
-  getStatus({ force: true }).catch(() => {});
+  getStatus({ force: true }).then(() => pollHandoffs()).catch(() => {});
 });
 
 chrome.contextMenus.onClicked.addListener((info, tab) => {

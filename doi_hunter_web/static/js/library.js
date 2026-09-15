@@ -462,6 +462,15 @@ window.libraryPart = function libraryPart() {
       it.status = 'downloading';
       this.toast('Looking for an available PDF...', 'info');
     },
+    /** Skip the server and ask the Chrome extension to fetch the PDF with the browser session. */
+    async retryInChrome(it) {
+      this.toast('Preparing the sources for Chrome...', 'info', 2500);
+      try {
+        const r = await api.post(`/api/items/${it.id}/handoff`);
+        if (!r.ok) this.toast(r.reason || 'Nothing to try in Chrome', 'error', 6000);
+        // The server announces the plan on the live socket, which forwards it to the extension.
+      } catch (e) { this.toast(e.message, 'error', 6000); }
+    },
     async retrieveMetadata(it) {
       this.toast('Retrieving metadata from PDF...', 'info');
       try {

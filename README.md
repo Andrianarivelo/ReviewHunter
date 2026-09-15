@@ -33,11 +33,27 @@ PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Every
 4. **Word add-in:** Settings > Word Add-in > *Set up Word add-in...* opens a script you run once (it trusts ReviewHunter's local certificate and registers the add-in), then restart Word: References tab > ReviewHunter.
 5. **Google Drive:** Settings > Google Drive & Backup. Desktop mode needs only Google Drive for desktop; API mode walks you through creating a Desktop OAuth client.
 
-### Why a paywalled PDF may fail from the app but work in your browser
+### How "Find PDF" works (v2.2)
 
-Publishers such as ScienceDirect block non-browser downloads (HTTP 403) and closed-access papers have no
-open copy. Your browser has your institutional session; the server does not. Use the Chrome connector on the
-article page: it downloads the PDF with your own access and attaches it to the existing item.
+The server tries, in order: legal open-access copies (OpenAlex, Unpaywall with your e-mail, Semantic Scholar,
+Europe PMC, PubMed Central, bioRxiv / medRxiv, arXiv), the publisher page (`citation_pdf_url`, PDF links),
+Sci-Hub mirrors (including Cloudflare-fronted proxies whose PDF host needs the article page as `Referer`) and
+Anna's Archive SciDB. Requests carry a Chrome TLS fingerprint (`curl_cffi`) and trust the same certificates as
+Chrome (built-in bundle + operating-system store), which is what gets past Cloudflare on Europe PMC and the
+Sci-Hub proxies. Settings > PDF Sources holds the e-mail, an optional proxy (`socks5h://127.0.0.1:9150` for Tor
+Browser, or an HTTP proxy), custom mirror lists, an EZproxy prefix and a **Test** button that lists, for any DOI,
+every candidate and the exact reason each source gave nothing.
+
+What the server still cannot fetch is **handed to the Chrome extension automatically**: JavaScript checks
+(Cloudflare "Just a moment", DDoS-Guard, PubMed Central's cookie page), publisher PDFs that need your
+institutional session, and Sci-Hub pages. The extension fetches them in a background tab with your own
+session and attaches the PDF; a human check (ALTCHA, CAPTCHA) is never solved: the page opens for you and
+the PDF is attached once the article appears. The item pane shows the progress and a **Retry in Chrome** button.
+
+Failures are explained precisely, for example "blocked by the FortiClient web filter (UNIGE - Site bloque)"
+(an organisation policy on the computer: no client-side trick gets past a block page, use another network or
+ask IT), "domain no longer exists" (checked against public DNS-over-HTTPS) versus "blocked by your DNS
+resolver", "mirror presents DDoS-Guard's self-signed certificate". Certificate verification is never disabled.
 
 ### Tests and benchmarks
 
@@ -46,7 +62,9 @@ article page: it downloads the PDF with your own access and attaches it to the e
 .venv/Scripts/python.exe tools/ui_snapshot.py --url http://127.0.0.1:8765/ --step "$(cat tests/e2e_ui.js)"   # UI scenario (test library only)
 ```
 `benchmarks/benchmark_v1_v2.py` compares v1 and v2 (PDF availability, API latency, feature coverage); results and
-figures are in `benchmarks/results/`.
+figures are in `benchmarks/results/`. `benchmarks/benchmark_pdf_acquisition.py` (Benchmark G) measures how many
+PDFs the server really downloads, previous resolver vs current, with paired statistics.
+`tools/extension_e2e.py` runs the browser hand-off in a real headless Chrome with the extension loaded.
 
 ## Easy install (Windows and Linux)
 

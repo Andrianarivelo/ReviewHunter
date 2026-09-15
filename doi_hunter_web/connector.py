@@ -170,6 +170,46 @@ def pdf_sources(doi: str) -> dict:
     return {"doi": clean, "pages": shadow_library_pages(clean)}
 
 
+# ---------------- Browser hand-off (server could not fetch the PDF; the extension tries in Chrome) ----------------
+
+class HandoffStatusIn(BaseModel):
+    state: str                      # running | waiting | done | failed
+    message: str = ""
+    step: Optional[str] = None      # source label of the step being run
+
+
+@router.get("/handoffs")
+def handoffs(include_failed: bool = False) -> dict:
+    """Plans waiting for the extension (polled once a minute, and pushed live through the app page)."""
+    from . import handoff
+
+    return {"handoffs": handoff.pending(include_failed=include_failed)}
+
+
+@router.post("/handoffs/{item_id}/status")
+def handoff_status(item_id: int, body: HandoffStatusIn, request: Request) -> dict:
+    """Progress reported by the extension, relayed to the web app as live events."""
+    from . import handoff
+
+    rec = handoff.update(item_id, body.state, body.message)
+    if rec is None:
+        raise HTTPException(404, "no hand-off for this item")
+    payload = {"id": item_id, "state": body.state, "message": body.message, "step": body.step or "",
+               "title": rec.get("title", "")}
+    if body.state == "done":
+        _publish(request, "handoff_done", payload)
+        _publish(request, "item_changed", {"id": item_id})
+        handoff.clear(item_id)
+    elif body.state == "failed":
+        get_conn().execute("UPDATE items SET error_msg=? WHERE id=?",
+                           (f"Chrome extension: {body.message}"[:500], item_id))
+        _publish(request, "handoff_failed", payload)
+        _publish(request, "item_changed", {"id": item_id})
+    else:
+        _publish(request, "handoff_progress", payload)
+    return {"ok": True, "state": rec["state"]}
+
+
 def _merge_enriched(payload: dict) -> dict:
     """Fill gaps from CrossRef/arXiv/PubMed when the page exposed an identifier."""
     resolved = None

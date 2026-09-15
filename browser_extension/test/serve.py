@@ -41,6 +41,9 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         /__shadow/wall                              human-verification page (fixtures/scihub_challenge.html)
         /__shadow/article                           article page embedding /__gen/pdf in an <object>
         /__shadow/alias                             302 to the wall on 127.0.0.1 (mirror alias)
+
+        Routes used by test/handoff_test.js (browser hand-off): /__handoff/pdf, /__handoff/article,
+        /__handoff/ddg?key=K (wall twice, then article), /__handoff/wall, /__handoff/block.
         """
         from urllib.parse import parse_qs, urlparse
 
@@ -59,12 +62,55 @@ class NoCacheHandler(SimpleHTTPRequestHandler):
         if parsed.path.startswith("/__shadow/"):
             self._shadow(parsed.path)
             return
+        if parsed.path.startswith("/__handoff/"):
+            self._handoff(parsed.path, query)
+            return
         if parsed.path == "/__gen/redirect":
             self.send_response(302)
             self.send_header("Location", query.get("to", ["/"])[0])
             self.end_headers()
             return
         super().do_GET()
+
+    # Hits per DDoS-Guard key: the wall is shown twice, then the article (a JavaScript check that "clears").
+    ddg_hits: dict[str, int] = {}
+
+    def _handoff(self, path: str, query: dict) -> None:
+        """Fake sources and a fake connector for the browser hand-off tests (test/handoff_test.js)."""
+        import json
+
+        if path == "/__handoff/pdf":
+            body = b"%PDF-1.4\n" + bytes(i % 251 for i in range(9, 4096))
+            ctype, status = "application/pdf", 200
+        elif path == "/__handoff/article":
+            body = b'<html><head><title>Sci-Hub | Deep learning</title></head><body><embed type="application/pdf" src="/__gen/pdf?size=4096#view=FitH" id="pdf"></body></html>'
+            ctype, status = "text/html; charset=utf-8", 200
+        elif path == "/__handoff/ddg":
+            key = query.get("key", ["k"])[0]
+            n = NoCacheHandler.ddg_hits.get(key, 0) + 1
+            NoCacheHandler.ddg_hits[key] = n
+            if n <= 2:
+                body = b'<!doctype html><html><head><title>DDoS-Guard</title></head><body data-ddg-origin="true"><h1>Checking your browser before accessing</h1></body></html>'
+                ctype, status = "text/html; charset=utf-8", 403
+            else:
+                body = b'<html><head><title>SciDB</title></head><body><object type="application/pdf" data="/__gen/pdf?size=4096"></object></body></html>'
+                ctype, status = "text/html; charset=utf-8", 200
+        elif path == "/__handoff/wall":
+            body = (ROOT / "test" / "fixtures" / "scihub_challenge.html").read_bytes()
+            ctype, status = "text/html; charset=utf-8", 200
+        elif path == "/__handoff/block":
+            body = b'<html><head><title>UNIGE - Site bloque</title></head><body><div>Fortinet FortiGuard Web Filter</div></body></html>'
+            ctype, status = "text/html; charset=utf-8", 200
+        elif path == "/__handoff/connector/ping":
+            body = json.dumps({"app": "ReviewHunter", "version": "test", "library": {"items": 0}}).encode()
+            ctype, status = "application/json", 200
+        else:
+            body, ctype, status = b"not found", "text/plain", 404
+        self.send_response(status)
+        self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def _shadow(self, path: str) -> None:
         """Fake Sci-Hub mirrors for the shadow-library fallback tests."""
