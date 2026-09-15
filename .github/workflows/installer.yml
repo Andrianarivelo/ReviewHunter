@@ -145,7 +145,8 @@ jobs:
           if-no-files-found: ignore
 
       - name: Require successful installation
-        if: always()
+        # Legacy is a comparison baseline whose failures are recorded, not a release gate.
+        if: always() && matrix.method == 'installer'
         shell: bash
         run: test '${{ steps.run.outputs.ok }}' = true
 
@@ -248,7 +249,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Require successful installation
-        if: always()
+        if: always() && matrix.method == 'installer'
         shell: pwsh
         run: |
           if ('${{ steps.run.outputs.ok }}' -ne 'true') { throw 'Installation or startup failed. See result artifact and logs.' }
