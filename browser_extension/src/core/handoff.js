@@ -182,6 +182,14 @@ export async function runStep(step, deps, onStep) {
     return fetchFromPage(step.url, "", deps, onStep);
   }
   if (step.kind === "pdf") {
+    // Fast path: the worker download with the Referer the host wants (declarativeNetRequest rule).
+    onStep(`Downloading ${shortUrl(step.url)} with Referer ${shortUrl(step.referer)}`);
+    const w = await deps.fetchInWorker(step.url, { referer: step.referer });
+    if (w.ok) return w;
+    const wall = w.html ? classifyWall(w.html) : null;
+    if (wall && wall.kind === "interactive") return { ok: false, error: wall.label, wall: "interactive", wallUrl: w.finalUrl || step.referer };
+    if (wall && wall.kind === "blocked") return { ok: false, error: wall.label, wall: "blocked", wallUrl: w.finalUrl || step.url };
+    // Slow path: visit the article page in a background tab (cookies from JavaScript checks), then fetch.
     onStep(`Opening ${shortUrl(step.referer)} to download ${shortUrl(step.url)}`);
     return fetchFromPage(step.referer, step.url, deps, onStep);
   }

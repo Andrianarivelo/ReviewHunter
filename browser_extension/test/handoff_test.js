@@ -26,6 +26,7 @@ globalThis.chrome = {
 
 const { runHandoff, fetchFromPage, WALL_WAIT_MS } = await import("../src/core/handoff.js");
 const { classifyWall } = await import("../src/shared/identifiers.js");
+const { fetchInWorker, withReferer } = await import("../src/core/pdf.js");
 
 const results = [];
 
@@ -161,6 +162,26 @@ const DOI = "10.1177/0269881107082286";
   check(WALL_WAIT_MS >= 20000, "walls are given time to clear");
   const p = await fetchFromPage(`${O}/__handoff/article`, "", fakeDeps({}), () => {});
   check(p.ok && p.bytes.length === 4096, "fetchFromPage finds the embed on a real page", p);
+}
+
+// 7. Referer injection: a session rule is installed for the exact URL while the worker downloads, then removed.
+{
+  const calls = [];
+  globalThis.chrome.runtime.id = "abcdefghijklmnop";
+  globalThis.chrome.declarativeNetRequest = { updateSessionRules: async (o) => calls.push(o) };
+  const r = await fetchInWorker(`${O}/__handoff/pdf`, { referer: "https://sci-hub.ren/10.1177/x" });
+  check(r.ok && r.bytes.length === 4096, "download under the Referer rule succeeds", r);
+  const add = calls.find((c) => c.addRules);
+  const rule = add && add.addRules[0];
+  check(rule && rule.action.requestHeaders[0].header === "Referer" && rule.action.requestHeaders[0].value === "https://sci-hub.ren/10.1177/x", "rule sets the Referer header", add);
+  check(rule && rule.condition.urlFilter === `${O}/__handoff/pdf` && rule.condition.initiatorDomains[0] === "abcdefghijklmnop", "rule is scoped to the URL and to this extension", rule);
+  check(calls.some((c) => c.removeRuleIds && c.removeRuleIds[0] === rule.id && !c.addRules), "rule removed after the download", calls);
+  const none = [];
+  globalThis.chrome.declarativeNetRequest = { updateSessionRules: async (o) => none.push(o) };
+  await fetchInWorker(`${O}/__handoff/pdf`);
+  check(none.length === 0, "no rule without a referer", none);
+  delete globalThis.chrome.declarativeNetRequest;
+  check((await withReferer("https://x.example/a.pdf", "https://x.example/", async () => 42)) === 42, "withReferer degrades gracefully without the permission");
 }
 
 const passed = results.filter((r) => r.ok).length;

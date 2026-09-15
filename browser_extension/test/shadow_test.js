@@ -64,7 +64,7 @@ const port = location.port;
 {
   scenario = "unknown-scenario-returns-empty";
   const pages = await shadowPages(DOI);
-  check(pages.length >= 2 && pages[0].url === `https://sci-hub.fr/${DOI}`, "built-in mirror list used when the server gives none", pages);
+  check(pages.length >= 2 && pages[0].url === `https://sci-hub.ren/${DOI}`, "built-in mirror list used when the server gives none", pages);
 }
 
 const passed = results.filter((r) => r.ok).length;

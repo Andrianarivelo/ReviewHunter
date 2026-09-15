@@ -40,7 +40,8 @@ const CHUNK_BYTES = 4 * 1024 * 1024;
  * Try every strategy for a list of candidate URLs.
  *
  * @param {string[]} candidates  PDF URLs, best first (duplicates and non-http URLs are ignored).
- * @param {{tabId?: number, onStep?: (text: string) => void, allowBackgroundTab?: boolean}} [opts]
+ * @param {{tabId?: number, onStep?: (text: string) => void, allowBackgroundTab?: boolean, referer?: string}} [opts]
+ *   referer: page the PDF host expects as Referer (Sci-Hub proxies), applied to the worker download.
  * @returns {Promise<PdfResult>} Result with bytes or the list of failed attempts.
  */
 export async function acquirePdf(candidates, opts = {}) {
@@ -67,7 +68,7 @@ export async function acquirePdf(candidates, opts = {}) {
       if (r.html) htmlSeen.push(r);
     }
     onStep(`Downloading PDF with your browser session: ${shortUrl(url)}`);
-    const w = await fetchInWorker(url);
+    const w = await fetchInWorker(url, { referer: opts.referer });
     if (w.ok) return { ok: true, bytes: w.bytes, finalUrl: w.finalUrl, via: label || "extension", attempts };
     attempts.push({ url, via: label ? `${label} (extension)` : "extension", error: w.error });
     if (w.html) htmlSeen.push(w);
@@ -123,14 +124,68 @@ export function shortUrl(url) {
   }
 }
 
+/** Session rule ids used for Referer injection (one per concurrent download). */
+let refererRuleId = 4000;
+
+/**
+ * Run `fn` while the extension's own requests to `url` carry `referer` as Referer header.
+ *
+ * fetch() cannot set a cross-origin Referer from the service worker (the Fetch standard downgrades it
+ * to the client), but PDF hosts of Sci-Hub proxies refuse requests without the article page as Referer
+ * (hot-link protection), and their answers carry no CORS header, so a page-context fetch is not an
+ * option either. A temporary declarativeNetRequest session rule scoped to this URL and to requests
+ * initiated by this extension sets the header, and is removed right after.
+ *
+ * @param {string} url      Exact URL being downloaded.
+ * @param {string} referer  Referer value ("" = nothing to do).
+ * @param {() => Promise<T>} fn  Work to run under the rule.
+ * @returns {Promise<T>}
+ * @template T
+ */
+export async function withReferer(url, referer, fn) {
+  const dnr = globalThis.chrome && chrome.declarativeNetRequest;
+  if (!referer || !dnr || !dnr.updateSessionRules) return fn();
+  const id = (refererRuleId += 1);
+  const rule = {
+    id,
+    priority: 1,
+    action: { type: "modifyHeaders", requestHeaders: [{ header: "Referer", operation: "set", value: referer }] },
+    condition: { urlFilter: url.split("#")[0], initiatorDomains: [chrome.runtime.id], resourceTypes: ["xmlhttprequest"] },
+  };
+  let installed = false;
+  try {
+    await dnr.updateSessionRules({ addRules: [rule], removeRuleIds: [id] });
+    installed = true;
+  } catch (e) {
+    console.warn(`ReviewHunter: cannot set Referer for ${url}: ${(e && e.message) || e}`);
+  }
+  try {
+    return await fn();
+  } finally {
+    if (installed) dnr.updateSessionRules({ removeRuleIds: [id] }).catch(() => {});
+  }
+}
+
 /**
  * b) Download from the service worker with the user's cookies.
  *
  * @param {string} url  URL.
- * @param {{timeoutMs?: number}} [opts]  timeoutMs: abort after this delay (default 90 s).
+ * @param {{timeoutMs?: number, referer?: string}} [opts]  timeoutMs: abort after this delay (default 90 s);
+ *   referer: Referer the host requires (set through a temporary declarativeNetRequest rule).
  * @returns {Promise<{ok: boolean, bytes?: Uint8Array, finalUrl?: string, html?: string, error?: string}>}
  */
 export async function fetchInWorker(url, opts = {}) {
+  return withReferer(url, opts.referer || "", () => fetchInWorkerPlain(url, opts));
+}
+
+/**
+ * fetchInWorker without the Referer rule (see withReferer).
+ *
+ * @param {string} url  URL.
+ * @param {{timeoutMs?: number}} [opts]
+ * @returns {Promise<{ok: boolean, bytes?: Uint8Array, finalUrl?: string, html?: string, error?: string}>}
+ */
+async function fetchInWorkerPlain(url, opts = {}) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), opts.timeoutMs || 90000);
   let failure = { ok: false, error: "PDF download failed" };

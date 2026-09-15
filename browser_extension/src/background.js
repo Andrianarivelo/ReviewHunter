@@ -273,7 +273,8 @@ async function autoAttach(tabId, url) {
       return;
     }
     await flashBadge(tabId, "...", "#0284c7", "ReviewHunter: attaching the PDF");
-    const pdf = await acquirePdf(candidates, { tabId, allowBackgroundTab: false });
+    // referer: the mirror's PDF host may require the article page as Referer (sci-hub.ren -> sci.bban.top).
+    const pdf = await acquirePdf(candidates, { tabId, allowBackgroundTab: false, referer: url });
     if (!pdf.ok) {
       const last = pdf.attempts[pdf.attempts.length - 1];
       await flashBadge(tabId, "ERR", "#dc2626", `ReviewHunter: PDF not attached (${last ? last.error : "download failed"})`);

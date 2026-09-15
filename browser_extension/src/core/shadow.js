@@ -22,9 +22,10 @@ const PAGE_TIMEOUT_MS = 20000;
 
 /** Used when the ReviewHunter server is older and has no /connector/pdf-sources route. */
 const DEFAULT_BASES = [
+  ["Sci-Hub (sci-hub.ren)", "https://sci-hub.ren/"],
   ["Sci-Hub (sci-hub.fr)", "https://sci-hub.fr/"],
   ["Sci-Hub (sci-hub.ru)", "https://sci-hub.ru/"],
-  ["Anna's Archive SciDB (annas-archive.org)", "https://annas-archive.org/scidb/"],
+  ["Anna's Archive SciDB (annas-archive.li)", "https://annas-archive.li/scidb/"],
 ];
 
 /**
@@ -101,7 +102,8 @@ export async function acquireFromShadowLibraries(doi, opts = {}) {
       continue;
     }
     onStep(`Downloading from ${shortUrl(link)}`);
-    const pdf = await fetchInWorker(link);
+    // Proxy mirrors (sci-hub.ren -> sci.bban.top) serve the PDF only with the article page as Referer.
+    const pdf = await fetchInWorker(link, { referer: res.finalUrl || page.url });
     if (pdf.ok) return { ok: true, bytes: pdf.bytes, finalUrl: pdf.finalUrl, via: page.source, attempts };
     attempts.push({ url: link, via: page.source, error: pdf.error || "download failed" });
   }
