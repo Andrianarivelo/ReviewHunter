@@ -25,6 +25,7 @@ REQUIRED_FILES = (
     "doi_hunter_web/fulltext.py", "doi_hunter_web/connector.py",
     "doi_hunter_web/catalog.py", "doi_hunter_web/metadata.py",
     "doi_hunter_web/insight.py", "doi_hunter_web/method_taxonomy.py",
+    "doi_hunter_web/method_details.py", "doi_hunter_web/word_concepts.py",
     "doi_hunter_web/static/js/insights.js", "doi_hunter_web/static/index.html",
     "doi_hunter_web/static/insights.css",
     "browser_extension/manifest.json", "browser_extension/src/core/pdf.js",

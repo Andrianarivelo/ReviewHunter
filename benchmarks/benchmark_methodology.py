@@ -58,7 +58,9 @@ def dependency_hashes() -> dict[str, str]:
     paths = [ANNOTATIONS, FIXTURES / "baseline" / "insight.py",
              FIXTURES / "baseline" / "method_taxonomy.py",
              REPO / "doi_hunter_web" / "insight.py",
-             REPO / "doi_hunter_web" / "method_taxonomy.py"]
+             REPO / "doi_hunter_web" / "method_taxonomy.py",
+             REPO / "doi_hunter_web" / "method_details.py",
+             REPO / "doi_hunter_web" / "word_concepts.py"]
     hashes = {str(path.relative_to(REPO)).replace("\\", "/"): sha256_bytes(path.read_bytes())
               for path in paths}
     # Changes to scoring or read validation invalidate numbers; figure styling

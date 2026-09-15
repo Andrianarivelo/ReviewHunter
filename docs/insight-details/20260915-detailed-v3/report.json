@@ -1,0 +1,2908 @@
+{
+  "synthetic": true,
+  "fixture": {
+    "home": "C:\\Users\\andry\\AppData\\Local\\Temp\\claude\\insight-ui-gnna0zfx",
+    "synthetic": true,
+    "items": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "collections": {
+      "parent": 1,
+      "child": 2
+    },
+    "titles": [
+      "Synthetic study: cocaine and population spike dynamics",
+      "Synthetic study: methamphetamine and tetrode reward recordings",
+      "Synthetic study: visual calcium transients during learning",
+      "Synthetic study: dLight dopamine signals and MDMA",
+      "Synthetic study: thermal hysteresis and stimulant intake",
+      "Synthetic study: thermal hysteresis and cocaine behavior",
+      "Synthetic study: human attention and scalp EEG",
+      "Synthetic study: neural networks and visual decoding",
+      "Ambient temperature and stimulant self-administration",
+      "Ambient temperatures and locomotor activity",
+      "Temperature effects on dopamine release",
+      "Human working memory and visual attention"
+    ],
+    "detailed": true,
+    "parent_items": [
+      4,
+      5,
+      6,
+      9,
+      10
+    ],
+    "descendant_items": [
+      1,
+      2,
+      4,
+      5,
+      6,
+      9,
+      10,
+      11
+    ],
+    "port": 8775,
+    "detail_expectations": {
+      "first_paper": 1,
+      "stress_tag": "detail-stress",
+      "single_occurrence_word": "alliesthesia",
+      "subset_word": "hysteresis",
+      "method_ids": [
+        "drug_cocaine",
+        "drug_methamphetamine",
+        "drug_mdma",
+        "tool_neuropixels",
+        "tool_tetrodes",
+        "tool_two_photon",
+        "tool_fiber_photometry",
+        "tool_gcamp",
+        "tool_dlight",
+        "signal_spikes",
+        "signal_lfp",
+        "signal_calcium",
+        "signal_dopamine"
+      ],
+      "paper_expectations": [
+        {
+          "id": 1,
+          "present": [
+            "drug_cocaine",
+            "tool_neuropixels",
+            "signal_spikes",
+            "signal_lfp",
+            "signal_dopamine"
+          ],
+          "absent": [
+            "signal_calcium",
+            "selfadmin"
+          ]
+        },
+        {
+          "id": 2,
+          "present": [
+            "drug_methamphetamine",
+            "tool_tetrodes",
+            "selfadmin"
+          ],
+          "absent": []
+        },
+        {
+          "id": 3,
+          "present": [
+            "tool_two_photon",
+            "tool_gcamp",
+            "signal_calcium"
+          ],
+          "absent": [
+            "signal_dopamine"
+          ]
+        },
+        {
+          "id": 4,
+          "present": [
+            "drug_mdma",
+            "tool_dlight",
+            "tool_fiber_photometry",
+            "signal_dopamine"
+          ],
+          "absent": [
+            "signal_calcium"
+          ]
+        }
+      ]
+    }
+  },
+  "url": "http://127.0.0.1:8775/",
+  "runs": {
+    "desktop-light": {
+      "method_ids": [
+        "human",
+        "task",
+        "signal_eeg",
+        "eeg",
+        "mixed",
+        "mouse",
+        "environment",
+        "drug_amphetamine",
+        "training",
+        "microdialysis",
+        "tool_microdialysis",
+        "signal_dopamine",
+        "tool_hplc",
+        "regression",
+        "rat",
+        "longitudinal",
+        "drug_cocaine",
+        "drug_systemic",
+        "locomotor",
+        "temperature",
+        "anova",
+        "drug_methamphetamine",
+        "drug_iv",
+        "selfadmin",
+        "insilico",
+        "decoding",
+        "ml",
+        "dimred",
+        "bootstrap",
+        "effectsize",
+        "eyetracking",
+        "signal",
+        "factorial",
+        "cpp",
+        "withinsubject",
+        "doseresponse",
+        "drug_mdma",
+        "tool_dlight",
+        "tool_fiber_photometry",
+        "transgenic",
+        "tool_gcamp",
+        "signal_calcium",
+        "tool_two_photon",
+        "video",
+        "tool_tetrodes",
+        "signal_spikes",
+        "signal_lfp",
+        "tool_neuropixels",
+        "permutation"
+      ],
+      "views": {
+        "methods-library": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 105,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(38, 50, 71)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-dense": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(38, 50, 71)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-evidence": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(38, 50, 71)"
+          ],
+          "documentOverflow": false
+        },
+        "words-frequency": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            16,
+            23.8157,
+            30.0878,
+            35.8848,
+            41.3933,
+            46.6967,
+            51.8423,
+            56.8602,
+            61.7714,
+            71.3309,
+            76
+          ],
+          "colors": [
+            "rgb(112, 80, 176)",
+            "rgb(88, 98, 113)",
+            "rgb(118, 97, 38)",
+            "rgb(8, 121, 135)",
+            "rgb(164, 68, 41)",
+            "rgb(38, 114, 72)",
+            "rgb(88, 107, 40)"
+          ],
+          "documentOverflow": false
+        },
+        "words-concept-neural": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 10,
+          "fontSizes": [
+            16,
+            36.6868,
+            53.288,
+            61.0757,
+            76
+          ],
+          "colors": [
+            "rgb(8, 121, 135)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(147, 96, 0)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare-evidence": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(147, 96, 0)"
+          ],
+          "documentOverflow": false
+        },
+        "words-unusual": {
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 8,
+            "collection_id": 1,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": true,
+            "comparison_items": 4,
+            "comparison_items_with_text": 4
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 28,
+          "fontSizes": [
+            16,
+            26.2453,
+            34.4672,
+            42.0662,
+            49.2871,
+            56.2392,
+            62.9844,
+            69.5622,
+            76
+          ],
+          "colors": [
+            "rgb(179, 33, 120)"
+          ],
+          "documentOverflow": false
+        }
+      },
+      "per_paper_method_ids": {
+        "1": [
+          "mouse",
+          "withinsubject",
+          "drug_cocaine",
+          "drug_systemic",
+          "training",
+          "signal_spikes",
+          "signal_lfp",
+          "tool_neuropixels",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "dimred",
+          "mixed",
+          "permutation"
+        ],
+        "2": [
+          "rat",
+          "longitudinal",
+          "selfadmin",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "tool_tetrodes",
+          "signal_spikes",
+          "signal_lfp",
+          "video",
+          "locomotor",
+          "signal",
+          "anova"
+        ],
+        "3": [
+          "transgenic",
+          "mouse",
+          "tool_gcamp",
+          "signal_calcium",
+          "tool_two_photon",
+          "video",
+          "regression"
+        ],
+        "4": [
+          "mouse",
+          "drug_mdma",
+          "drug_systemic",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "temperature",
+          "bootstrap",
+          "effectsize"
+        ],
+        "5": [
+          "rat",
+          "withinsubject",
+          "doseresponse",
+          "longitudinal",
+          "drug_methamphetamine",
+          "drug_systemic",
+          "environment",
+          "training",
+          "temperature",
+          "anova"
+        ],
+        "6": [
+          "rat",
+          "factorial",
+          "drug_cocaine",
+          "drug_systemic",
+          "environment",
+          "cpp",
+          "locomotor",
+          "temperature",
+          "mixed"
+        ],
+        "7": [
+          "human",
+          "task",
+          "eeg",
+          "eyetracking",
+          "signal"
+        ],
+        "8": [
+          "insilico",
+          "decoding",
+          "ml",
+          "dimred",
+          "bootstrap",
+          "effectsize"
+        ],
+        "9": [
+          "rat",
+          "environment",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "selfadmin",
+          "temperature",
+          "anova"
+        ],
+        "10": [
+          "rat",
+          "longitudinal",
+          "environment",
+          "drug_cocaine",
+          "drug_systemic",
+          "locomotor",
+          "temperature",
+          "anova"
+        ],
+        "11": [
+          "mouse",
+          "environment",
+          "drug_amphetamine",
+          "training",
+          "microdialysis",
+          "tool_microdialysis",
+          "signal_dopamine",
+          "tool_hplc",
+          "regression"
+        ],
+        "12": [
+          "human",
+          "task",
+          "signal_eeg",
+          "eeg",
+          "mixed"
+        ]
+      },
+      "method_categories": [
+        {
+          "id": "drug_systemic",
+          "category": "interventions"
+        },
+        {
+          "id": "environment",
+          "category": "interventions"
+        },
+        {
+          "id": "locomotor",
+          "category": "measurement"
+        },
+        {
+          "id": "rat",
+          "category": "subjects"
+        },
+        {
+          "id": "temperature",
+          "category": "measurement"
+        },
+        {
+          "id": "training",
+          "category": "interventions"
+        },
+        {
+          "id": "anova",
+          "category": "analysis"
+        },
+        {
+          "id": "mouse",
+          "category": "subjects"
+        },
+        {
+          "id": "drug_cocaine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_methamphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "longitudinal",
+          "category": "design"
+        },
+        {
+          "id": "mixed",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_dopamine",
+          "category": "signals"
+        },
+        {
+          "id": "bootstrap",
+          "category": "analysis"
+        },
+        {
+          "id": "dimred",
+          "category": "analysis"
+        },
+        {
+          "id": "drug_iv",
+          "category": "interventions"
+        },
+        {
+          "id": "eeg",
+          "category": "measurement"
+        },
+        {
+          "id": "effectsize",
+          "category": "analysis"
+        },
+        {
+          "id": "human",
+          "category": "subjects"
+        },
+        {
+          "id": "regression",
+          "category": "analysis"
+        },
+        {
+          "id": "selfadmin",
+          "category": "interventions"
+        },
+        {
+          "id": "signal",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_lfp",
+          "category": "signals"
+        },
+        {
+          "id": "signal_spikes",
+          "category": "signals"
+        },
+        {
+          "id": "task",
+          "category": "interventions"
+        },
+        {
+          "id": "tool_dlight",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_fiber_photometry",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "video",
+          "category": "measurement"
+        },
+        {
+          "id": "withinsubject",
+          "category": "design"
+        },
+        {
+          "id": "cpp",
+          "category": "measurement"
+        },
+        {
+          "id": "decoding",
+          "category": "analysis"
+        },
+        {
+          "id": "doseresponse",
+          "category": "design"
+        },
+        {
+          "id": "drug_amphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_mdma",
+          "category": "drugs"
+        },
+        {
+          "id": "eyetracking",
+          "category": "measurement"
+        },
+        {
+          "id": "factorial",
+          "category": "design"
+        },
+        {
+          "id": "insilico",
+          "category": "subjects"
+        },
+        {
+          "id": "microdialysis",
+          "category": "measurement"
+        },
+        {
+          "id": "ml",
+          "category": "analysis"
+        },
+        {
+          "id": "permutation",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_calcium",
+          "category": "signals"
+        },
+        {
+          "id": "signal_eeg",
+          "category": "signals"
+        },
+        {
+          "id": "tool_gcamp",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_hplc",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_microdialysis",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_neuropixels",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_tetrodes",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_two_photon",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "transgenic",
+          "category": "subjects"
+        }
+      ],
+      "rare_word": {
+        "word": "alliesthesia",
+        "count": 1,
+        "items": [
+          1
+        ],
+        "n_items": 1,
+        "evidence": [
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "Alliesthesia is a single-occurrence exploratory term."
+          }
+        ],
+        "distinct": 0,
+        "bigram": false,
+        "concept_id": "physiology",
+        "concept_label": "Physiology & environment",
+        "concepts": [
+          {
+            "id": "physiology",
+            "label": "Physiology & environment"
+          }
+        ],
+        "rarity": "single_occurrence",
+        "rare": true,
+        "unusual": false,
+        "rest_count": null,
+        "rest_n_items": null,
+        "absent_from_rest": null
+      },
+      "unusual_word": {
+        "word": "hysteresis",
+        "count": 4,
+        "items": [
+          5,
+          6
+        ],
+        "n_items": 2,
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "Thermal hysteresis distinguishes the heating and cooling sessions in this synthetic example."
+          },
+          {
+            "id": 6,
+            "source": "abstract",
+            "sentence": "We tested whether thermal hysteresis alters cocaine reward seeking."
+          }
+        ],
+        "distinct": 1.66,
+        "bigram": false,
+        "concept_id": "computing",
+        "concept_label": "Computation & models",
+        "concepts": [
+          {
+            "id": "computing",
+            "label": "Computation & models"
+          }
+        ],
+        "rarity": "shared",
+        "rare": false,
+        "unusual": true,
+        "rest_count": 0,
+        "rest_n_items": 0,
+        "absent_from_rest": true
+      },
+      "console_errors": []
+    },
+    "desktop-dark": {
+      "method_ids": [
+        "human",
+        "task",
+        "signal_eeg",
+        "eeg",
+        "mixed",
+        "mouse",
+        "environment",
+        "drug_amphetamine",
+        "training",
+        "microdialysis",
+        "tool_microdialysis",
+        "signal_dopamine",
+        "tool_hplc",
+        "regression",
+        "rat",
+        "longitudinal",
+        "drug_cocaine",
+        "drug_systemic",
+        "locomotor",
+        "temperature",
+        "anova",
+        "drug_methamphetamine",
+        "drug_iv",
+        "selfadmin",
+        "insilico",
+        "decoding",
+        "ml",
+        "dimred",
+        "bootstrap",
+        "effectsize",
+        "eyetracking",
+        "signal",
+        "factorial",
+        "cpp",
+        "withinsubject",
+        "doseresponse",
+        "drug_mdma",
+        "tool_dlight",
+        "tool_fiber_photometry",
+        "transgenic",
+        "tool_gcamp",
+        "signal_calcium",
+        "tool_two_photon",
+        "video",
+        "tool_tetrodes",
+        "signal_spikes",
+        "signal_lfp",
+        "tool_neuropixels",
+        "permutation"
+      ],
+      "views": {
+        "methods-library": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 105,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(230, 237, 245)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-dense": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(230, 237, 245)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-evidence": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(230, 237, 245)"
+          ],
+          "documentOverflow": false
+        },
+        "words-frequency": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            16,
+            23.8157,
+            30.0878,
+            35.8848,
+            41.3933,
+            46.6967,
+            51.8423,
+            56.8602,
+            61.7714,
+            71.3309,
+            76
+          ],
+          "colors": [
+            "rgb(186, 156, 239)",
+            "rgb(174, 184, 199)",
+            "rgb(202, 184, 136)",
+            "rgb(81, 206, 222)",
+            "rgb(239, 155, 126)",
+            "rgb(117, 206, 160)",
+            "rgb(179, 201, 120)"
+          ],
+          "documentOverflow": false
+        },
+        "words-concept-neural": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 10,
+          "fontSizes": [
+            16,
+            36.6868,
+            53.288,
+            61.0757,
+            76
+          ],
+          "colors": [
+            "rgb(81, 206, 222)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(255, 209, 102)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare-evidence": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(255, 209, 102)"
+          ],
+          "documentOverflow": false
+        },
+        "words-unusual": {
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 8,
+            "collection_id": 1,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": true,
+            "comparison_items": 4,
+            "comparison_items_with_text": 4
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 28,
+          "fontSizes": [
+            16,
+            26.2453,
+            34.4672,
+            42.0662,
+            49.2871,
+            56.2392,
+            62.9844,
+            69.5622,
+            76
+          ],
+          "colors": [
+            "rgb(255, 134, 206)"
+          ],
+          "documentOverflow": false
+        }
+      },
+      "per_paper_method_ids": {
+        "1": [
+          "mouse",
+          "withinsubject",
+          "drug_cocaine",
+          "drug_systemic",
+          "training",
+          "signal_spikes",
+          "signal_lfp",
+          "tool_neuropixels",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "dimred",
+          "mixed",
+          "permutation"
+        ],
+        "2": [
+          "rat",
+          "longitudinal",
+          "selfadmin",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "tool_tetrodes",
+          "signal_spikes",
+          "signal_lfp",
+          "video",
+          "locomotor",
+          "signal",
+          "anova"
+        ],
+        "3": [
+          "transgenic",
+          "mouse",
+          "tool_gcamp",
+          "signal_calcium",
+          "tool_two_photon",
+          "video",
+          "regression"
+        ],
+        "4": [
+          "mouse",
+          "drug_mdma",
+          "drug_systemic",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "temperature",
+          "bootstrap",
+          "effectsize"
+        ],
+        "5": [
+          "rat",
+          "withinsubject",
+          "doseresponse",
+          "longitudinal",
+          "drug_methamphetamine",
+          "drug_systemic",
+          "environment",
+          "training",
+          "temperature",
+          "anova"
+        ],
+        "6": [
+          "rat",
+          "factorial",
+          "drug_cocaine",
+          "drug_systemic",
+          "environment",
+          "cpp",
+          "locomotor",
+          "temperature",
+          "mixed"
+        ],
+        "7": [
+          "human",
+          "task",
+          "eeg",
+          "eyetracking",
+          "signal"
+        ],
+        "8": [
+          "insilico",
+          "decoding",
+          "ml",
+          "dimred",
+          "bootstrap",
+          "effectsize"
+        ],
+        "9": [
+          "rat",
+          "environment",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "selfadmin",
+          "temperature",
+          "anova"
+        ],
+        "10": [
+          "rat",
+          "longitudinal",
+          "environment",
+          "drug_cocaine",
+          "drug_systemic",
+          "locomotor",
+          "temperature",
+          "anova"
+        ],
+        "11": [
+          "mouse",
+          "environment",
+          "drug_amphetamine",
+          "training",
+          "microdialysis",
+          "tool_microdialysis",
+          "signal_dopamine",
+          "tool_hplc",
+          "regression"
+        ],
+        "12": [
+          "human",
+          "task",
+          "signal_eeg",
+          "eeg",
+          "mixed"
+        ]
+      },
+      "method_categories": [
+        {
+          "id": "drug_systemic",
+          "category": "interventions"
+        },
+        {
+          "id": "environment",
+          "category": "interventions"
+        },
+        {
+          "id": "locomotor",
+          "category": "measurement"
+        },
+        {
+          "id": "rat",
+          "category": "subjects"
+        },
+        {
+          "id": "temperature",
+          "category": "measurement"
+        },
+        {
+          "id": "training",
+          "category": "interventions"
+        },
+        {
+          "id": "anova",
+          "category": "analysis"
+        },
+        {
+          "id": "mouse",
+          "category": "subjects"
+        },
+        {
+          "id": "drug_cocaine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_methamphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "longitudinal",
+          "category": "design"
+        },
+        {
+          "id": "mixed",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_dopamine",
+          "category": "signals"
+        },
+        {
+          "id": "bootstrap",
+          "category": "analysis"
+        },
+        {
+          "id": "dimred",
+          "category": "analysis"
+        },
+        {
+          "id": "drug_iv",
+          "category": "interventions"
+        },
+        {
+          "id": "eeg",
+          "category": "measurement"
+        },
+        {
+          "id": "effectsize",
+          "category": "analysis"
+        },
+        {
+          "id": "human",
+          "category": "subjects"
+        },
+        {
+          "id": "regression",
+          "category": "analysis"
+        },
+        {
+          "id": "selfadmin",
+          "category": "interventions"
+        },
+        {
+          "id": "signal",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_lfp",
+          "category": "signals"
+        },
+        {
+          "id": "signal_spikes",
+          "category": "signals"
+        },
+        {
+          "id": "task",
+          "category": "interventions"
+        },
+        {
+          "id": "tool_dlight",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_fiber_photometry",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "video",
+          "category": "measurement"
+        },
+        {
+          "id": "withinsubject",
+          "category": "design"
+        },
+        {
+          "id": "cpp",
+          "category": "measurement"
+        },
+        {
+          "id": "decoding",
+          "category": "analysis"
+        },
+        {
+          "id": "doseresponse",
+          "category": "design"
+        },
+        {
+          "id": "drug_amphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_mdma",
+          "category": "drugs"
+        },
+        {
+          "id": "eyetracking",
+          "category": "measurement"
+        },
+        {
+          "id": "factorial",
+          "category": "design"
+        },
+        {
+          "id": "insilico",
+          "category": "subjects"
+        },
+        {
+          "id": "microdialysis",
+          "category": "measurement"
+        },
+        {
+          "id": "ml",
+          "category": "analysis"
+        },
+        {
+          "id": "permutation",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_calcium",
+          "category": "signals"
+        },
+        {
+          "id": "signal_eeg",
+          "category": "signals"
+        },
+        {
+          "id": "tool_gcamp",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_hplc",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_microdialysis",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_neuropixels",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_tetrodes",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_two_photon",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "transgenic",
+          "category": "subjects"
+        }
+      ],
+      "rare_word": {
+        "word": "alliesthesia",
+        "count": 1,
+        "items": [
+          1
+        ],
+        "n_items": 1,
+        "evidence": [
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "Alliesthesia is a single-occurrence exploratory term."
+          }
+        ],
+        "distinct": 0,
+        "bigram": false,
+        "concept_id": "physiology",
+        "concept_label": "Physiology & environment",
+        "concepts": [
+          {
+            "id": "physiology",
+            "label": "Physiology & environment"
+          }
+        ],
+        "rarity": "single_occurrence",
+        "rare": true,
+        "unusual": false,
+        "rest_count": null,
+        "rest_n_items": null,
+        "absent_from_rest": null
+      },
+      "unusual_word": {
+        "word": "hysteresis",
+        "count": 4,
+        "items": [
+          5,
+          6
+        ],
+        "n_items": 2,
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "Thermal hysteresis distinguishes the heating and cooling sessions in this synthetic example."
+          },
+          {
+            "id": 6,
+            "source": "abstract",
+            "sentence": "We tested whether thermal hysteresis alters cocaine reward seeking."
+          }
+        ],
+        "distinct": 1.66,
+        "bigram": false,
+        "concept_id": "computing",
+        "concept_label": "Computation & models",
+        "concepts": [
+          {
+            "id": "computing",
+            "label": "Computation & models"
+          }
+        ],
+        "rarity": "shared",
+        "rare": false,
+        "unusual": true,
+        "rest_count": 0,
+        "rest_n_items": 0,
+        "absent_from_rest": true
+      },
+      "console_errors": []
+    },
+    "laptop-light": {
+      "method_ids": [
+        "human",
+        "task",
+        "signal_eeg",
+        "eeg",
+        "mixed",
+        "mouse",
+        "environment",
+        "drug_amphetamine",
+        "training",
+        "microdialysis",
+        "tool_microdialysis",
+        "signal_dopamine",
+        "tool_hplc",
+        "regression",
+        "rat",
+        "longitudinal",
+        "drug_cocaine",
+        "drug_systemic",
+        "locomotor",
+        "temperature",
+        "anova",
+        "drug_methamphetamine",
+        "drug_iv",
+        "selfadmin",
+        "insilico",
+        "decoding",
+        "ml",
+        "dimred",
+        "bootstrap",
+        "effectsize",
+        "eyetracking",
+        "signal",
+        "factorial",
+        "cpp",
+        "withinsubject",
+        "doseresponse",
+        "drug_mdma",
+        "tool_dlight",
+        "tool_fiber_photometry",
+        "transgenic",
+        "tool_gcamp",
+        "signal_calcium",
+        "tool_two_photon",
+        "video",
+        "tool_tetrodes",
+        "signal_spikes",
+        "signal_lfp",
+        "tool_neuropixels",
+        "permutation"
+      ],
+      "views": {
+        "methods-library": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 105,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(38, 50, 71)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-dense": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(38, 50, 71)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-evidence": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(38, 50, 71)"
+          ],
+          "documentOverflow": false
+        },
+        "words-frequency": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            16,
+            23.8157,
+            30.0878,
+            35.8848,
+            41.3933,
+            46.6967,
+            51.8423,
+            56.8602,
+            61.7714,
+            71.3309,
+            76
+          ],
+          "colors": [
+            "rgb(112, 80, 176)",
+            "rgb(88, 98, 113)",
+            "rgb(118, 97, 38)",
+            "rgb(8, 121, 135)",
+            "rgb(164, 68, 41)",
+            "rgb(38, 114, 72)",
+            "rgb(88, 107, 40)"
+          ],
+          "documentOverflow": false
+        },
+        "words-concept-neural": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 10,
+          "fontSizes": [
+            16,
+            36.6868,
+            53.288,
+            61.0757,
+            76
+          ],
+          "colors": [
+            "rgb(8, 121, 135)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(147, 96, 0)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare-evidence": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(147, 96, 0)"
+          ],
+          "documentOverflow": false
+        },
+        "words-unusual": {
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 8,
+            "collection_id": 1,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": true,
+            "comparison_items": 4,
+            "comparison_items_with_text": 4
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 28,
+          "fontSizes": [
+            16,
+            26.2453,
+            34.4672,
+            42.0662,
+            49.2871,
+            56.2392,
+            62.9844,
+            69.5622,
+            76
+          ],
+          "colors": [
+            "rgb(179, 33, 120)"
+          ],
+          "documentOverflow": false
+        }
+      },
+      "per_paper_method_ids": {
+        "1": [
+          "mouse",
+          "withinsubject",
+          "drug_cocaine",
+          "drug_systemic",
+          "training",
+          "signal_spikes",
+          "signal_lfp",
+          "tool_neuropixels",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "dimred",
+          "mixed",
+          "permutation"
+        ],
+        "2": [
+          "rat",
+          "longitudinal",
+          "selfadmin",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "tool_tetrodes",
+          "signal_spikes",
+          "signal_lfp",
+          "video",
+          "locomotor",
+          "signal",
+          "anova"
+        ],
+        "3": [
+          "transgenic",
+          "mouse",
+          "tool_gcamp",
+          "signal_calcium",
+          "tool_two_photon",
+          "video",
+          "regression"
+        ],
+        "4": [
+          "mouse",
+          "drug_mdma",
+          "drug_systemic",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "temperature",
+          "bootstrap",
+          "effectsize"
+        ],
+        "5": [
+          "rat",
+          "withinsubject",
+          "doseresponse",
+          "longitudinal",
+          "drug_methamphetamine",
+          "drug_systemic",
+          "environment",
+          "training",
+          "temperature",
+          "anova"
+        ],
+        "6": [
+          "rat",
+          "factorial",
+          "drug_cocaine",
+          "drug_systemic",
+          "environment",
+          "cpp",
+          "locomotor",
+          "temperature",
+          "mixed"
+        ],
+        "7": [
+          "human",
+          "task",
+          "eeg",
+          "eyetracking",
+          "signal"
+        ],
+        "8": [
+          "insilico",
+          "decoding",
+          "ml",
+          "dimred",
+          "bootstrap",
+          "effectsize"
+        ],
+        "9": [
+          "rat",
+          "environment",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "selfadmin",
+          "temperature",
+          "anova"
+        ],
+        "10": [
+          "rat",
+          "longitudinal",
+          "environment",
+          "drug_cocaine",
+          "drug_systemic",
+          "locomotor",
+          "temperature",
+          "anova"
+        ],
+        "11": [
+          "mouse",
+          "environment",
+          "drug_amphetamine",
+          "training",
+          "microdialysis",
+          "tool_microdialysis",
+          "signal_dopamine",
+          "tool_hplc",
+          "regression"
+        ],
+        "12": [
+          "human",
+          "task",
+          "signal_eeg",
+          "eeg",
+          "mixed"
+        ]
+      },
+      "method_categories": [
+        {
+          "id": "drug_systemic",
+          "category": "interventions"
+        },
+        {
+          "id": "environment",
+          "category": "interventions"
+        },
+        {
+          "id": "locomotor",
+          "category": "measurement"
+        },
+        {
+          "id": "rat",
+          "category": "subjects"
+        },
+        {
+          "id": "temperature",
+          "category": "measurement"
+        },
+        {
+          "id": "training",
+          "category": "interventions"
+        },
+        {
+          "id": "anova",
+          "category": "analysis"
+        },
+        {
+          "id": "mouse",
+          "category": "subjects"
+        },
+        {
+          "id": "drug_cocaine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_methamphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "longitudinal",
+          "category": "design"
+        },
+        {
+          "id": "mixed",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_dopamine",
+          "category": "signals"
+        },
+        {
+          "id": "bootstrap",
+          "category": "analysis"
+        },
+        {
+          "id": "dimred",
+          "category": "analysis"
+        },
+        {
+          "id": "drug_iv",
+          "category": "interventions"
+        },
+        {
+          "id": "eeg",
+          "category": "measurement"
+        },
+        {
+          "id": "effectsize",
+          "category": "analysis"
+        },
+        {
+          "id": "human",
+          "category": "subjects"
+        },
+        {
+          "id": "regression",
+          "category": "analysis"
+        },
+        {
+          "id": "selfadmin",
+          "category": "interventions"
+        },
+        {
+          "id": "signal",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_lfp",
+          "category": "signals"
+        },
+        {
+          "id": "signal_spikes",
+          "category": "signals"
+        },
+        {
+          "id": "task",
+          "category": "interventions"
+        },
+        {
+          "id": "tool_dlight",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_fiber_photometry",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "video",
+          "category": "measurement"
+        },
+        {
+          "id": "withinsubject",
+          "category": "design"
+        },
+        {
+          "id": "cpp",
+          "category": "measurement"
+        },
+        {
+          "id": "decoding",
+          "category": "analysis"
+        },
+        {
+          "id": "doseresponse",
+          "category": "design"
+        },
+        {
+          "id": "drug_amphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_mdma",
+          "category": "drugs"
+        },
+        {
+          "id": "eyetracking",
+          "category": "measurement"
+        },
+        {
+          "id": "factorial",
+          "category": "design"
+        },
+        {
+          "id": "insilico",
+          "category": "subjects"
+        },
+        {
+          "id": "microdialysis",
+          "category": "measurement"
+        },
+        {
+          "id": "ml",
+          "category": "analysis"
+        },
+        {
+          "id": "permutation",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_calcium",
+          "category": "signals"
+        },
+        {
+          "id": "signal_eeg",
+          "category": "signals"
+        },
+        {
+          "id": "tool_gcamp",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_hplc",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_microdialysis",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_neuropixels",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_tetrodes",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_two_photon",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "transgenic",
+          "category": "subjects"
+        }
+      ],
+      "rare_word": {
+        "word": "alliesthesia",
+        "count": 1,
+        "items": [
+          1
+        ],
+        "n_items": 1,
+        "evidence": [
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "Alliesthesia is a single-occurrence exploratory term."
+          }
+        ],
+        "distinct": 0,
+        "bigram": false,
+        "concept_id": "physiology",
+        "concept_label": "Physiology & environment",
+        "concepts": [
+          {
+            "id": "physiology",
+            "label": "Physiology & environment"
+          }
+        ],
+        "rarity": "single_occurrence",
+        "rare": true,
+        "unusual": false,
+        "rest_count": null,
+        "rest_n_items": null,
+        "absent_from_rest": null
+      },
+      "unusual_word": {
+        "word": "hysteresis",
+        "count": 4,
+        "items": [
+          5,
+          6
+        ],
+        "n_items": 2,
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "Thermal hysteresis distinguishes the heating and cooling sessions in this synthetic example."
+          },
+          {
+            "id": 6,
+            "source": "abstract",
+            "sentence": "We tested whether thermal hysteresis alters cocaine reward seeking."
+          }
+        ],
+        "distinct": 1.66,
+        "bigram": false,
+        "concept_id": "computing",
+        "concept_label": "Computation & models",
+        "concepts": [
+          {
+            "id": "computing",
+            "label": "Computation & models"
+          }
+        ],
+        "rarity": "shared",
+        "rare": false,
+        "unusual": true,
+        "rest_count": 0,
+        "rest_n_items": 0,
+        "absent_from_rest": true
+      },
+      "console_errors": []
+    },
+    "laptop-dark": {
+      "method_ids": [
+        "human",
+        "task",
+        "signal_eeg",
+        "eeg",
+        "mixed",
+        "mouse",
+        "environment",
+        "drug_amphetamine",
+        "training",
+        "microdialysis",
+        "tool_microdialysis",
+        "signal_dopamine",
+        "tool_hplc",
+        "regression",
+        "rat",
+        "longitudinal",
+        "drug_cocaine",
+        "drug_systemic",
+        "locomotor",
+        "temperature",
+        "anova",
+        "drug_methamphetamine",
+        "drug_iv",
+        "selfadmin",
+        "insilico",
+        "decoding",
+        "ml",
+        "dimred",
+        "bootstrap",
+        "effectsize",
+        "eyetracking",
+        "signal",
+        "factorial",
+        "cpp",
+        "withinsubject",
+        "doseresponse",
+        "drug_mdma",
+        "tool_dlight",
+        "tool_fiber_photometry",
+        "transgenic",
+        "tool_gcamp",
+        "signal_calcium",
+        "tool_two_photon",
+        "video",
+        "tool_tetrodes",
+        "signal_spikes",
+        "signal_lfp",
+        "tool_neuropixels",
+        "permutation"
+      ],
+      "views": {
+        "methods-library": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 105,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(230, 237, 245)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-dense": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(230, 237, 245)"
+          ],
+          "documentOverflow": false
+        },
+        "methods-evidence": {
+          "scope": {
+            "label": "#detail-stress",
+            "items": 1,
+            "collection_id": null,
+            "author": null,
+            "tag": "detail-stress",
+            "include_sub": true
+          },
+          "svg": true,
+          "chips": 15,
+          "chipOverlaps": 0,
+          "wordTexts": 3,
+          "fontSizes": [
+            11.5,
+            13
+          ],
+          "colors": [
+            "rgb(230, 237, 245)"
+          ],
+          "documentOverflow": false
+        },
+        "words-frequency": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 38,
+          "fontSizes": [
+            16,
+            23.8157,
+            30.0878,
+            35.8848,
+            41.3933,
+            46.6967,
+            51.8423,
+            56.8602,
+            61.7714,
+            71.3309,
+            76
+          ],
+          "colors": [
+            "rgb(186, 156, 239)",
+            "rgb(174, 184, 199)",
+            "rgb(202, 184, 136)",
+            "rgb(81, 206, 222)",
+            "rgb(239, 155, 126)",
+            "rgb(117, 206, 160)",
+            "rgb(179, 201, 120)"
+          ],
+          "documentOverflow": false
+        },
+        "words-concept-neural": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 10,
+          "fontSizes": [
+            16,
+            36.6868,
+            53.288,
+            61.0757,
+            76
+          ],
+          "colors": [
+            "rgb(81, 206, 222)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(255, 209, 102)"
+          ],
+          "documentOverflow": false
+        },
+        "words-rare-evidence": {
+          "scope": {
+            "label": "Whole library",
+            "items": 12,
+            "collection_id": null,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": false,
+            "comparison_items": 0,
+            "comparison_items_with_text": 0
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 33,
+          "fontSizes": [
+            30
+          ],
+          "colors": [
+            "rgb(255, 209, 102)"
+          ],
+          "documentOverflow": false
+        },
+        "words-unusual": {
+          "scope": {
+            "label": "Temperature_addiction (synthetic)",
+            "items": 8,
+            "collection_id": 1,
+            "author": null,
+            "tag": null,
+            "source": "abstract",
+            "include_sub": true,
+            "comparison_available": true,
+            "comparison_items": 4,
+            "comparison_items_with_text": 4
+          },
+          "svg": true,
+          "chips": 0,
+          "chipOverlaps": 0,
+          "wordTexts": 28,
+          "fontSizes": [
+            16,
+            26.2453,
+            34.4672,
+            42.0662,
+            49.2871,
+            56.2392,
+            62.9844,
+            69.5622,
+            76
+          ],
+          "colors": [
+            "rgb(255, 134, 206)"
+          ],
+          "documentOverflow": false
+        }
+      },
+      "per_paper_method_ids": {
+        "1": [
+          "mouse",
+          "withinsubject",
+          "drug_cocaine",
+          "drug_systemic",
+          "training",
+          "signal_spikes",
+          "signal_lfp",
+          "tool_neuropixels",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "dimred",
+          "mixed",
+          "permutation"
+        ],
+        "2": [
+          "rat",
+          "longitudinal",
+          "selfadmin",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "tool_tetrodes",
+          "signal_spikes",
+          "signal_lfp",
+          "video",
+          "locomotor",
+          "signal",
+          "anova"
+        ],
+        "3": [
+          "transgenic",
+          "mouse",
+          "tool_gcamp",
+          "signal_calcium",
+          "tool_two_photon",
+          "video",
+          "regression"
+        ],
+        "4": [
+          "mouse",
+          "drug_mdma",
+          "drug_systemic",
+          "signal_dopamine",
+          "tool_dlight",
+          "tool_fiber_photometry",
+          "locomotor",
+          "temperature",
+          "bootstrap",
+          "effectsize"
+        ],
+        "5": [
+          "rat",
+          "withinsubject",
+          "doseresponse",
+          "longitudinal",
+          "drug_methamphetamine",
+          "drug_systemic",
+          "environment",
+          "training",
+          "temperature",
+          "anova"
+        ],
+        "6": [
+          "rat",
+          "factorial",
+          "drug_cocaine",
+          "drug_systemic",
+          "environment",
+          "cpp",
+          "locomotor",
+          "temperature",
+          "mixed"
+        ],
+        "7": [
+          "human",
+          "task",
+          "eeg",
+          "eyetracking",
+          "signal"
+        ],
+        "8": [
+          "insilico",
+          "decoding",
+          "ml",
+          "dimred",
+          "bootstrap",
+          "effectsize"
+        ],
+        "9": [
+          "rat",
+          "environment",
+          "drug_methamphetamine",
+          "drug_iv",
+          "training",
+          "selfadmin",
+          "temperature",
+          "anova"
+        ],
+        "10": [
+          "rat",
+          "longitudinal",
+          "environment",
+          "drug_cocaine",
+          "drug_systemic",
+          "locomotor",
+          "temperature",
+          "anova"
+        ],
+        "11": [
+          "mouse",
+          "environment",
+          "drug_amphetamine",
+          "training",
+          "microdialysis",
+          "tool_microdialysis",
+          "signal_dopamine",
+          "tool_hplc",
+          "regression"
+        ],
+        "12": [
+          "human",
+          "task",
+          "signal_eeg",
+          "eeg",
+          "mixed"
+        ]
+      },
+      "method_categories": [
+        {
+          "id": "drug_systemic",
+          "category": "interventions"
+        },
+        {
+          "id": "environment",
+          "category": "interventions"
+        },
+        {
+          "id": "locomotor",
+          "category": "measurement"
+        },
+        {
+          "id": "rat",
+          "category": "subjects"
+        },
+        {
+          "id": "temperature",
+          "category": "measurement"
+        },
+        {
+          "id": "training",
+          "category": "interventions"
+        },
+        {
+          "id": "anova",
+          "category": "analysis"
+        },
+        {
+          "id": "mouse",
+          "category": "subjects"
+        },
+        {
+          "id": "drug_cocaine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_methamphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "longitudinal",
+          "category": "design"
+        },
+        {
+          "id": "mixed",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_dopamine",
+          "category": "signals"
+        },
+        {
+          "id": "bootstrap",
+          "category": "analysis"
+        },
+        {
+          "id": "dimred",
+          "category": "analysis"
+        },
+        {
+          "id": "drug_iv",
+          "category": "interventions"
+        },
+        {
+          "id": "eeg",
+          "category": "measurement"
+        },
+        {
+          "id": "effectsize",
+          "category": "analysis"
+        },
+        {
+          "id": "human",
+          "category": "subjects"
+        },
+        {
+          "id": "regression",
+          "category": "analysis"
+        },
+        {
+          "id": "selfadmin",
+          "category": "interventions"
+        },
+        {
+          "id": "signal",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_lfp",
+          "category": "signals"
+        },
+        {
+          "id": "signal_spikes",
+          "category": "signals"
+        },
+        {
+          "id": "task",
+          "category": "interventions"
+        },
+        {
+          "id": "tool_dlight",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_fiber_photometry",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "video",
+          "category": "measurement"
+        },
+        {
+          "id": "withinsubject",
+          "category": "design"
+        },
+        {
+          "id": "cpp",
+          "category": "measurement"
+        },
+        {
+          "id": "decoding",
+          "category": "analysis"
+        },
+        {
+          "id": "doseresponse",
+          "category": "design"
+        },
+        {
+          "id": "drug_amphetamine",
+          "category": "drugs"
+        },
+        {
+          "id": "drug_mdma",
+          "category": "drugs"
+        },
+        {
+          "id": "eyetracking",
+          "category": "measurement"
+        },
+        {
+          "id": "factorial",
+          "category": "design"
+        },
+        {
+          "id": "insilico",
+          "category": "subjects"
+        },
+        {
+          "id": "microdialysis",
+          "category": "measurement"
+        },
+        {
+          "id": "ml",
+          "category": "analysis"
+        },
+        {
+          "id": "permutation",
+          "category": "analysis"
+        },
+        {
+          "id": "signal_calcium",
+          "category": "signals"
+        },
+        {
+          "id": "signal_eeg",
+          "category": "signals"
+        },
+        {
+          "id": "tool_gcamp",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_hplc",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_microdialysis",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_neuropixels",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_tetrodes",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "tool_two_photon",
+          "category": "techniques_tools"
+        },
+        {
+          "id": "transgenic",
+          "category": "subjects"
+        }
+      ],
+      "rare_word": {
+        "word": "alliesthesia",
+        "count": 1,
+        "items": [
+          1
+        ],
+        "n_items": 1,
+        "evidence": [
+          {
+            "id": 1,
+            "source": "abstract",
+            "sentence": "Alliesthesia is a single-occurrence exploratory term."
+          }
+        ],
+        "distinct": 0,
+        "bigram": false,
+        "concept_id": "physiology",
+        "concept_label": "Physiology & environment",
+        "concepts": [
+          {
+            "id": "physiology",
+            "label": "Physiology & environment"
+          }
+        ],
+        "rarity": "single_occurrence",
+        "rare": true,
+        "unusual": false,
+        "rest_count": null,
+        "rest_n_items": null,
+        "absent_from_rest": null
+      },
+      "unusual_word": {
+        "word": "hysteresis",
+        "count": 4,
+        "items": [
+          5,
+          6
+        ],
+        "n_items": 2,
+        "evidence": [
+          {
+            "id": 5,
+            "source": "abstract",
+            "sentence": "Thermal hysteresis distinguishes the heating and cooling sessions in this synthetic example."
+          },
+          {
+            "id": 6,
+            "source": "abstract",
+            "sentence": "We tested whether thermal hysteresis alters cocaine reward seeking."
+          }
+        ],
+        "distinct": 1.66,
+        "bigram": false,
+        "concept_id": "computing",
+        "concept_label": "Computation & models",
+        "concepts": [
+          {
+            "id": "computing",
+            "label": "Computation & models"
+          }
+        ],
+        "rarity": "shared",
+        "rare": false,
+        "unusual": true,
+        "rest_count": 0,
+        "rest_n_items": 0,
+        "absent_from_rest": true
+      },
+      "console_errors": []
+    }
+  },
+  "exports": {
+    "concepts": {
+      "json": {
+        "name": "ReviewHunter-concepts-Whole_library.json",
+        "type": "application/json",
+        "size": 49168
+      },
+      "csv": {
+        "name": "ReviewHunter-concepts-Whole_library.csv",
+        "type": "text/csv;charset=utf-8",
+        "size": 5897,
+        "rows": 113
+      },
+      "png": {
+        "name": "ReviewHunter-concepts-Whole_library.png",
+        "type": "image/png",
+        "size": 461840
+      }
+    },
+    "goals": {
+      "json": {
+        "name": "ReviewHunter-goals-Whole_library.json",
+        "type": "application/json",
+        "size": 14238
+      },
+      "csv": {
+        "name": "ReviewHunter-goals-Whole_library.csv",
+        "type": "text/csv;charset=utf-8",
+        "size": 1859,
+        "rows": 10
+      },
+      "png": {
+        "name": "ReviewHunter-goals-Whole_library.png",
+        "type": "image/png",
+        "size": 418510
+      }
+    },
+    "methods": {
+      "json": {
+        "name": "ReviewHunter-methods-Whole_library.json",
+        "type": "application/json",
+        "size": 152172
+      },
+      "csv": {
+        "name": "ReviewHunter-methods-Whole_library.csv",
+        "type": "text/csv;charset=utf-8",
+        "size": 4577,
+        "rows": 13
+      },
+      "png": {
+        "name": "ReviewHunter-methods-Whole_library.png",
+        "type": "image/png",
+        "size": 1639056
+      },
+      "detailed_columns": 17
+    },
+    "words": {
+      "json": {
+        "name": "ReviewHunter-words-Whole_library.json",
+        "type": "application/json",
+        "size": 289004
+      },
+      "csv": {
+        "name": "ReviewHunter-words-Whole_library.csv",
+        "type": "text/csv;charset=utf-8",
+        "size": 23637,
+        "rows": 301
+      },
+      "png": {
+        "name": "ReviewHunter-words-Whole_library.png",
+        "type": "image/png",
+        "size": 489577
+      },
+      "csv_union_terms": 300,
+      "legend_categories": [
+        "Recording & imaging",
+        "Drugs & pharmacology",
+        "Neural signals & circuits",
+        "Behaviour & cognition",
+        "Organisms & biology",
+        "Physiology & environment",
+        "Statistics & study design",
+        "Computation & models",
+        "Other terms"
+      ],
+      "source": "fulltext",
+      "visible_pool": "rare",
+      "measured_font_preserved": true
+    }
+  }
+}

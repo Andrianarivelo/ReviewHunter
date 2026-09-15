@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import re
 
+from .method_details import DRUGS, detail_methods
+
 STAGES: list[tuple[str, str]] = [
     ("subjects", "Subjects & models"),
     ("design", "Study design"),
@@ -143,7 +145,23 @@ _RAW.extend([
 # Tighten inherited broad cues that otherwise confuse routine housing or equipment with experiments.
 for _index, (_mid, _label, _stage, _patterns) in enumerate(_RAW):
     if _mid == "pk":
-        _patterns = [p for p in _patterns if p != r"\bserum\b"]
+        # A chromatograph or mass spectrometer also measures endogenous molecules.
+        # Its mere use does not establish pharmacokinetics or a blood sample.
+        _drug_names = "|".join(pattern for _, _, pattern in DRUGS)
+        _patterns = [r"\bpharmacokinetics?\b", r"\b(?:plasma|blood) (?:levels?|concentrations?|samples?)\b",
+                     r"\b(?:brain|tissue) (?:levels?|concentrations?) of (?:" + _drug_names + r")\b"]
+    elif _mid == "ephys":
+        _patterns = [r"\belectrophysiolog(?:y|ical)\b", r"\bextracellular recordings?\b",
+                     r"\bintracellular recordings?\b"]
+    elif _mid == "calcium":
+        # Photometry, miniscopes and two-photon optics support many indicators.
+        _label = "Calcium imaging"
+        _patterns = [r"\bcalcium imaging\b"]
+    elif _mid == "selfadmin":
+        # Ratio schedules and breakpoints also occur in food-reward tasks.
+        # A separate drug-identity chip identifies the compound when explicit.
+        _label = "Self-administration"
+        _patterns = [r"\bself[- ]?administ(?:ration|ered|er)\b"]
     elif _mid == "intracranial":
         _patterns = [r"\bintracranial (?:infusion|injection|administration)\b", r"\bmicroinjection\b",
                      r"\bintracerebroventricular\b"]
@@ -156,9 +174,11 @@ for _index, (_mid, _label, _stage, _patterns) in enumerate(_RAW):
     _RAW[_index] = (_mid, _label, _stage, _patterns)
 
 METHODS: list[dict] = [
-    {"id": mid, "label": label, "stage": stage, "regex": re.compile("|".join(f"(?:{p})" for p in patterns), re.IGNORECASE)}
+    {"id": mid, "label": label, "stage": stage, "category": "interventions" if stage == "manipulation" else stage,
+     "regex": re.compile("|".join(f"(?:{p})" for p in patterns), re.IGNORECASE)}
     for mid, label, stage, patterns in _RAW
 ]
+METHODS.extend(detail_methods())
 METHOD_BY_ID: dict[str, dict] = {m["id"]: m for m in METHODS}
 STAGE_ORDER: dict[str, int] = {sid: i for i, (sid, _label) in enumerate(STAGES)}
 

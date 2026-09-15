@@ -5,6 +5,17 @@
   const WIDTH = 1000, HEIGHT = 440, TICKS = 300, PAGE_SIZE = 18;
   const COLORS = ['#087d93', '#7650bd', '#a75e08', '#07815f', '#ba416e', '#476cbd', '#8a702e'];
   const DARK_COLORS = ['#51c6dc', '#b49aef', '#edb45d', '#5acead', '#e78caa', '#91aaf0', '#d9c385'];
+  // Concept colours stay fixed across scopes. Gold and pink are reserved for rarity and outliers.
+  const WORD_COLORS = {
+    recording: ['#285cae', '#88b7ff'], drugs: ['#a44429', '#ef9b7e'],
+    neural: ['#087987', '#51cede'], behavior: ['#7050b0', '#ba9cef'],
+    biology: ['#267248', '#75cea0'], physiology: ['#766126', '#cab888'],
+    disease: ['#8c435b', '#d9a4b5'], statistics: ['#506781', '#a7bbd4'],
+    computing: ['#586b28', '#b3c978'], other: ['#586271', '#aeb8c7'],
+    rare: ['#936000', '#ffd166'], unusual: ['#b32178', '#ff86ce'],
+  };
+  const METHOD_GROUPS = { drugs: 'Drugs & compounds', interventions: 'Interventions',
+    signals: 'Recorded signals', techniques_tools: 'Techniques & tools' };
   const STAGES = ['subjects', 'design', 'manipulation', 'measurement', 'analysis'];
   const KINDS = { concepts: 'Concepts', words: 'Words', goals: 'Goals', methods: 'Methodology' };
   const TYPES = { test: 'Test hypothesis', effect: 'Measure effect', mechanism: 'Mechanism', compare: 'Compare', develop: 'Develop method', review: 'Review', describe: 'Describe', unknown: 'No aim detected' };
@@ -15,6 +26,7 @@
   const text = (x, y, value, size = 13, attrs = '') => `<text x="${x}" y="${y}" font-size="${size}" ${attrs}>${esc(value)}</text>`;
   const title = value => `<title>${esc(value)}</title>`;
   const paperCount = n => `${n} paper${n === 1 ? '' : 's'}`;
+  const wordColour = word => (WORD_COLORS[word.unusual ? 'unusual' : word.rare ? 'rare' : word.concept_id] || WORD_COLORS.other)[document.documentElement.classList.contains('dark') ? 1 : 0];
   const graphHeight = count => count > 45 ? Math.max(650, count * 12) : HEIGHT;
   const csvCell = value => { const v = String(value ?? ''); return '"' + (typeof value === 'string' && /^[=+@\-\t\r]/.test(v) ? "'" : '') + v.replace(/"/g, '""') + '"'; };
 
@@ -124,9 +136,11 @@
     const ctx = document.createElement('canvas').getContext('2d');
     const score = w => metric === 'distinct' ? Math.max(0, w.distinct || 0) : w.count;
     const sorted = [...words].filter(w => score(w) > 0).sort((a, b) => score(b) - score(a) || a.word.localeCompare(b.word));
-    const max = Math.max(1, ...sorted.map(score)), placed = [];
+    const max = Math.max(1, ...sorted.map(score)), min = Math.min(max, ...sorted.map(score)), placed = [];
     for (const [i, w] of sorted.slice(0, 90).entries()) {
-      const size = 15 + 32 * Math.sqrt(score(w) / max);
+      // Stretch the observed range for a clear hierarchy; counts remain available on click.
+      // Equal counts receive equal sizes, including the single-occurrence view.
+      const size = max === min ? 30 : 16 + 60 * Math.pow((score(w) - min) / (max - min), .85);
       ctx.font = `600 ${size}px Georgia`;
       const width = ctx.measureText(w.word).width + 12, height = size * 1.3;
       if (width > WIDTH - 30) continue;
@@ -134,7 +148,7 @@
         const a = step * .24 + i * .17, r = step * .18;
         const x = WIDTH / 2 + Math.cos(a) * r * 1.35, y = HEIGHT / 2 + Math.sin(a) * r;
         const rect = { l: x - width / 2, r: x + width / 2, t: y - height / 2, b: y + height / 2 };
-        if (rect.l < 15 || rect.r > WIDTH - 15 || rect.t < 15 || rect.b > HEIGHT - 15) continue;
+        if (rect.l < 15 || rect.r > WIDTH - 15 || rect.t < 15 || rect.b > HEIGHT - 35) continue;
         if (placed.some(p => rect.l < p.rect.r && rect.r > p.rect.l && rect.t < p.rect.b && rect.b > p.rect.t)) continue;
         placed.push({ ...w, x, y, size, rect }); break;
       }
@@ -151,13 +165,49 @@
   window.insightsPart = function insightsPart() {
     return {
       insight: { kind: 'concepts', loading: false, data: {}, scope: 'all', includeSub: true, source: 'abstract',
-        metric: 'count', terms: 'all', view: 'cloud', methodView: 'pipeline', focus: '', cluster: null, selected: null,
+        metric: 'count', terms: 'all', wordPool: 'frequent', wordConcept: '', view: 'cloud', methodView: 'pipeline', focus: '', cluster: null, selected: null,
         svg: '', height: HEIGHT, width: WIDTH, actions: [], nodes: [], page: 0, error: '', request: 0, zoom: 1 },
       insightKinds: Object.entries(KINDS).map(([id, label]) => ({ id, label })),
       insightTitle() { return KINDS[this.insight.kind]; },
       insightDescription() { return ({ concepts: 'Themes that connect your literature', words: 'The language of this body of work', goals: 'Factors, outcomes and the questions between them', methods: 'How the science was done, with evidence for every step' })[this.insight.kind]; },
       insightWords() {
-        return (this.insight.data.words || []).filter(word => this.insight.terms === 'phrases' ? word.bigram : this.insight.terms === 'words' ? !word.bigram : true);
+        const state = this.insight;
+        const pool = state.wordPool === 'rare' ? state.data.rare_words : state.wordPool === 'unusual' ? state.data.outlier_words : state.data.words;
+        return (pool || []).filter(word => (!state.wordConcept || word.concept_id === state.wordConcept) &&
+          (state.terms === 'phrases' ? word.bigram : state.terms === 'words' ? !word.bigram : true));
+      },
+      wordColour,
+      paperCount,
+      /** Legend entries filter the current pool; rare and unusual colours override concept colour. */
+      insightWordLegend() {
+        const state = this.insight;
+        const pool = state.wordPool === 'rare' ? state.data.rare_words : state.wordPool === 'unusual' ? state.data.outlier_words : state.data.words;
+        const ids = new Set((pool || []).map(word => word.concept_id));
+        return (state.data.concept_categories || []).filter(category => ids.has(category.id));
+      },
+      insightWordPoolLabel() { return ({ frequent: 'frequent terms', rare: 'single-occurrence terms', unusual: 'unusual terms' })[this.insight.wordPool] || 'terms'; },
+      insightRareSuggestions() {
+        const state = this.insight;
+        return (state.data.rare_words || []).filter(word => (!state.wordConcept || word.concept_id === state.wordConcept) &&
+          (state.terms === 'phrases' ? word.bigram : state.terms === 'words' ? !word.bigram : true)).slice(0, 8);
+      },
+      setInsightWordPool(pool) {
+        this.insight.wordPool = pool; this.insight.wordConcept = '';
+        if (pool === 'rare') this.insight.metric = 'count';
+        this.renderInsight();
+      },
+      /** Counts and comparison status travel with the exact text-source evidence. */
+      inspectWord(word) {
+        const data = this.insight.data;
+        this.insight.selected = { label: word.word, count: word.n_items,
+          items: (word.items || []).map(id => data.items?.[id]).filter(Boolean),
+          evidence: word.evidence || [], description: this.wordDescription(word) };
+        this.clearItem();
+      },
+      wordDescription(word) {
+        return `${word.count} occurrence${word.count === 1 ? '' : 's'} in ${paperCount(word.n_items)}. ${word.concept_label || 'Other terms'}.` +
+          (word.rare ? ' Very rare: occurs exactly once in this scope and text source.' : '') +
+          (word.unusual ? ' Unusual here: not found in the available comparison text elsewhere in your library.' : '');
       },
       /** Plain-language orientation without inventing research conclusions from co-occurrence. */
       insightSummary() {
@@ -169,8 +219,8 @@
         }
         if (this.insight.kind === 'words') {
           const terms = this.insightWords(), leading = terms[0];
-          return [{ value: terms.length, label: 'frequent terms' }, { value: this.insight.source === 'abstract' ? 'Abstracts' : 'Full text', label: 'text source' },
-            { value: leading?.count || 0, label: leading ? `occurrences of “${leading.word}”` : 'occurrences' }];
+          return [{ value: terms.length, label: this.insightWordPoolLabel() }, { value: this.insight.source === 'abstract' ? 'Abstracts' : 'Full text', label: 'text source' },
+            { value: leading?.count || 0, label: leading ? `occurrence${leading.count === 1 ? '' : 's'} of “${leading.word}”` : 'occurrences' }];
         }
         if (this.insight.kind === 'goals') return [
           { value: (data.papers || []).filter(paper => paper.aims?.length).length + '/' + total, label: 'papers with explicit aims' },
@@ -227,7 +277,11 @@
         try {
           const data = await api.get('/api/insight/' + s.kind, params);
           if (s.request !== request) return;
-          s.data = data; if (s.kind === 'words' && !data.scope?.comparison_available) s.metric = 'count';
+          s.data = data;
+          if (s.kind === 'words' && !data.scope?.comparison_available) {
+            s.metric = 'count';
+            if (s.wordPool === 'unusual') s.wordPool = 'frequent';
+          }
           s.nodes = forceLayout(data.nodes || [], data.edges || []);
           this.renderInsight();
         } catch (e) { if (s.request === request) { s.error = e.message || 'Could not load this map'; s.data = {}; s.svg = ''; } }
@@ -237,12 +291,19 @@
         const labels = { no_abstract: 'without an abstract', no_fulltext: 'without indexed full text', no_methods_section: 'without a detected Methods section', truncated: 'excluded by the scope limit' };
         const limits = this.insight.data.limits || {};
         const notes = Object.entries(limits).filter(([k, v]) => labels[k] && typeof v === 'number' && v > 0).map(([k, v]) => `${v} ${labels[k]}`);
+        if (this.insight.kind === 'words') {
+          const data = this.insight.data, pool = this.insight.wordPool;
+          const available = data.candidate_counts?.[pool];
+          if (available > limits.list_limit) notes.push(`This ${this.insightWordPoolLabel()} list contains ${limits.list_limit} of ${available} candidates; concept and phrase filters apply to that list.`);
+          if (data.scope?.comparison_available) notes.push(`Comparison text available for ${data.scope.comparison_items_with_text ?? 0}/${data.scope.comparison_items ?? 0} papers outside this scope.`);
+          if (limits.comparison_capped) notes.push('Comparison reached the library analysis limit.');
+        }
         if (limits.scope_capped) notes.push(`Scope reached the ${limits.max_items || 2000}-paper analysis limit; narrow the scope for complete coverage.`);
         if (limits.no_text) notes.push(`${limits.no_text} without assessable text`);
         if (limits.fulltext_scan_chars) notes.push(`Goal search reads up to ${Number(limits.fulltext_scan_chars).toLocaleString()} indexed characters per paper.`);
         return notes.join(' · ');
       },
-      insightHasData() { const d = this.insight.data; return !!(d.nodes?.length || d.words?.length || d.papers?.length); },
+      insightHasData() { const d = this.insight.data; return !!(d.nodes?.length || d.words?.length || d.rare_words?.length || d.papers?.length); },
       insightPageCount() { return Math.max(1, Math.ceil((this.insight.data.papers || []).length / PAGE_SIZE)); },
       insightPage(delta) { this.insight.page = Math.max(0, Math.min(this.insightPageCount() - 1, this.insight.page + delta)); this.renderInsight(); },
       insightAction(detail) { const index = this.insight.actions.length; this.insight.actions.push(detail); return `data-index="${index}" tabindex="0" role="button"`; },
@@ -269,6 +330,7 @@
       /** Construct the active map once; Alpine does not rerun expensive layouts on hover. */
       renderInsight() {
         const s = this.insight; s.actions = []; s.height = HEIGHT; s.width = WIDTH;
+        if (s.kind === 'words' && s.wordPool === 'rare') s.metric = 'count';
         if (s.kind === 'concepts') s.svg = this.conceptSVG();
         if (s.kind === 'words') s.svg = this.wordSVG();
         if (s.kind === 'goals') s.svg = this.goalSVG();
@@ -294,38 +356,43 @@
       wordSVG() {
         const state = this.insight;
         const words = this.insightWords();
-        const detail = word => ({ label: word.word, count: word.n_items,
+        const detail = word => ({ label: word.word, count: word.n_items, description: this.wordDescription(word),
           items: (word.items || []).map(id => state.data.items?.[id]).filter(Boolean), evidence: word.evidence || [] });
+        if (!words.length) return text(35, 100, state.wordPool === 'unusual'
+          ? 'No terms meet the comparison criteria in this view.' : 'No matching terms. Try another concept, source or term group.', 16);
         if (state.view === 'bars') {
           const distinct = state.metric === 'distinct';
           const sorted = [...words].sort((a, b) => distinct ? b.distinct - a.distinct : b.count - a.count).slice(0, 50);
           const max = Math.max(1, ...sorted.map(word => distinct ? Math.abs(word.distinct) : word.count));
           const zero = distinct ? 615 : 320;
           const range = distinct ? 255 : 560;
-          state.height = Math.max(220, sorted.length * 36 + 90);
+          const rows = sorted.map(word => ({ word, lines: wrapText(word.word, 280, 14) }));
+          state.height = Math.max(220, rows.reduce((height, row) => height + Math.max(36, row.lines.length * 17 + 12), 90));
           let svg = text(20, 27, 'TERM', 12, 'font-weight="600"') +
             text(935, 27, distinct ? 'LOG-ODDS' : 'COUNT', 12, 'text-anchor="end" font-weight="600"');
           if (distinct) svg += text(360, 48, 'Less distinctive', 12) + text(725, 48, 'More distinctive', 12);
           svg += `<line x1="${zero}" y1="55" x2="${zero}" y2="${state.height - 20}" stroke="currentColor" opacity=".3"/>`;
-          sorted.forEach((word, index) => {
+          let y = 68;
+          rows.forEach(({ word, lines }) => {
             const value = distinct ? word.distinct : word.count;
             const length = Math.abs(value) / max * range;
             const x = value < 0 ? zero - length : zero;
-            const y = 68 + index * 36;
-            svg += `<g class="insight-node" data-score="${value}" ${this.insightAction(detail(word))}>` +
-              title(`${word.word}: ${word.count} occurrences in ${paperCount(word.n_items)}; log-odds ${word.distinct}`) +
-              text(20, y + 18, clip(word.word, 35), 14) +
-              `<rect class="insight-word-bar" x="${x}" y="${y}" width="${length}" height="24" rx="4" fill="${color(value < 0 ? 1 : 0)}" opacity=".78"/>` +
+            svg += `<g class="insight-node" data-score="${value}" data-concept="${esc(word.concept_id || 'other')}" data-rare="${!!word.rare}" data-unusual="${!!word.unusual}" ${this.insightAction(detail(word))}>` +
+              title(this.wordDescription(word) + ` Log-odds ${word.distinct}.`) +
+              textLines(20, y + 18, lines, 14, 17, word.rare || word.unusual ? `fill="${wordColour(word)}" font-weight="600"` : '') +
+              `<rect class="insight-word-bar" x="${x}" y="${y}" width="${length}" height="24" rx="4" fill="${wordColour(word)}" opacity=".78"/>` +
               text(935, y + 18, distinct ? (value > 0 ? '+' : '') + value.toFixed(2) : value, 13, 'text-anchor="end"') + '</g>';
+            y += Math.max(36, lines.length * 17 + 12);
           });
           return svg;
         }
         const placed = wordLayout(words, state.metric);
         if (!placed.length) return text(50, 120, 'No positive distinctive terms in this view. Try ranked bars or another scope.', 16);
-        return placed.map(word => `<g class="insight-node" ${this.insightAction(detail(word))}>` +
-          title(`${word.count} occurrences · ${paperCount(word.n_items)} · log-odds ${word.distinct}`) +
-          text(word.x, word.y, word.word, word.size, `text-anchor="middle" dominant-baseline="central" font-family="Georgia,serif" font-weight="600" fill="${color(word.bigram ? 0 : 1)}"`) + '</g>').join('') +
-          text(20, HEIGHT - 8, `${placed.length} of ${words.length} frequent terms shown. Colour: phrases / single words.`, 12, 'opacity=".8"');
+        return placed.map(word => `<g class="insight-node" data-word="${esc(word.word)}" data-concept="${esc(word.concept_id || 'other')}" data-rare="${!!word.rare}" data-unusual="${!!word.unusual}" ${this.insightAction(detail(word))}>` +
+          title(this.wordDescription(word) + ` Log-odds ${word.distinct}.`) +
+          text(word.x, word.y, word.word, word.size, `text-anchor="middle" dominant-baseline="central" font-family="Georgia,serif" font-weight="600" fill="${wordColour(word)}"`) +
+          (word.rare ? `<line x1="${word.rect.l + 6}" x2="${word.rect.r - 6}" y1="${word.y + word.size * .5 + 1}" y2="${word.y + word.size * .5 + 1}" stroke="${wordColour(word)}" stroke-width="1.5"/>` : '') + '</g>').join('') +
+          text(20, HEIGHT - 8, `${placed.length} of ${words.length} ${this.insightWordPoolLabel()} shown. Size: ${state.metric === 'distinct' ? 'positive distinctiveness' : 'frequency'} (expanded scale).`, 12, 'opacity=".8"');
       },
 
       /** Pair evidence belongs to the selected relation, including title-derived goals. */
@@ -382,11 +449,23 @@
         }
         for (const paper of papers) {
           const titleLines = wrapText(paper.title, left - 40, 13, 600);
-          const columns = (paper.pipeline || []).map(stage => stage.methods.map(method => {
-            const lines = wrapText(method.label, chipWidth - 22, 12);
-            return { method, lines, height: lines.length * 16 + 14 };
-          }));
-          const height = Math.max(titleLines.length * 17 + 53, 60, ...columns.map(chips => chips.reduce((total, chip) => total + chip.height + 6, 8))) + 12;
+          const columns = (paper.pipeline || []).map(stage => {
+            const groups = new Map();
+            for (const method of stage.methods) {
+              const category = method.category || '';
+              if (!groups.has(category)) groups.set(category, []);
+              groups.get(category).push(method);
+            }
+            const order = { drugs: 0, signals: 0, interventions: 1, techniques_tools: 1 };
+            const showGroups = [...groups.keys()].some(category => METHOD_GROUPS[category]);
+            return [...groups].sort((a, b) => (order[a[0]] ?? 2) - (order[b[0]] ?? 2)).flatMap(([category, methods]) =>
+              methods.map((method, index) => {
+                const lines = wrapText(method.label, chipWidth - 22, 12);
+                const group = showGroups && index === 0 ? METHOD_GROUPS[category] || (stage.stage === 'measurement' ? 'Other measurements' : 'Other methods') : '';
+                return { method, lines, group, height: lines.length * 16 + 14 };
+              }));
+          });
+          const height = Math.max(titleLines.length * 17 + 53, 60, ...columns.map(chips => chips.reduce((total, chip) => total + chip.height + 6 + (chip.group ? 23 : 0), 8))) + 12;
           svg += `<rect x="6" y="${y}" width="1023" height="${height}" rx="9" class="insight-svg-card"/>`;
           const detail = { label: paper.title, items: [paper], evidence: paper.detected.map(method => ({ id: paper.id, sentence: method.evidence, source: this.methodConfidence(method) })) };
           svg += `<g class="insight-node insight-paper-title" ${this.insightAction(detail)}>${title(paper.title)}` +
@@ -396,11 +475,15 @@
             let chipY = y + 10;
             const x = left + index * column;
             if (!stage.methods.length) svg += text(x + 3, chipY + 20, 'Not detected', 12, 'opacity=".75"');
-            for (const { method, lines, height: chipHeight } of columns[index]) {
+            for (const { method, lines, group, height: chipHeight } of columns[index]) {
+              if (group) {
+                svg += text(x + 2, chipY + 12, group, 11, 'opacity=".8" font-weight="600"');
+                chipY += 23;
+              }
               const confidence = this.methodConfidence(method);
               const action = this.insightAction({ label: method.label, items: [paper],
                 evidence: [{ id: paper.id, sentence: method.evidence, source: confidence }], confidence });
-              svg += `<g class="insight-method-chip" ${action}>${title(method.label + '\n' + confidence + '\n' + method.evidence)}` +
+              svg += `<g class="insight-method-chip" data-method="${esc(method.id)}" data-category="${esc(method.category || '')}" ${action}>${title(method.label + '\n' + confidence + '\n' + method.evidence)}` +
                 `<rect x="${x}" y="${chipY}" width="${chipWidth}" height="${chipHeight}" rx="6" fill="${stageColor(stage.stage)}" opacity=".13"/>` +
                 `<circle cx="${x + 8}" cy="${chipY + 15}" r="2.7" fill="${stageColor(stage.stage)}"/>` +
                 textLines(x + 17, chipY + 20, lines, 12, 16) + '</g>';
@@ -464,7 +547,13 @@
       insightCSV() {
         const d = this.insight.data, kind = this.insight.kind;
         if (kind === 'methods') return [['paper_id', 'title', 'year', 'text_source', ...(d.matrix || []).map(m => m.label)], ...(d.papers || []).map(p => [p.id, p.title, p.year, p.source, ...(d.matrix || []).map(m => p.detected.some(x => x.id === m.id) ? 1 : 0)])];
-        if (kind === 'words') return [['word', 'occurrences', 'paper_count', 'log_odds', 'paper_ids'], ...(d.words || []).map(w => [w.word, w.count, w.n_items, w.distinct, w.items.join(';')])];
+        if (kind === 'words') {
+          const terms = new Map();
+          for (const word of [...(d.words || []), ...(d.rare_words || []), ...(d.outlier_words || [])]) terms.set(word.word, word);
+          return [['word', 'occurrences', 'paper_count', 'log_odds', 'paper_ids', 'concept', 'rarity', 'unusual_in_scope', 'comparison_occurrences'],
+            ...[...terms.values()].map(word => [word.word, word.count, word.n_items, word.distinct, word.items.join(';'),
+              word.concept_label || '', word.rarity || '', !!word.unusual, word.rest_count ?? ''])];
+        }
         if (kind === 'goals') return [['factor', 'outcome', 'goal_type', 'paper_id', 'paper_title', 'evidence'], ...(d.links || []).flatMap(l => l.items.map(p => [l.factor, l.outcome, l.kind, p.id, p.title, p.evidence]))];
         return [['record_type', 'id_or_source', 'label_or_target', 'paper_count_or_weight', 'cluster', 'paper_ids'], ...(d.nodes || []).map(n => ['node', n.id, n.label, n.count, n.cluster, n.items.map(p => p.id).join(';')]), ...(d.edges || []).map(e => ['edge', e.source, e.target, e.weight, '', ''])];
       },
@@ -476,10 +565,19 @@
           const background = this.dark ? '#0f111c' : '#f8f9fb', foreground = this.dark ? '#eef0f4' : '#272b3c';
           const notes = s.kind === 'methods' ? [this.insightLimits(), 'Reporting checks describe available text, not study quality.',
             ...(s.data.checks || []).map(c => `${c.label}: ${c.count}/${c.assessed ?? s.data.scope?.items ?? 0} assessed papers${c.unavailable ? `; ${c.unavailable} unavailable` : ''}`),
-            ...(s.data.insights?.gaps || [])] : [this.insightLimits()];
+            ...(s.data.insights?.gaps || [])] : s.kind === 'words'
+              ? [this.insightLimits(), 'Colours: lexical concept groups; gold and underlining = exactly one occurrence; pink = unusual in this scope.',
+                'Unusual: at least two occurrences, absent from available comparison text, and log-odds >= 1. Not a novelty claim.']
+              : [this.insightLimits()];
           const footer = notes.filter(Boolean).flatMap(line => String(line).match(/.{1,115}(?:\s|$)|.{1,115}/g) || []);
-          const height = s.height + 90 + footer.length * 22;
-          const markup = `<svg xmlns="http://www.w3.org/2000/svg" width="${s.width}" height="${height}" viewBox="0 0 ${s.width} ${height}"><style>svg{color:${foreground}}text{font-family:Arial,sans-serif}text:not([fill]){fill:${foreground}}.insight-svg-card{fill:${this.dark ? '#181b29' : '#fff'};stroke:${this.dark ? '#272b3c' : '#dde1ea'}}.insight-label{paint-order:stroke;stroke:${background};stroke-width:3px;stroke-linejoin:round}</style><rect width="100%" height="100%" fill="${background}"/>${text(20, 27, this.insightTitle() + ' · ' + (s.data.scope?.label || ''), 20)}${text(20, 49, `${s.data.scope?.items || 0} papers · ${s.kind === 'methods' ? 'Displayed page ' + (s.page + 1) + '; CSV/JSON include every paper. 0 = not detected.' : 'Evidence and complete data in the accompanying JSON.'}`, 11)}<g transform="translate(0,65)">${s.svg}</g>${footer.map((line, i) => text(20, s.height + 90 + i * 22, line, 12)).join('')}</svg>`;
+          const legend = s.kind === 'words' ? this.insightWordLegend() : [];
+          const height = s.height + 90 + footer.length * 22 + Math.ceil(legend.length / 3) * 24;
+          const legendMarkup = legend.map((category, index) => {
+            const x = 20 + index % 3 * (s.width - 40) / 3;
+            const y = s.height + 90 + footer.length * 22 + Math.floor(index / 3) * 24;
+            return `<circle cx="${x + 4}" cy="${y - 4}" r="4" fill="${wordColour({ concept_id: category.id })}"/>` + text(x + 15, y, category.label, 11);
+          }).join('');
+          const markup = `<svg xmlns="http://www.w3.org/2000/svg" width="${s.width}" height="${height}" viewBox="0 0 ${s.width} ${height}"><style>svg{color:${foreground}}text:not([font-family]){font-family:Arial,sans-serif}text:not([fill]){fill:${foreground}}.insight-svg-card{fill:${this.dark ? '#181b29' : '#fff'};stroke:${this.dark ? '#272b3c' : '#dde1ea'}}.insight-label{paint-order:stroke;stroke:${background};stroke-width:3px;stroke-linejoin:round}</style><rect width="100%" height="100%" fill="${background}"/>${text(20, 27, this.insightTitle() + ' · ' + (s.data.scope?.label || ''), 20)}${text(20, 49, `${s.data.scope?.items || 0} papers · ${s.kind === 'methods' ? 'Displayed page ' + (s.page + 1) + '; CSV/JSON include every paper. 0 = not detected.' : 'Evidence and complete data in the accompanying JSON.'}`, 11)}<g transform="translate(0,65)">${s.svg}</g>${footer.map((line, i) => text(20, s.height + 90 + i * 22, line, 12)).join('')}${legendMarkup}</svg>`;
           const url = URL.createObjectURL(new Blob([markup], { type: 'image/svg+xml' }));
           try {
             const img = new Image(); await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });

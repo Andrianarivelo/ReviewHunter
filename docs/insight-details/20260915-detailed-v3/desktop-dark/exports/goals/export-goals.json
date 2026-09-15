@@ -1,0 +1,569 @@
+{
+  "scope": {
+    "label": "Whole library",
+    "items": 12,
+    "collection_id": null,
+    "author": null,
+    "tag": null,
+    "include_sub": true
+  },
+  "papers": [
+    {
+      "id": 12,
+      "title": "Human working memory and visual attention",
+      "year": 2020,
+      "authors": [
+        "Example, Dana"
+      ],
+      "journal": "",
+      "goal_type": "compare",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We compared working memory and visual attention in human participants.",
+          "kind": "compare"
+        }
+      ],
+      "pairs": []
+    },
+    {
+      "id": 11,
+      "title": "Temperature effects on dopamine release",
+      "year": 2025,
+      "authors": [
+        "Example, Carol"
+      ],
+      "journal": "",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+          "kind": "effect"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "ambient temperature",
+          "outcome": "dopamine release",
+          "kind": "effect",
+          "evidence": "Our aim was to measure the effect of ambient temperature on dopamine release."
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Ambient temperatures and locomotor activity",
+      "year": 2024,
+      "authors": [
+        "Example, Alice",
+        "Example, Bob"
+      ],
+      "journal": "",
+      "goal_type": "test",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We investigated whether ambient temperature alters locomotor activity.",
+          "kind": "test"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "ambient temperature",
+          "outcome": "locomotor activity",
+          "kind": "test",
+          "evidence": "We investigated whether ambient temperature alters locomotor activity."
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Ambient temperature and stimulant self-administration",
+      "year": 2023,
+      "authors": [
+        "Example, Alice"
+      ],
+      "journal": "",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of ambient temperature on methamphetamine self-administration.",
+          "kind": "effect"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "ambient temperature",
+          "outcome": "methamphetamine self-administration",
+          "kind": "effect",
+          "evidence": "We examined the effect of ambient temperature on methamphetamine self-administration."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Synthetic study: neural networks and visual decoding",
+      "year": 2022,
+      "authors": [
+        "Synthetic, Jun"
+      ],
+      "journal": "",
+      "goal_type": "describe",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We developed a neural network model for decoding visual cortex activity.",
+          "kind": "describe"
+        }
+      ],
+      "pairs": []
+    },
+    {
+      "id": 7,
+      "title": "Synthetic study: human attention and scalp EEG",
+      "year": 2021,
+      "authors": [
+        "Synthetic, Ibrahim"
+      ],
+      "journal": "",
+      "goal_type": "compare",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We compared visual attention and working memory in human participants.",
+          "kind": "compare"
+        }
+      ],
+      "pairs": []
+    },
+    {
+      "id": 6,
+      "title": "Synthetic study: thermal hysteresis and cocaine behavior",
+      "year": 2020,
+      "authors": [
+        "Synthetic, Helena"
+      ],
+      "journal": "",
+      "goal_type": "test",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We tested whether thermal hysteresis alters cocaine reward seeking.",
+          "kind": "test"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "thermal hysteresis",
+          "outcome": "cocaine reward seeking",
+          "kind": "test",
+          "evidence": "We tested whether thermal hysteresis alters cocaine reward seeking."
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Synthetic study: thermal hysteresis and stimulant intake",
+      "year": 2025,
+      "authors": [
+        "Synthetic, Helena"
+      ],
+      "journal": "",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of ambient temperature on stimulant intake.",
+          "kind": "effect"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "ambient temperature",
+          "outcome": "stimulant intake",
+          "kind": "effect",
+          "evidence": "We examined the effect of ambient temperature on stimulant intake."
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Synthetic study: dLight dopamine signals and MDMA",
+      "year": 2024,
+      "authors": [
+        "Synthetic, Farid"
+      ],
+      "journal": "",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "Our aim was to measure the effect of MDMA on dopamine signals and locomotor activity.",
+          "kind": "effect"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "mdma",
+          "outcome": "dopamine signals and locomotor activity",
+          "kind": "effect",
+          "evidence": "Our aim was to measure the effect of MDMA on dopamine signals and locomotor activity."
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Synthetic study: visual calcium transients during learning",
+      "year": 2023,
+      "authors": [
+        "Synthetic, Grace"
+      ],
+      "journal": "",
+      "goal_type": "test",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We investigated whether visual learning changes calcium transients in visual cortex.",
+          "kind": "test"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "visual learning",
+          "outcome": "calcium transients in visual cortex",
+          "kind": "test",
+          "evidence": "We investigated whether visual learning changes calcium transients in visual cortex."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Synthetic study: methamphetamine and tetrode reward recordings",
+      "year": 2022,
+      "authors": [
+        "Synthetic, Elena"
+      ],
+      "journal": "",
+      "goal_type": "effect",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We examined the effect of methamphetamine on reward seeking and neural activity.",
+          "kind": "effect"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "methamphetamine",
+          "outcome": "reward seeking and neural activity",
+          "kind": "effect",
+          "evidence": "We examined the effect of methamphetamine on reward seeking and neural activity."
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "title": "Synthetic study: cocaine and population spike dynamics",
+      "year": 2021,
+      "authors": [
+        "Synthetic, Elena",
+        "Synthetic, Farid"
+      ],
+      "journal": "",
+      "goal_type": "test",
+      "confidence": "high",
+      "aims": [
+        {
+          "sentence": "We tested whether cocaine alters dopamine signals and neural activity during reward seeking.",
+          "kind": "test"
+        }
+      ],
+      "pairs": [
+        {
+          "factor": "cocaine",
+          "outcome": "dopamine signals and neural activity",
+          "kind": "test",
+          "evidence": "We tested whether cocaine alters dopamine signals and neural activity during reward seeking."
+        }
+      ]
+    }
+  ],
+  "factors": [
+    {
+      "id": "ambient temperature",
+      "label": "ambient temperature",
+      "count": 4,
+      "items": [
+        5,
+        9,
+        10,
+        11
+      ]
+    },
+    {
+      "id": "cocaine",
+      "label": "cocaine",
+      "count": 1,
+      "items": [
+        1
+      ]
+    },
+    {
+      "id": "mdma",
+      "label": "mdma",
+      "count": 1,
+      "items": [
+        4
+      ]
+    },
+    {
+      "id": "methamphetamine",
+      "label": "methamphetamine",
+      "count": 1,
+      "items": [
+        2
+      ]
+    },
+    {
+      "id": "thermal hysteresis",
+      "label": "thermal hysteresis",
+      "count": 1,
+      "items": [
+        6
+      ]
+    },
+    {
+      "id": "visual learning",
+      "label": "visual learning",
+      "count": 1,
+      "items": [
+        3
+      ]
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "calcium transients in visual cortex",
+      "label": "calcium transients in visual cortex",
+      "count": 1,
+      "items": [
+        3
+      ]
+    },
+    {
+      "id": "cocaine reward seeking",
+      "label": "cocaine reward seeking",
+      "count": 1,
+      "items": [
+        6
+      ]
+    },
+    {
+      "id": "dopamine release",
+      "label": "dopamine release",
+      "count": 1,
+      "items": [
+        11
+      ]
+    },
+    {
+      "id": "dopamine signals and locomotor activity",
+      "label": "dopamine signals and locomotor activity",
+      "count": 1,
+      "items": [
+        4
+      ]
+    },
+    {
+      "id": "dopamine signals and neural activity",
+      "label": "dopamine signals and neural activity",
+      "count": 1,
+      "items": [
+        1
+      ]
+    },
+    {
+      "id": "locomotor activity",
+      "label": "locomotor activity",
+      "count": 1,
+      "items": [
+        10
+      ]
+    },
+    {
+      "id": "methamphetamine self-administration",
+      "label": "methamphetamine self-administration",
+      "count": 1,
+      "items": [
+        9
+      ]
+    },
+    {
+      "id": "reward seeking and neural activity",
+      "label": "reward seeking and neural activity",
+      "count": 1,
+      "items": [
+        2
+      ]
+    },
+    {
+      "id": "stimulant intake",
+      "label": "stimulant intake",
+      "count": 1,
+      "items": [
+        5
+      ]
+    }
+  ],
+  "links": [
+    {
+      "factor": "ambient temperature",
+      "outcome": "dopamine release",
+      "items": [
+        {
+          "id": 11,
+          "title": "Temperature effects on dopamine release",
+          "evidence": "Our aim was to measure the effect of ambient temperature on dopamine release."
+        }
+      ],
+      "kind": "effect"
+    },
+    {
+      "factor": "ambient temperature",
+      "outcome": "locomotor activity",
+      "items": [
+        {
+          "id": 10,
+          "title": "Ambient temperatures and locomotor activity",
+          "evidence": "We investigated whether ambient temperature alters locomotor activity."
+        }
+      ],
+      "kind": "test"
+    },
+    {
+      "factor": "ambient temperature",
+      "outcome": "methamphetamine self-administration",
+      "items": [
+        {
+          "id": 9,
+          "title": "Ambient temperature and stimulant self-administration",
+          "evidence": "We examined the effect of ambient temperature on methamphetamine self-administration."
+        }
+      ],
+      "kind": "effect"
+    },
+    {
+      "factor": "ambient temperature",
+      "outcome": "stimulant intake",
+      "items": [
+        {
+          "id": 5,
+          "title": "Synthetic study: thermal hysteresis and stimulant intake",
+          "evidence": "We examined the effect of ambient temperature on stimulant intake."
+        }
+      ],
+      "kind": "effect"
+    },
+    {
+      "factor": "cocaine",
+      "outcome": "dopamine signals and neural activity",
+      "items": [
+        {
+          "id": 1,
+          "title": "Synthetic study: cocaine and population spike dynamics",
+          "evidence": "We tested whether cocaine alters dopamine signals and neural activity during reward seeking."
+        }
+      ],
+      "kind": "test"
+    },
+    {
+      "factor": "mdma",
+      "outcome": "dopamine signals and locomotor activity",
+      "items": [
+        {
+          "id": 4,
+          "title": "Synthetic study: dLight dopamine signals and MDMA",
+          "evidence": "Our aim was to measure the effect of MDMA on dopamine signals and locomotor activity."
+        }
+      ],
+      "kind": "effect"
+    },
+    {
+      "factor": "methamphetamine",
+      "outcome": "reward seeking and neural activity",
+      "items": [
+        {
+          "id": 2,
+          "title": "Synthetic study: methamphetamine and tetrode reward recordings",
+          "evidence": "We examined the effect of methamphetamine on reward seeking and neural activity."
+        }
+      ],
+      "kind": "effect"
+    },
+    {
+      "factor": "thermal hysteresis",
+      "outcome": "cocaine reward seeking",
+      "items": [
+        {
+          "id": 6,
+          "title": "Synthetic study: thermal hysteresis and cocaine behavior",
+          "evidence": "We tested whether thermal hysteresis alters cocaine reward seeking."
+        }
+      ],
+      "kind": "test"
+    },
+    {
+      "factor": "visual learning",
+      "outcome": "calcium transients in visual cortex",
+      "items": [
+        {
+          "id": 3,
+          "title": "Synthetic study: visual calcium transients during learning",
+          "evidence": "We investigated whether visual learning changes calcium transients in visual cortex."
+        }
+      ],
+      "kind": "test"
+    }
+  ],
+  "goal_types": [
+    {
+      "kind": "effect",
+      "count": 5
+    },
+    {
+      "kind": "test",
+      "count": 4
+    },
+    {
+      "kind": "compare",
+      "count": 2
+    },
+    {
+      "kind": "describe",
+      "count": 1
+    }
+  ],
+  "insights": {
+    "single_paper_outcomes": [
+      "calcium transients in visual cortex",
+      "cocaine reward seeking",
+      "dopamine release",
+      "dopamine signals and locomotor activity",
+      "dopamine signals and neural activity",
+      "locomotor activity",
+      "methamphetamine self-administration",
+      "reward seeking and neural activity",
+      "stimulant intake"
+    ],
+    "no_aim_found": []
+  },
+  "limits": {
+    "scope_capped": false,
+    "max_items": 2000,
+    "no_abstract": 0,
+    "fulltext_scan_chars": 60000,
+    "interpretation": "Aims are extracted from metadata abstracts and the first 60000 indexed full-text characters. Later aims may be missed."
+  }
+}

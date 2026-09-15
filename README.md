@@ -47,18 +47,31 @@ and [the PDF identity benchmark](benchmarks/results/H_pdf_identity_notes.md).
 | Storage | Google Drive for desktop folder mode or Google Drive API mode (`drive.file` scope), verified automatic backups with staged restore |
 | Security | The local server rejects cross-site writes and DNS rebinding; only the app and browser extensions can modify the library |
 
-### Insight maps (v2.3)
+### Insight maps (v2.4)
 
 Open **Concepts**, **Words**, **Goals**, or **Methodology** in the sidebar. Opening a map from a
 collection inherits that collection; the scope bar also supports subcollections, authors, tags, and the
 whole library. Concepts show clustered co-occurrence, Words offers a cloud or ranked bars with
 subset distinctiveness, and Goals connects factors to outcomes with the authors' aim sentences.
 
+Words uses a stronger size range and stable colours for lexical concept groups. **Very rare** shows
+terms occurring exactly once, with gold underlining. **Unusual in this scope** shows repeated terms
+absent from available comparison text elsewhere in the library, with a disclosed log-odds threshold.
+These are local text patterns, not claims of scientific novelty. Click a legend category to filter it,
+or a term to inspect exact occurrence counts, paper counts and evidence. Rare candidates have their
+own list, independent of the frequent-term cap. [Definitions and limits](docs/word-map-semantics.md).
+
 Methodology arranges each paper across subjects/models, design, manipulations, measurements, and
 analyses, with a prevalence-sorted heatmap and reporting/gaps dashboard. Click any chip, cell, term,
 or goal link to inspect its source evidence and open its paper. Missing evidence means **not detected**,
 not that a procedure was never performed. Confidence describes the source of the evidence, not a
 probability that the claim is correct. Layouts and extraction run locally without a new runtime dependency.
+
+Detailed chips now separate **Drugs & compounds**, **Recorded signals**, and **Techniques & tools**.
+The vocabulary includes cocaine, amphetamine, methamphetamine and MDMA; spikes, LFP, calcium,
+voltage and neurotransmitter signals; Neuropixels, tetrodes, patch-clamp, two-photon microscopy,
+fiber photometry and specific optical sensors. Instruments do not automatically imply a measured
+signal, and drug names require procedural context. [Taxonomy and sources](docs/method-detail-taxonomy.md).
 
 **Export** saves the displayed map as PNG or its data as CSV/JSON. The methodology CSV contains every
 analysed paper and method (1 = detected, 0 = not detected); JSON retains evidence and reporting details.
@@ -71,7 +84,7 @@ Validation: `pytest tests -q`; `tools/insight_fixture.py` creates an isolated sy
 Benchmark I (`benchmarks/benchmark_methodology.py`) compares the initial and current detector on five
 available real papers: precision 75.6% to 100%, recall 83.1% to 74.6%, for the fixed initial taxonomy.
 These are agent-audited development annotations, pending independent human review, not general accuracy
-estimates. The expanded 100-method taxonomy includes additional methods that are explicitly unscored.
+estimates. The expanded 215-entry taxonomy includes additional details that are explicitly unscored.
 CSV decisions, annotation evidence, and PDF/PNG/SVG figures make that tradeoff inspectable.
 
 The [screenshot audit](docs/insight-audit/README.md) compares laptop and desktop layouts in both

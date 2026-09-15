@@ -334,7 +334,7 @@
       <div class="insight-scope-bar">
         <label>Scope <select aria-label="Insight scope" x-model="insight.scope" @change="insight.focus=''; loadInsight()"><template x-for="option in insightScopeOptions()" :key="option.value"><option :value="option.value" x-text="option.label"></option></template></select></label>
         <label class="insight-sub-toggle" x-show="insight.scope.startsWith('collection:')"><input type="checkbox" x-model="insight.includeSub" @change="loadInsight()"> Subcollections</label>
-        <span class="insight-count" x-text="(insight.data.scope?.items || 0) + ' papers'"></span>
+        <span class="insight-count" x-text="paperCount(insight.data.scope?.items || 0)"></span>
         <button class="insight-reset" @click="resetInsightScope()">Reset</button>
       </div>
       <div class="insight-scroll">
@@ -353,9 +353,16 @@
             <div class="insight-segment"><button @click="insight.view='cloud'; renderInsight()" :class="{'active':insight.view==='cloud'}">Cloud</button><button @click="insight.view='bars'; renderInsight()" :class="{'active':insight.view==='bars'}">Ranked bars</button></div>
             <select aria-label="Word source" x-model="insight.source" @change="loadInsight()"><option value="abstract">Abstracts</option><option value="fulltext">Full text</option></select>
             <select aria-label="Word terms" x-model="insight.terms" @change="renderInsight()"><option value="all">All terms</option><option value="phrases">Phrases</option><option value="words">Single words</option></select>
-            <select aria-label="Word metric" x-model="insight.metric" @change="renderInsight()"><option value="count">Frequency</option><option value="distinct" :disabled="!insight.data.scope?.comparison_available">Distinctiveness</option></select>
-            <span x-show="insight.metric==='distinct'">Among frequent terms, compared with the rest of the library. Negative = less distinctive.</span>
+            <select aria-label="Word group" :value="insight.wordPool" @change="setInsightWordPool($event.target.value)"><option value="frequent">Frequent terms</option><option value="rare">Very rare: once only</option><option value="unusual" :disabled="!insight.data.scope?.comparison_available">Unusual in this scope</option></select>
+            <select aria-label="Word metric" x-model="insight.metric" @change="renderInsight()"><option value="count">Frequency</option><option value="distinct" :disabled="insight.wordPool==='rare' || !insight.data.scope?.comparison_available">Distinctiveness</option></select>
+            <span x-show="insight.metric==='distinct'">Compared with the rest of the library. Negative = less distinctive.</span>
           </div>
+          <div class="insight-word-key" x-show="insight.kind==='words'" aria-label="Word concept colours">
+            <template x-for="category in insightWordLegend()" :key="category.id"><button @click="insight.wordConcept=insight.wordConcept===category.id ? '' : category.id; renderInsight()" :class="{'active':insight.wordConcept===category.id}" :style="'--word-colour:' + wordColour({concept_id:category.id})"><i></i><span x-text="category.label"></span></button></template>
+            <span class="word-rarity-key" :style="'color:' + wordColour({rare:true})">◆ Once only</span><span class="word-rarity-key" :style="'color:' + wordColour({unusual:true})" x-show="insight.data.scope?.comparison_available">● Unusual here</span>
+            <button x-show="insight.wordConcept" @click="insight.wordConcept=''; renderInsight()">All concepts</button>
+          </div>
+          <p class="insight-word-explanation" x-show="insight.kind==='words'">Concept colours group related terms. <span x-show="insight.wordPool==='frequent'" x-text="'Size emphasises ' + (insight.metric==='distinct' ? 'positive distinctiveness' : 'frequency') + '; click any term for its counts and evidence.'"></span><span x-show="insight.wordPool==='rare'">Gold and underlining mark exactly one occurrence in the selected text. Equal counts have equal sizes.</span><span x-show="insight.wordPool==='unusual'">Pink marks terms occurring at least twice here, absent from available comparison text elsewhere in the library, with log-odds ≥ 1. This does not establish scientific novelty.</span></p>
           <div class="insight-tools" x-show="insight.kind==='methods'">
             <div class="insight-segment"><button @click="insight.methodView='pipeline'; renderInsight()" :class="{'active':insight.methodView==='pipeline'}">Paper pipelines</button><button @click="insight.methodView='matrix'; renderInsight()" :class="{'active':insight.methodView==='matrix'}">Methods heatmap</button></div>
             <span>Click a chip or cell to inspect its evidence.</span>
@@ -366,6 +373,10 @@
             <svg id="insight-svg" xmlns="http://www.w3.org/2000/svg" :view-box.camel="'0 0 ' + insight.width + ' ' + insight.height" :style="insightChartStyle()" role="group" :aria-label="insightTitle() + ' interactive map'" @click="insightActivate($event)" @keydown.enter.prevent="insightActivate($event)" @keydown.space.prevent="insightActivate($event)" @mouseover="insightHover($event)" @mouseleave="insightHover($event,true)"><g x-html="insight.svg"></g></svg>
           </div>
           <div class="insight-pagination" x-show="insight.kind==='methods' &amp;&amp; insightPageCount()>1"><button @click="insightPage(-1)" :disabled="insight.page===0">Previous papers</button><span x-text="'Page ' + (insight.page+1) + ' of ' + insightPageCount()"></span><button @click="insightPage(1)" :disabled="insight.page+1>=insightPageCount()">Next papers</button></div>
+          <section class="insight-rare-discoveries" x-show="insight.kind==='words' &amp;&amp; insight.wordPool==='frequent' &amp;&amp; insightRareSuggestions().length">
+            <div><h2>Rare terms to explore</h2><p>Each appears exactly once in this scope and text source. A rare mention may be useful, incidental or a text-extraction error.</p></div>
+            <div class="insight-rare-chips"><template x-for="word in insightRareSuggestions()" :key="word.word"><button @click="inspectWord(word)" :style="'--word-colour:' + wordColour(word)"><span>◆</span><span x-text="word.word"></span><small>1×</small></button></template><button @click="setInsightWordPool('rare')">Explore rare terms →</button></div>
+          </section>
           <section class="insight-diagnostics" x-show="insight.kind==='methods'">
             <div class="insight-diagnostics-title"><div><div class="rail-label">Evidence audit</div><h2 class="font-serif">Gaps &amp; rigour</h2></div><span x-text="(insight.data.scope?.items || 0) + ' papers assessed'"></span></div>
             <p class="insight-caveat">Counts describe the available text, not a quality score. A missing statement does not prove a procedure was omitted. The five stages organise methods; they do not reconstruct the experiment's timeline.</p>
@@ -590,7 +601,7 @@
     <div class="insight-detail p-5 space-y-4 overflow-y-auto">
       <div class="flex items-center justify-between"><div class="rail-label">Evidence explorer</div><button @click="insight.selected=null" aria-label="Close evidence">×</button></div>
       <h2 class="font-serif text-2xl leading-tight" x-text="insight.selected.label"></h2>
-      <p class="text-xs text-ink-500" x-text="insight.selected.confidence || 'Trace this pattern to its source papers.'"></p>
+      <p class="text-xs text-ink-500" x-text="insight.selected.description || insight.selected.confidence || 'Trace this pattern to its source papers.'"></p>
       <button x-show="insight.kind==='concepts'" @click="focusInsight()" class="action-primary h-9 px-3 text-sm">Focus on this concept</button>
       <div class="insight-related" x-show="insight.selected.related?.length"><div class="rail-label">Related concepts</div><template x-for="related in (insight.selected.related || [])" :key="related.label"><button @click="insight.focus=related.label; loadInsight()"><span x-text="related.label"></span><b x-text="related.weight"></b></button></template></div>
       <div><div class="rail-label mb-2">Source evidence</div><template x-for="(e,i) in insightEvidence(insight.selected)" :key="i"><blockquote class="insight-quote"><span x-text="e.source || 'Available text'"></span><p x-text="e.sentence || e.evidence"></p><button x-show="e.id" @click="openInsightPaper({id:e.id})">Open source paper ↗</button></blockquote></template><p class="text-xs text-ink-500" x-show="!insightEvidence(insight.selected).length">No extracted evidence sentence available. Inspect the source papers.</p></div>

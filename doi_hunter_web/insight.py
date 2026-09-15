@@ -400,7 +400,9 @@ def concepts(collection_id: Optional[int] = None, author: Optional[str] = None, 
 
 def words(collection_id: Optional[int] = None, author: Optional[str] = None, tag: Optional[str] = None,
           source: str = "abstract", limit: int = MAX_WORDS, include_sub: bool = True) -> dict:
-    """Word map (unigrams + bigrams) with per-word items and distinctiveness against the rest of the library."""
+    """Map source terms with lexical themes and separate frequent, rare and local-outlier lists."""
+    from .word_concepts import categories, classify_term, semantics, term_flags
+
     items = scope_items(collection_id, author, tag, include_sub)
     use_full = source == "fulltext"
     texts = _texts(items, with_fulltext=use_full)
@@ -415,45 +417,72 @@ def words(collection_id: Optional[int] = None, author: Optional[str] = None, tag
 
     total: Counter = Counter()
     per_word_items: dict[str, set[int]] = defaultdict(set)
-    per_item_counts: dict[int, Counter] = {}
     for it in items:
         c = _phrases(text_of(it["id"]), max_n=2)
-        per_item_counts[it["id"]] = c
         total.update(c)
         for w in c:
             per_word_items[w].add(it["id"])
     # drop a bigram's unigrams when the bigram carries most of their occurrences? keep both; UI can filter by length.
     scoped_ids = {it["id"] for it in items}
     rest_counts: Counter = Counter()
-    subset = collection_id is not None or author or tag
+    rest_word_items: Counter = Counter()
+    others = []
+    comparison_capped = False
+    subset = bool(collection_id is not None or author or tag)
     if subset:
-        others = [it for it in catalog.query_items(limit=MAX_ITEMS, compact=False) if it["id"] not in scoped_ids]
+        comparison_candidates = catalog.query_items(limit=MAX_ITEMS, compact=False)
+        comparison_capped = len(comparison_candidates) >= MAX_ITEMS
+        others = [it for it in comparison_candidates if it["id"] not in scoped_ids]
         texts.update(_texts(others, with_fulltext=use_full))
         for o in others:
-            rest_counts.update(_phrases(text_of(o["id"]), max_n=2))
+            counts = _phrases(text_of(o["id"]), max_n=2)
+            rest_counts.update(counts)
+            rest_word_items.update(counts.keys())
     n_scope = max(1, sum(total.values()))
     n_rest = max(1, sum(rest_counts.values()))
-    out = []
-    for w, c in total.most_common(limit * 2):
-        if c < 2 and len(items) > 1:
-            continue
+    comparison_available = bool(subset and rest_counts)
+    scores = {}
+    flags = {}
+    for w, c in total.items():
         # Smoothed log odds of term occurrence versus every other candidate term.
         other_c = rest_counts.get(w, 0)
         distinct = (math.log((c + 0.5) / (n_scope - c + 0.5)) -
-                    math.log((other_c + 0.5) / (n_rest - other_c + 0.5))) if subset and rest_counts else 0.0
-        out.append({"word": w, "count": c, "items": sorted(per_word_items[w]), "n_items": len(per_word_items[w]),
+                    math.log((other_c + 0.5) / (n_rest - other_c + 0.5))) if comparison_available else 0.0
+        scores[w] = distinct
+        flags[w] = term_flags(c, len(per_word_items[w]), other_c, rest_word_items[w], distinct, comparison_available)
+
+    # Select each view from the entire vocabulary. In particular, singleton terms
+    # must survive independently of the frequent list's cap rather than disappearing
+    # before the user chooses the rare-terms view.
+    ranked = sorted(total, key=lambda word: (-total[word], word))
+    frequent = [word for word in ranked if total[word] >= 2 or len(items) == 1]
+    # Single words first: an incidental one-off word pair must not crowd a genuinely
+    # single-occurrence word out of the rare list. Ties are alphabetical and stable.
+    rare = sorted((word for word in total if flags[word]["rare"]), key=lambda word: (" " in word, word))
+    unusual = sorted((word for word in total if flags[word]["unusual"]),
+                     key=lambda word: (-scores[word], -len(per_word_items[word]), -total[word], word))
+    payloads = {}
+    for w in dict.fromkeys(frequent[:limit] + rare[:limit] + unusual[:limit]):
+        payloads[w] = {"word": w, "count": total[w], "items": sorted(per_word_items[w]), "n_items": len(per_word_items[w]),
                     "evidence": [_term_evidence(iid, w, texts[iid], source="fulltext" if use_full else "abstract")
                                  for iid in sorted(per_word_items[w])],
-                    "distinct": round(distinct, 2), "bigram": " " in w})
-        if len(out) >= limit:
-            break
+                    "distinct": round(scores[w], 2), "bigram": " " in w,
+                    **classify_term(w), **flags[w]}
     briefs = {it["id"]: _item_brief(it) for it in items}
     return {
         "scope": {"label": scope_label(collection_id, author, tag), "items": len(items), "collection_id": collection_id,
                   "author": author, "tag": tag, "source": "fulltext" if use_full else "abstract", "include_sub": include_sub,
-                  "comparison_available": bool(subset and rest_counts)},
-        "words": out, "items": briefs,
+                  "comparison_available": comparison_available, "comparison_items": len(others),
+                  "comparison_items_with_text": sum(bool(text_of(it["id"]).strip()) for it in others)},
+        "words": [payloads[w] for w in frequent[:limit]],
+        "rare_words": [payloads[w] for w in rare[:limit]],
+        "outlier_words": [payloads[w] for w in unusual[:limit]],
+        "items": briefs, "concept_categories": categories(), "semantics": semantics(),
+        "candidate_counts": {"frequent": len(frequent), "rare": len(rare), "unusual": len(unusual), "total": len(total)},
         "limits": {"scope_capped": len(items) >= MAX_ITEMS, "max_items": MAX_ITEMS,
+                   "comparison_capped": comparison_capped,
+                   "list_limit": limit, "frequent_capped": len(frequent) > limit,
+                   "rare_capped": len(rare) > limit, "outlier_capped": len(unusual) > limit,
                    "no_fulltext": sum(1 for it in items if use_full and not texts[it["id"]]["fulltext"]),
                    "no_abstract": sum(1 for it in items if not texts[it["id"]]["abstract"].strip())},
     }
@@ -587,17 +616,24 @@ _NULL_RESULT_RX = re.compile(
     r"(?:differences?|effects?|changes?|associations?|correlations?|evidence of an? effect)\b", re.I)
 
 
-def _sentence_at(text: str, start: int, end: int) -> str:
-    """Find complete evidence without breaking on decimal dose values."""
-    line_start = text.rfind("\n", 0, start) + 1
-    line_end = text.find("\n", end)
-    line_end = len(text) if line_end < 0 else line_end
-    line = text[line_start:line_end]
-    for sentence in sentences(line):
-        pos = text.find(sentence, line_start, line_end)
-        if pos <= start < pos + len(sentence):
-            return sentence
-    return line.strip()
+def _sentence_spans(text: str) -> list[tuple[int, int]]:
+    """Keep raw offsets while treating wrapped PDF lines as sentence whitespace."""
+    spans, start = [], 0
+    for boundary in _SENT_SPLIT_RX.finditer(text):
+        if _ABBREV_RX.search(text[max(start, boundary.start() - 16):boundary.start()]):
+            continue
+        spans.append((start, boundary.start()))
+        start = boundary.end()
+    spans.append((start, len(text)))
+    return spans
+
+
+def _sentence_at(text: str, start: int, end: int, spans: Optional[list[tuple[int, int]]] = None) -> str:
+    """Find full evidence across PDF line wraps, retaining decimals and qualifiers."""
+    for left, right in spans if spans is not None else _sentence_spans(text):
+        if left <= start < right:
+            return re.sub(r"\s+", " ", text[left:right]).strip()
+    return re.sub(r"\s+", " ", text[start:end]).strip()
 
 
 def _negated(text: str, hit: re.Match) -> bool:
@@ -615,9 +651,10 @@ def _negated(text: str, hit: re.Match) -> bool:
     before = _NULL_RESULT_RX.sub("", before)
     after = text[hit.end():hit.end() + 65]
     return bool(_NEGATION_RX.search(before) or re.match(
-        r"\s+(?:was|were|is|are)\s+(?:not|never)\s+"
+        r"\s+(?:(?:was|were|is|are)\s+)?(?:not|never)\s+"
         r"(?:(?:actually|routinely|systematically)\s+)?(?:used|performed|conducted|employed|applied|included|"
-        r"recruited|required|obtained|sought|provided|reported|implemented|undertaken|available|carried out)\b|"
+        r"recruited|required|obtained|sought|provided|reported|recorded|measured|monitored|imaged|implanted|inserted|"
+        r"implemented|undertaken|available|carried out)\b|"
         r"\s+(?:was|were)\s+(?:omitted|excluded)\b", after, re.I))
 
 
@@ -630,8 +667,13 @@ def _detect_methods(text: str, confidence: str, seen: dict[str, dict], scale: in
     """
     if not text:
         return
+    from .method_details import detail_has_context
+
+    spans = _sentence_spans(text)
     for m in METHODS:
-        hits = [hit for hit in m["regex"].finditer(text) if not _negated(text, hit)]
+        hits = [hit for hit in m["regex"].finditer(text) if not _negated(text, hit)
+                and (not m.get("context_required") or detail_has_context(
+                    _sentence_at(text, hit.start(), hit.end(), spans), hit.group(0), m["category"], confidence))]
         count = len(hits)
         if count < min_count:
             continue
@@ -639,15 +681,13 @@ def _detect_methods(text: str, confidence: str, seen: dict[str, dict], scale: in
         if not hit:
             continue
         start = hit.start()
-        s0 = max(text.rfind(".", 0, start), text.rfind("\n", 0, start)) + 1
-        s1_candidates = [p for p in (text.find(".", hit.end()), text.find("\n", hit.end())) if p != -1]
-        s1 = min(s1_candidates) + 1 if s1_candidates else min(len(text), hit.end() + 200)
-        sentence = _sentence_at(text, start, hit.end())
+        sentence = _sentence_at(text, start, hit.end(), spans)
         sequence = _SEQUENCE_RX.search(sentence)
         entry = seen.get(m["id"])
         rank = {"high": 3, "medium": 2, "low": 1}
         if entry is None or rank[confidence] > rank[entry["confidence"]]:
             seen[m["id"]] = {"id": m["id"], "label": m["label"], "stage": m["stage"], "confidence": confidence,
+                             "category": m.get("category", m["stage"]),
                              "count": count, "position": round(start / max(1, scale), 4), "evidence": _evidence(sentence),
                              "source": {"high": "methods section", "medium": "full text", "low": "abstract"}[confidence],
                              "sequence_cue": sequence.group(0) if sequence else "",
@@ -659,13 +699,14 @@ def _detect_methods(text: str, confidence: str, seen: dict[str, dict], scale: in
 def _reporting(text: str) -> list[dict]:
     """Separate detected reporting from explicit absence and unavailable evidence."""
     out = []
+    spans = _sentence_spans(text or "")
     for chk in REPORTING_CHECKS:
         candidates = list(chk["regex"].finditer(text or ""))
         hit = next((h for h in candidates if not _negated(text, h)), None)
         evidence_hit = hit or (candidates[0] if candidates else None)
         ev = ""
         if evidence_hit:
-            ev = _sentence_at(text, evidence_hit.start(), evidence_hit.end())
+            ev = _sentence_at(text, evidence_hit.start(), evidence_hit.end(), spans)
         out.append({"id": chk["id"], "label": chk["label"], "found": bool(hit), "evidence": ev,
                     "status": "detected" if hit else ("explicitly_absent" if candidates else
                               ("not_detected" if (text or "").strip() else "unavailable"))})
@@ -713,9 +754,11 @@ def methods(collection_id: Optional[int] = None, author: Optional[str] = None, t
 
     n = len(items)
     assessed = sum(1 for p in papers if p["source"] != "none")
+    taxonomy = {m["id"]: m for m in METHODS}
     matrix_methods = sorted(method_items.items(), key=lambda kv: (-len(kv[1]), kv[0]))
-    matrix = [{"id": mid, "label": next(m["label"] for m in METHODS if m["id"] == mid),
-               "stage": next(m["stage"] for m in METHODS if m["id"] == mid), "items": ids, "share": round(len(ids) / max(1, n), 2)}
+    matrix = [{"id": mid, "label": taxonomy[mid]["label"], "stage": taxonomy[mid]["stage"],
+               "category": taxonomy[mid].get("category", taxonomy[mid]["stage"]),
+               "items": ids, "share": round(len(ids) / max(1, n), 2)}
               for mid, ids in matrix_methods]
     rare = [m for m in matrix if n >= 3 and len(m["items"]) == 1]
     common = [m for m in matrix if n >= 2 and len(m["items"]) == n]

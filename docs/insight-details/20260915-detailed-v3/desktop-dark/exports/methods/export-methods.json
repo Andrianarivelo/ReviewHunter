@@ -1,0 +1,4939 @@
+{
+  "scope": {
+    "label": "Whole library",
+    "items": 12,
+    "collection_id": null,
+    "author": null,
+    "tag": null,
+    "include_sub": true
+  },
+  "stages": [
+    {
+      "id": "subjects",
+      "label": "Subjects & models",
+      "items": 12
+    },
+    {
+      "id": "design",
+      "label": "Study design",
+      "items": 5
+    },
+    {
+      "id": "manipulation",
+      "label": "Manipulations",
+      "items": 10
+    },
+    {
+      "id": "measurement",
+      "label": "Measurements",
+      "items": 11
+    },
+    {
+      "id": "analysis",
+      "label": "Analyses",
+      "items": 12
+    }
+  ],
+  "papers": [
+    {
+      "id": 12,
+      "title": "Human working memory and visual attention",
+      "year": 2020,
+      "authors": [
+        "Example, Dana"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "human",
+          "label": "Human participants",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 2,
+          "position": 0,
+          "evidence": "Human participants (n = 40) provided informed consent.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Human participants"
+        },
+        {
+          "id": "task",
+          "label": "Cognitive / behavioural task",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.4842,
+          "evidence": "Participants completed a working memory task.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "working memory task"
+        },
+        {
+          "id": "signal_eeg",
+          "label": "EEG signals",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.193,
+          "evidence": "Electroencephalography recorded event-related potentials.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Electroencephalography"
+        },
+        {
+          "id": "eeg",
+          "label": "EEG / MEG",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 1,
+          "position": 0.3053,
+          "evidence": "Electroencephalography recorded event-related potentials.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "event-related potentials"
+        },
+        {
+          "id": "mixed",
+          "label": "Mixed / hierarchical models",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.8561,
+          "evidence": "A mixed effects model assessed performance.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "mixed effects model"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "human",
+              "label": "Human participants",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 2,
+              "position": 0,
+              "evidence": "Human participants (n = 40) provided informed consent.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Human participants"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": []
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "task",
+              "label": "Cognitive / behavioural task",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.4842,
+              "evidence": "Participants completed a working memory task.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "working memory task"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "signal_eeg",
+              "label": "EEG signals",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.193,
+              "evidence": "Electroencephalography recorded event-related potentials.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Electroencephalography"
+            },
+            {
+              "id": "eeg",
+              "label": "EEG / MEG",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 1,
+              "position": 0.3053,
+              "evidence": "Electroencephalography recorded event-related potentials.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "event-related potentials"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "mixed",
+              "label": "Mixed / hierarchical models",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.8561,
+              "evidence": "A mixed effects model assessed performance.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "mixed effects model"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Human participants (n = 40) provided informed consent.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "A mixed effects model assessed performance.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": true,
+          "evidence": "A power analysis determined sample size.",
+          "status": "detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": true,
+          "evidence": "Data are available in an open repository.",
+          "status": "detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        }
+      ],
+      "missing_stages": [
+        "Study design"
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Temperature effects on dopamine release",
+      "year": 2025,
+      "authors": [
+        "Example, Carol"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "mouse",
+          "label": "Mice",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 2,
+          "position": 0.0147,
+          "evidence": "Male mice (n = 18) were assigned to amphetamine treatment.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "mice"
+        },
+        {
+          "id": "environment",
+          "label": "Environmental manipulation",
+          "stage": "manipulation",
+          "confidence": "low",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.1869,
+          "evidence": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+          "source": "abstract",
+          "sequence_cue": "",
+          "match": "ambient temperature"
+        },
+        {
+          "id": "drug_amphetamine",
+          "label": "Amphetamine",
+          "stage": "manipulation",
+          "confidence": "low",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.4646,
+          "evidence": "Mice received amphetamine.",
+          "source": "abstract",
+          "sequence_cue": "",
+          "match": "amphetamine"
+        },
+        {
+          "id": "training",
+          "label": "Behavioural training / conditioning",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.5806,
+          "evidence": "First, mice were trained in an operant chamber.",
+          "source": "methods section",
+          "sequence_cue": "First",
+          "match": "operant"
+        },
+        {
+          "id": "microdialysis",
+          "label": "Microdialysis / voltammetry",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 1,
+          "position": 0.173,
+          "evidence": "Microdialysis probes measured dopamine release.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Microdialysis"
+        },
+        {
+          "id": "tool_microdialysis",
+          "label": "Microdialysis",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.173,
+          "evidence": "Microdialysis probes measured dopamine release.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Microdialysis"
+        },
+        {
+          "id": "signal_dopamine",
+          "label": "Dopamine dynamics",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.261,
+          "evidence": "Microdialysis probes measured dopamine release.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "dopamine release"
+        },
+        {
+          "id": "tool_hplc",
+          "label": "HPLC",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.3138,
+          "evidence": "High performance liquid chromatography quantified dopamine.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "High performance liquid chromatography"
+        },
+        {
+          "id": "regression",
+          "label": "Regression / correlation",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.8328,
+          "evidence": "Linear regression related temperature to dopamine concentration.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "regression"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "mouse",
+              "label": "Mice",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 2,
+              "position": 0.0147,
+              "evidence": "Male mice (n = 18) were assigned to amphetamine treatment.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "mice"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": []
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "environment",
+              "label": "Environmental manipulation",
+              "stage": "manipulation",
+              "confidence": "low",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.1869,
+              "evidence": "Our aim was to measure the effect of ambient temperature on dopamine release.",
+              "source": "abstract",
+              "sequence_cue": "",
+              "match": "ambient temperature"
+            },
+            {
+              "id": "drug_amphetamine",
+              "label": "Amphetamine",
+              "stage": "manipulation",
+              "confidence": "low",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.4646,
+              "evidence": "Mice received amphetamine.",
+              "source": "abstract",
+              "sequence_cue": "",
+              "match": "amphetamine"
+            },
+            {
+              "id": "training",
+              "label": "Behavioural training / conditioning",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.5806,
+              "evidence": "First, mice were trained in an operant chamber.",
+              "source": "methods section",
+              "sequence_cue": "First",
+              "match": "operant"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "microdialysis",
+              "label": "Microdialysis / voltammetry",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 1,
+              "position": 0.173,
+              "evidence": "Microdialysis probes measured dopamine release.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Microdialysis"
+            },
+            {
+              "id": "tool_microdialysis",
+              "label": "Microdialysis",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.173,
+              "evidence": "Microdialysis probes measured dopamine release.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Microdialysis"
+            },
+            {
+              "id": "signal_dopamine",
+              "label": "Dopamine dynamics",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.261,
+              "evidence": "Microdialysis probes measured dopamine release.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "dopamine release"
+            },
+            {
+              "id": "tool_hplc",
+              "label": "HPLC",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.3138,
+              "evidence": "High performance liquid chromatography quantified dopamine.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "High performance liquid chromatography"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "regression",
+              "label": "Regression / correlation",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.8328,
+              "evidence": "Linear regression related temperature to dopamine concentration.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "regression"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Materials and methods Male mice (n = 18) were assigned to amphetamine treatment.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Male mice (n = 18) were assigned to amphetamine treatment.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "Linear regression related temperature to dopamine concentration.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        }
+      ],
+      "missing_stages": [
+        "Study design"
+      ]
+    },
+    {
+      "id": 10,
+      "title": "Ambient temperatures and locomotor activity",
+      "year": 2024,
+      "authors": [
+        "Example, Alice",
+        "Example, Bob"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "rat",
+          "label": "Rats",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 2,
+          "position": 0.0584,
+          "evidence": "Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Sprague-Dawley"
+        },
+        {
+          "id": "longitudinal",
+          "label": "Longitudinal / repeated sessions",
+          "stage": "design",
+          "confidence": "high",
+          "category": "design",
+          "count": 1,
+          "position": 0.8321,
+          "evidence": "Repeated measures ANOVA was used for analysis.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Repeated measures"
+        },
+        {
+          "id": "environment",
+          "label": "Environmental manipulation",
+          "stage": "manipulation",
+          "confidence": "low",
+          "category": "interventions",
+          "count": 2,
+          "position": 0.1326,
+          "evidence": "We investigated whether ambient temperature alters locomotor activity.",
+          "source": "abstract",
+          "sequence_cue": "",
+          "match": "ambient temperature"
+        },
+        {
+          "id": "drug_cocaine",
+          "label": "Cocaine",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.1971,
+          "evidence": "Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "cocaine"
+        },
+        {
+          "id": "drug_systemic",
+          "label": "Systemic drug administration",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.2263,
+          "evidence": "Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "intraperitoneally"
+        },
+        {
+          "id": "locomotor",
+          "label": "Locomotor activity",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.3394,
+          "evidence": "Locomotor activity was measured in an open field.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Locomotor activity"
+        },
+        {
+          "id": "temperature",
+          "label": "Body temperature / thermoregulation",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.5219,
+          "evidence": "Core temperature was recorded by telemetry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Core temperature"
+        },
+        {
+          "id": "anova",
+          "label": "ANOVA",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.8978,
+          "evidence": "Repeated measures ANOVA was used for analysis.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "ANOVA"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "rat",
+              "label": "Rats",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 2,
+              "position": 0.0584,
+              "evidence": "Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Sprague-Dawley"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": [
+            {
+              "id": "longitudinal",
+              "label": "Longitudinal / repeated sessions",
+              "stage": "design",
+              "confidence": "high",
+              "category": "design",
+              "count": 1,
+              "position": 0.8321,
+              "evidence": "Repeated measures ANOVA was used for analysis.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Repeated measures"
+            }
+          ]
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "environment",
+              "label": "Environmental manipulation",
+              "stage": "manipulation",
+              "confidence": "low",
+              "category": "interventions",
+              "count": 2,
+              "position": 0.1326,
+              "evidence": "We investigated whether ambient temperature alters locomotor activity.",
+              "source": "abstract",
+              "sequence_cue": "",
+              "match": "ambient temperature"
+            },
+            {
+              "id": "drug_cocaine",
+              "label": "Cocaine",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.1971,
+              "evidence": "Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "cocaine"
+            },
+            {
+              "id": "drug_systemic",
+              "label": "Systemic drug administration",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.2263,
+              "evidence": "Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "intraperitoneally"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "locomotor",
+              "label": "Locomotor activity",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.3394,
+              "evidence": "Locomotor activity was measured in an open field.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Locomotor activity"
+            },
+            {
+              "id": "temperature",
+              "label": "Body temperature / thermoregulation",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.5219,
+              "evidence": "Core temperature was recorded by telemetry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Core temperature"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "anova",
+              "label": "ANOVA",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.8978,
+              "evidence": "Repeated measures ANOVA was used for analysis.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "ANOVA"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Male and female rats received cocaine.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": true,
+          "evidence": "Male and female rats received cocaine.",
+          "status": "detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": true,
+          "evidence": "Investigators were blinded to treatment.",
+          "status": "detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "Repeated measures ANOVA was used for analysis.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": true,
+          "evidence": "Materials and methods Male and female Sprague-Dawley rats (n = 32) received cocaine intraperitoneally at 10 mg/kg.",
+          "status": "detected"
+        }
+      ],
+      "missing_stages": []
+    },
+    {
+      "id": 9,
+      "title": "Ambient temperature and stimulant self-administration",
+      "year": 2023,
+      "authors": [
+        "Example, Alice"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "rat",
+          "label": "Rats",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 3,
+          "position": 0.0145,
+          "evidence": "Male Wistar rats (n = 24) were randomly assigned to treatment groups.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Wistar"
+        },
+        {
+          "id": "environment",
+          "label": "Environmental manipulation",
+          "stage": "manipulation",
+          "confidence": "low",
+          "category": "interventions",
+          "count": 2,
+          "position": 0.1198,
+          "evidence": "We examined the effect of ambient temperature on methamphetamine self-administration.",
+          "source": "abstract",
+          "sequence_cue": "",
+          "match": "ambient temperature"
+        },
+        {
+          "id": "drug_methamphetamine",
+          "label": "Methamphetamine",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.2023,
+          "evidence": "Methamphetamine was administered intravenously at 0.1 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Methamphetamine"
+        },
+        {
+          "id": "drug_iv",
+          "label": "Intravenous drug delivery",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.2977,
+          "evidence": "Methamphetamine was administered intravenously at 0.1 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "intravenously"
+        },
+        {
+          "id": "training",
+          "label": "Behavioural training / conditioning",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.422,
+          "evidence": "Rats performed operant self-administration under a progressive ratio schedule.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "operant"
+        },
+        {
+          "id": "selfadmin",
+          "label": "Self-administration",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.4451,
+          "evidence": "Rats performed operant self-administration under a progressive ratio schedule.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "self-administration"
+        },
+        {
+          "id": "temperature",
+          "label": "Body temperature / thermoregulation",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.6069,
+          "evidence": "Body temperature was measured by telemetry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Body temperature"
+        },
+        {
+          "id": "anova",
+          "label": "ANOVA",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.763,
+          "evidence": "A two-way ANOVA compared temperature groups.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "ANOVA"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "rat",
+              "label": "Rats",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 3,
+              "position": 0.0145,
+              "evidence": "Male Wistar rats (n = 24) were randomly assigned to treatment groups.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Wistar"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": []
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "environment",
+              "label": "Environmental manipulation",
+              "stage": "manipulation",
+              "confidence": "low",
+              "category": "interventions",
+              "count": 2,
+              "position": 0.1198,
+              "evidence": "We examined the effect of ambient temperature on methamphetamine self-administration.",
+              "source": "abstract",
+              "sequence_cue": "",
+              "match": "ambient temperature"
+            },
+            {
+              "id": "drug_methamphetamine",
+              "label": "Methamphetamine",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.2023,
+              "evidence": "Methamphetamine was administered intravenously at 0.1 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Methamphetamine"
+            },
+            {
+              "id": "drug_iv",
+              "label": "Intravenous drug delivery",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.2977,
+              "evidence": "Methamphetamine was administered intravenously at 0.1 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "intravenously"
+            },
+            {
+              "id": "training",
+              "label": "Behavioural training / conditioning",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.422,
+              "evidence": "Rats performed operant self-administration under a progressive ratio schedule.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "operant"
+            },
+            {
+              "id": "selfadmin",
+              "label": "Self-administration",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.4451,
+              "evidence": "Rats performed operant self-administration under a progressive ratio schedule.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "self-administration"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "temperature",
+              "label": "Body temperature / thermoregulation",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.6069,
+              "evidence": "Body temperature was measured by telemetry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Body temperature"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "anova",
+              "label": "ANOVA",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.763,
+              "evidence": "A two-way ANOVA compared temperature groups.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "ANOVA"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Male rats self-administered methamphetamine under a progressive ratio schedule.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Male Wistar rats (n = 24) were randomly assigned to treatment groups.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": true,
+          "evidence": "Materials and methods Male Wistar rats (n = 24) were randomly assigned to treatment groups.",
+          "status": "detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": true,
+          "evidence": "The animal ethics committee approved the study.",
+          "status": "detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "A two-way ANOVA compared temperature groups.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": true,
+          "evidence": "Methamphetamine was administered intravenously at 0.1 mg/kg.",
+          "status": "detected"
+        }
+      ],
+      "missing_stages": [
+        "Study design"
+      ]
+    },
+    {
+      "id": 8,
+      "title": "Synthetic study: neural networks and visual decoding",
+      "year": 2022,
+      "authors": [
+        "Synthetic, Jun"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "insilico",
+          "label": "Computational model / simulation",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 1,
+          "position": 0.0063,
+          "evidence": "A computational model simulated visual cortex activity.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "computational model"
+        },
+        {
+          "id": "decoding",
+          "label": "Decoding / encoding models",
+          "stage": "analysis",
+          "confidence": "low",
+          "category": "analysis",
+          "count": 2,
+          "position": 0.1384,
+          "evidence": "We developed a neural network model for decoding visual cortex activity.",
+          "source": "abstract",
+          "sequence_cue": "",
+          "match": "decoding"
+        },
+        {
+          "id": "ml",
+          "label": "Machine learning / classification",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 2,
+          "position": 0.183,
+          "evidence": "A neural network classified visual stimuli using cross-validation.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "neural network"
+        },
+        {
+          "id": "dimred",
+          "label": "Dimensionality reduction / clustering",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.388,
+          "evidence": "Principal component analysis reduced dimensionality.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Principal component"
+        },
+        {
+          "id": "bootstrap",
+          "label": "Bootstrap resampling",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.5552,
+          "evidence": "Bootstrap resampling estimated confidence intervals.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Bootstrap"
+        },
+        {
+          "id": "effectsize",
+          "label": "Effect sizes / confidence intervals",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.653,
+          "evidence": "Bootstrap resampling estimated confidence intervals.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "confidence intervals"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "insilico",
+              "label": "Computational model / simulation",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 1,
+              "position": 0.0063,
+              "evidence": "A computational model simulated visual cortex activity.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "computational model"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": []
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": []
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": []
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "decoding",
+              "label": "Decoding / encoding models",
+              "stage": "analysis",
+              "confidence": "low",
+              "category": "analysis",
+              "count": 2,
+              "position": 0.1384,
+              "evidence": "We developed a neural network model for decoding visual cortex activity.",
+              "source": "abstract",
+              "sequence_cue": "",
+              "match": "decoding"
+            },
+            {
+              "id": "ml",
+              "label": "Machine learning / classification",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 2,
+              "position": 0.183,
+              "evidence": "A neural network classified visual stimuli using cross-validation.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "neural network"
+            },
+            {
+              "id": "dimred",
+              "label": "Dimensionality reduction / clustering",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.388,
+              "evidence": "Principal component analysis reduced dimensionality.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Principal component"
+            },
+            {
+              "id": "bootstrap",
+              "label": "Bootstrap resampling",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.5552,
+              "evidence": "Bootstrap resampling estimated confidence intervals.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Bootstrap"
+            },
+            {
+              "id": "effectsize",
+              "label": "Effect sizes / confidence intervals",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.653,
+              "evidence": "Bootstrap resampling estimated confidence intervals.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "confidence intervals"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": true,
+          "evidence": "Model code is available in a synthetic repository.",
+          "status": "detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        }
+      ],
+      "missing_stages": [
+        "Study design",
+        "Manipulations",
+        "Measurements"
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Synthetic study: human attention and scalp EEG",
+      "year": 2021,
+      "authors": [
+        "Synthetic, Ibrahim"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "human",
+          "label": "Human participants",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 1,
+          "position": 0,
+          "evidence": "Human participants (n = 48) performed an n-back working memory task.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Human participants"
+        },
+        {
+          "id": "task",
+          "label": "Cognitive / behavioural task",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 2,
+          "position": 0.1269,
+          "evidence": "Human participants (n = 48) performed an n-back working memory task.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "n-back"
+        },
+        {
+          "id": "eeg",
+          "label": "EEG / MEG",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.2136,
+          "evidence": "EEG recorded event-related potentials during visual attention.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "EEG"
+        },
+        {
+          "id": "eyetracking",
+          "label": "Eye tracking / pupillometry",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.4087,
+          "evidence": "Eye tracking measured pupil diameter.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Eye tracking"
+        },
+        {
+          "id": "signal",
+          "label": "Spectral / time-frequency analysis",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 2,
+          "position": 0.5263,
+          "evidence": "Wavelet analysis quantified spectral power.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Wavelet"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "human",
+              "label": "Human participants",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 1,
+              "position": 0,
+              "evidence": "Human participants (n = 48) performed an n-back working memory task.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Human participants"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": []
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "task",
+              "label": "Cognitive / behavioural task",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 2,
+              "position": 0.1269,
+              "evidence": "Human participants (n = 48) performed an n-back working memory task.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "n-back"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "eeg",
+              "label": "EEG / MEG",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.2136,
+              "evidence": "EEG recorded event-related potentials during visual attention.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "EEG"
+            },
+            {
+              "id": "eyetracking",
+              "label": "Eye tracking / pupillometry",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.4087,
+              "evidence": "Eye tracking measured pupil diameter.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Eye tracking"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "signal",
+              "label": "Spectral / time-frequency analysis",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 2,
+              "position": 0.5263,
+              "evidence": "Wavelet analysis quantified spectral power.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Wavelet"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Human participants (n = 48) performed an n-back working memory task.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": true,
+          "evidence": "A preregistered power analysis determined sample size.",
+          "status": "detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": true,
+          "evidence": "A preregistered power analysis determined sample size.",
+          "status": "detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": true,
+          "evidence": "Data and code are available in a synthetic repository.",
+          "status": "detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        }
+      ],
+      "missing_stages": [
+        "Study design"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Synthetic study: thermal hysteresis and cocaine behavior",
+      "year": 2020,
+      "authors": [
+        "Synthetic, Helena"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "rat",
+          "label": "Rats",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 2,
+          "position": 0.0489,
+          "evidence": "Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "rats"
+        },
+        {
+          "id": "factorial",
+          "label": "Factorial design",
+          "stage": "design",
+          "confidence": "high",
+          "category": "design",
+          "count": 1,
+          "position": 0.7584,
+          "evidence": "The experiment used a factorial design.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "factorial design"
+        },
+        {
+          "id": "drug_cocaine",
+          "label": "Cocaine",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.1193,
+          "evidence": "Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "cocaine"
+        },
+        {
+          "id": "drug_systemic",
+          "label": "Systemic drug administration",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.1865,
+          "evidence": "Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "intraperitoneal"
+        },
+        {
+          "id": "environment",
+          "label": "Environmental manipulation",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.4893,
+          "evidence": "Rats performed conditioned place preference and open-field tests at two ambient temperatures.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "ambient temperatures"
+        },
+        {
+          "id": "cpp",
+          "label": "Conditioned place preference",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 1,
+          "position": 0.315,
+          "evidence": "Rats performed conditioned place preference and open-field tests at two ambient temperatures.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "conditioned place preference"
+        },
+        {
+          "id": "locomotor",
+          "label": "Locomotor activity",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 1,
+          "position": 0.4159,
+          "evidence": "Rats performed conditioned place preference and open-field tests at two ambient temperatures.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "open-field"
+        },
+        {
+          "id": "temperature",
+          "label": "Body temperature / thermoregulation",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.5566,
+          "evidence": "Core temperature was recorded by telemetry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Core temperature"
+        },
+        {
+          "id": "mixed",
+          "label": "Mixed / hierarchical models",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.8196,
+          "evidence": "A mixed effects model quantified the temperature interaction.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "mixed effects model"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "rat",
+              "label": "Rats",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 2,
+              "position": 0.0489,
+              "evidence": "Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "rats"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": [
+            {
+              "id": "factorial",
+              "label": "Factorial design",
+              "stage": "design",
+              "confidence": "high",
+              "category": "design",
+              "count": 1,
+              "position": 0.7584,
+              "evidence": "The experiment used a factorial design.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "factorial design"
+            }
+          ]
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "drug_cocaine",
+              "label": "Cocaine",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.1193,
+              "evidence": "Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "cocaine"
+            },
+            {
+              "id": "drug_systemic",
+              "label": "Systemic drug administration",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.1865,
+              "evidence": "Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "intraperitoneal"
+            },
+            {
+              "id": "environment",
+              "label": "Environmental manipulation",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.4893,
+              "evidence": "Rats performed conditioned place preference and open-field tests at two ambient temperatures.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "ambient temperatures"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "cpp",
+              "label": "Conditioned place preference",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 1,
+              "position": 0.315,
+              "evidence": "Rats performed conditioned place preference and open-field tests at two ambient temperatures.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "conditioned place preference"
+            },
+            {
+              "id": "locomotor",
+              "label": "Locomotor activity",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 1,
+              "position": 0.4159,
+              "evidence": "Rats performed conditioned place preference and open-field tests at two ambient temperatures.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "open-field"
+            },
+            {
+              "id": "temperature",
+              "label": "Body temperature / thermoregulation",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.5566,
+              "evidence": "Core temperature was recorded by telemetry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Core temperature"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "mixed",
+              "label": "Mixed / hierarchical models",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.8196,
+              "evidence": "A mixed effects model quantified the temperature interaction.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "mixed effects model"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Materials and methods Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": true,
+          "evidence": "Materials and methods Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+          "status": "detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "A mixed effects model quantified the temperature interaction.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": true,
+          "evidence": "Materials and methods Male and female rats (n = 28) received cocaine at 5 mg/kg by intraperitoneal injection.",
+          "status": "detected"
+        }
+      ],
+      "missing_stages": []
+    },
+    {
+      "id": 5,
+      "title": "Synthetic study: thermal hysteresis and stimulant intake",
+      "year": 2025,
+      "authors": [
+        "Synthetic, Helena"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "rat",
+          "label": "Rats",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 2,
+          "position": 0.015,
+          "evidence": "Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "rats"
+        },
+        {
+          "id": "withinsubject",
+          "label": "Within-subject design",
+          "stage": "design",
+          "confidence": "high",
+          "category": "design",
+          "count": 1,
+          "position": 0.4371,
+          "evidence": "Ambient temperature was varied across heating and cooling sessions in a counterbalanced design.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "counterbalanced"
+        },
+        {
+          "id": "doseresponse",
+          "label": "Dose-response",
+          "stage": "design",
+          "confidence": "high",
+          "category": "design",
+          "count": 2,
+          "position": 0.7425,
+          "evidence": "A dose-response experiment tested graded doses.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "dose-response"
+        },
+        {
+          "id": "longitudinal",
+          "label": "Longitudinal / repeated sessions",
+          "stage": "design",
+          "confidence": "high",
+          "category": "design",
+          "count": 1,
+          "position": 0.8802,
+          "evidence": "Repeated-measures ANOVA assessed intake.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Repeated-measures"
+        },
+        {
+          "id": "drug_methamphetamine",
+          "label": "Methamphetamine",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.0838,
+          "evidence": "Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "methamphetamine"
+        },
+        {
+          "id": "drug_systemic",
+          "label": "Systemic drug administration",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.1317,
+          "evidence": "Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "intraperitoneally"
+        },
+        {
+          "id": "environment",
+          "label": "Environmental manipulation",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.2216,
+          "evidence": "Ambient temperature was varied across heating and cooling sessions in a counterbalanced design.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Ambient temperature"
+        },
+        {
+          "id": "training",
+          "label": "Behavioural training / conditioning",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.5629,
+          "evidence": "Rats performed an operant task.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "operant"
+        },
+        {
+          "id": "temperature",
+          "label": "Body temperature / thermoregulation",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.6048,
+          "evidence": "Core temperature was measured by telemetry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Core temperature"
+        },
+        {
+          "id": "anova",
+          "label": "ANOVA",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.9341,
+          "evidence": "Repeated-measures ANOVA assessed intake.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "ANOVA"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "rat",
+              "label": "Rats",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 2,
+              "position": 0.015,
+              "evidence": "Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "rats"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": [
+            {
+              "id": "withinsubject",
+              "label": "Within-subject design",
+              "stage": "design",
+              "confidence": "high",
+              "category": "design",
+              "count": 1,
+              "position": 0.4371,
+              "evidence": "Ambient temperature was varied across heating and cooling sessions in a counterbalanced design.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "counterbalanced"
+            },
+            {
+              "id": "doseresponse",
+              "label": "Dose-response",
+              "stage": "design",
+              "confidence": "high",
+              "category": "design",
+              "count": 2,
+              "position": 0.7425,
+              "evidence": "A dose-response experiment tested graded doses.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "dose-response"
+            },
+            {
+              "id": "longitudinal",
+              "label": "Longitudinal / repeated sessions",
+              "stage": "design",
+              "confidence": "high",
+              "category": "design",
+              "count": 1,
+              "position": 0.8802,
+              "evidence": "Repeated-measures ANOVA assessed intake.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Repeated-measures"
+            }
+          ]
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "drug_methamphetamine",
+              "label": "Methamphetamine",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.0838,
+              "evidence": "Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "methamphetamine"
+            },
+            {
+              "id": "drug_systemic",
+              "label": "Systemic drug administration",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.1317,
+              "evidence": "Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "intraperitoneally"
+            },
+            {
+              "id": "environment",
+              "label": "Environmental manipulation",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.2216,
+              "evidence": "Ambient temperature was varied across heating and cooling sessions in a counterbalanced design.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Ambient temperature"
+            },
+            {
+              "id": "training",
+              "label": "Behavioural training / conditioning",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.5629,
+              "evidence": "Rats performed an operant task.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "operant"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "temperature",
+              "label": "Body temperature / thermoregulation",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.6048,
+              "evidence": "Core temperature was measured by telemetry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Core temperature"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "anova",
+              "label": "ANOVA",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.9341,
+              "evidence": "Repeated-measures ANOVA assessed intake.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "ANOVA"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Materials and methods Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "Repeated-measures ANOVA assessed intake.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": true,
+          "evidence": "Materials and methods Male rats (n = 22) received methamphetamine intraperitoneally at 2 mg/kg.",
+          "status": "detected"
+        }
+      ],
+      "missing_stages": []
+    },
+    {
+      "id": 4,
+      "title": "Synthetic study: dLight dopamine signals and MDMA",
+      "year": 2024,
+      "authors": [
+        "Synthetic, Farid"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "mouse",
+          "label": "Mice",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 1,
+          "position": 0.0202,
+          "evidence": "Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "mice"
+        },
+        {
+          "id": "drug_mdma",
+          "label": "MDMA",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.0865,
+          "evidence": "Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "MDMA"
+        },
+        {
+          "id": "drug_systemic",
+          "label": "Systemic drug administration",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.1009,
+          "evidence": "Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "intraperitoneally"
+        },
+        {
+          "id": "signal_dopamine",
+          "label": "Dopamine dynamics",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 2,
+          "position": 0.2219,
+          "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "dopamine signals"
+        },
+        {
+          "id": "tool_dlight",
+          "label": "dLight dopamine sensor",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.2882,
+          "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "dLight1.3"
+        },
+        {
+          "id": "tool_fiber_photometry",
+          "label": "Fiber photometry",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.3285,
+          "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "fiber photometry"
+        },
+        {
+          "id": "locomotor",
+          "label": "Locomotor activity",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 1,
+          "position": 0.4784,
+          "evidence": "An overhead video camera recorded locomotor activity.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "locomotor activity"
+        },
+        {
+          "id": "temperature",
+          "label": "Body temperature / thermoregulation",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.536,
+          "evidence": "Body temperature was recorded using telemetry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Body temperature"
+        },
+        {
+          "id": "bootstrap",
+          "label": "Bootstrap resampling",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.7896,
+          "evidence": "Bootstrap resampling estimated confidence intervals for dopamine signals.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Bootstrap"
+        },
+        {
+          "id": "effectsize",
+          "label": "Effect sizes / confidence intervals",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.879,
+          "evidence": "Bootstrap resampling estimated confidence intervals for dopamine signals.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "confidence intervals"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "mouse",
+              "label": "Mice",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 1,
+              "position": 0.0202,
+              "evidence": "Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "mice"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": []
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "drug_mdma",
+              "label": "MDMA",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.0865,
+              "evidence": "Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "MDMA"
+            },
+            {
+              "id": "drug_systemic",
+              "label": "Systemic drug administration",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.1009,
+              "evidence": "Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "intraperitoneally"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "signal_dopamine",
+              "label": "Dopamine dynamics",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 2,
+              "position": 0.2219,
+              "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "dopamine signals"
+            },
+            {
+              "id": "tool_dlight",
+              "label": "dLight dopamine sensor",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.2882,
+              "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "dLight1.3"
+            },
+            {
+              "id": "tool_fiber_photometry",
+              "label": "Fiber photometry",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.3285,
+              "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "fiber photometry"
+            },
+            {
+              "id": "locomotor",
+              "label": "Locomotor activity",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 1,
+              "position": 0.4784,
+              "evidence": "An overhead video camera recorded locomotor activity.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "locomotor activity"
+            },
+            {
+              "id": "temperature",
+              "label": "Body temperature / thermoregulation",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.536,
+              "evidence": "Body temperature was recorded using telemetry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Body temperature"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "bootstrap",
+              "label": "Bootstrap resampling",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.7896,
+              "evidence": "Bootstrap resampling estimated confidence intervals for dopamine signals.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Bootstrap"
+            },
+            {
+              "id": "effectsize",
+              "label": "Effect sizes / confidence intervals",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.879,
+              "evidence": "Bootstrap resampling estimated confidence intervals for dopamine signals.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "confidence intervals"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Materials and methods Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": true,
+          "evidence": "Materials and methods Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+          "status": "detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": true,
+          "evidence": "Investigators were blinded to treatment.",
+          "status": "detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": true,
+          "evidence": "Materials and methods Female mice (n = 20) received MDMA intraperitoneally at 5 mg/kg.",
+          "status": "detected"
+        }
+      ],
+      "missing_stages": [
+        "Study design"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Synthetic study: visual calcium transients during learning",
+      "year": 2023,
+      "authors": [
+        "Synthetic, Grace"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "transgenic",
+          "label": "Transgenic / knockout animals",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 1,
+          "position": 0,
+          "evidence": "Transgenic mice (n = 16) expressed GCaMP6f in visual cortex.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Transgenic"
+        },
+        {
+          "id": "mouse",
+          "label": "Mice",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 2,
+          "position": 0.0297,
+          "evidence": "Transgenic mice (n = 16) expressed GCaMP6f in visual cortex.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "mice"
+        },
+        {
+          "id": "tool_gcamp",
+          "label": "GCaMP indicator",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 2,
+          "position": 0.0946,
+          "evidence": "Transgenic mice (n = 16) expressed GCaMP6f in visual cortex.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "GCaMP6f"
+        },
+        {
+          "id": "signal_calcium",
+          "label": "Calcium activity",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.1919,
+          "evidence": "We imaged calcium transients using two-photon microscopy and GCaMP6f.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "calcium transients"
+        },
+        {
+          "id": "tool_two_photon",
+          "label": "Two-photon microscopy",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.2595,
+          "evidence": "We imaged calcium transients using two-photon microscopy and GCaMP6f.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "two-photon microscopy"
+        },
+        {
+          "id": "video",
+          "label": "Video tracking / observation",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.5432,
+          "evidence": "DeepLabCut video tracking quantified movement.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "DeepLabCut"
+        },
+        {
+          "id": "regression",
+          "label": "Regression / correlation",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.6946,
+          "evidence": "A linear regression related calcium transients to behavioral performance.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "regression"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "transgenic",
+              "label": "Transgenic / knockout animals",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 1,
+              "position": 0,
+              "evidence": "Transgenic mice (n = 16) expressed GCaMP6f in visual cortex.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Transgenic"
+            },
+            {
+              "id": "mouse",
+              "label": "Mice",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 2,
+              "position": 0.0297,
+              "evidence": "Transgenic mice (n = 16) expressed GCaMP6f in visual cortex.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "mice"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": []
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": []
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "tool_gcamp",
+              "label": "GCaMP indicator",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 2,
+              "position": 0.0946,
+              "evidence": "Transgenic mice (n = 16) expressed GCaMP6f in visual cortex.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "GCaMP6f"
+            },
+            {
+              "id": "signal_calcium",
+              "label": "Calcium activity",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.1919,
+              "evidence": "We imaged calcium transients using two-photon microscopy and GCaMP6f.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "calcium transients"
+            },
+            {
+              "id": "tool_two_photon",
+              "label": "Two-photon microscopy",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.2595,
+              "evidence": "We imaged calcium transients using two-photon microscopy and GCaMP6f.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "two-photon microscopy"
+            },
+            {
+              "id": "video",
+              "label": "Video tracking / observation",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.5432,
+              "evidence": "DeepLabCut video tracking quantified movement.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "DeepLabCut"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "regression",
+              "label": "Regression / correlation",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.6946,
+              "evidence": "A linear regression related calcium transients to behavioral performance.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "regression"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Transgenic mice (n = 16) expressed GCaMP6f in visual cortex.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": true,
+          "evidence": "The ethics committee approved animal procedures.",
+          "status": "detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "A linear regression related calcium transients to behavioral performance.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        }
+      ],
+      "missing_stages": [
+        "Study design",
+        "Manipulations"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Synthetic study: methamphetamine and tetrode reward recordings",
+      "year": 2022,
+      "authors": [
+        "Synthetic, Elena"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "rat",
+          "label": "Rats",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 2,
+          "position": 0.012,
+          "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "rats"
+        },
+        {
+          "id": "longitudinal",
+          "label": "Longitudinal / repeated sessions",
+          "stage": "design",
+          "confidence": "high",
+          "category": "design",
+          "count": 1,
+          "position": 0.8993,
+          "evidence": "A repeated-measures ANOVA compared sessions.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "repeated-measures"
+        },
+        {
+          "id": "selfadmin",
+          "label": "Self-administration",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.0456,
+          "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "self-administered"
+        },
+        {
+          "id": "drug_methamphetamine",
+          "label": "Methamphetamine",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.0887,
+          "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "methamphetamine"
+        },
+        {
+          "id": "drug_iv",
+          "label": "Intravenous drug delivery",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.1271,
+          "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "intravenously"
+        },
+        {
+          "id": "training",
+          "label": "Behavioural training / conditioning",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.3309,
+          "evidence": "Rats performed a progressive-ratio task in operant chambers.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "operant"
+        },
+        {
+          "id": "tool_tetrodes",
+          "label": "Tetrodes",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.3741,
+          "evidence": "Tetrodes recorded action potentials and local field potentials during reward seeking.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Tetrodes"
+        },
+        {
+          "id": "signal_spikes",
+          "label": "Action potentials / spikes",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.4173,
+          "evidence": "Tetrodes recorded action potentials and local field potentials during reward seeking.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "action potentials"
+        },
+        {
+          "id": "signal_lfp",
+          "label": "Local field potentials (LFP)",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.47,
+          "evidence": "Tetrodes recorded action potentials and local field potentials during reward seeking.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "local field potentials"
+        },
+        {
+          "id": "video",
+          "label": "Video tracking / observation",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 1,
+          "position": 0.789,
+          "evidence": "Video tracking measured locomotor activity.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Video tracking"
+        },
+        {
+          "id": "locomotor",
+          "label": "Locomotor activity",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 1,
+          "position": 0.8465,
+          "evidence": "Video tracking measured locomotor activity.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "locomotor activity"
+        },
+        {
+          "id": "signal",
+          "label": "Spectral / time-frequency analysis",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 2,
+          "position": 0.6882,
+          "evidence": "Fourier analysis measured spectral power.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "Fourier"
+        },
+        {
+          "id": "anova",
+          "label": "ANOVA",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.9424,
+          "evidence": "A repeated-measures ANOVA compared sessions.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "ANOVA"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "rat",
+              "label": "Rats",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 2,
+              "position": 0.012,
+              "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "rats"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": [
+            {
+              "id": "longitudinal",
+              "label": "Longitudinal / repeated sessions",
+              "stage": "design",
+              "confidence": "high",
+              "category": "design",
+              "count": 1,
+              "position": 0.8993,
+              "evidence": "A repeated-measures ANOVA compared sessions.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "repeated-measures"
+            }
+          ]
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "selfadmin",
+              "label": "Self-administration",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.0456,
+              "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "self-administered"
+            },
+            {
+              "id": "drug_methamphetamine",
+              "label": "Methamphetamine",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.0887,
+              "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "methamphetamine"
+            },
+            {
+              "id": "drug_iv",
+              "label": "Intravenous drug delivery",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.1271,
+              "evidence": "Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "intravenously"
+            },
+            {
+              "id": "training",
+              "label": "Behavioural training / conditioning",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.3309,
+              "evidence": "Rats performed a progressive-ratio task in operant chambers.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "operant"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "tool_tetrodes",
+              "label": "Tetrodes",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.3741,
+              "evidence": "Tetrodes recorded action potentials and local field potentials during reward seeking.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Tetrodes"
+            },
+            {
+              "id": "signal_spikes",
+              "label": "Action potentials / spikes",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.4173,
+              "evidence": "Tetrodes recorded action potentials and local field potentials during reward seeking.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "action potentials"
+            },
+            {
+              "id": "signal_lfp",
+              "label": "Local field potentials (LFP)",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.47,
+              "evidence": "Tetrodes recorded action potentials and local field potentials during reward seeking.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "local field potentials"
+            },
+            {
+              "id": "video",
+              "label": "Video tracking / observation",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 1,
+              "position": 0.789,
+              "evidence": "Video tracking measured locomotor activity.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Video tracking"
+            },
+            {
+              "id": "locomotor",
+              "label": "Locomotor activity",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 1,
+              "position": 0.8465,
+              "evidence": "Video tracking measured locomotor activity.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "locomotor activity"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "signal",
+              "label": "Spectral / time-frequency analysis",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 2,
+              "position": 0.6882,
+              "evidence": "Fourier analysis measured spectral power.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "Fourier"
+            },
+            {
+              "id": "anova",
+              "label": "ANOVA",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.9424,
+              "evidence": "A repeated-measures ANOVA compared sessions.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "ANOVA"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Materials and methods Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "A repeated-measures ANOVA compared sessions.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": true,
+          "evidence": "Materials and methods Male rats (n = 18) self-administered methamphetamine intravenously at 0.05 mg/kg per infusion.",
+          "status": "detected"
+        }
+      ],
+      "missing_stages": []
+    },
+    {
+      "id": 1,
+      "title": "Synthetic study: cocaine and population spike dynamics",
+      "year": 2021,
+      "authors": [
+        "Synthetic, Elena",
+        "Synthetic, Farid"
+      ],
+      "journal": "",
+      "source": "methods section",
+      "detected": [
+        {
+          "id": "mouse",
+          "label": "Mice",
+          "stage": "subjects",
+          "confidence": "high",
+          "category": "subjects",
+          "count": 3,
+          "position": 0.0197,
+          "evidence": "Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "mice"
+        },
+        {
+          "id": "withinsubject",
+          "label": "Within-subject design",
+          "stage": "design",
+          "confidence": "high",
+          "category": "design",
+          "count": 1,
+          "position": 0.1192,
+          "evidence": "Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "within-subject"
+        },
+        {
+          "id": "drug_cocaine",
+          "label": "Cocaine",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "drugs",
+          "count": 1,
+          "position": 0.1646,
+          "evidence": "Mice received cocaine intraperitoneally at 10 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "cocaine"
+        },
+        {
+          "id": "drug_systemic",
+          "label": "Systemic drug administration",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.1744,
+          "evidence": "Mice received cocaine intraperitoneally at 10 mg/kg.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "intraperitoneally"
+        },
+        {
+          "id": "training",
+          "label": "Behavioural training / conditioning",
+          "stage": "manipulation",
+          "confidence": "high",
+          "category": "interventions",
+          "count": 1,
+          "position": 0.2469,
+          "evidence": "First, mice were trained in operant chambers under a fixed-ratio schedule.",
+          "source": "methods section",
+          "sequence_cue": "First",
+          "match": "operant"
+        },
+        {
+          "id": "signal_spikes",
+          "label": "Action potentials / spikes",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.3268,
+          "evidence": "Then, we recorded action potentials and local field potentials using Neuropixels probes.",
+          "source": "methods section",
+          "sequence_cue": "Then",
+          "match": "action potentials"
+        },
+        {
+          "id": "signal_lfp",
+          "label": "Local field potentials (LFP)",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.3538,
+          "evidence": "Then, we recorded action potentials and local field potentials using Neuropixels probes.",
+          "source": "methods section",
+          "sequence_cue": "Then",
+          "match": "local field potentials"
+        },
+        {
+          "id": "tool_neuropixels",
+          "label": "Neuropixels probes",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.3894,
+          "evidence": "Then, we recorded action potentials and local field potentials using Neuropixels probes.",
+          "source": "methods section",
+          "sequence_cue": "Then",
+          "match": "Neuropixels probes"
+        },
+        {
+          "id": "signal_dopamine",
+          "label": "Dopamine dynamics",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "signals",
+          "count": 1,
+          "position": 0.4287,
+          "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "dopamine signals"
+        },
+        {
+          "id": "tool_dlight",
+          "label": "dLight dopamine sensor",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.457,
+          "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "dLight1.3"
+        },
+        {
+          "id": "tool_fiber_photometry",
+          "label": "Fiber photometry",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "techniques_tools",
+          "count": 1,
+          "position": 0.4742,
+          "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "fiber photometry"
+        },
+        {
+          "id": "locomotor",
+          "label": "Locomotor activity",
+          "stage": "measurement",
+          "confidence": "high",
+          "category": "measurement",
+          "count": 2,
+          "position": 0.5381,
+          "evidence": "An overhead video camera recorded locomotor activity during the open-field task.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "locomotor activity"
+        },
+        {
+          "id": "dimred",
+          "label": "Dimensionality reduction / clustering",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.629,
+          "evidence": "Kilosort sorted spikes and principal component analysis reduced neural population activity.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "principal component"
+        },
+        {
+          "id": "mixed",
+          "label": "Mixed / hierarchical models",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.7113,
+          "evidence": "A mixed effects model and permutation tests assessed neural activity.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "mixed effects model"
+        },
+        {
+          "id": "permutation",
+          "label": "Permutation / randomisation tests",
+          "stage": "analysis",
+          "confidence": "high",
+          "category": "analysis",
+          "count": 1,
+          "position": 0.7408,
+          "evidence": "A mixed effects model and permutation tests assessed neural activity.",
+          "source": "methods section",
+          "sequence_cue": "",
+          "match": "permutation tests"
+        }
+      ],
+      "pipeline": [
+        {
+          "stage": "subjects",
+          "label": "Subjects & models",
+          "methods": [
+            {
+              "id": "mouse",
+              "label": "Mice",
+              "stage": "subjects",
+              "confidence": "high",
+              "category": "subjects",
+              "count": 3,
+              "position": 0.0197,
+              "evidence": "Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "mice"
+            }
+          ]
+        },
+        {
+          "stage": "design",
+          "label": "Study design",
+          "methods": [
+            {
+              "id": "withinsubject",
+              "label": "Within-subject design",
+              "stage": "design",
+              "confidence": "high",
+              "category": "design",
+              "count": 1,
+              "position": 0.1192,
+              "evidence": "Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "within-subject"
+            }
+          ]
+        },
+        {
+          "stage": "manipulation",
+          "label": "Manipulations",
+          "methods": [
+            {
+              "id": "drug_cocaine",
+              "label": "Cocaine",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "drugs",
+              "count": 1,
+              "position": 0.1646,
+              "evidence": "Mice received cocaine intraperitoneally at 10 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "cocaine"
+            },
+            {
+              "id": "drug_systemic",
+              "label": "Systemic drug administration",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.1744,
+              "evidence": "Mice received cocaine intraperitoneally at 10 mg/kg.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "intraperitoneally"
+            },
+            {
+              "id": "training",
+              "label": "Behavioural training / conditioning",
+              "stage": "manipulation",
+              "confidence": "high",
+              "category": "interventions",
+              "count": 1,
+              "position": 0.2469,
+              "evidence": "First, mice were trained in operant chambers under a fixed-ratio schedule.",
+              "source": "methods section",
+              "sequence_cue": "First",
+              "match": "operant"
+            }
+          ]
+        },
+        {
+          "stage": "measurement",
+          "label": "Measurements",
+          "methods": [
+            {
+              "id": "signal_spikes",
+              "label": "Action potentials / spikes",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.3268,
+              "evidence": "Then, we recorded action potentials and local field potentials using Neuropixels probes.",
+              "source": "methods section",
+              "sequence_cue": "Then",
+              "match": "action potentials"
+            },
+            {
+              "id": "signal_lfp",
+              "label": "Local field potentials (LFP)",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.3538,
+              "evidence": "Then, we recorded action potentials and local field potentials using Neuropixels probes.",
+              "source": "methods section",
+              "sequence_cue": "Then",
+              "match": "local field potentials"
+            },
+            {
+              "id": "tool_neuropixels",
+              "label": "Neuropixels probes",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.3894,
+              "evidence": "Then, we recorded action potentials and local field potentials using Neuropixels probes.",
+              "source": "methods section",
+              "sequence_cue": "Then",
+              "match": "Neuropixels probes"
+            },
+            {
+              "id": "signal_dopamine",
+              "label": "Dopamine dynamics",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "signals",
+              "count": 1,
+              "position": 0.4287,
+              "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "dopamine signals"
+            },
+            {
+              "id": "tool_dlight",
+              "label": "dLight dopamine sensor",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.457,
+              "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "dLight1.3"
+            },
+            {
+              "id": "tool_fiber_photometry",
+              "label": "Fiber photometry",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "techniques_tools",
+              "count": 1,
+              "position": 0.4742,
+              "evidence": "We recorded dopamine signals using dLight1.3 and fiber photometry.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "fiber photometry"
+            },
+            {
+              "id": "locomotor",
+              "label": "Locomotor activity",
+              "stage": "measurement",
+              "confidence": "high",
+              "category": "measurement",
+              "count": 2,
+              "position": 0.5381,
+              "evidence": "An overhead video camera recorded locomotor activity during the open-field task.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "locomotor activity"
+            }
+          ]
+        },
+        {
+          "stage": "analysis",
+          "label": "Analyses",
+          "methods": [
+            {
+              "id": "dimred",
+              "label": "Dimensionality reduction / clustering",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.629,
+              "evidence": "Kilosort sorted spikes and principal component analysis reduced neural population activity.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "principal component"
+            },
+            {
+              "id": "mixed",
+              "label": "Mixed / hierarchical models",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.7113,
+              "evidence": "A mixed effects model and permutation tests assessed neural activity.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "mixed effects model"
+            },
+            {
+              "id": "permutation",
+              "label": "Permutation / randomisation tests",
+              "stage": "analysis",
+              "confidence": "high",
+              "category": "analysis",
+              "count": 1,
+              "position": 0.7408,
+              "evidence": "A mixed effects model and permutation tests assessed neural activity.",
+              "source": "methods section",
+              "sequence_cue": "",
+              "match": "permutation tests"
+            }
+          ]
+        }
+      ],
+      "checks": [
+        {
+          "id": "sex",
+          "label": "Sex of subjects stated",
+          "found": true,
+          "evidence": "Materials and methods Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+          "status": "detected"
+        },
+        {
+          "id": "female",
+          "label": "Female subjects included",
+          "found": true,
+          "evidence": "Materials and methods Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+          "status": "detected"
+        },
+        {
+          "id": "n",
+          "label": "Sample size stated",
+          "found": true,
+          "evidence": "Materials and methods Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+          "status": "detected"
+        },
+        {
+          "id": "random",
+          "label": "Randomisation mentioned",
+          "found": true,
+          "evidence": "Materials and methods Male and female mice (n = 24) were randomly assigned to cocaine treatment or saline control in a within-subject design.",
+          "status": "detected"
+        },
+        {
+          "id": "blind",
+          "label": "Blinding mentioned",
+          "found": true,
+          "evidence": "Investigators were blinded and a power analysis determined sample size.",
+          "status": "detected"
+        },
+        {
+          "id": "ethics",
+          "label": "Ethics review / approval mentioned",
+          "found": true,
+          "evidence": "The ethics committee approved the study.",
+          "status": "detected"
+        },
+        {
+          "id": "stats",
+          "label": "Statistical test named",
+          "found": true,
+          "evidence": "A mixed effects model and permutation tests assessed neural activity.",
+          "status": "detected"
+        },
+        {
+          "id": "power",
+          "label": "Power analysis / sample size justification",
+          "found": true,
+          "evidence": "Investigators were blinded and a power analysis determined sample size.",
+          "status": "detected"
+        },
+        {
+          "id": "prereg",
+          "label": "Pre-registration",
+          "found": false,
+          "evidence": "",
+          "status": "not_detected"
+        },
+        {
+          "id": "data",
+          "label": "Data or code availability",
+          "found": true,
+          "evidence": "Data and code are available in a synthetic repository.",
+          "status": "detected"
+        },
+        {
+          "id": "dose",
+          "label": "Doses / concentrations stated",
+          "found": true,
+          "evidence": "Mice received cocaine intraperitoneally at 10 mg/kg.",
+          "status": "detected"
+        }
+      ],
+      "missing_stages": []
+    }
+  ],
+  "matrix": [
+    {
+      "id": "drug_systemic",
+      "label": "Systemic drug administration",
+      "stage": "manipulation",
+      "category": "interventions",
+      "items": [
+        10,
+        6,
+        5,
+        4,
+        1
+      ],
+      "share": 0.42
+    },
+    {
+      "id": "environment",
+      "label": "Environmental manipulation",
+      "stage": "manipulation",
+      "category": "interventions",
+      "items": [
+        11,
+        10,
+        9,
+        6,
+        5
+      ],
+      "share": 0.42
+    },
+    {
+      "id": "locomotor",
+      "label": "Locomotor activity",
+      "stage": "measurement",
+      "category": "measurement",
+      "items": [
+        10,
+        6,
+        4,
+        2,
+        1
+      ],
+      "share": 0.42
+    },
+    {
+      "id": "rat",
+      "label": "Rats",
+      "stage": "subjects",
+      "category": "subjects",
+      "items": [
+        10,
+        9,
+        6,
+        5,
+        2
+      ],
+      "share": 0.42
+    },
+    {
+      "id": "temperature",
+      "label": "Body temperature / thermoregulation",
+      "stage": "measurement",
+      "category": "measurement",
+      "items": [
+        10,
+        9,
+        6,
+        5,
+        4
+      ],
+      "share": 0.42
+    },
+    {
+      "id": "training",
+      "label": "Behavioural training / conditioning",
+      "stage": "manipulation",
+      "category": "interventions",
+      "items": [
+        11,
+        9,
+        5,
+        2,
+        1
+      ],
+      "share": 0.42
+    },
+    {
+      "id": "anova",
+      "label": "ANOVA",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        10,
+        9,
+        5,
+        2
+      ],
+      "share": 0.33
+    },
+    {
+      "id": "mouse",
+      "label": "Mice",
+      "stage": "subjects",
+      "category": "subjects",
+      "items": [
+        11,
+        4,
+        3,
+        1
+      ],
+      "share": 0.33
+    },
+    {
+      "id": "drug_cocaine",
+      "label": "Cocaine",
+      "stage": "manipulation",
+      "category": "drugs",
+      "items": [
+        10,
+        6,
+        1
+      ],
+      "share": 0.25
+    },
+    {
+      "id": "drug_methamphetamine",
+      "label": "Methamphetamine",
+      "stage": "manipulation",
+      "category": "drugs",
+      "items": [
+        9,
+        5,
+        2
+      ],
+      "share": 0.25
+    },
+    {
+      "id": "longitudinal",
+      "label": "Longitudinal / repeated sessions",
+      "stage": "design",
+      "category": "design",
+      "items": [
+        10,
+        5,
+        2
+      ],
+      "share": 0.25
+    },
+    {
+      "id": "mixed",
+      "label": "Mixed / hierarchical models",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        12,
+        6,
+        1
+      ],
+      "share": 0.25
+    },
+    {
+      "id": "signal_dopamine",
+      "label": "Dopamine dynamics",
+      "stage": "measurement",
+      "category": "signals",
+      "items": [
+        11,
+        4,
+        1
+      ],
+      "share": 0.25
+    },
+    {
+      "id": "bootstrap",
+      "label": "Bootstrap resampling",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        8,
+        4
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "dimred",
+      "label": "Dimensionality reduction / clustering",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        8,
+        1
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "drug_iv",
+      "label": "Intravenous drug delivery",
+      "stage": "manipulation",
+      "category": "interventions",
+      "items": [
+        9,
+        2
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "eeg",
+      "label": "EEG / MEG",
+      "stage": "measurement",
+      "category": "measurement",
+      "items": [
+        12,
+        7
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "effectsize",
+      "label": "Effect sizes / confidence intervals",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        8,
+        4
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "human",
+      "label": "Human participants",
+      "stage": "subjects",
+      "category": "subjects",
+      "items": [
+        12,
+        7
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "regression",
+      "label": "Regression / correlation",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        11,
+        3
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "selfadmin",
+      "label": "Self-administration",
+      "stage": "manipulation",
+      "category": "interventions",
+      "items": [
+        9,
+        2
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "signal",
+      "label": "Spectral / time-frequency analysis",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        7,
+        2
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "signal_lfp",
+      "label": "Local field potentials (LFP)",
+      "stage": "measurement",
+      "category": "signals",
+      "items": [
+        2,
+        1
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "signal_spikes",
+      "label": "Action potentials / spikes",
+      "stage": "measurement",
+      "category": "signals",
+      "items": [
+        2,
+        1
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "task",
+      "label": "Cognitive / behavioural task",
+      "stage": "manipulation",
+      "category": "interventions",
+      "items": [
+        12,
+        7
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "tool_dlight",
+      "label": "dLight dopamine sensor",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        4,
+        1
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "tool_fiber_photometry",
+      "label": "Fiber photometry",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        4,
+        1
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "video",
+      "label": "Video tracking / observation",
+      "stage": "measurement",
+      "category": "measurement",
+      "items": [
+        3,
+        2
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "withinsubject",
+      "label": "Within-subject design",
+      "stage": "design",
+      "category": "design",
+      "items": [
+        5,
+        1
+      ],
+      "share": 0.17
+    },
+    {
+      "id": "cpp",
+      "label": "Conditioned place preference",
+      "stage": "measurement",
+      "category": "measurement",
+      "items": [
+        6
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "decoding",
+      "label": "Decoding / encoding models",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        8
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "doseresponse",
+      "label": "Dose-response",
+      "stage": "design",
+      "category": "design",
+      "items": [
+        5
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "drug_amphetamine",
+      "label": "Amphetamine",
+      "stage": "manipulation",
+      "category": "drugs",
+      "items": [
+        11
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "drug_mdma",
+      "label": "MDMA",
+      "stage": "manipulation",
+      "category": "drugs",
+      "items": [
+        4
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "eyetracking",
+      "label": "Eye tracking / pupillometry",
+      "stage": "measurement",
+      "category": "measurement",
+      "items": [
+        7
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "factorial",
+      "label": "Factorial design",
+      "stage": "design",
+      "category": "design",
+      "items": [
+        6
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "insilico",
+      "label": "Computational model / simulation",
+      "stage": "subjects",
+      "category": "subjects",
+      "items": [
+        8
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "microdialysis",
+      "label": "Microdialysis / voltammetry",
+      "stage": "measurement",
+      "category": "measurement",
+      "items": [
+        11
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "ml",
+      "label": "Machine learning / classification",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        8
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "permutation",
+      "label": "Permutation / randomisation tests",
+      "stage": "analysis",
+      "category": "analysis",
+      "items": [
+        1
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "signal_calcium",
+      "label": "Calcium activity",
+      "stage": "measurement",
+      "category": "signals",
+      "items": [
+        3
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "signal_eeg",
+      "label": "EEG signals",
+      "stage": "measurement",
+      "category": "signals",
+      "items": [
+        12
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "tool_gcamp",
+      "label": "GCaMP indicator",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        3
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "tool_hplc",
+      "label": "HPLC",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        11
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "tool_microdialysis",
+      "label": "Microdialysis",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        11
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "tool_neuropixels",
+      "label": "Neuropixels probes",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        1
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "tool_tetrodes",
+      "label": "Tetrodes",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        2
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "tool_two_photon",
+      "label": "Two-photon microscopy",
+      "stage": "measurement",
+      "category": "techniques_tools",
+      "items": [
+        3
+      ],
+      "share": 0.08
+    },
+    {
+      "id": "transgenic",
+      "label": "Transgenic / knockout animals",
+      "stage": "subjects",
+      "category": "subjects",
+      "items": [
+        3
+      ],
+      "share": 0.08
+    }
+  ],
+  "checks": [
+    {
+      "id": "sex",
+      "label": "Sex of subjects stated",
+      "count": 8,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "female",
+      "label": "Female subjects included",
+      "count": 4,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "n",
+      "label": "Sample size stated",
+      "count": 11,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "random",
+      "label": "Randomisation mentioned",
+      "count": 2,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "blind",
+      "label": "Blinding mentioned",
+      "count": 3,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "ethics",
+      "label": "Ethics review / approval mentioned",
+      "count": 3,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "stats",
+      "label": "Statistical test named",
+      "count": 9,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "power",
+      "label": "Power analysis / sample size justification",
+      "count": 3,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "prereg",
+      "label": "Pre-registration",
+      "count": 1,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "data",
+      "label": "Data or code availability",
+      "count": 4,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    },
+    {
+      "id": "dose",
+      "label": "Doses / concentrations stated",
+      "count": 7,
+      "assessed": 12,
+      "unavailable": 0,
+      "explicitly_absent": 0
+    }
+  ],
+  "insights": {
+    "gaps": [
+      "Female subjects detected in 4 of 12 papers; missing mentions do not establish exclusion.",
+      "Power analysis / sample-size justification detected in 3 of 12 papers' available text.",
+      "Pre-registration detected in 1 of 12 papers' available text.",
+      "Blinding detected in 3 of 12 papers' available text.",
+      "Data or code availability detected in 4 of 12 papers' available text.",
+      "Randomisation detected in 2 of 12 papers' available text.",
+      "Detected in one paper only: Conditioned place preference, Decoding / encoding models, Dose-response, Amphetamine, MDMA, Eye tracking / pupillometry, Factorial design, Computational model / simulation."
+    ],
+    "common": [],
+    "rare": [
+      "Conditioned place preference",
+      "Decoding / encoding models",
+      "Dose-response",
+      "Amphetamine",
+      "MDMA",
+      "Eye tracking / pupillometry",
+      "Factorial design",
+      "Computational model / simulation",
+      "Microdialysis / voltammetry",
+      "Machine learning / classification",
+      "Permutation / randomisation tests",
+      "Calcium activity"
+    ]
+  },
+  "limits": {
+    "scope_capped": false,
+    "max_items": 2000,
+    "no_text": 0,
+    "no_fulltext": 0,
+    "no_methods_section": 0,
+    "no_abstract": 0,
+    "interpretation": "Not detected does not mean not performed. Pipeline stage order is canonical; explicit sequence cues do not establish a complete chronology."
+  }
+}
