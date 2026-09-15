@@ -219,22 +219,51 @@ def list_authors(limit: int = 200) -> list[dict]:
     return [{"name": n, "count": c} for n, c in pairs[:limit]]
 
 
+def _tags_by_item(item_ids: Optional[list[int]] = None) -> dict[int, list[str]]:
+    """v2 tags (manual and automatic) per item id.
+
+    Items created through the v2 catalog (connector, identifiers, imports) keep their subjects and
+    keywords as tags in ``item_tags``; the legacy ``subjects`` / ``keywords`` columns stay empty. The
+    facets and the concept map read both, so they work for every item.
+    """
+    conn = get_conn()
+    sql = ("SELECT it.item_id, t.name FROM item_tags it JOIN tags t ON t.id = it.tag_id "
+           "JOIN items i ON i.id = it.item_id WHERE i.deleted_at IS NULL")
+    params: list = []
+    if item_ids is not None:
+        if not item_ids:
+            return {}
+        sql += f" AND it.item_id IN ({','.join('?' for _ in item_ids)})"
+        params = list(item_ids)
+    out: dict[int, list[str]] = defaultdict(list)
+    for item_id, name in conn.execute(sql, params).fetchall():
+        if name and name.strip():
+            out[item_id].append(name.strip())
+    return out
+
+
 def list_subjects(limit: int = 200) -> list[dict]:
-    """Aggregate distinct subjects + keywords across the library, with counts."""
-    rows = get_conn().execute("SELECT subjects, keywords FROM items WHERE deleted_at IS NULL").fetchall()
+    """Aggregate distinct subjects, keywords and tags across the library, with counts (one per item)."""
+    rows = get_conn().execute("SELECT id, subjects, keywords FROM items WHERE deleted_at IS NULL").fetchall()
+    tags = _tags_by_item()
     counter: dict[str, int] = {}
+    labels: dict[str, str] = {}
     for r in rows:
+        names: set[str] = set()
         for col in ("subjects", "keywords"):
             try:
                 vals = json.loads(r[col]) if r[col] else []
             except (json.JSONDecodeError, TypeError):
                 vals = []
-            for v in vals:
-                name = (v or "").strip()
-                if name and len(name) > 1:
-                    counter[name] = counter.get(name, 0) + 1
+            names.update((v or "").strip() for v in vals)
+        names.update(tags.get(r["id"], []))
+        for name in names:
+            if name and len(name) > 1:
+                key = name.casefold()
+                labels.setdefault(key, name)
+                counter[key] = counter.get(key, 0) + 1
     pairs = sorted(counter.items(), key=lambda kv: (-kv[1], kv[0]))
-    return [{"name": n, "count": c} for n, c in pairs[:limit]]
+    return [{"name": labels[k], "count": c} for k, c in pairs[:limit]]
 
 
 def facets() -> dict:
@@ -277,7 +306,7 @@ def _graph_key(label: str) -> str:
 
 def _graph_terms(item: dict) -> list[tuple[str, str]]:
     labels: dict[str, str] = {}
-    for field in ("subjects", "keywords"):
+    for field in ("subjects", "keywords", "tags"):
         values = item.get(field) or []
         if isinstance(values, str):
             try:
@@ -312,6 +341,19 @@ def subject_graph(
     limit = max(12, min(limit, 90))
     depth = max(1, min(depth, 2))
     items = list_items(collection_id=collection_id, author=author, subject=subject, limit=10000)
+    # v2 tags carry the subjects of connector / identifier imports (the legacy columns are empty for them).
+    all_tags = _tags_by_item()
+    if subject:
+        # The catalog's subject filter only knows the legacy columns: add the items whose tags match.
+        wanted = _graph_key(subject)
+        seen = {it["id"] for it in items}
+        tagged_ids = {iid for iid, names in all_tags.items() if wanted in {_graph_key(n) for n in names}}
+        if tagged_ids - seen:
+            items.extend(it for it in list_items(collection_id=collection_id, author=author, limit=10000)
+                         if it["id"] in tagged_ids and it["id"] not in seen)
+    for it in items:
+        own = [t if isinstance(t, str) else (t.get("name") or "") for t in (it.get("tags") or [])]
+        it["tags"] = [*own, *all_tags.get(it["id"], [])]
 
     label_by_key: dict[str, str] = {}
     term_items: dict[str, list[dict]] = defaultdict(list)
