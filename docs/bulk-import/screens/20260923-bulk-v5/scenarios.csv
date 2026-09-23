@@ -1,0 +1,17 @@
+viewport_theme,scenario,pass,seconds
+desktop-light,paste_destination_failures_review,True,2.125
+desktop-light,csv_docx_multi_pdf_my_library,True,2.13
+desktop-light,recursive_folder_new_collection,True,2.113
+desktop-light,progress_cancel_reopen_reload,True,3.383
+desktop-dark,paste_destination_failures_review,True,2.131
+desktop-dark,csv_docx_multi_pdf_my_library,True,2.303
+desktop-dark,recursive_folder_new_collection,True,1.439
+desktop-dark,progress_cancel_reopen_reload,True,6.947
+laptop-light,paste_destination_failures_review,True,2.12
+laptop-light,csv_docx_multi_pdf_my_library,True,3.477
+laptop-light,recursive_folder_new_collection,True,1.338
+laptop-light,progress_cancel_reopen_reload,True,6.057
+laptop-dark,paste_destination_failures_review,True,2.115
+laptop-dark,csv_docx_multi_pdf_my_library,True,2.22
+laptop-dark,recursive_folder_new_collection,True,1.135
+laptop-dark,progress_cancel_reopen_reload,True,3.372

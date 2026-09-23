@@ -1,0 +1,6 @@
+﻿"source","query","status","item_id","pdf","error","warnings"
+"Pasted text: Text line 1","10.9999/audit-paste-one","matched","2","false","Reference saved; Synthetic unavailable-PDF fixture",""
+"Pasted text: Text line 2","10.9999/audit-paste-two","matched","3","true","",""
+"Pasted text: Text line 3","10.9999/audit-missing","not_found","","false","No metadata was found for this DOI.",""
+"Pasted text: Text line 4","Synthetic ambiguous neuroscience study","needs_review","","false","No unique exact title match. Supply a DOI or structured citation metadata.",""
+"Pasted text: Text line 5","Synthetic unmatched neuroscience query","needs_review","","false","No unique exact title match. Supply a DOI or structured citation metadata.",""

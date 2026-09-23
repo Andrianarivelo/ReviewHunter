@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/Andrianarivelo/ReviewHunter)
+[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/Andrianarivelo/ReviewHunter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Issues](https://img.shields.io/github/issues/Andrianarivelo/ReviewHunter)](https://github.com/Andrianarivelo/ReviewHunter/issues)
 [![Size](https://img.shields.io/github/repo-size/Andrianarivelo/ReviewHunter.svg)](https://github.com/Andrianarivelo/ReviewHunter)
@@ -10,6 +10,25 @@
 collect papers and books, find legal PDFs, organise them in nested collections and tags, read and annotate
 PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Everything runs on your computer
 (SQLite + your files); Google Drive is optional for storage and backups.
+
+### Bulk publication import (2.7)
+
+Open **Import** in the library toolbar, or right-click a collection and choose **Import
+Publications Here**. Paste a publication list, select CSV/TSV or Word `.docx` lists,
+choose several PDFs, or browse/paste a folder containing PDFs. BibTeX, RIS and
+CSL-JSON imports remain available. Save legacy Word `.doc` documents as `.docx` first.
+
+Choose the current collection, another collection, **My Library**, or **Create a new
+collection**. The destination stays fixed while the import runs. PDFs are copied,
+identified and attached to matching references; source files remain unchanged.
+Citation metadata search and PDF search are optional. Uncertain matches are reported
+for review instead of importing the first search result. Missing metadata stays missing.
+
+The progress window reports each entry, including references saved without a PDF.
+Close and reopen it while working, stop after the current entry, or save its report as
+CSV. Jobs run while the app server stays open; reports expire after an hour or a server
+restart. A batch supports up to 500 references, 200 MB per PDF, 10 MB per other file,
+2 MB of pasted text and 1 GB combined. Folder imports can include subfolders.
 
 ### PDF imports and reference matching (2.2.1)
 

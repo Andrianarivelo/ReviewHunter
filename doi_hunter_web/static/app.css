@@ -306,3 +306,84 @@ textarea.field-input { height: auto; padding: .3rem .4rem; }
 }
 .dark .kbd { background: rgba(39, 43, 60, .8); }
 code { font: 11.5px ui-monospace, 'Cascadia Code', Consolas, monospace; }
+/* Bulk import keeps source, destination and progress readable in one window. */
+.dialog.bulk-import-dialog { width: min(900px, 96vw); max-height: 94vh; padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.bulk-import-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding: 22px 26px 18px; border-bottom: 1px solid var(--line); }
+.bulk-import-header h3 { margin: 4px 0 6px; font: 26px Georgia, serif; }
+.bulk-import-header p, .bulk-job-heading p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.bulk-import-body { overflow-y: auto; min-height: 0; padding: 20px 26px; }
+.bulk-import-inputs { min-width: 0; border: 0; padding: 0; margin: 0; }
+.bulk-source-tabs { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--row-hover); }
+.bulk-source-tabs button { flex: 1; padding: 10px 12px; border-radius: 7px; font-size: 13px; font-weight: 600; }
+.bulk-source-tabs button.active, .bulk-report-tools button.active { background: var(--row-selected); color: #0284c7; box-shadow: inset 0 0 0 1px var(--row-selected-line); }
+.dark .bulk-source-tabs button.active, .dark .bulk-report-tools button.active { color: #67d4ec; }
+.bulk-source-panel { margin-top: 20px; }
+.bulk-source-panel > label:not(.bulk-upload), .bulk-import-destination > label { display: block; font-size: 12px; font-weight: 600; }
+.bulk-source-panel textarea { display: block; width: 100%; min-height: 140px; max-height: 260px; resize: vertical; margin-top: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 9px; background: transparent; font-size: 13px; line-height: 1.65; }
+.bulk-import-dialog :is(textarea,input,select,button):focus-visible { outline: 2px solid #0ea5e9; outline-offset: 2px; }
+.bulk-source-help { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+.bulk-source-help label { display: inline-flex; align-items: center; gap: 8px; }
+.bulk-source-help button, .bulk-folder-picker, .bulk-result-actions button, .bulk-report-tools > button { color: #0284c7; font-weight: 600; }
+.dark :is(.bulk-source-help button,.bulk-folder-picker,.bulk-result-actions button,.bulk-report-tools > button) { color: #67d4ec; }
+.bulk-upload { position: relative; display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 30px 18px; }
+.bulk-upload strong { font-size: 16px; }
+.bulk-upload span { font-size: 13px; }
+.bulk-upload small { font-size: 12px; color: var(--muted); }
+.bulk-upload input, .bulk-folder-picker input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+.bulk-upload:focus-within, .bulk-folder-picker:focus-within { outline: 2px solid #0ea5e9; outline-offset: 3px; }
+.bulk-folder-picker { position: relative; cursor: pointer; }
+#bulk-import-folder { margin-top: 8px; }
+.bulk-file-selection { margin-top: 16px; font-size: 12px; }
+.bulk-file-selection ul { max-height: 150px; overflow-y: auto; margin-top: 8px; border: 1px solid var(--line); border-radius: 8px; }
+.bulk-file-selection li { display: flex; align-items: center; gap: 12px; padding: 6px 10px; border-bottom: 1px solid var(--line-soft); }
+.bulk-file-selection li span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.bulk-file-selection li small { color: var(--muted); white-space: nowrap; }
+.bulk-file-selection li button { font-size: 18px; padding: 0 6px; }
+.bulk-import-destination { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
+.bulk-import-destination .dlg-input { margin-top: 8px; font-weight: 400; }
+.bulk-import-options { display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 18px 0 10px; font-size: 12px; }
+.bulk-import-options label { display: flex; align-items: center; gap: 8px; }
+.bulk-hint { margin: 8px 0; color: var(--muted); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.bulk-import-error, .bulk-entry-error { color: #be123c; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.dark :is(.bulk-import-error,.bulk-entry-error) { color: #fda4af; }
+.bulk-import-error { margin-top: 14px; border: 1px solid #be123c66; border-radius: 8px; padding: 10px 12px; }
+.bulk-zotero { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 12px; }
+.bulk-zotero summary, .bulk-result-row summary { cursor: pointer; }
+.bulk-import-footer { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 10px; border-top: 1px solid var(--line); padding: 14px 26px; }
+.bulk-import-footer > span { margin-right: auto; font-size: 12px; color: var(--muted); max-width: 45%; overflow-wrap: anywhere; }
+.bulk-import-dialog button:disabled { opacity: .5; cursor: default; }
+.bulk-job-heading { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.bulk-job-heading h4 { font-size: 19px; margin: 0 0 4px; font-weight: 600; }
+.bulk-job-heading > b { font-size: 20px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bulk-progress { height: 6px; margin: 17px 0; background: var(--line); border-radius: 8px; overflow: hidden; }
+.bulk-progress i { display: block; height: 100%; background: linear-gradient(90deg,#0284c7,#14b8a6); transition: width .3s; }
+.bulk-import-stats { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin: 20px 0; }
+.bulk-import-stats > div { border: 1px solid var(--line); border-radius: 9px; padding: 12px; }
+.bulk-import-stats b { display: block; font-size: 23px; font-variant-numeric: tabular-nums; }
+.bulk-import-stats span { font-size: 11px; color: var(--muted); }
+.bulk-report-tools { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 14px; font-size: 12px; }
+.bulk-report-tools button { padding: 7px 10px; border-radius: 6px; }
+.bulk-result-list { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.bulk-result-row { display: grid; grid-template-columns: minmax(0,1fr) 155px; gap: 18px; padding: 15px; border-bottom: 1px solid var(--line); }
+.bulk-result-row:last-child { border-bottom: 0; }
+.bulk-result-row strong { display: block; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.bulk-result-row small { display: block; font-size: 11px; color: var(--muted); overflow-wrap: anywhere; }
+.bulk-result-row details { margin-top: 9px; font-size: 12px; }
+.bulk-candidate { margin: 10px 0; }
+.bulk-result-actions { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; font-size: 12px; }
+.bulk-result-status { padding: 3px 8px; border-radius: 6px; background: var(--row-hover); font-size: 11px; }
+.bulk-result-row:is([data-status='created'],[data-status='matched'],[data-status='pdf']) .bulk-result-status { color: #047857; background: #10b9811a; }
+.dark .bulk-result-row:is([data-status='created'],[data-status='matched'],[data-status='pdf']) .bulk-result-status { color: #6ee7b7; }
+.bulk-result-row:is([data-status='failed'],[data-status='needs_review'],[data-status='not_found']) .bulk-result-status { color: #b45309; background: #f59e0b1a; }
+.dark .bulk-result-row:is([data-status='failed'],[data-status='needs_review'],[data-status='not_found']) .bulk-result-status { color: #fcd34d; }
+.bulk-import-badge { font-size: 10px; border-radius: 5px; padding: 2px 5px; background: var(--row-selected); }
+@media (max-width: 640px) {
+  .bulk-import-header, .bulk-import-body { padding: 16px; }
+  .bulk-import-footer { padding: 12px 16px; }
+  .bulk-import-destination { grid-template-columns: 1fr; }
+  .bulk-import-stats { gap: 6px; }
+  .bulk-import-stats > div { padding: 8px; }
+  .bulk-result-row { grid-template-columns: minmax(0,1fr); gap: 10px; }
+  .bulk-result-actions { flex-direction: row; flex-wrap: wrap; align-items: center; text-align: left; }
+  .bulk-source-tabs button { padding: 9px 6px; font-size: 12px; }
+}

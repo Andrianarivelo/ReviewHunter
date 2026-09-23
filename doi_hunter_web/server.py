@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import __version__
-from . import api_v2, books, catalog, config, connector, gdrive, library
+from . import api_v2, books, bulk_api, catalog, config, connector, gdrive, library
 from .config import default_google_drive_root, library_root, papers_dir
 from .security import LocalOriginGuard, NoStoreApi
 
@@ -182,6 +182,7 @@ def _impact_factor_loop(stop: threading.Event, interval_s: int = IMPACT_FACTOR_P
 
 
 app.include_router(api_v2.router)
+app.include_router(bulk_api.router)
 app.include_router(connector.router)
 
 

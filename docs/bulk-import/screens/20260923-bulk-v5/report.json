@@ -1,0 +1,2612 @@
+{
+  "synthetic": true,
+  "fixture": "C:\\Users\\andry\\AppData\\Local\\Temp\\claude\\bulk-import-audit-rk48pk1t\\fixture.json",
+  "runs": {
+    "desktop-light": {
+      "screens": {
+        "paste": {
+          "width": 900,
+          "height": 744.625,
+          "top": 77.6875,
+          "left": 270,
+          "right": 1170,
+          "bottom": 822.3125,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic bulk Alpha",
+          "completed": false,
+          "progressRatio": null
+        },
+        "paste-results": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 5,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "review": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 4,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "files": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": null
+        },
+        "file-results": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 7,
+          "destination": "My Library",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "folder": {
+          "width": 900,
+          "height": 652,
+          "top": 124,
+          "left": 270,
+          "right": 1170,
+          "bottom": 776,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic folder desktop-light",
+          "completed": false,
+          "progressRatio": null
+        },
+        "folder-results": {
+          "width": 900,
+          "height": 670,
+          "top": 115,
+          "left": 270,
+          "right": 1170,
+          "bottom": 785,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 2,
+          "destination": "Synthetic folder desktop-light",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "progress": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0
+        },
+        "cancelled": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.18999335106382978
+        },
+        "restored": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.18999335106382978
+        }
+      },
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.125
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 2.13
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 2.113
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 3.383
+        }
+      ],
+      "paste": {
+        "job_id": "ca2db578ba204a3b936e54f3a305e969",
+        "status": "completed",
+        "total": 5,
+        "completed": 5,
+        "current": null,
+        "collection": {
+          "id": 1,
+          "name": "Synthetic bulk Alpha"
+        },
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149652.534861,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-paste-one",
+            "source": "Pasted text: Text line 1",
+            "status": "created",
+            "item_id": 2,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste one",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_found",
+            "error": "Reference saved; Synthetic unavailable-PDF fixture",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-paste-two",
+            "source": "Pasted text: Text line 2",
+            "status": "created",
+            "item_id": 3,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste two",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "downloaded",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-missing",
+            "source": "Pasted text: Text line 3",
+            "status": "not_found",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No metadata was found for this DOI.",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "Synthetic ambiguous neuroscience study",
+            "source": "Pasted text: Text line 4",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-a",
+                "year": 2024
+              },
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-b",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "Synthetic unmatched neuroscience query",
+            "source": "Pasted text: Text line 5",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Unrelated top-ranked publication",
+                "doi": "10.9999/audit-unrelated",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149654.5637157
+      },
+      "started_from_seed_only": true,
+      "files": {
+        "job_id": "5ff9682fb515492db17f166eea42eb27",
+        "status": "completed",
+        "total": 7,
+        "completed": 7,
+        "current": null,
+        "collection": null,
+        "warnings": [],
+        "created_at": 1790149656.6078029,
+        "records": [
+          {
+            "index": 1,
+            "query": "broken.pdf",
+            "source": "broken.pdf",
+            "status": "failed",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "The response is not a PDF (it may be a login or error page)"
+          },
+          {
+            "index": 2,
+            "query": "pdf-match.pdf",
+            "source": "pdf-match.pdf",
+            "status": "pdf",
+            "item_id": 1,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf match",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "pdf-new.pdf",
+            "source": "pdf-new.pdf",
+            "status": "pdf",
+            "item_id": 4,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf new",
+            "created": true,
+            "matched": false,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-csv-one",
+            "source": "references.csv: CSV row 2",
+            "status": "created",
+            "item_id": 5,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv one",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-csv-two",
+            "source": "references.csv: CSV row 3",
+            "status": "created",
+            "item_id": 6,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv two",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-docx-one",
+            "source": "references.docx: DOCX paragraph 1",
+            "status": "created",
+            "item_id": 7,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx one",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-docx-two",
+            "source": "references.docx: DOCX paragraph 2",
+            "status": "created",
+            "item_id": 8,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx two",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149658.4904394
+      },
+      "folder": {
+        "job_id": "4dc2f202c4164a5db476fdd32f2d09e1",
+        "status": "completed",
+        "total": 2,
+        "completed": 2,
+        "current": null,
+        "collection": {
+          "id": 3,
+          "name": "Synthetic folder desktop-light",
+          "parent_id": null,
+          "color": null,
+          "count": 0
+        },
+        "warnings": [],
+        "created_at": 1790149659.85365,
+        "records": [
+          {
+            "index": 1,
+            "query": "folder-one.pdf",
+            "source": "folder-one.pdf",
+            "status": "pdf",
+            "item_id": 9,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder one",
+            "created": true,
+            "matched": false,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "nested\\folder-two.pdf",
+            "source": "nested\\folder-two.pdf",
+            "status": "pdf",
+            "item_id": 10,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder two",
+            "created": true,
+            "matched": false,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149661.2659028
+      },
+      "cancel": {
+        "job_id": "009ddf7b98a1473a9b967bc7c91365d0",
+        "status": "cancelled",
+        "total": 16,
+        "completed": 3,
+        "current": null,
+        "collection": null,
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149662.5740323,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-cancel-00",
+            "source": "Pasted text: Text line 1",
+            "status": "created",
+            "item_id": 11,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 00",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-cancel-01",
+            "source": "Pasted text: Text line 2",
+            "status": "created",
+            "item_id": 12,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 01",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-cancel-02",
+            "source": "Pasted text: Text line 3",
+            "status": "created",
+            "item_id": 13,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 02",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-cancel-03",
+            "source": "Pasted text: Text line 4",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-cancel-04",
+            "source": "Pasted text: Text line 5",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-cancel-05",
+            "source": "Pasted text: Text line 6",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-cancel-06",
+            "source": "Pasted text: Text line 7",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 8,
+            "query": "10.9999/audit-cancel-07",
+            "source": "Pasted text: Text line 8",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 9,
+            "query": "10.9999/audit-cancel-08",
+            "source": "Pasted text: Text line 9",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 10,
+            "query": "10.9999/audit-cancel-09",
+            "source": "Pasted text: Text line 10",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 11,
+            "query": "10.9999/audit-cancel-10",
+            "source": "Pasted text: Text line 11",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 12,
+            "query": "10.9999/audit-cancel-11",
+            "source": "Pasted text: Text line 12",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 13,
+            "query": "10.9999/audit-cancel-12",
+            "source": "Pasted text: Text line 13",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 14,
+            "query": "10.9999/audit-cancel-13",
+            "source": "Pasted text: Text line 14",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 15,
+            "query": "10.9999/audit-cancel-14",
+            "source": "Pasted text: Text line 15",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 16,
+            "query": "10.9999/audit-cancel-15",
+            "source": "Pasted text: Text line 16",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          }
+        ],
+        "finished_at": 1790149663.4919598
+      },
+      "unexpected_network": [],
+      "console_errors": [],
+      "external_font_warnings": []
+    },
+    "desktop-dark": {
+      "screens": {
+        "paste": {
+          "width": 900,
+          "height": 744.625,
+          "top": 77.6875,
+          "left": 270,
+          "right": 1170,
+          "bottom": 822.3125,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic bulk Alpha",
+          "completed": false,
+          "progressRatio": null
+        },
+        "paste-results": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 5,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "review": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 4,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "files": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": null
+        },
+        "file-results": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 7,
+          "destination": "My Library",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "folder": {
+          "width": 900,
+          "height": 652,
+          "top": 124,
+          "left": 270,
+          "right": 1170,
+          "bottom": 776,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic folder desktop-dark",
+          "completed": false,
+          "progressRatio": null
+        },
+        "folder-results": {
+          "width": 900,
+          "height": 670,
+          "top": 115,
+          "left": 270,
+          "right": 1170,
+          "bottom": 785,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 2,
+          "destination": "Synthetic folder desktop-dark",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "progress": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0
+        },
+        "cancelled": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.18999335106382978
+        },
+        "restored": {
+          "width": 900,
+          "height": 846,
+          "top": 27,
+          "left": 270,
+          "right": 1170,
+          "bottom": 873,
+          "viewport": [
+            1440,
+            900
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.18999335106382978
+        }
+      },
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.131
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 2.303
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 1.439
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 6.947
+        }
+      ],
+      "paste": {
+        "job_id": "51d9432fe0d8422bb2fe0ed0328ca1c2",
+        "status": "completed",
+        "total": 5,
+        "completed": 5,
+        "current": null,
+        "collection": {
+          "id": 1,
+          "name": "Synthetic bulk Alpha"
+        },
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149670.007393,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-paste-one",
+            "source": "Pasted text: Text line 1",
+            "status": "matched",
+            "item_id": 2,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_found",
+            "error": "Reference saved; Synthetic unavailable-PDF fixture",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-paste-two",
+            "source": "Pasted text: Text line 2",
+            "status": "matched",
+            "item_id": 3,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "existing",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-missing",
+            "source": "Pasted text: Text line 3",
+            "status": "not_found",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No metadata was found for this DOI.",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "Synthetic ambiguous neuroscience study",
+            "source": "Pasted text: Text line 4",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-a",
+                "year": 2024
+              },
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-b",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "Synthetic unmatched neuroscience query",
+            "source": "Pasted text: Text line 5",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Unrelated top-ranked publication",
+                "doi": "10.9999/audit-unrelated",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149671.5238314
+      },
+      "started_from_seed_only": false,
+      "files": {
+        "job_id": "69d7321b998748708572643f314fe1d0",
+        "status": "completed",
+        "total": 7,
+        "completed": 7,
+        "current": null,
+        "collection": null,
+        "warnings": [],
+        "created_at": 1790149674.2033188,
+        "records": [
+          {
+            "index": 1,
+            "query": "broken.pdf",
+            "source": "broken.pdf",
+            "status": "failed",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "The response is not a PDF (it may be a login or error page)"
+          },
+          {
+            "index": 2,
+            "query": "pdf-match.pdf",
+            "source": "pdf-match.pdf",
+            "status": "pdf",
+            "item_id": 1,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf match",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "pdf-new.pdf",
+            "source": "pdf-new.pdf",
+            "status": "pdf",
+            "item_id": 4,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf new",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-csv-one",
+            "source": "references.csv: CSV row 2",
+            "status": "matched",
+            "item_id": 5,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-csv-two",
+            "source": "references.csv: CSV row 3",
+            "status": "matched",
+            "item_id": 6,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-docx-one",
+            "source": "references.docx: DOCX paragraph 1",
+            "status": "matched",
+            "item_id": 7,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-docx-two",
+            "source": "references.docx: DOCX paragraph 2",
+            "status": "matched",
+            "item_id": 8,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149676.0536747
+      },
+      "folder": {
+        "job_id": "e864b645a50a4a2ba1e91b86f1858d71",
+        "status": "completed",
+        "total": 2,
+        "completed": 2,
+        "current": null,
+        "collection": {
+          "id": 4,
+          "name": "Synthetic folder desktop-dark",
+          "parent_id": null,
+          "color": null,
+          "count": 0
+        },
+        "warnings": [],
+        "created_at": 1790149677.867075,
+        "records": [
+          {
+            "index": 1,
+            "query": "folder-one.pdf",
+            "source": "folder-one.pdf",
+            "status": "pdf",
+            "item_id": 9,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder one",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "nested\\folder-two.pdf",
+            "source": "nested\\folder-two.pdf",
+            "status": "pdf",
+            "item_id": 10,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder two",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149678.5263968
+      },
+      "cancel": {
+        "job_id": "7465160d2efc45a19746efdf925ec974",
+        "status": "cancelled",
+        "total": 16,
+        "completed": 3,
+        "current": null,
+        "collection": null,
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149679.6373398,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-cancel-00",
+            "source": "Pasted text: Text line 1",
+            "status": "matched",
+            "item_id": 11,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 00",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-cancel-01",
+            "source": "Pasted text: Text line 2",
+            "status": "matched",
+            "item_id": 12,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 01",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-cancel-02",
+            "source": "Pasted text: Text line 3",
+            "status": "matched",
+            "item_id": 13,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 02",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-cancel-03",
+            "source": "Pasted text: Text line 4",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-cancel-04",
+            "source": "Pasted text: Text line 5",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-cancel-05",
+            "source": "Pasted text: Text line 6",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-cancel-06",
+            "source": "Pasted text: Text line 7",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 8,
+            "query": "10.9999/audit-cancel-07",
+            "source": "Pasted text: Text line 8",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 9,
+            "query": "10.9999/audit-cancel-08",
+            "source": "Pasted text: Text line 9",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 10,
+            "query": "10.9999/audit-cancel-09",
+            "source": "Pasted text: Text line 10",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 11,
+            "query": "10.9999/audit-cancel-10",
+            "source": "Pasted text: Text line 11",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 12,
+            "query": "10.9999/audit-cancel-11",
+            "source": "Pasted text: Text line 12",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 13,
+            "query": "10.9999/audit-cancel-12",
+            "source": "Pasted text: Text line 13",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 14,
+            "query": "10.9999/audit-cancel-13",
+            "source": "Pasted text: Text line 14",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 15,
+            "query": "10.9999/audit-cancel-14",
+            "source": "Pasted text: Text line 15",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 16,
+            "query": "10.9999/audit-cancel-15",
+            "source": "Pasted text: Text line 16",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          }
+        ],
+        "finished_at": 1790149680.5476995
+      },
+      "unexpected_network": [],
+      "console_errors": [],
+      "external_font_warnings": []
+    },
+    "laptop-light": {
+      "screens": {
+        "paste": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic bulk Alpha",
+          "completed": false,
+          "progressRatio": null
+        },
+        "paste-results": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 5,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "review": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 4,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "files": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": null
+        },
+        "file-results": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 7,
+          "destination": "My Library",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "folder": {
+          "width": 900,
+          "height": 652,
+          "top": 58,
+          "left": 62,
+          "right": 962,
+          "bottom": 710,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic folder laptop-light",
+          "completed": false,
+          "progressRatio": null
+        },
+        "folder-results": {
+          "width": 900,
+          "height": 670,
+          "top": 49,
+          "left": 62,
+          "right": 962,
+          "bottom": 719,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 2,
+          "destination": "Synthetic folder laptop-light",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "progress": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0
+        },
+        "cancelled": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.5599881796690307
+        },
+        "restored": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.5599881796690307
+        }
+      },
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.12
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 3.477
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 1.338
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 6.057
+        }
+      ],
+      "paste": {
+        "job_id": "1594b39598804bceac041891d02e6daa",
+        "status": "completed",
+        "total": 5,
+        "completed": 5,
+        "current": null,
+        "collection": {
+          "id": 1,
+          "name": "Synthetic bulk Alpha"
+        },
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149691.5508044,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-paste-one",
+            "source": "Pasted text: Text line 1",
+            "status": "matched",
+            "item_id": 2,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_found",
+            "error": "Reference saved; Synthetic unavailable-PDF fixture",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-paste-two",
+            "source": "Pasted text: Text line 2",
+            "status": "matched",
+            "item_id": 3,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "existing",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-missing",
+            "source": "Pasted text: Text line 3",
+            "status": "not_found",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No metadata was found for this DOI.",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "Synthetic ambiguous neuroscience study",
+            "source": "Pasted text: Text line 4",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-a",
+                "year": 2024
+              },
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-b",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "Synthetic unmatched neuroscience query",
+            "source": "Pasted text: Text line 5",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Unrelated top-ranked publication",
+                "doi": "10.9999/audit-unrelated",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149693.0617037
+      },
+      "started_from_seed_only": false,
+      "files": {
+        "job_id": "d3d182b3bfb34416815d7d995b3bab1c",
+        "status": "completed",
+        "total": 7,
+        "completed": 7,
+        "current": null,
+        "collection": null,
+        "warnings": [],
+        "created_at": 1790149696.0287454,
+        "records": [
+          {
+            "index": 1,
+            "query": "broken.pdf",
+            "source": "broken.pdf",
+            "status": "failed",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "The response is not a PDF (it may be a login or error page)"
+          },
+          {
+            "index": 2,
+            "query": "pdf-match.pdf",
+            "source": "pdf-match.pdf",
+            "status": "pdf",
+            "item_id": 1,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf match",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "pdf-new.pdf",
+            "source": "pdf-new.pdf",
+            "status": "pdf",
+            "item_id": 4,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf new",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-csv-one",
+            "source": "references.csv: CSV row 2",
+            "status": "matched",
+            "item_id": 5,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-csv-two",
+            "source": "references.csv: CSV row 3",
+            "status": "matched",
+            "item_id": 6,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-docx-one",
+            "source": "references.docx: DOCX paragraph 1",
+            "status": "matched",
+            "item_id": 7,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-docx-two",
+            "source": "references.docx: DOCX paragraph 2",
+            "status": "matched",
+            "item_id": 8,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149698.189624
+      },
+      "folder": {
+        "job_id": "e3eaef1c651d4ff0830211e7a5150f7f",
+        "status": "completed",
+        "total": 2,
+        "completed": 2,
+        "current": null,
+        "collection": {
+          "id": 5,
+          "name": "Synthetic folder laptop-light",
+          "parent_id": null,
+          "color": null,
+          "count": 0
+        },
+        "warnings": [],
+        "created_at": 1790149700.4557543,
+        "records": [
+          {
+            "index": 1,
+            "query": "folder-one.pdf",
+            "source": "folder-one.pdf",
+            "status": "pdf",
+            "item_id": 9,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder one",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "nested\\folder-two.pdf",
+            "source": "nested\\folder-two.pdf",
+            "status": "pdf",
+            "item_id": 10,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder two",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149701.123328
+      },
+      "cancel": {
+        "job_id": "27b1c0ea127b4ac0982392bb9b499ca8",
+        "status": "cancelled",
+        "total": 16,
+        "completed": 9,
+        "current": null,
+        "collection": null,
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149702.1897407,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-cancel-00",
+            "source": "Pasted text: Text line 1",
+            "status": "matched",
+            "item_id": 11,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 00",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-cancel-01",
+            "source": "Pasted text: Text line 2",
+            "status": "matched",
+            "item_id": 12,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 01",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-cancel-02",
+            "source": "Pasted text: Text line 3",
+            "status": "matched",
+            "item_id": 13,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 02",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-cancel-03",
+            "source": "Pasted text: Text line 4",
+            "status": "created",
+            "item_id": 14,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 03",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-cancel-04",
+            "source": "Pasted text: Text line 5",
+            "status": "created",
+            "item_id": 15,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 04",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-cancel-05",
+            "source": "Pasted text: Text line 6",
+            "status": "created",
+            "item_id": 16,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 05",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-cancel-06",
+            "source": "Pasted text: Text line 7",
+            "status": "created",
+            "item_id": 17,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 06",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 8,
+            "query": "10.9999/audit-cancel-07",
+            "source": "Pasted text: Text line 8",
+            "status": "created",
+            "item_id": 18,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 07",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 9,
+            "query": "10.9999/audit-cancel-08",
+            "source": "Pasted text: Text line 9",
+            "status": "created",
+            "item_id": 19,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 08",
+            "created": true,
+            "matched": false,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 10,
+            "query": "10.9999/audit-cancel-09",
+            "source": "Pasted text: Text line 10",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 11,
+            "query": "10.9999/audit-cancel-10",
+            "source": "Pasted text: Text line 11",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 12,
+            "query": "10.9999/audit-cancel-11",
+            "source": "Pasted text: Text line 12",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 13,
+            "query": "10.9999/audit-cancel-12",
+            "source": "Pasted text: Text line 13",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 14,
+            "query": "10.9999/audit-cancel-13",
+            "source": "Pasted text: Text line 14",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 15,
+            "query": "10.9999/audit-cancel-14",
+            "source": "Pasted text: Text line 15",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 16,
+            "query": "10.9999/audit-cancel-15",
+            "source": "Pasted text: Text line 16",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          }
+        ],
+        "finished_at": 1790149705.167873
+      },
+      "unexpected_network": [],
+      "console_errors": [],
+      "external_font_warnings": []
+    },
+    "laptop-dark": {
+      "screens": {
+        "paste": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic bulk Alpha",
+          "completed": false,
+          "progressRatio": null
+        },
+        "paste-results": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 5,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "review": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 4,
+          "destination": "Synthetic bulk Alpha",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "files": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": null
+        },
+        "file-results": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 7,
+          "destination": "My Library",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "folder": {
+          "width": 900,
+          "height": 652,
+          "top": 58,
+          "left": 62,
+          "right": 962,
+          "bottom": 710,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 0,
+          "destination": "Synthetic folder laptop-dark",
+          "completed": false,
+          "progressRatio": null
+        },
+        "folder-results": {
+          "width": 900,
+          "height": 670,
+          "top": 49,
+          "left": 62,
+          "right": 962,
+          "bottom": 719,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 2,
+          "destination": "Synthetic folder laptop-dark",
+          "completed": true,
+          "progressRatio": 1
+        },
+        "progress": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0
+        },
+        "cancelled": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.18999335106382978
+        },
+        "restored": {
+          "width": 900,
+          "height": 721.90625,
+          "top": 23.046875,
+          "left": 62,
+          "right": 962,
+          "bottom": 744.953125,
+          "viewport": [
+            1024,
+            768
+          ],
+          "horizontalOverflow": false,
+          "rows": 16,
+          "destination": "My Library",
+          "completed": false,
+          "progressRatio": 0.18999335106382978
+        }
+      },
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.115
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 2.22
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 1.135
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 3.372
+        }
+      ],
+      "paste": {
+        "job_id": "ad671057b61e4c7483c911cf5fd02077",
+        "status": "completed",
+        "total": 5,
+        "completed": 5,
+        "current": null,
+        "collection": {
+          "id": 1,
+          "name": "Synthetic bulk Alpha"
+        },
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149713.4723659,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-paste-one",
+            "source": "Pasted text: Text line 1",
+            "status": "matched",
+            "item_id": 2,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_found",
+            "error": "Reference saved; Synthetic unavailable-PDF fixture",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-paste-two",
+            "source": "Pasted text: Text line 2",
+            "status": "matched",
+            "item_id": 3,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience paste two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "existing",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-missing",
+            "source": "Pasted text: Text line 3",
+            "status": "not_found",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No metadata was found for this DOI.",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "Synthetic ambiguous neuroscience study",
+            "source": "Pasted text: Text line 4",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-a",
+                "year": 2024
+              },
+              {
+                "title": "Synthetic ambiguous neuroscience study",
+                "doi": "10.9999/audit-ambiguous-b",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "Synthetic unmatched neuroscience query",
+            "source": "Pasted text: Text line 5",
+            "status": "needs_review",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "No unique exact title match. Supply a DOI or structured citation metadata.",
+            "candidates": [
+              {
+                "title": "Unrelated top-ranked publication",
+                "doi": "10.9999/audit-unrelated",
+                "year": 2024
+              }
+            ],
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149714.9847612
+      },
+      "started_from_seed_only": false,
+      "files": {
+        "job_id": "3bbfa255ddf04697addaaed2be30b95e",
+        "status": "completed",
+        "total": 7,
+        "completed": 7,
+        "current": null,
+        "collection": null,
+        "warnings": [],
+        "created_at": 1790149717.517346,
+        "records": [
+          {
+            "index": 1,
+            "query": "broken.pdf",
+            "source": "broken.pdf",
+            "status": "failed",
+            "item_id": null,
+            "pdf": false,
+            "warnings": [],
+            "error": "The response is not a PDF (it may be a login or error page)"
+          },
+          {
+            "index": 2,
+            "query": "pdf-match.pdf",
+            "source": "pdf-match.pdf",
+            "status": "pdf",
+            "item_id": 1,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf match",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "pdf-new.pdf",
+            "source": "pdf-new.pdf",
+            "status": "pdf",
+            "item_id": 4,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience pdf new",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-csv-one",
+            "source": "references.csv: CSV row 2",
+            "status": "matched",
+            "item_id": 5,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-csv-two",
+            "source": "references.csv: CSV row 3",
+            "status": "matched",
+            "item_id": 6,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience csv two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-docx-one",
+            "source": "references.docx: DOCX paragraph 1",
+            "status": "matched",
+            "item_id": 7,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx one",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-docx-two",
+            "source": "references.docx: DOCX paragraph 2",
+            "status": "matched",
+            "item_id": 8,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience docx two",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149719.4973154
+      },
+      "folder": {
+        "job_id": "843f97d3221141578f9c1e8fbf958d50",
+        "status": "completed",
+        "total": 2,
+        "completed": 2,
+        "current": null,
+        "collection": {
+          "id": 6,
+          "name": "Synthetic folder laptop-dark",
+          "parent_id": null,
+          "color": null,
+          "count": 0
+        },
+        "warnings": [],
+        "created_at": 1790149720.8368442,
+        "records": [
+          {
+            "index": 1,
+            "query": "folder-one.pdf",
+            "source": "folder-one.pdf",
+            "status": "pdf",
+            "item_id": 9,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder one",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "nested\\folder-two.pdf",
+            "source": "nested\\folder-two.pdf",
+            "status": "pdf",
+            "item_id": 10,
+            "pdf": true,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience folder two",
+            "created": false,
+            "matched": true,
+            "pdf_status": "attached",
+            "metadata_status": "verified",
+            "retry_count": 0
+          }
+        ],
+        "finished_at": 1790149721.4658508
+      },
+      "cancel": {
+        "job_id": "6f51060a1fdd436699a930466be78a24",
+        "status": "cancelled",
+        "total": 16,
+        "completed": 3,
+        "current": null,
+        "collection": null,
+        "warnings": [
+          "Pasted text: Unnumbered text uses one reference per line; indent wrapped continuation lines or number references to keep them together."
+        ],
+        "created_at": 1790149722.5504572,
+        "records": [
+          {
+            "index": 1,
+            "query": "10.9999/audit-cancel-00",
+            "source": "Pasted text: Text line 1",
+            "status": "matched",
+            "item_id": 11,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 00",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 2,
+            "query": "10.9999/audit-cancel-01",
+            "source": "Pasted text: Text line 2",
+            "status": "matched",
+            "item_id": 12,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 01",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 3,
+            "query": "10.9999/audit-cancel-02",
+            "source": "Pasted text: Text line 3",
+            "status": "matched",
+            "item_id": 13,
+            "pdf": false,
+            "warnings": [],
+            "title": "Synthetic bulk neuroscience cancel 02",
+            "created": false,
+            "matched": true,
+            "metadata_status": "verified",
+            "pdf_status": "not_requested",
+            "retry_count": 0
+          },
+          {
+            "index": 4,
+            "query": "10.9999/audit-cancel-03",
+            "source": "Pasted text: Text line 4",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 5,
+            "query": "10.9999/audit-cancel-04",
+            "source": "Pasted text: Text line 5",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 6,
+            "query": "10.9999/audit-cancel-05",
+            "source": "Pasted text: Text line 6",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 7,
+            "query": "10.9999/audit-cancel-06",
+            "source": "Pasted text: Text line 7",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 8,
+            "query": "10.9999/audit-cancel-07",
+            "source": "Pasted text: Text line 8",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 9,
+            "query": "10.9999/audit-cancel-08",
+            "source": "Pasted text: Text line 9",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 10,
+            "query": "10.9999/audit-cancel-09",
+            "source": "Pasted text: Text line 10",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 11,
+            "query": "10.9999/audit-cancel-10",
+            "source": "Pasted text: Text line 11",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 12,
+            "query": "10.9999/audit-cancel-11",
+            "source": "Pasted text: Text line 12",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 13,
+            "query": "10.9999/audit-cancel-12",
+            "source": "Pasted text: Text line 13",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 14,
+            "query": "10.9999/audit-cancel-13",
+            "source": "Pasted text: Text line 14",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 15,
+            "query": "10.9999/audit-cancel-14",
+            "source": "Pasted text: Text line 15",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          },
+          {
+            "index": 16,
+            "query": "10.9999/audit-cancel-15",
+            "source": "Pasted text: Text line 16",
+            "status": "cancelled",
+            "item_id": null,
+            "pdf": false,
+            "warnings": []
+          }
+        ],
+        "finished_at": 1790149723.489591
+      },
+      "unexpected_network": [],
+      "console_errors": [],
+      "external_font_warnings": []
+    }
+  },
+  "source_sha256": {
+    "doi_hunter_web/bulk_import.py": "8bae2d7d6b8891b04a4014ea93bf846bf9c065ec5fd7a8c5c11ee00b4756c6ce",
+    "doi_hunter_web/bulk_api.py": "dcd015d50e1358b75457f9befef273cb9ef0edb19ce4ae689c3c63e5403fad87",
+    "doi_hunter_web/bulk_sources.py": "f251d13861f623a2cea8d376b98362e1605f0193c4e65a60376df8884eecd16a",
+    "doi_hunter_web/static/js/bulk_import.js": "649a1c3f94f61ae721717ee455498bcaff2dc9f75da35674f152f7821014dd06",
+    "doi_hunter_web/static/index.html": "c572bfe790235b40ad3889e44b16a4eae77a18db894e0f06d05087cf496c308a",
+    "doi_hunter_web/static/styles.css": "07c97d4a877260875142164223715bfb1883afccff844c40db3f3e853c4a5269",
+    "doi_hunter_web/static/app.css": "2d57cd447af888d6535c61d7ffc32d8cebe7d8bdfa98fdc6284bdcf6607bf32b"
+  },
+  "source_inputs_unchanged": true
+}

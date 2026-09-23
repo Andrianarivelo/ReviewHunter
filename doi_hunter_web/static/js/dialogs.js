@@ -11,7 +11,6 @@ window.dialogsPart = function dialogsPart() {
 
     identify: { text: '', collectionId: '', tags: '', autoDownload: true, busy: false },
     newItemMenu: false,
-    importState: { file: null, text: '', format: '', collectionId: '', newCollection: true, busy: false, result: null },
     zotero: { dataDir: '', summary: null, copyFiles: true, includeTrash: false, running: false, progress: null, report: null, error: '' },
     exportState: { format: 'bibtex', scope: {}, label: '' },
     bib: { scope: {}, label: '', style: '', locale: 'en-US', mode: 'bibliography', html: '', text: '', loading: false, error: '', styleQuery: '' },
@@ -128,50 +127,6 @@ window.dialogsPart = function dialogsPart() {
 
     // ------------------------------------------------------------ import
 
-    openImport() {
-      this.importState = { file: null, text: '', format: '', collectionId: '', newCollection: true, busy: false, result: null };
-      this.openDialog('import');
-    },
-    onImportFile(file) {
-      if (!file) return;
-      this.importState.file = file;
-      const reader = new FileReader();
-      reader.onload = () => { this.importState.text = String(reader.result || '').slice(0, 20000); };
-      reader.readAsText(file);
-    },
-    importPreviewLabel() {
-      const t = (this.importState.text || '').trimStart();
-      const name = (this.importState.file?.name || '').toLowerCase();
-      if (/\.pdf$/.test(name)) return 'PDF';
-      if (/\.(bib|bibtex)$/.test(name) || /@\w+\s*\{/.test(t)) return 'BibTeX / BibLaTeX';
-      if (/\.ris$/.test(name) || /^TY {2}-/m.test(t)) return 'RIS';
-      if (/\.json$/.test(name) || t.startsWith('[') || t.startsWith('{')) return 'CSL-JSON';
-      return t ? 'Identifiers or titles (one per line)' : '';
-    },
-    async submitImport() {
-      const s = this.importState;
-      s.busy = true;
-      try {
-        const cid = s.collectionId ? Number(s.collectionId) : null;
-        if (s.file && /\.pdf$/i.test(s.file.name)) {
-          const r = await api.upload('/api/import/pdfs', [['files', s.file]], { collection_id: cid });
-          s.result = { created: r.imported, existing: 0, total: r.imported, format: 'PDF' };
-        } else if (s.file) {
-          s.result = await api.upload('/api/import/file', [['file', s.file]], { collection_id: cid, new_collection: s.newCollection && !cid });
-        } else if (s.text.trim()) {
-          s.result = await api.post('/api/import/text', { text: s.text, collection_id: cid,
-            create_collection: s.newCollection && !cid ? 'Clipboard import' : null });
-        }
-        const r = s.result || {};
-        this.toast(r.format === 'identifiers' ? `Queued ${r.queued} identifier(s)` : `Imported ${r.created || 0} new item(s), ${r.existing || 0} already in library`, 'ok', 5000);
-        await this.reloadAll();
-        if (r.collection_id) this.expanded = { ...this.expanded };
-      } catch (e) {
-        this.toast(e.message, 'error', 7000);
-      } finally {
-        s.busy = false;
-      }
-    },
     /** Locate the Zotero data directory and show what will be migrated. */
     async detectZotero() {
       this.zotero.error = '';
@@ -196,17 +151,6 @@ window.dialogsPart = function dialogsPart() {
       } catch (e) {
         this.zotero.running = false;
         this.toast(e.message, 'error', 8000);
-      }
-    },
-
-    async importFromClipboard() {
-      try {
-        const text = await navigator.clipboard.readText();
-        if (!text.trim()) return this.toast('Clipboard is empty', 'error');
-        this.openImport();
-        this.importState.text = text;
-      } catch (e) {
-        this.toast('Clipboard access was denied by the browser', 'error');
       }
     },
 

@@ -31,6 +31,7 @@
   <script src="/static/js/library.js"></script>
   <script src="/static/js/detail.js"></script>
   <script src="/static/js/dialogs.js"></script>
+  <script src="/static/js/bulk_import.js"></script>
   <script src="/static/js/settings.js"></script>
   <script src="/static/js/discover.js"></script>
   <script src="/static/js/goal_views.js"></script>
@@ -69,8 +70,9 @@
     <button @click="newStandaloneNote()" class="tb-btn" title="New Standalone Note (Ctrl+Shift+N)">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h5"/></svg>
     </button>
-    <button @click="openImport()" class="tb-btn" title="Import BibTeX, RIS, CSL-JSON, PDFs">
+    <button @click="openImport()" class="tb-btn" title="Import publications: paste a list, CSV, Word, PDFs or a PDF folder" aria-label="Import publications">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v3h16v-3"/></svg>
+      <span class="hidden xl:inline">Import</span><span x-show="bulkImportActive()" class="bulk-import-badge" x-text="bulkImportProgress() + '%'"></span>
     </button>
   </div>
 
@@ -576,7 +578,7 @@
 
       <div class="flex-1 min-h-0 overflow-y-auto relative" @dragover.prevent="if (!$event.dataTransfer.types.includes('application/x-rh-items')) dropping=true"
            @dragleave.self="dropping=false" @drop.prevent="onDropFiles($event)">
-        <div x-show="dropping" class="drop-overlay">Drop PDFs to create items, or BibTeX / RIS / CSL-JSON files to import</div>
+        <div x-show="dropping" class="drop-overlay">Drop PDFs, CSV, Word (.docx), text or bibliography files to import</div>
         <template x-if="!items.length && !loading">
           <div class="h-full grid place-items-center p-10 text-center">
             <div class="result-empty compact max-w-md">
@@ -943,8 +945,69 @@
   </div>
 
   <!-- Import -->
-  <div x-show="dialog==='import'" class="dialog w-[min(640px,96vw)] p-5 max-h-[94vh] overflow-y-auto">
-    <div class="dlg-head"><h3>Import</h3><button @click="closeDialog()" class="dlg-x">&#215;</button></div>
+  <div x-show="dialog==='import'" class="dialog bulk-import-dialog" role="dialog" aria-modal="true" aria-labelledby="bulk-import-title">
+    <div class="bulk-import-header"><div><div class="rail-label">Build your library</div><h3 id="bulk-import-title">Import publications</h3><p>Identify references, complete their metadata and bring their PDFs together.</p></div><button @click="closeDialog()" class="dlg-x" aria-label="Close import">&#215;</button></div>
+    <div class="bulk-import-body">
+      <div x-show="!importState.job">
+        <fieldset :disabled="bulkImportLocked()" class="bulk-import-inputs">
+          <div class="bulk-source-tabs" role="group" aria-label="Import source">
+            <button @click="setImportMode('text')" :class="{'active':importState.mode==='text'}">Paste a list</button>
+            <button @click="setImportMode('files')" :class="{'active':importState.mode==='files'}">CSV, Word &amp; PDFs</button>
+            <button @click="setImportMode('folder')" :class="{'active':importState.mode==='folder'}">PDF folder</button>
+          </div>
+          <div x-show="importState.mode==='text'" class="bulk-source-panel">
+            <label for="bulk-import-text">Publication list</label>
+            <textarea id="bulk-import-text" x-model="importState.text" rows="6" placeholder="Paste titles, full citations, DOIs or publication URLs.&#10;Use one reference per line, numbered entries, or a blank line between references."></textarea>
+            <div class="bulk-source-help"><span>Also accepts BibTeX, RIS and CSL-JSON. Up to 500 entries.</span><button @click="importFromClipboard()">Paste from clipboard</button></div>
+          </div>
+          <div x-show="importState.mode==='files'" class="bulk-source-panel">
+            <label class="drop-zone bulk-upload" @dragover.prevent @drop.prevent="onImportFiles($event.dataTransfer.files)">
+              <input type="file" multiple accept=".pdf,.csv,.tsv,.docx,.txt,.bib,.bibtex,.ris,.json" @change="onImportFiles($event.target.files); $event.target.value=''" aria-label="Choose publication files">
+              <strong>Choose files or drop them here</strong><span>CSV · Word (.docx) · PDFs · text · bibliography exports</span>
+              <small>Select several files together. Original documents are kept unchanged.</small>
+            </label>
+          </div>
+          <div x-show="importState.mode==='folder'" class="bulk-source-panel">
+            <label for="bulk-import-folder">Folder containing PDFs</label>
+            <input id="bulk-import-folder" type="text" x-model="importState.folderPath" @input="importState.files=[]; importState.folderFiles=[]" placeholder="C:\Users\you\Documents\papers" class="dlg-input">
+            <div class="bulk-source-help"><label><input type="checkbox" x-model="importState.recursive" @change="refreshImportFolder()"> Include subfolders</label><label class="bulk-folder-picker">Browse for a folder<input type="file" webkitdirectory multiple @change="onImportFiles($event.target.files,true); $event.target.value=''" aria-label="Choose a PDF folder"></label></div>
+            <p class="bulk-hint">Paste a folder path on the computer running ReviewHunter, or choose a folder. PDF files are copied into the library.</p>
+          </div>
+          <div x-show="importState.mode!=='text' &amp;&amp; importState.files.length" class="bulk-file-selection">
+            <strong x-text="importState.files.length + ' files selected'"></strong>
+            <ul><template x-for="(file,index) in importState.files" :key="index"><li><span x-text="file.webkitRelativePath || file.name"></span><small x-text="(file.size/1024/1024).toFixed(1) + ' MB'"></small><button @click="removeImportFile(index)" :aria-label="'Remove ' + file.name">&#215;</button></li></template></ul>
+          </div>
+          <div x-show="importState.notice" class="bulk-hint" x-text="importState.notice"></div>
+          <div class="bulk-import-destination">
+            <label>Destination<select aria-label="Import destination" x-model="importState.collectionId" x-effect="const value=importState.collectionId; $nextTick(() => { $el.value=value })" class="dlg-input"><option value="">My Library, no collection</option><option value="__new__">Create a new collection</option><template x-for="collection in collections" :key="collection.id"><option :value="String(collection.id)" x-text="collectionPath(collection.id)"></option></template></select></label>
+            <label x-show="importState.collectionId==='__new__'">Collection name<input aria-label="New import collection name" type="text" x-model="importState.newName" placeholder="e.g. 260561_UPC" class="dlg-input"></label>
+          </div>
+          <div class="bulk-import-options"><label><input type="checkbox" x-model="importState.autoSearch"> Look up citation metadata online</label><label><input type="checkbox" x-model="importState.autoDownload"> Find PDFs for references without a file</label></div>
+          <p class="bulk-hint">PDFs are identified automatically. Matching references are reused. Uncertain matches are marked for review; PDF availability depends on the available sources and your access.</p>
+        </fieldset>
+      </div>
+      <section x-show="importState.job" class="bulk-import-report" aria-live="polite">
+        <div class="bulk-job-heading"><div><h4 x-text="bulkImportStatus(importState.job?.status)"></h4><p>Destination: <strong x-text="bulkImportDestination()"></strong></p></div><b x-text="(importState.job?.completed || 0) + ' / ' + (importState.job?.total || 0)"></b></div>
+        <p x-show="importState.job?.error" class="bulk-import-error" x-text="importState.job?.error"></p>
+        <div class="bulk-progress" role="progressbar" :aria-valuenow="bulkImportProgress()" aria-valuemin="0" aria-valuemax="100" aria-label="Import progress"><i :style="'width:' + bulkImportProgress() + '%'"></i></div>
+        <p class="bulk-hint" x-show="bulkImportActive()">You can close this window and keep working. Reopen Import to see progress. Stopping finishes the current entry first.</p>
+        <div class="bulk-import-stats"><div><b x-text="bulkImportCounts().added"></b><span>New references</span></div><div><b x-text="bulkImportCounts().matched"></b><span>Existing matches</span></div><div><b x-text="bulkImportCounts().pdf"></b><span>Entries with PDFs</span></div><div><b x-text="bulkImportCounts().review"></b><span>To review</span></div></div>
+        <div class="bulk-report-tools"><div><button @click="importState.resultFilter='all'" :class="{'active':importState.resultFilter==='all'}">All entries</button><button @click="importState.resultFilter='review'" :class="{'active':importState.resultFilter==='review'}">Needs attention</button></div><button @click="exportBulkImportReport()">Save report CSV</button></div>
+        <template x-for="(warning,index) in (importState.job?.warnings || [])" :key="index"><p class="bulk-hint" x-text="warning"></p></template>
+        <div class="bulk-result-list">
+          <template x-for="(row,index) in bulkImportRows()" :key="row.index ?? index">
+            <article class="bulk-result-row" :data-status="row.status">
+              <div><strong x-text="row.title || row.query || row.source"></strong><small x-text="row.source"></small><p x-show="row.error" class="bulk-entry-error" x-text="row.error"></p><template x-for="(warning,windex) in (row.warnings || [])" :key="windex"><p class="bulk-hint" x-text="warning"></p></template>
+                <details x-show="row.candidates?.length"><summary>Possible matches to check</summary><template x-for="(candidate,cindex) in (row.candidates || [])" :key="cindex"><p class="bulk-candidate"><span x-text="candidate.title"></span><small x-text="candidate.doi ? 'DOI: ' + candidate.doi : ''"></small></p></template><small>Use Add by ID with the verified DOI to import the correct reference.</small></details>
+              </div>
+              <div class="bulk-result-actions"><span class="bulk-result-status" x-text="bulkImportStatus(row.status)"></span><small x-show="row.pdf">PDF available</small><small x-show="row.metadata_status==='partial'">Metadata incomplete</small><small x-show="!row.pdf &amp;&amp; row.pdf_status" x-text="bulkImportPdfStatus(row.pdf_status)"></small><button x-show="row.item_id" @click="openBulkImportItem(row.item_id)">Open reference ↗</button></div>
+            </article>
+          </template>
+          <p x-show="!bulkImportRows().length" class="bulk-hint">No entries in this filter.</p>
+        </div>
+      </section>
+      <p x-show="importState.error" class="bulk-import-error" role="alert" x-text="importState.error"></p>
+      <details x-show="!importState.job" class="bulk-zotero"><summary>Migrate an existing Zotero library</summary>
     <div class="card p-3 mt-3">
       <div class="flex items-center gap-2">
         <span class="font-semibold text-sm">Migrate from Zotero</span>
@@ -969,26 +1032,14 @@
       </div>
       <div x-show="zotero.report" class="text-xs text-emerald-600 mt-2" x-text="zotero.report ? `Done: ${zotero.report.items} new items (${zotero.report.items_existing} already present), ${zotero.report.collections} collections, ${zotero.report.notes} notes, ${zotero.report.files} files, ${zotero.report.annotations} annotations, ${zotero.report.missing_files} missing files.` : ''"></div>
     </div>
-    <div class="rail-label mt-4 mb-1">Files and text</div>
-    <label class="drop-zone" @dragover.prevent @drop.prevent="onImportFile($event.dataTransfer.files[0])">
-      <input type="file" class="hidden" accept=".bib,.bibtex,.ris,.json,.txt,.pdf" @change="onImportFile($event.target.files[0])">
-      <div class="font-semibold text-sm" x-text="importState.file ? importState.file.name : 'Choose or drop a file'"></div>
-      <div class="text-xs text-ink-500 mt-1">BibTeX / BibLaTeX (Zotero, JabRef, Mendeley exports), RIS (EndNote), CSL-JSON, a list of identifiers, or a PDF</div>
-    </label>
-    <div class="text-xs text-ink-500 mt-3">...or paste text:</div>
-    <textarea x-model="importState.text" @input="importState.file=null" rows="5" class="mt-1 w-full p-2.5 text-xs font-mono bg-ink-50 dark:bg-ink-950 border border-ink-200 dark:border-ink-800 rounded-lg outline-none"></textarea>
-    <div class="mt-2 flex items-center gap-2 text-xs">
-      <span class="text-ink-500">Detected:</span><span class="type-pill" x-text="importPreviewLabel() || 'nothing yet'"></span>
-      <button @click="importFromClipboard()" class="ml-auto text-accent-600">Paste from clipboard</button>
+      </details>
     </div>
-    <div class="mt-3 grid grid-cols-2 gap-2 items-center">
-      <select x-model="importState.collectionId" class="dlg-input"><option value="">No existing collection</option><template x-for="c in collections" :key="c.id"><option :value="c.id" x-text="collectionPath(c.id)"></option></template></select>
-      <label x-show="!importState.collectionId" class="text-xs flex items-center gap-1.5"><input type="checkbox" x-model="importState.newCollection" class="rounded">Place in a new collection</label>
-    </div>
-    <div x-show="importState.result" class="mt-3 card p-2.5 text-xs" x-text="importState.result ? JSON.stringify(importState.result) : ''"></div>
-    <div class="mt-4 flex justify-end gap-2">
+    <div class="bulk-import-footer">
+      <span x-show="!importState.job" x-text="'Import into ' + bulkImportDestination()"></span>
+      <button x-show="bulkImportActive()" @click="cancelBulkImport()" :disabled="importState.job?.status==='cancelling'" class="action-secondary h-9 px-3 text-sm">Stop after current entry</button>
+      <button x-show="importState.job &amp;&amp; !bulkImportActive()" @click="newBulkImport()" class="action-secondary h-9 px-3 text-sm">New import</button>
       <button @click="closeDialog()" class="action-secondary h-9 px-3 text-sm">Close</button>
-      <button @click="submitImport()" :disabled="importState.busy || (!importState.file && !importState.text.trim())" class="action-primary h-9 px-4 text-sm" x-text="importState.busy ? 'Importing...' : 'Import'"></button>
+      <button x-show="!importState.job" @click="submitImport()" :disabled="!bulkImportCanStart()" class="action-primary h-9 px-4 text-sm" x-text="importState.submitting ? 'Reading sources...' : 'Search and import'"></button>
     </div>
   </div>
 

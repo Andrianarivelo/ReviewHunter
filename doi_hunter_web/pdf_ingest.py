@@ -125,7 +125,7 @@ def _identify(path: str, hints: dict) -> tuple[dict, dict, str]:
     if evidence.get("text", "").strip() and payload.get("title") and not fulltext._title_in_text(payload["title"], evidence["text"]):
         # Producer templates can leave a previous paper's Info/XMP behind.
         payload = {}
-        evidence.setdefault("warnings", []).append("Embedded title was not printed in the PDF; stale metadata ignored")
+        evidence.setdefault("warnings", []).append("Embedded title could not be confirmed in extracted text; registry verification required")
     # Page metadata can help the resolver search, but must not assign arbitrary identity.
     verified, source, _ = fulltext._find_verified_metadata({"title": hints.get("title") or payload.get("title") or ""}, path)
     if verified:
@@ -149,7 +149,7 @@ def extract_abstract(text: str) -> str:
     if not start:
         return ""
     remainder = text[start.end():]
-    end = re.search(r"(?im)^\s*(?:\d+[.)]?\s*)?(?:introduction|background|keywords|key words)\s*[:.-]?\s*(?:\n|$)", remainder)
+    end = re.search(r"(?im)^\s*(?:\d+[.)]?\s*)?(?:(?:introduction|background)\s*[:.-]?\s*(?:\n|$)|(?:keywords|key words)\s*(?::|\n|$))", remainder)
     if not end or not 80 <= end.start() <= MAX_ABSTRACT_CHARS:
         return ""
     paragraph = re.sub(r"(?<=\w)-\s*\n\s*(?=\w)", "", remainder[:end.start()])

@@ -22,6 +22,9 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_FILES = (
     "Install-ReviewHunter.bat", "install.sh", "run.py", "requirements.txt",
     "installer/reviewhunter_installer.py", "doi_hunter_web/pdf_ingest.py",
+    "doi_hunter_web/bulk_sources.py", "doi_hunter_web/bulk_import.py", "doi_hunter_web/bulk_api.py",
+    "doi_hunter_web/static/js/bulk_import.js", "doi_hunter_web/static/app.css",
+    "doi_hunter_web/static/app.js", "doi_hunter_web/static/js/dialogs.js", "doi_hunter_web/static/js/library.js",
     "doi_hunter_web/fulltext.py", "doi_hunter_web/connector.py",
     "doi_hunter_web/catalog.py", "doi_hunter_web/metadata.py",
     "doi_hunter_web/insight.py", "doi_hunter_web/method_taxonomy.py",

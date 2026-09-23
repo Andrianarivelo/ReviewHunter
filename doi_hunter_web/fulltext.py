@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import difflib
+import html
 import logging
 import re
 import unicodedata
@@ -117,9 +118,21 @@ _BOILERPLATE_LINE_RE = re.compile(
     r"research article|original article|article|open access|citation:)", re.I)
 
 
+_GREEK_NAMES = {"α": "alpha", "β": "beta", "γ": "gamma", "δ": "delta", "ε": "epsilon", "μ": "mu", "κ": "kappa", "λ": "lambda", "ω": "omega"}
+
+
+def _plain_title(value: str) -> str:
+    """Remove registry presentation markup without adding tag names to identity."""
+    value = html.unescape(value or "")
+    value = re.sub(r"</(?:i|b|em|strong)>\s*(?=[A-Za-z])", " ", value, flags=re.I)
+    return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", value)).strip()
+
+
 def _compact(s: str) -> str:
     """Lower-case alphanumerics only (accents folded), so line breaks and hyphenation do not matter."""
-    s = unicodedata.normalize("NFKD", s or "")
+    s = unicodedata.normalize("NFKD", _plain_title(s)).lower()
+    for letter, name in _GREEK_NAMES.items():
+        s = s.replace(letter, name)
     return re.sub(r"[^a-z0-9]", "", s.lower())
 
 
@@ -129,15 +142,90 @@ def _title_in_text(title: str, text: str) -> bool:
     return len(t) >= MIN_VERIFIED_TITLE and t in _compact(text)
 
 
+def _verified_title_position(payload: dict, text: str, *, glyph_fallback: bool = False,
+                             title_guesses: list[str] | None = None) -> int:
+    """Locate a title exactly, or tolerate isolated PDF font codes with two authors.
+
+    The fallback is only used for a DOI extracted from the document. Every title
+    letter must match in sequence. Only hyphen positions may contain an erroneous
+    capital glyph, and a Greek symbol may appear as an explicit /C-number code.
+    Two different author surnames must also occur in the first-page header area.
+    """
+    title = _plain_title(payload.get("title") or "")
+    if _title_in_text(title, text):
+        return _compact(text).find(_compact(title))
+    if not glyph_fallback or len(_compact(title)) < 60:
+        return -1
+    if any(letter.lower() in _GREEK_NAMES for letter in title) and not any(
+            _compact(guess) == _compact(title) for guess in title_guesses or []):
+        # /C227 alone cannot establish which Greek letter was printed. An
+        # agreeing embedded title must establish its identity independently.
+        return -1
+    header = text[:6000]
+    surnames = {_compact(person.get("lastName") or "") for person in payload.get("creators", [])}
+    if sum(len(name) >= 4 and name in _compact(header) for name in surnames) < 2:
+        return -1
+    pieces = []
+    for character in unicodedata.normalize("NFKD", title):
+        if character.lower() in _GREEK_NAMES:
+            name = _GREEK_NAMES[character.lower()]
+            pieces.append(r"(?:(?i:" + name + r")|C\d{1,4})")
+        elif character in "-\u2010\u2011\u2012\u2013\u2212":
+            pieces.append(r"[A-Z]?")
+        elif character.isascii() and character.isalnum():
+            pieces.append("[" + character.lower() + character.upper() + "]" if character.isalpha() else character)
+    normalized = unicodedata.normalize("NFKD", _plain_title(header))
+    for letter, name in _GREEK_NAMES.items():
+        normalized = normalized.replace(letter, name).replace(letter.upper(), name)
+    normalized = re.sub(r"[^A-Za-z0-9]", "", normalized)
+    match = re.search("".join(pieces), normalized)
+    return match.start() if match else -1
+
+
 def _pdf_title(value: object) -> str:
     """Reject common export placeholders before treating embedded text as a title."""
     title = re.sub(r"\s+", " ", str(value or "")).strip()
     if len(title) < 8 or len(title) > 1000 or re.search(
-        r"\.(pdf|docx?)$|^(untitled|microsoft word|main|document|full.?text|manuscript)$|^https?://",
+        r"\.(pdf|docx?)$|^(untitled|microsoft word|main|document|full.?text|manuscript)$|^https?://|^[a-z]{1,6}[_-]\d+\s+\d+\.{2}\d+$",
         title, re.I,
     ):
         return ""
     return title
+
+
+def _xmp_fields(reader) -> dict:
+    """Read bounded RDF directly, including legacy attribute-encoded DC fields.
+
+    Some older PDFs store dc:title as an attribute; pypdf's property accessor
+    assumes an element and raises AttributeError. Explicit namespaces here avoid
+    both that failure and treating related-paper DOIs as the document's own DOI.
+    """
+    root_ref = getattr(reader, "trailer", {}).get("/Root")
+    if root_ref is None:
+        return {}
+    stream_ref = root_ref.get_object().get("/Metadata")
+    if stream_ref is None:
+        return {}
+    raw = stream_ref.get_object().get_data()
+    if len(raw) > 2 * 1024 * 1024 or re.search(br"<!\s*(?:DOCTYPE|ENTITY)\b", raw.replace(b"\x00", b""), re.I):
+        raise ValueError("XMP packet exceeds limits or contains an unsupported entity declaration")
+    root = ET.fromstring(raw)
+    dc = "{http://purl.org/dc/elements/1.1/}"
+    rdf_li = "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}li"
+    fields = {"titles": [], "creators": [], "identifiers": [], "prism": []}
+    for node in root.iter():
+        for key, value in [(node.tag, node.text or ""), *node.attrib.items()]:
+            if key in (dc + "title", dc + "creator", dc + "identifier"):
+                values = [value.strip()] if value.strip() else []
+                if key == node.tag:
+                    leaves = list(node.iter(rdf_li))
+                    leaves.sort(key=lambda leaf: leaf.get("{http://www.w3.org/XML/1998/namespace}lang") != "x-default")
+                    values.extend("".join(leaf.itertext()).strip() for leaf in leaves)
+                field = {dc + "title": "titles", dc + "creator": "creators", dc + "identifier": "identifiers"}[key]
+                fields[field].extend(value for value in values if value)
+            elif key.startswith("{http://prismstandard.org/namespaces/basic/") and key.endswith("}doi"):
+                fields["prism"].append(value)
+    return fields
 
 
 def _before_references(text: str) -> str:
@@ -204,37 +292,22 @@ def extract_pdf_evidence(path: str | Path) -> dict:
                 result["metadata_sources"].append(f"info:{str(key).lstrip('/')}")
 
     try:
-        xmp = reader.xmp_metadata
-        if xmp is not None:
-            titles = xmp.dc_title or {}
-            xmp_title = _pdf_title(titles.get("x-default") or next(iter(titles.values()), ""))
-            if xmp_title:
-                if title and _compact(title) != _compact(xmp_title):
-                    result["warnings"].append("PDF Info and XMP titles differ; XMP title preferred")
-                result["title"] = xmp_title
-                result["metadata_sources"].append("xmp:dc_title")
-            if xmp.dc_creator:
-                result["creators"] = catalog.clean_creators(xmp.dc_creator)
-                result["metadata_sources"].append("xmp:dc_creator")
-            xmp_ids = xmp.dc_identifier or []
-            if isinstance(xmp_ids, str):
-                xmp_ids = [xmp_ids]
-            for value in xmp_ids:
-                found = identifiers.extract_identifiers(str(value))
+        xmp = _xmp_fields(reader)
+        xmp_title = next((candidate for value in xmp.get("titles", []) if (candidate := _pdf_title(value))), "")
+        if xmp_title:
+            if title and _compact(title) != _compact(xmp_title):
+                result["warnings"].append("PDF Info and XMP titles differ; XMP title preferred")
+            result["title"] = xmp_title
+            result["metadata_sources"].append("xmp:dc_title")
+        if xmp.get("creators"):
+            result["creators"] = catalog.clean_creators(xmp["creators"])
+            result["metadata_sources"].append("xmp:dc_creator")
+        for field, label in (("identifiers", "xmp:dc_identifier"), ("prism", "xmp:prism_doi")):
+            for value in xmp.get(field, []):
+                found = identifiers.extract_identifiers(value)
                 if found:
                     result["metadata_identifiers"].extend(found)
-                    result["metadata_sources"].append("xmp:dc_identifier")
-            # pypdf exposes Dublin Core fields but not publisher PRISM DOI.
-            # Read both element and attribute encodings, restricting namespaces
-            # so dc:relation and arbitrary description text cannot become own DOI.
-            root = ET.fromstring(xmp.stream.get_data())
-            for node in root.iter():
-                for key, value in [(node.tag, node.text or ""), *node.attrib.items()]:
-                    if key.startswith("{http://prismstandard.org/namespaces/basic/") and key.endswith("}doi"):
-                        found = identifiers.extract_identifiers(value)
-                        if found:
-                            result["metadata_identifiers"].extend(found)
-                            result["metadata_sources"].append("xmp:prism_doi")
+                    result["metadata_sources"].append(label)
     except Exception as exc:
         result["warnings"].append(f"PDF XMP metadata could not be read: {exc}")
 
@@ -264,6 +337,11 @@ def extract_pdf_evidence(path: str | Path) -> dict:
         result["warnings"].append("Conflicting embedded DOI identifiers; identity requires verification")
     blob = "\n".join(str(v) for v in meta.values() if v)
     candidates = identifiers.extract_identifiers(_before_references(blob) + "\n" + _before_references(result["text"]))
+    # OUP download watermarks append a numeric article ID after their DOI route.
+    # This adds a lookup candidate only; acceptance still requires title evidence.
+    oup = re.findall(r"https?://academic\.oup\.com/[^\s]*/doi/(10\.1093/[^/\s]+/[^/\s]+)/\d+(?=[\s?#]|$)",
+                     _before_references(result["text"]), re.I)
+    candidates = [("doi", value.lower()) for value in oup] + candidates
     result["identifiers"] = list(dict.fromkeys(result["metadata_identifiers"] + candidates))
 
     guesses = [result["title"]] if result["title"] else []
@@ -318,14 +396,15 @@ def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], 
 
     ids, guesses, page_text = _pdf_identifiers(pdf_path)
     page_text = _before_references(page_text)
-    compact_text = _compact(page_text)
     printed: list[tuple[int, dict, str]] = []      # (position of the title in the PDF, payload, source)
     for kind, value in ids[:6]:
         payload = identifiers.resolve_doi(value) if kind == "doi" else identifiers.resolve_arxiv(value)
         if not _is_work(payload):
             continue
-        if _title_in_text(payload.get("title", ""), page_text):
-            printed.append((compact_text.find(_compact(payload["title"])), payload, f"{kind}:{value}"))
+        position = _verified_title_position(payload, page_text, glyph_fallback=kind == "doi", title_guesses=guesses)
+        if position >= 0:
+            payload = {**payload, "title": _plain_title(payload["title"])}
+            printed.append((position, payload, f"{kind}:{value}"))
     # Several DOIs can be verified (a letter quoting the article it answers, an issue bundle):
     # the paper itself is the one whose title is printed first.
     if printed:
@@ -355,6 +434,7 @@ def _find_verified_metadata(item: dict, pdf_path: str) -> tuple[Optional[dict], 
             if verified or close:
                 payload = identifiers.resolve_doi(doi)
                 if _is_work(payload):
+                    payload = {**payload, "title": _plain_title(payload["title"])}
                     how = "title printed in PDF" if verified else "title match"
                     return payload, f"{how}: {title}", guesses
     return None, "", guesses

@@ -1,0 +1,118 @@
+{
+  "synthetic": true,
+  "input_hashes_unchanged": true,
+  "runs": {
+    "desktop-light": {
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.125
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 2.13
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 2.113
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 3.383
+        }
+      ],
+      "screenshots": 10,
+      "console_errors": 0,
+      "external_font_warnings": 0,
+      "unexpected_resolver_network_calls": 0
+    },
+    "desktop-dark": {
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.131
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 2.303
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 1.439
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 6.947
+        }
+      ],
+      "screenshots": 10,
+      "console_errors": 0,
+      "external_font_warnings": 0,
+      "unexpected_resolver_network_calls": 0
+    },
+    "laptop-light": {
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.12
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 3.477
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 1.338
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 6.057
+        }
+      ],
+      "screenshots": 10,
+      "console_errors": 0,
+      "external_font_warnings": 0,
+      "unexpected_resolver_network_calls": 0
+    },
+    "laptop-dark": {
+      "scenarios": [
+        {
+          "scenario": "paste_destination_failures_review",
+          "pass": true,
+          "seconds": 2.115
+        },
+        {
+          "scenario": "csv_docx_multi_pdf_my_library",
+          "pass": true,
+          "seconds": 2.22
+        },
+        {
+          "scenario": "recursive_folder_new_collection",
+          "pass": true,
+          "seconds": 1.135
+        },
+        {
+          "scenario": "progress_cancel_reopen_reload",
+          "pass": true,
+          "seconds": 3.372
+        }
+      ],
+      "screenshots": 10,
+      "console_errors": 0,
+      "external_font_warnings": 0,
+      "unexpected_resolver_network_calls": 0
+    }
+  }
+}

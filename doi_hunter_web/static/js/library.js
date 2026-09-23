@@ -583,17 +583,14 @@ window.libraryPart = function libraryPart() {
       await this.importDroppedFiles(files, this.virtual === 'collection' ? this.selectedCollectionId : null);
     },
     async importDroppedFiles(files, collectionId) {
-      const pdfs = files.filter(f => /\.pdf$/i.test(f.name));
-      const biblio = files.filter(f => /\.(bib|bibtex|ris|json|txt)$/i.test(f.name));
-      if (pdfs.length) {
-        const r = await api.upload('/api/import/pdfs', pdfs.map(f => ['files', f]), { collection_id: collectionId });
-        this.toast(`Imported ${r.imported} PDF(s). Retrieving metadata...`, 'ok', 5000);
+      if (this.bulkImportLocked()) {
+        this.openImport();
+        this.toast('An import is already running. Its destination is preserved.', 'info');
+        return;
       }
-      for (const f of biblio) {
-        const r = await api.upload('/api/import/file', [['file', f]], { collection_id: collectionId, new_collection: !collectionId });
-        this.toast(r.format === 'identifiers' ? `Queued ${r.queued} identifier(s)` : `Imported ${r.created} new, ${r.existing} existing from ${f.name}`, 'ok', 5000);
-      }
-      await this.reloadAll();
+      this.newBulkImport(collectionId);
+      this.onImportFiles(files);
+      this.openImport(collectionId);
     },
 
     // ------------------------------------------------------------------ context menus
@@ -616,6 +613,7 @@ window.libraryPart = function libraryPart() {
       const sep = { separator: true };
       switch (this.contextMenu.type) {
         case 'collection': return [
+          { label: 'Import Publications Here...', action: () => this.openImport(t.id) },
           { label: 'New Subcollection...', action: () => this.newCollection(t.id) },
           { label: 'Rename Collection...', action: () => this.renameCollection(t) },
           { label: 'Concept Map', action: () => this.openGraph({ collection_id: t.id, label: t.name }) },

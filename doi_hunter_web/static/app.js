@@ -37,6 +37,7 @@ function app() {
           this.toast('ReviewHunter server is not reachable', 'error', 8000);
         }
         this.connectWS();
+        this.restoreBulkImport();
         addEventListener('click', () => { this.closeContextMenu(); });
         addEventListener('resize', () => this.closeContextMenu());
         addEventListener('keydown', (e) => this.onGlobalKey(e));
@@ -212,6 +213,7 @@ function app() {
     libraryPart(),
     detailPart(),
     dialogsPart(),
+    bulkImportPart(),
     settingsPart(),
     discoverPart(),
     insightsPart(),
