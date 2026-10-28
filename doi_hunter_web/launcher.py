@@ -133,13 +133,16 @@ def _command_line(pid: int) -> str:
 def stop_instance(host: str, port: int, found: dict, timeout: float = STOP_TIMEOUT_S) -> bool:
     """Stop a ReviewHunter instance: politely first, then (old versions only) by PID after checking
     that the process really is ReviewHunter. Returns True once the port is free."""
+    polite = True
     try:
         req = urllib.request.Request(f"http://{host}:{port}/api/system/shutdown", data=b"{}", method="POST",
                                      headers={"Content-Type": "application/json"})
         _NO_PROXY.open(req, timeout=5).read()
+    except urllib.error.HTTPError as e:
+        polite = e.code not in (404, 405, 409)   # older version (no endpoint) or not stoppable: do not wait
     except (OSError, ValueError):
         pass
-    deadline = time.time() + timeout
+    deadline = time.time() + (timeout if polite else 1.0)
     while time.time() < deadline:
         if port_free(host, port):
             return True
@@ -279,12 +282,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--no-shortcuts", action="store_true", help="do not check the shortcuts")
     parser.add_argument("--wait-pid", type=int, help=argparse.SUPPRESS)   # restart requested by the app itself
     args = parser.parse_args(argv)
+    try:
+        return _run(args)
+    finally:
+        # After the browser has opened: the check (PowerShell on Windows) must not delay the window.
+        if not args.no_shortcuts:
+            _heal_shortcuts()
+
+
+def _run(args: argparse.Namespace) -> int:
     host, port = config.HOST, config.PORT
     url = f"http://{host}:{port}"
-
-    if not args.no_shortcuts:
-        _heal_shortcuts()
-
     found = probe(host, port)
     state = classify(found)
     settle = time.time() + float(os.environ.get("REVIEWHUNTER_LAUNCHER_SETTLE", "12"))
