@@ -376,3 +376,44 @@ jobs:
         if: always()
         shell: bash
         run: test '${{ steps.run.outputs.ok }}' = true
+
+  published-oneliner:
+    # Run by hand after a release (Actions > installer > Run workflow): the exact commands from the README,
+    # downloading everything from the published release, on fresh machines.
+    if: github.event_name == 'workflow_dispatch'
+    name: published one-liner / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    steps:
+      - name: Install with the README one-liner (macOS, Linux)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP"          # no repository files available: everything comes from the release
+          curl -fsSL https://github.com/Andrianarivelo/ReviewHunter/releases/latest/download/install.sh | bash -s -- --cli --yes --no-launch
+      - name: Install with the README one-liner (Windows PowerShell)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Set-Location $env:RUNNER_TEMP
+          $env:RH_ARGS = "--cli --yes --no-launch"
+          irm https://github.com/Andrianarivelo/ReviewHunter/releases/latest/download/install.ps1 | iex
+      - name: Open it like a user and check which instance answers
+        shell: bash
+        env:
+          REVIEWHUNTER_NO_DIALOGS: "1"
+        run: |
+          case "$RUNNER_OS" in
+            macOS)   open -a "$HOME/Applications/ReviewHunter.app" --args --no-browser; T="$HOME/Library/ReviewHunter" ;;
+            Linux)   T="$HOME/.local/share/reviewhunter"; (cd "$T" && .venv/bin/python -m doi_hunter_web.launcher --no-browser) ;;
+            Windows) T="$LOCALAPPDATA/Programs/ReviewHunter"; powershell -Command "Start-Process \"\$env:APPDATA\Microsoft\Windows\Start Menu\Programs\ReviewHunter.lnk\"" ;;
+          esac
+          for i in $(seq 1 120); do curl -fsS http://127.0.0.1:8765/api/system/instance > instance.json 2>/dev/null && break; sleep 1; done
+          cat instance.json; echo
+          grep -q '"launched_by":"launcher"' instance.json
+          grep -q '"version":"2.9' instance.json
+          curl -fsS -X POST http://127.0.0.1:8765/api/system/shutdown
