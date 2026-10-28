@@ -98,6 +98,11 @@ def main() -> None:
 
     # Inside the venv now - start the app.
     sys.path.insert(0, str(ROOT))
+    try:   # keep the shortcuts pointing at this folder, like the launcher does (never blocks the start)
+        from doi_hunter_web import shortcuts
+        shortcuts.ensure()
+    except Exception as e:
+        print(f"[setup] shortcut check skipped: {e}")
     from doi_hunter_web.__main__ import main as app_main
 
     # Forward post-`--` args to argparse inside the app.

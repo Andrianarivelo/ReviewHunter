@@ -1,6 +1,8 @@
 # Line endings that must survive checkouts on any OS and the release zip
 *.sh        text eol=lf
+*.command   text eol=lf
 *.bat       text eol=crlf
+*.ps1       text eol=crlf
 
 # Kept in the repository but left out of `git archive` (the release zip)
 downloads/            export-ignore

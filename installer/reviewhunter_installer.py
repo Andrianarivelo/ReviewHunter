@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""ReviewHunter installer (Windows and Linux) - standard library only.
+"""ReviewHunter installer (Windows, macOS and Linux) - standard library only.
 
 What it does, step by step (every step reports progress to a window or to the terminal):
 
@@ -11,7 +11,9 @@ What it does, step by step (every step reports progress to a window or to the te
     6. Self-test          imports + starts the app on a free port with a throw-away library and
                           waits for ``/connector/ping`` to answer (a real end-to-end check)
     7. Chrome extension   validate bundled connector, prepare setup launcher and instructions
-    8. Shortcuts          Windows: Desktop + Start menu (.lnk); Linux: application menu + Desktop (.desktop)
+    8. Shortcuts          Windows: Desktop + Start menu (.lnk); macOS: ~/Applications/ReviewHunter.app;
+                          Linux: application menu + Desktop (.desktop). All run the launcher, which
+                          keeps them pointing at this install (doi_hunter_web/shortcuts.py)
     9. Finish             writes ``install.json`` and opens Chrome setup when requested
 
 Your library (``~/ReviewHunter``: database, PDFs, settings) is never created, modified or deleted by
@@ -77,6 +79,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 IS_WINDOWS = os.name == "nt"
+IS_MAC = sys.platform == "darwin"
 IS_LINUX = sys.platform.startswith("linux")
 HERE = Path(__file__).resolve().parent
 LOG_FILE = Path(tempfile.gettempdir()) / "reviewhunter-install.log"
@@ -85,10 +88,48 @@ LOG_FILE = Path(tempfile.gettempdir()) / "reviewhunter-install.log"
 # ---------------------------------------------------------------------------- locations
 
 def default_install_dir() -> Path:
-    """Per-user program folder: no administrator rights needed on either OS."""
+    """Per-user program folder: no administrator rights needed on any OS.
+
+    macOS: ~/Library/ReviewHunter (no space in the path, like Linux' ~/.local/share); the small
+    ReviewHunter.app launcher goes to ~/Applications, where Launchpad and Spotlight find it.
+    """
     if IS_WINDOWS:
         return Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "Programs" / APP_NAME
+    if IS_MAC:
+        return Path.home() / "Library" / APP_NAME
     return Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "reviewhunter"
+
+
+def urlopen_verified(url, timeout: float):
+    """urlopen that still verifies certificates when this Python has no CA store configured.
+
+    python.org builds on macOS ship without one until "Install Certificates.command" is run, and some
+    standalone builds look in OpenSSL's default folder. Retry with the bundles that exist instead of
+    ever disabling verification.
+    """
+    import ssl
+
+    try:
+        return urllib.request.urlopen(url, timeout=timeout)
+    except urllib.error.URLError as e:
+        if not isinstance(getattr(e, "reason", None), ssl.SSLCertVerificationError):
+            raise
+        candidates = ["/etc/ssl/cert.pem", "/etc/ssl/certs/ca-certificates.crt", "/etc/pki/tls/certs/ca-bundle.crt"]
+        for module in ("certifi", "pip._vendor.certifi"):
+            try:
+                candidates.insert(0, __import__(module, fromlist=["where"]).where())
+            except Exception:
+                pass
+        for cafile in candidates:
+            if os.path.isfile(cafile):
+                context = ssl.create_default_context(cafile=cafile)
+                return urllib.request.urlopen(url, timeout=timeout, context=context)
+        raise
+
+
+def desktop_session() -> bool:
+    """True when a browser / window can be opened (not a headless server or CI container)."""
+    return IS_WINDOWS or IS_MAC or bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
 
 
 def bundled_source() -> Optional[Path]:
@@ -112,25 +153,6 @@ def venv_python(target: Path, windowless: bool = False) -> Path:
     if IS_WINDOWS:
         return target / ".venv" / "Scripts" / ("pythonw.exe" if windowless else "python.exe")
     return target / ".venv" / "bin" / "python"
-
-
-def desktop_dir() -> Path:
-    """User's Desktop folder (localised name on Linux via xdg-user-dir)."""
-    if IS_LINUX and shutil.which("xdg-user-dir"):
-        try:
-            out = subprocess.run(["xdg-user-dir", "DESKTOP"], capture_output=True, text=True, timeout=5).stdout.strip()
-            if out:
-                return Path(out)
-        except (OSError, subprocess.SubprocessError):
-            pass
-    if IS_WINDOWS:
-        try:  # OneDrive-redirected desktops are common on Windows 10/11
-            out = _powershell("[Environment]::GetFolderPath('Desktop')").strip()
-            if out:
-                return Path(out)
-        except (OSError, subprocess.SubprocessError):
-            pass
-    return Path.home() / "Desktop"
 
 
 def console_python() -> str:
@@ -295,8 +317,8 @@ class Installer:
     def check_system(self) -> str:
         if sys.version_info < MIN_PYTHON:
             raise InstallError(f"Python {'.'.join(map(str, MIN_PYTHON))} or newer is required "
-                               f"(this is {platform.python_version()}). Run the Install-ReviewHunter launcher, "
-                               "it installs a suitable Python for you.")
+                               f"(this is {platform.python_version()}). Use install.sh (macOS, Linux) or "
+                               "Install-ReviewHunter.bat (Windows): they install a private Python for you.")
         self.sub_progress(0.2, "Python version OK")
         try:
             import ensurepip  # noqa: F401  (missing on Debian/Ubuntu without python3-venv)
@@ -320,7 +342,7 @@ class Installer:
             raise InstallError(f"Not enough free disk space on {parent}: {free_gb:.1f} GB free, {need:.1f} GB needed.")
         self.sub_progress(0.6, f"{free_gb:.0f} GB free")
         try:
-            urllib.request.urlopen(urllib.request.Request("https://pypi.org/simple/pip/", method="HEAD"), timeout=15)
+            urlopen_verified(urllib.request.Request("https://pypi.org/simple/pip/", method="HEAD"), timeout=15)
         except Exception as e:
             raise InstallError(f"Cannot reach the Python package index (pypi.org): {e}\n"
                                "Check your internet connection or proxy settings.")
@@ -334,7 +356,7 @@ class Installer:
             archive = tmp / "ReviewHunter.zip"
             self.log(f"Downloading {RELEASE_ZIP_URL}")
             try:
-                with urllib.request.urlopen(RELEASE_ZIP_URL, timeout=60) as resp, archive.open("wb") as out:
+                with urlopen_verified(RELEASE_ZIP_URL, timeout=60) as resp, archive.open("wb") as out:
                     total = int(resp.headers.get("Content-Length") or 0)
                     got = 0
                     while chunk := resp.read(1 << 16):
@@ -379,8 +401,8 @@ class Installer:
                 self.sub_progress(0.7 + 0.3 * n / len(files), f"Copying files {n}/{len(files)}")
         if tmp:
             shutil.rmtree(tmp, ignore_errors=True)
-        if IS_LINUX:
-            for script in ("run.sh", "install.sh"):
+        if not IS_WINDOWS:   # zip extraction drops the executable bit
+            for script in ("run.sh", "install.sh", "Install ReviewHunter.command"):
                 if (target / script).exists():
                     (target / script).chmod(0o755)
         return f"version {self.version}, {len(files)} files"
@@ -506,22 +528,29 @@ class Installer:
     def create_shortcuts(self) -> str:
         if not (self.o.desktop_shortcut or self.o.menu_shortcut):
             return "skipped"
-        icon_png = self.o.target / "browser_extension" / "icons" / "icon-128.png"
+        # The app's own shortcut module writes them: the launcher repairs them later with the exact same
+        # rules, so installer-made and repaired shortcuts can never disagree.
+        kinds = [k for k, wanted in (("menu", self.o.menu_shortcut), ("desktop", self.o.desktop_shortcut)) if wanted]
+        lines: list[str] = []
+        self.run_cmd([str(venv_python(self.o.target)), "-m", "doi_hunter_web.shortcuts", "--create", *kinds],
+                     cwd=self.o.target, on_line=lines.append, timeout=180)
+        try:
+            report = json.loads("\n".join(lines[lines.index("{"):] if "{" in lines else lines))
+        except ValueError:
+            raise InstallError("The shortcut helper did not answer.")
+        if report.get("skipped"):
+            self.warnings.append(f"Shortcuts were not created ({report['skipped']}).")
+            return f"skipped ({report['skipped']})"
+        self.created_shortcuts += [s["path"] for s in report.get("shortcuts", []) if s.get("exists")]
+        if report.get("errors"):
+            self.warnings.append("Some shortcuts could not be written: " + "; ".join(report["errors"]))
         if IS_WINDOWS:
+            icon_png = self.o.target / "browser_extension" / "icons" / "icon-128.png"
             icon = self.o.target / "installer" / "reviewhunter.ico"
-            if icon_png.exists():
+            if icon_png.exists() and not icon.exists():
                 write_ico_from_png(icon_png, icon)
-            places = []
-            if self.o.desktop_shortcut:
-                places.append(desktop_dir())
             if self.o.menu_shortcut:
-                places.append(Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs")
-            for place in places:
-                lnk = place / f"{APP_NAME}.lnk"
-                make_windows_shortcut(lnk, venv_python(self.o.target), "-m doi_hunter_web", self.o.target, icon,
-                                      "ReviewHunter reference manager", minimized=True)
-                self.created_shortcuts.append(str(lnk))
-            if self.o.menu_shortcut:
+                places = [Path(os.environ["APPDATA"]) / "Microsoft" / "Windows" / "Start Menu" / "Programs"]
                 if self.o.chrome_extension:
                     setup_link = places[-1] / f"{APP_NAME} Chrome Extension.lnk"
                     make_windows_shortcut(setup_link, venv_python(self.o.target),
@@ -533,25 +562,10 @@ class Installer:
                 make_windows_shortcut(lnk, base, f'"{self.o.target / "installer" / "reviewhunter_installer.py"}" --uninstall',
                                       Path.home(), icon, "Remove ReviewHunter (your library is kept)")
                 self.created_shortcuts.append(str(lnk))
-        elif IS_LINUX:
-            entry = linux_desktop_entry(self.o.target, icon_png)
-            if self.o.menu_shortcut:
-                apps = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "applications"
-                apps.mkdir(parents=True, exist_ok=True)
-                f = apps / "reviewhunter.desktop"
-                f.write_text(entry, encoding="utf-8")
-                f.chmod(0o755)
-                self.created_shortcuts.append(str(f))
-                if shutil.which("update-desktop-database"):
-                    subprocess.run(["update-desktop-database", str(apps)], capture_output=True)
-            if self.o.desktop_shortcut and desktop_dir().is_dir():
-                f = desktop_dir() / "reviewhunter.desktop"
-                f.write_text(entry, encoding="utf-8")
-                f.chmod(0o755)
-                if shutil.which("gio"):  # GNOME: mark as trusted so it launches on double-click
-                    subprocess.run(["gio", "set", str(f), "metadata::trusted", "true"], capture_output=True)
-                self.created_shortcuts.append(str(f))
-        return f"{len(self.created_shortcuts)} created"
+        elif IS_LINUX and shutil.which("update-desktop-database"):
+            apps = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share")) / "applications"
+            subprocess.run(["update-desktop-database", str(apps)], capture_output=True)
+        return f"{len(self.created_shortcuts)} ready"
 
     def finish(self) -> str:
         manifest = {
@@ -601,38 +615,38 @@ def make_windows_shortcut(lnk: Path, target: Path, arguments: str, workdir: Path
         raise InstallError(f"Could not create the shortcut {lnk}")
 
 
-def linux_desktop_entry(target: Path, icon: Path) -> str:
-    """freedesktop.org launcher. The app is single-instance: clicking again just reopens the browser tab."""
-    return (
-        "[Desktop Entry]\n"
-        "Type=Application\n"
-        f"Name={APP_NAME}\n"
-        "Comment=Reference manager: library, PDFs, citations\n"
-        # Exec only allows double-quoted arguments (freedesktop spec); Path= sets the working directory
-        # so "-m doi_hunter_web" finds the package.
-        f'Exec="{venv_python(target)}" -m doi_hunter_web\n'
-        f"Path={target}\n"
-        f"Icon={icon}\n"
-        "Terminal=false\n"
-        "Categories=Office;Education;Science;\n"
-        "StartupNotify=false\n"
-    )
-
-
 def open_in_browser(url: str) -> None:
     import webbrowser
     webbrowser.open(url)
 
 
 def launch_app(target: Path) -> None:
-    """Start the installed app detached from the installer."""
-    py = venv_python(target, windowless=False)
+    """Start the installed app exactly like its shortcut does (the launcher: single, current instance)."""
+    py = venv_python(target, windowless=True)
     if IS_WINDOWS:
-        subprocess.Popen([str(py), "-m", "doi_hunter_web"], cwd=str(target),
-                         creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0))
+        subprocess.Popen([str(py), "-m", "doi_hunter_web.launcher"], cwd=str(target),
+                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
     else:
-        subprocess.Popen([str(py), "-m", "doi_hunter_web"], cwd=str(target), start_new_session=True,
+        subprocess.Popen([str(py), "-m", "doi_hunter_web.launcher"], cwd=str(target), start_new_session=True,
                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def stop_running_app(target: Path) -> None:
+    """Before deleting a program folder, stop the server it is running (if any)."""
+    for port in (8765,):
+        try:
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/system/instance", timeout=2) as r:
+                info = json.loads(r.read().decode("utf-8"))
+        except Exception:
+            continue
+        if info.get("app") == APP_NAME and Path(info.get("root") or "").resolve() == target.resolve():
+            try:
+                req = urllib.request.Request(f"http://127.0.0.1:{port}/api/system/shutdown", data=b"{}",
+                                             method="POST", headers={"Content-Type": "application/json"})
+                urllib.request.urlopen(req, timeout=5).read()
+                time.sleep(2)
+            except Exception:
+                pass
 
 
 def validate_chrome_extension(target: Path) -> dict:
@@ -680,6 +694,11 @@ def find_chrome() -> Optional[str]:
                 path = Path(os.environ[base]) / "Google/Chrome/Application/chrome.exe"
                 if path.is_file():
                     return str(path)
+    if IS_MAC:
+        for app in (Path("/Applications"), Path.home() / "Applications"):
+            path = app / "Google Chrome.app" / "Contents" / "MacOS" / "Google Chrome"
+            if path.is_file():
+                return str(path)
     for name in ("chrome", "google-chrome", "google-chrome-stable", "chromium", "chromium-browser"):
         found = shutil.which(name)
         if found:
@@ -694,6 +713,9 @@ def open_extension_setup(target: Path) -> bool:
     if IS_WINDOWS:
         _powershell("Set-Clipboard -Value $env:RH_EXTENSION_FOLDER", {"RH_EXTENSION_FOLDER": str(folder)})
         os.startfile(str(folder))  # type: ignore[attr-defined]
+    elif IS_MAC:
+        subprocess.run(["pbcopy"], input=str(folder).encode("utf-8"), capture_output=True)   # paste in "Load unpacked"
+        subprocess.Popen(["open", str(folder)])
     else:
         if shutil.which("xdg-open"):
             subprocess.Popen(["xdg-open", str(folder)])
@@ -725,9 +747,14 @@ def uninstall(target: Optional[Path], confirm: Callable[[str], bool], say: Calla
     if not confirm(f"Remove ReviewHunter {manifest.get('version', '')} from\n{target}\n\n"
                    f"Your library (database, PDFs, settings) in\n{library}\nis kept."):
         return False
+    stop_running_app(target)
     for s in manifest.get("shortcuts", []):
         try:
-            Path(s).unlink(missing_ok=True)
+            p = Path(s)
+            if p.is_dir() and not p.is_symlink():   # macOS ReviewHunter.app bundle
+                shutil.rmtree(p)
+            else:
+                p.unlink(missing_ok=True)
         except OSError as e:
             say(f"Could not remove shortcut {s}: {e}")
     if manifest.get("in_place"):  # a git clone or unzipped folder the user manages: keep it
@@ -808,10 +835,10 @@ def run_cli(args: argparse.Namespace, options: Options) -> int:
     if ok:
         if options.chrome_extension:
             print("\nChrome extension ready. Confirm loading it in Chrome:\n" + EXTENSION_HELP.format(folder=options.target / "browser_extension"))
-            if options.launch and (IS_WINDOWS or os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+            if options.launch and desktop_session():
                 if not open_extension_setup(options.target):
                     print("Chrome was not found. Install Chrome, then run the Chrome extension setup shortcut.")
-        if options.launch and (IS_WINDOWS or os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+        if options.launch and desktop_session():
             launch_app(options.target)
             print("\nReviewHunter is starting in your browser.")
     return 0 if ok else 1
@@ -834,7 +861,10 @@ def run_gui(options: Options) -> int:
             root.iconphoto(True, tk.PhotoImage(file=str(icon_png)))
     except tk.TclError:
         pass
-    if not IS_WINDOWS:  # Segoe UI / Consolas do not exist on Linux: use Tk's portable families
+    if IS_MAC:  # native macOS families (Segoe UI / Consolas do not exist there)
+        UI.update(font=("Helvetica Neue", 13), font_title=("Helvetica Neue", 22, "bold"), font_step=("Helvetica Neue", 13),
+                  font_mono=("Menlo", 11), width=820, height=700)
+    elif not IS_WINDOWS:  # Segoe UI / Consolas do not exist on Linux: use Tk's portable families
         UI.update(font=("DejaVu Sans", 10), font_title=("DejaVu Sans", 17, "bold"), font_step=("DejaVu Sans", 10),
                   font_mono=("DejaVu Sans Mono", 9))
 
@@ -1089,7 +1119,7 @@ def run_gui_uninstall(target: Optional[Path]) -> int:
 # ---------------------------------------------------------------------------- entry point
 
 def gui_available() -> bool:
-    if not IS_WINDOWS and not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
+    if not desktop_session() or (IS_MAC and os.environ.get("SSH_CONNECTION")):
         return False
     try:
         import tkinter  # noqa: F401
@@ -1099,7 +1129,7 @@ def gui_available() -> bool:
 
 
 def main(argv: Optional[list[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description=f"Install {APP_NAME} on Windows or Linux.")
+    parser = argparse.ArgumentParser(description=f"Install {APP_NAME} on Windows, macOS or Linux.")
     parser.add_argument("--cli", action="store_true", help="terminal mode (no window)")
     parser.add_argument("--yes", "-y", action="store_true", help="accept defaults, no questions (implies --cli)")
     parser.add_argument("--target", type=Path, help=f"install folder (default: {default_install_dir()})")
@@ -1146,7 +1176,13 @@ def main(argv: Optional[list[str]] = None) -> int:
         if not (args.cli or args.yes):
             print("No graphical display or tkinter available: using terminal mode.")
         return run_cli(args, options)
-    return run_gui(options)
+    try:
+        return run_gui(options)
+    except Exception as e:   # e.g. a Tk build that cannot open a window on this Mac: same install, in the terminal
+        if "tcl" not in type(e).__module__.lower() and "display" not in str(e).lower():
+            raise
+        print(f"The setup window could not open ({e}): continuing in terminal mode.")
+        return run_cli(args, options)
 
 
 if __name__ == "__main__":

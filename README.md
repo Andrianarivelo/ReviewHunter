@@ -169,7 +169,7 @@ detections. Reporting checks distinguish unavailable text from an assessed paper
 
 ### First steps
 
-1. Double-click the **ReviewHunter** shortcut (or `ReviewHunter.bat`). The app opens at `http://127.0.0.1:8765`.
+1. Open **ReviewHunter** from its shortcut (Start menu or Desktop on Windows, Launchpad or Applications on macOS, the application menu on Linux). The app opens at `http://127.0.0.1:8765`; clicking again just brings it back.
 2. **Coming from Zotero?** Settings > Zotero: tick the libraries to sync and click *Sync now* (or Import > *Migrate from Zotero* for a one-time copy). Zotero's files are only read.
 3. **Chrome connector:** Settings > Browser Connector shows the folder to load in `chrome://extensions` (Developer mode > Load unpacked).
 4. **Word add-in:** Settings > Word Add-in > *Set up Word add-in...* opens a script you run once (it trusts ReviewHunter's local certificate and registers the add-in), then restart Word: References tab > ReviewHunter.
@@ -228,46 +228,56 @@ connector, and shared-library concurrency against single-file and per-paper alte
 venv, `plot` with a Python that has matplotlib and SciPy; launcher `benchmarks/Run_Zotero_Shared_Benchmark.cmd`).
 `tools/extension_e2e.py` runs the browser hand-off in a real headless Chrome with the extension loaded.
 
-## Easy install (Windows and Linux)
+## Easy install (Windows, macOS, Linux)
 
-Download **ReviewHunter.zip** from the [latest release](https://github.com/Andrianarivelo/ReviewHunter/releases/latest), unzip it, then:
+Nothing to install first: no Python, no administrator password. If the computer has no suitable
+Python, the installer gets a private one for your user account with [uv](https://docs.astral.sh/uv/).
 
-| System | One click | What happens |
+| System | Do this | |
 |---|---|---|
-| **Windows 10/11** | double-click `Install-ReviewHunter.bat` | finds Python 3.10+ (offers to install Python 3.12 with winget if missing), then opens the setup window |
-| **Linux** (Ubuntu, Debian, Fedora, openSUSE, Arch) | `bash install.sh` | installs `python3-venv` / `python3-tk` with your confirmation if missing, then opens the setup window (terminal mode without a display) |
+| **macOS** (Apple silicon and Intel) | open **Terminal** and paste:<br>`curl -fsSL https://github.com/Andrianarivelo/ReviewHunter/releases/latest/download/install.sh \| bash` | ReviewHunter then appears in **Launchpad**, **Spotlight** and **Applications** |
+| **Windows 10/11** | download **Install-ReviewHunter.bat** from the [latest release](https://github.com/Andrianarivelo/ReviewHunter/releases/latest) and double-click it, or paste in PowerShell:<br>`irm https://github.com/Andrianarivelo/ReviewHunter/releases/latest/download/install.ps1 \| iex` | **Start menu** and **Desktop** shortcuts |
+| **Linux** (Ubuntu, Debian, Fedora, openSUSE, Arch) | paste in a terminal:<br>`curl -fsSL https://github.com/Andrianarivelo/ReviewHunter/releases/latest/download/install.sh \| bash` | application menu and Desktop entries |
+
+From the unzipped **ReviewHunter.zip** you can also double-click `Install-ReviewHunter.bat` (Windows) or
+`Install ReviewHunter.command` (macOS; the first time, right-click it > **Open**, because macOS asks
+about scripts downloaded from the internet), or run `bash install.sh` (Linux).
 
 The setup window shows each step with a progress bar: system check, file copy, private Python environment,
-dependencies, optional semantic clustering, a **self-test that really starts the app**, Chrome extension setup, shortcuts
-(Desktop + Start menu / applications menu). Nothing needs administrator rights: the program goes to
-`%LOCALAPPDATA%\Programs\ReviewHunter` (Windows) or `~/.local/share/reviewhunter` (Linux), and your library
-in `~/ReviewHunter` is never touched, not even by the uninstaller.
+dependencies, optional semantic clustering, a **self-test that really starts the app**, Chrome extension setup
+and shortcuts. The program goes to `%LOCALAPPDATA%\Programs\ReviewHunter` (Windows), `~/Library/ReviewHunter`
+(macOS) or `~/.local/share/reviewhunter` (Linux); your library in `~/ReviewHunter` is never touched, not even
+by the uninstaller.
+
+**The shortcut always opens the right ReviewHunter.** Every shortcut runs the same small launcher
+(`python -m doi_hunter_web.launcher`), which
+* opens the browser on the running ReviewHunter if it is this installation and this version (one instance only);
+* replaces a running instance that comes from another folder or still runs older code (after an update);
+* starts the server in the background (no console window; log in `~/ReviewHunter/logs/server.log`) and
+  shows a dialog if it cannot start;
+* checks the shortcuts at every launch and repairs any that point to another copy or an old launch method.
+
+**Settings > Advanced > Application** shows the running version and folder, the state of each shortcut
+(with *Repair shortcuts*), and **Restart** / **Quit** buttons.
 
 **Chrome extension setup is selected by default.** The installer bundles and validates the current
-connector alongside the PDF metadata, reference matching, and citation filename features. At the end it
-opens Chrome's extensions page and the installed extension folder (the folder path is copied on Windows).
-Enable **Developer mode**, click **Load unpacked**, and select that folder. Chrome requires this final
-manual step for extensions distributed outside the Chrome Web Store. For an existing connector loaded
-from the same folder, click **Reload** instead. On Windows, **ReviewHunter Chrome Extension** in the Start
-menu, or **Install Chrome Extension.cmd** in the installation folder, reopens setup later.
+connector. At the end it opens Chrome's extensions page and the extension folder (its path is copied to
+the clipboard on Windows and macOS). Enable **Developer mode**, click **Load unpacked**, and select that
+folder: Chrome requires this final manual step for extensions distributed outside the Chrome Web Store.
+For an existing connector loaded from the same folder, click **Reload** instead.
 
 ```bash
 bash install.sh --cli --yes --no-launch                            # unattended install, no app/browser launch
 python installer/reviewhunter_installer.py --setup-chrome          # reopen Chrome setup for the installed app
-python installer/reviewhunter_installer.py --no-chrome-extension   # skip Chrome setup
 python installer/reviewhunter_installer.py --uninstall             # remove program + shortcuts, keep library
-python installer/reviewhunter_installer.py --help                  # all options
+python -m doi_hunter_web.launcher --foreground                     # run the server in a terminal (troubleshooting)
+python -m doi_hunter_web.shortcuts --status                        # where the shortcuts point
 ```
 
-`Install-ReviewHunter.bat` and `install.sh` also work on their own (downloaded without the zip): they fetch the
-latest release. While the repository is private this needs the [GitHub CLI](https://cli.github.com/) signed in
-(`gh auth login`); otherwise download the zip from the Releases page while signed in to GitHub.
-Setup log: `%TEMP%\reviewhunter-install.log` or `/tmp/reviewhunter-install.log`.
-
-Every installer CI run packages `ReviewHunter.zip` and `ReviewHunter-Chrome-Extension.zip` from its exact
-commit. The **ReviewHunter-installer** workflow artifact contains both ZIPs and the Windows/Linux
-launchers. Automated clean installations use this same packaged app and verify its PDF dependencies
-and connector files before reporting success.
+Setup log: `%TEMP%\reviewhunter-install.log` or `$TMPDIR/reviewhunter-install.log`. Every installer CI run
+packages `ReviewHunter.zip` from its exact commit and installs it on clean Windows, macOS (Apple silicon)
+and Linux machines, with and without a preinstalled Python, then opens the app through its shortcut and
+checks which instance answers.
 
 ## Launching the Web App - no install required
 

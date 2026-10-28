@@ -923,6 +923,14 @@
   </template>
 </div>
 
+<!-- Shown after Settings > Quit; disappears by itself when the app is opened again (WebSocket reconnects). -->
+<div x-show="appStopped" x-transition.opacity class="fixed inset-0 z-[90] grid place-items-center bg-ink-50/95 dark:bg-ink-950/95 backdrop-blur-sm p-4">
+  <div class="card p-6 max-w-md text-center space-y-2">
+    <div class="font-serif text-xl">ReviewHunter is closed</div>
+    <p class="text-sm text-ink-500 leading-relaxed">Open it again from its shortcut (Start menu, Applications folder or Desktop). This page reconnects by itself.</p>
+  </div>
+</div>
+
 <!-- ============================================================ DIALOGS -->
 <div x-show="dialog" x-transition.opacity class="fixed inset-0 z-50 grid place-items-center bg-ink-900/45 backdrop-blur-sm p-4" @mousedown.self="dialog !== 'settings' && closeDialog()">
 
@@ -1624,6 +1632,29 @@
 
         <!-- Advanced -->
         <section x-show="settingsTab==='advanced'" class="space-y-4 text-sm">
+          <h4 class="set-h">Application</h4>
+          <div class="card p-4 space-y-2" x-show="appInstance">
+            <div class="flex items-center gap-3">
+              <span class="status-dot on"></span>
+              <div class="min-w-0"><div class="font-semibold" x-text="`ReviewHunter ${appInstance?.version || ''}`"></div>
+                <div class="text-xs text-ink-500 truncate" x-text="`Running from ${appInstance?.root || ''} (process ${appInstance?.pid || ''}, since ${(appInstance?.started_at || '').replace('T', ' ')})`"></div></div>
+              <button @click="restartApp()" :disabled="!appInstance?.can_shutdown" class="ml-auto action-secondary h-8 px-3 text-xs shrink-0" :title="appInstance?.can_shutdown ? 'Stop and start again (applies updates)' : 'Started in a development mode that cannot restart itself'">Restart</button>
+              <button @click="quitApp()" :disabled="!appInstance?.can_shutdown" class="action-secondary h-8 px-3 text-xs shrink-0 text-rose-600 dark:text-rose-300">Quit</button>
+            </div>
+            <div class="border-t border-ink-100 dark:border-ink-800 pt-2 flex items-start gap-3 text-xs">
+              <div class="flex-1 space-y-0.5">
+                <template x-if="appShortcuts && appShortcuts.managed">
+                  <div><template x-for="s in appShortcuts.shortcuts" :key="s.path">
+                    <div :class="!s.exists ? 'text-ink-400' : (s.linked ? 'text-emerald-600' : 'text-amber-600')" :title="s.path"
+                         x-text="(s.exists ? (s.linked ? '✓ ' : '! ') : '- ') + shortcutLabel(s)"></div>
+                  </template></div>
+                </template>
+                <div x-show="appShortcuts && !appShortcuts.managed" class="text-ink-400" x-text="`Shortcuts are not managed for this copy (${appShortcuts?.reason})`"></div>
+                <div class="text-ink-400">Every launch checks the shortcuts and repairs any that start another copy or an old version.</div>
+              </div>
+              <button x-show="appShortcuts && appShortcuts.managed" @click="repairShortcuts()" class="action-secondary h-7 px-2.5 text-xs shrink-0">Repair shortcuts</button>
+            </div>
+          </div>
           <h4 class="set-h">Locations</h4>
           <template x-for="p in [['Library', system?.library_root], ['Files (PDFs)', system?.papers_dir]]" :key="p[0]">
             <div class="flex items-center gap-2"><span class="w-28 text-ink-500" x-text="p[0]"></span><code class="kbd truncate flex-1" x-text="p[1] || ''"></code>

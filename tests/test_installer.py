@@ -105,3 +105,36 @@ def test_setup_command_uses_installed_target_without_reinstalling(bundle, monkey
     monkeypatch.setattr(setup.Installer, "run", lambda self: pytest.fail("Must not reinstall"))
     assert setup.main(["--setup-chrome", "--target", str(bundle)]) == 0
     assert called == [bundle.resolve()]
+
+
+def test_macos_defaults_and_desktop_session(monkeypatch, tmp_path):
+    monkeypatch.setattr(setup, "IS_WINDOWS", False)
+    monkeypatch.setattr(setup, "IS_MAC", True)
+    monkeypatch.setattr(setup.Path, "home", lambda: tmp_path)
+    monkeypatch.delenv("DISPLAY", raising=False)
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+    assert setup.default_install_dir() == tmp_path / "Library" / "ReviewHunter"   # no space in the path
+    assert setup.desktop_session()                                                # a Mac always has a desktop
+
+
+def test_uninstall_removes_mac_app_bundle_and_keeps_library(tmp_path, monkeypatch):
+    monkeypatch.setattr(setup, "stop_running_app", lambda target: None)
+    target = tmp_path / "Library" / "ReviewHunter"
+    (target / "doi_hunter_web").mkdir(parents=True)
+    (target / "run.py").write_text("")
+    bundle = tmp_path / "Applications" / "ReviewHunter.app" / "Contents" / "MacOS"
+    bundle.mkdir(parents=True)
+    (bundle / "ReviewHunter").write_text("#!/bin/bash\n")
+    library = tmp_path / "ReviewHunter"
+    library.mkdir()
+    monkeypatch.setattr(setup.Path, "home", lambda: tmp_path)
+    (target / "install.json").write_text(json.dumps({"version": "x", "shortcuts": [str(bundle.parents[1])]}))
+    assert setup.uninstall(target, lambda q: True, print)
+    assert not target.exists() and not (tmp_path / "Applications" / "ReviewHunter.app").exists() and library.exists()
+
+
+def test_launch_uses_the_launcher(monkeypatch, tmp_path):
+    calls = []
+    monkeypatch.setattr(setup.subprocess, "Popen", lambda cmd, **kw: calls.append(cmd))
+    setup.launch_app(tmp_path)
+    assert calls and calls[0][1:] == ["-m", "doi_hunter_web.launcher"]

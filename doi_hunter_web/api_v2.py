@@ -1175,6 +1175,60 @@ def system_info(request: Request) -> dict:
     }
 
 
+@router.get("/system/instance")
+def system_instance() -> dict:
+    """Who is running on this port (install folder, version, pid): used by shortcuts and launchers."""
+    from . import instance
+
+    return instance.info()
+
+
+def _no_extension(request: Request) -> None:
+    """Quit / restart / shortcut changes: the app's own page or a local program, never an extension."""
+    if (request.headers.get("origin") or "").lower().startswith(("chrome-extension://", "moz-extension://")):
+        raise HTTPException(403, "not allowed from a browser extension")
+
+
+@router.post("/system/shutdown")
+def system_shutdown(request: Request) -> dict:
+    from . import instance
+
+    _no_extension(request)
+    if not instance.request_shutdown():
+        raise HTTPException(409, "this ReviewHunter was not started by its launcher and cannot stop itself")
+    return {"ok": True}
+
+
+@router.post("/system/restart")
+def system_restart(request: Request) -> dict:
+    """Start a launcher that waits for this process to stop, then starts the current code again."""
+    from . import instance, launcher
+
+    _no_extension(request)
+    if not instance.SERVERS:
+        raise HTTPException(409, "this ReviewHunter was not started by its launcher and cannot restart itself")
+    launcher.spawn_restart(os.getpid())
+    instance.request_shutdown(delay=0.8)
+    return {"ok": True}
+
+
+@router.get("/system/shortcuts")
+def system_shortcuts() -> dict:
+    from . import shortcuts
+
+    reason = shortcuts.skip_reason()
+    return {"managed": reason is None, "reason": reason or "",
+            "shortcuts": [] if reason else shortcuts.status()}
+
+
+@router.post("/system/shortcuts/repair")
+def system_shortcuts_repair(request: Request) -> dict:
+    from . import shortcuts
+
+    _no_extension(request)
+    return shortcuts.ensure(keep_one=True)
+
+
 @router.post("/system/open-path")
 def open_path(body: OpenPathIn) -> dict:
     """Open a folder in Explorer. Restricted to ReviewHunter's own folders."""

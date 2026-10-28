@@ -6,7 +6,8 @@ rem  Double-click this file. It works in two situations:
 rem    * inside the unzipped ReviewHunter folder (uses the files next to it)
 rem    * on its own, downloaded from the Releases page (downloads the latest app)
 rem
-rem  Steps: 1) find Python 3.10+ (offers to install Python 3.12 with winget if missing)
+rem  Steps: 1) find Python 3.10+; if missing, install a private Python for this user
+rem            with uv (no administrator rights, no prompts; winget is the fallback)
 rem         2) locate or download the app      3) open the graphical installer
 rem  Options are forwarded, e.g.  Install-ReviewHunter.bat --cli --yes
 rem ============================================================================
@@ -24,7 +25,11 @@ echo.
 rem ---------------------------------------------------------------- 1) Python
 call :find_python
 if defined PY goto :have_python
-echo   Python 3.10 or newer was not found on this computer.
+echo   Python 3.10 or newer was not found: installing a private Python for your account
+echo   (no administrator rights needed, about 30 MB, one time)...
+call :private_python
+if defined PY goto :have_python
+echo   The private Python could not be installed.
 where winget >nul 2>nul
 if errorlevel 1 goto :no_python
 echo   It can be installed now with the Windows package manager (winget).
@@ -91,11 +96,26 @@ rem ---------------------------------------------------------------- helpers
 :find_python
 rem The py launcher, then python on PATH (the Microsoft Store stub prints nothing), then per-user installs.
 set "PY="
+if "%RH_FORCE_UV%"=="1" exit /b 0
 for /f "usebackq delims=" %%P in (`py -3 -c "%PROBE%" 2^>nul`) do set "PY=%%P"
 if defined PY exit /b 0
 for /f "usebackq delims=" %%P in (`python -c "%PROBE%" 2^>nul`) do set "PY=%%P"
 if defined PY exit /b 0
 for /d %%D in ("%LOCALAPPDATA%\Programs\Python\Python3*") do (
-    if exist "%%D\python.exe" for /f "usebackq delims=" %%P in (`"%%D\python.exe" -c "%PROBE%" 2^>nul`) do set "PY=%%P"
+    if exist "%%D\python.exe" for /f "usebackq delims=" %%P in (`call "%%D\python.exe" -c "%PROBE%" 2^>nul`) do set "PY=%%P"
 )
+exit /b 0
+
+:private_python
+rem uv (https://docs.astral.sh/uv) installs a standalone Python in the user profile. UV_NO_MODIFY_PATH
+rem keeps the user's PATH untouched; ReviewHunter only needs the interpreter path.
+set "UV=%USERPROFILE%\.local\bin\uv.exe"
+if not exist "%UV%" powershell -NoProfile -ExecutionPolicy Bypass -Command "$env:UV_NO_MODIFY_PATH='1'; [Net.ServicePointManager]::SecurityProtocol='Tls12'; irm https://astral.sh/uv/install.ps1 | iex" >nul 2>nul
+if not exist "%UV%" exit /b 0
+"%UV%" python install 3.12 >nul 2>nul
+for /f "usebackq delims=" %%P in (`call "%UV%" python find 3.12 2^>nul`) do set "PY=%%P"
+if not defined PY exit /b 0
+set "UVPY=%PY%"
+set "PY="
+for /f "usebackq delims=" %%P in (`call "%UVPY%" -c "%PROBE%" 2^>nul`) do set "PY=%%P"
 exit /b 0

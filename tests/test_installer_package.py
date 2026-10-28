@@ -37,6 +37,8 @@ REQUIRED_FILES = (
     "browser_extension/manifest.json", "browser_extension/src/core/pdf.js",
     "browser_extension/src/core/save.js", "browser_extension/src/core/handoff.js",
     "browser_extension/src/core/shadow.js", "browser_extension/src/shared/identifiers.js",
+    "install.ps1", "Install ReviewHunter.command", "doi_hunter_web/launcher.py", "doi_hunter_web/shortcuts.py",
+    "doi_hunter_web/instance.py",
 )
 
 
@@ -128,6 +130,17 @@ class InstallerPackageTests(unittest.TestCase):
         self.assertTrue(unix.startswith(b"#!/usr/bin/env bash\n"))
         self.assertNotIn(b"\r\n", unix)
         self.assertIn(b"\r\n", windows)
+        mac = app.read("ReviewHunter/Install ReviewHunter.command")
+        self.assertTrue(mac.startswith(b"#!/bin/bash\n"))
+        self.assertNotIn(b"\r\n", mac)
+
+    def test_unix_launchers_are_executable_in_the_zip(self):
+        """Finder and unzip keep the zip's Unix mode: the double-clickable .command must be executable."""
+        app = self.archives["app"]
+        for name in ("install.sh", "Install ReviewHunter.command"):
+            with self.subTest(file=name):
+                mode = app.getinfo("ReviewHunter/" + name).external_attr >> 16
+                self.assertTrue(mode & 0o111, oct(mode))
 
 
 if __name__ == "__main__":

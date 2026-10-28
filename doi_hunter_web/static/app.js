@@ -131,7 +131,10 @@ function app() {
           clearTimeout(refreshTimer);
           refreshTimer = setTimeout(() => this.reloadAll(), 400);
         };
-        ws.onopen = () => { if (!this.online) { this.online = true; this.reloadAll(); } };
+        ws.onopen = () => {
+          this.appStopped = false;   // reopened from its shortcut after Settings > Quit
+          if (!this.online) { this.online = true; this.reloadAll(); }
+        };
         ws.onmessage = async (ev) => {
           const m = JSON.parse(ev.data);
           switch (m.event) {

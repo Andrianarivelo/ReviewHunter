@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import socket
 import threading
 import time
@@ -30,18 +31,6 @@ def _port_free(host: str, port: int) -> bool:
             return True
         except OSError:
             return False
-
-
-def _reviewhunter_already_running(host: str, port: int) -> bool:
-    """The browser extension and Word add-in rely on fixed ports, so never silently move."""
-    import json
-    import urllib.request
-
-    try:
-        with urllib.request.urlopen(f"http://{host}:{port}/api/health", timeout=2) as r:
-            return json.loads(r.read().decode()).get("ok") is True
-    except Exception:
-        return False
 
 
 def _open_when_ready(url: str, host: str, port: int) -> None:
@@ -90,12 +79,24 @@ def main() -> None:
     port = args.port
     url = f"http://{args.host}:{port}"
     if not _port_free(args.host, port):
-        if _reviewhunter_already_running(args.host, port):
+        # Single instance, but never a stale one: an instance of another install folder or an older
+        # version is replaced, so whatever starts the app always gets this code (see launcher.py).
+        from .launcher import classify, probe, stop_instance
+
+        found = probe(args.host, port)
+        state = classify(found)
+        if state == "same":
             print(f"\n  ReviewHunter is already running at {url} - opening it.")
             if not args.no_browser:
                 webbrowser.open(url)
             return
-        raise SystemExit(f"Port {port} is used by another program. Close it or set REVIEWHUNTER_PORT.")
+        if state == "stale":
+            print(f"\n  Replacing the running ReviewHunter {found.get('version')} "
+                  f"from {found.get('root') or 'another folder'}...")
+            if not stop_instance(args.host, port, found):
+                raise SystemExit(f"An older ReviewHunter keeps port {port} busy and could not be stopped.")
+        elif not _port_free(args.host, port):
+            raise SystemExit(f"Port {port} is used by another program. Close it or set REVIEWHUNTER_PORT.")
 
     print(f"\n  ReviewHunter - {url}")
     print(f"      library: {config.library_root()}")
@@ -108,7 +109,8 @@ def main() -> None:
 
     # HTTPS listener for the Word add-in (Office requires TLS even on localhost).
     https_port = int(config.get_settings().get("https_port") or 8766)
-    if not args.no_https and _port_free("127.0.0.1", https_port):
+    no_https = args.no_https or os.environ.get("REVIEWHUNTER_NO_HTTPS") == "1"   # tests, CI, headless servers
+    if not no_https and _port_free("127.0.0.1", https_port):
         try:
             from .addin import ensure_certificates, write_manifest
 
@@ -127,6 +129,10 @@ def main() -> None:
         return
 
     import asyncio
+
+    from . import instance
+
+    instance.register(servers)   # lets Settings > Quit / Restart and newer launchers stop this process
 
     async def serve_all() -> None:
         await asyncio.gather(*(srv.serve() for srv in servers))

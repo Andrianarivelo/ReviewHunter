@@ -11,7 +11,8 @@ name: installer
 on:
   push:
     branches: [main]
-    paths: ["installer/**", "install.sh", "Install-ReviewHunter.bat", "requirements.txt", "run.py",
+    paths: ["installer/**", "install.sh", "install.ps1", "Install-ReviewHunter.bat", "Install ReviewHunter.command",
+            "requirements.txt", "run.py",
             "doi_hunter/**", "doi_hunter_web/**", "browser_extension/**", "word_addin/**",
             "scripts/**", "tools/**", "pyproject.toml", "setup.py", "MANIFEST.in", ".gitattributes",
             "tests/test_installer*.py", ".github/workflows/installer.yml"]
@@ -34,7 +35,7 @@ jobs:
           mkdir -p dist
           git archive --format=zip --prefix=ReviewHunter/ --output=dist/ReviewHunter.zip HEAD
           git archive --format=zip --output=dist/ReviewHunter-Chrome-Extension.zip HEAD:browser_extension
-          cp Install-ReviewHunter.bat install.sh dist/
+          cp Install-ReviewHunter.bat install.sh install.ps1 "Install ReviewHunter.command" dist/
       - name: Verify packaged app, extension resources and PDF dependencies
         env:
           RH_RELEASE_ARCHIVE: ${{ github.workspace }}/dist/ReviewHunter.zip
@@ -110,6 +111,7 @@ jobs:
             # the installer self-test already started the app; also check the files it promised
             test -f "$HOME/.local/share/reviewhunter/install.json" || ok=false
             test -f "$HOME/.local/share/applications/reviewhunter.desktop" || ok=false
+            grep -q "doi_hunter_web.launcher" "$HOME/.local/share/applications/reviewhunter.desktop" || ok=false
             (cd "$HOME/.local/share/reviewhunter" && .venv/bin/python -c "import doi_hunter_web.server, doi_hunter_web.pdf_ingest, fontTools, curl_cffi") || ok=false
             test -f "$HOME/.local/share/reviewhunter/browser_extension/manifest.json" || ok=false
             test -f "$HOME/.local/share/reviewhunter/ChromeExtensionSetup.txt" || ok=false
@@ -187,7 +189,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        method: [legacy, installer]
+        # installer = double-click Install-ReviewHunter.bat; oneline = install.ps1 (the "irm | iex" script)
+        # forced onto the private-Python path (uv), as on a PC without Python.
+        method: [legacy, installer, oneline]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -199,7 +203,13 @@ jobs:
         shell: pwsh
         run: |
           $start = Get-Date; $ok = $false
-          if ("${{ matrix.method }}" -eq "legacy") {
+          if ("${{ matrix.method }}" -eq "oneline") {
+            Expand-Archive -LiteralPath packaged/ReviewHunter.zip -DestinationPath packaged
+            $env:RH_FORCE_UV = "1"
+            powershell -NoProfile -ExecutionPolicy Bypass -File packaged/ReviewHunter/install.ps1 --cli --yes --no-launch
+            $target = "$env:LOCALAPPDATA\Programs\ReviewHunter"
+            $ok = (Test-Path "$target\install.json") -and (Test-Path "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\ReviewHunter.lnk")
+          } elseif ("${{ matrix.method }}" -eq "legacy") {
             $p = Start-Process python -ArgumentList "run.py","--","--no-browser","--no-https" -WindowStyle Hidden -PassThru -RedirectStandardOutput legacy.log -RedirectStandardError legacy.err
             for ($i = 0; $i -lt 600; $i++) {
               try { Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8765/connector/ping -TimeoutSec 2 | Out-Null; $ok = $true; break } catch {}
@@ -225,6 +235,23 @@ jobs:
               } finally { Pop-Location }
             }
           }
+          if ($ok -and "${{ matrix.method }}" -ne "legacy") {
+            # Open the Start menu shortcut itself (what a click does) and check WHICH instance answers.
+            $lnk = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\ReviewHunter.lnk"
+            $s = (New-Object -ComObject WScript.Shell).CreateShortcut($lnk)
+            "shortcut: $($s.TargetPath) $($s.Arguments) in $($s.WorkingDirectory)"
+            $ok = $s.TargetPath -like "*pythonw.exe" -and $s.Arguments -like "*doi_hunter_web.launcher*"
+            $env:REVIEWHUNTER_NO_DIALOGS = "1"
+            Start-Process $lnk
+            $inst = $null
+            for ($i = 0; $i -lt 120 -and -not $inst; $i++) {
+              try { $inst = Invoke-RestMethod http://127.0.0.1:8765/api/system/instance -TimeoutSec 2 } catch { Start-Sleep 1 }
+            }
+            $inst | ConvertTo-Json
+            $ok = $ok -and $inst -and ($inst.root -eq $target) -and ($inst.launched_by -eq "launcher")
+            try { Invoke-RestMethod -Method Post http://127.0.0.1:8765/api/system/shutdown | Out-Null } catch { $ok = $false }
+            Start-Sleep 3
+          }
           $seconds = [int]((Get-Date) - $start).TotalSeconds
           $py = (python -c "import platform; print(platform.python_version())")
           New-Item -ItemType Directory -Force result | Out-Null
@@ -249,7 +276,86 @@ jobs:
           if-no-files-found: ignore
 
       - name: Require successful installation
-        if: always() && matrix.method == 'installer'
+        if: always() && matrix.method != 'legacy'
         shell: pwsh
         run: |
           if ('${{ steps.run.outputs.ok }}' -ne 'true') { throw 'Installation or startup failed. See result artifact and logs.' }
+
+  macos:
+    # Real Macs (Apple silicon). "system" uses the runner's Python; "private" forces the path taken on a
+    # Mac without Python: install.sh installs a private Python with uv (no admin, no Xcode tools).
+    name: macos / ${{ matrix.python }}
+    runs-on: macos-latest
+    needs: package
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [system, private]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: ReviewHunter-installer
+          path: packaged
+      - name: Install from the release archive, then open the app like a user
+        id: run
+        shell: bash
+        run: |
+          set +e
+          start=$(date +%s); ok=true
+          ditto -x -k packaged/ReviewHunter.zip packaged          # Finder's unzip: keeps the executable bits
+          test -x "packaged/ReviewHunter/Install ReviewHunter.command" || { echo "command file not executable"; ok=false; }
+          if [ "${{ matrix.python }}" = private ]; then export RH_FORCE_UV=1; fi
+          bash packaged/ReviewHunter/install.sh --cli --yes --no-launch || ok=false
+          T="$HOME/Library/ReviewHunter"; APP="$HOME/Applications/ReviewHunter.app"
+          test -f "$T/install.json" || { echo "no install.json"; ok=false; }
+          test -x "$APP/Contents/MacOS/ReviewHunter" || { echo "no app bundle"; ok=false; }
+          plutil -lint "$APP/Contents/Info.plist" || ok=false
+          test -L "$HOME/Desktop/ReviewHunter.app" || echo "note: no Desktop link"
+          export REVIEWHUNTER_NO_DIALOGS=1
+          # 1) the bundle's executable = what Launchpad runs; the launcher starts the server and exits
+          "$APP/Contents/MacOS/ReviewHunter" --no-browser || ok=false
+          curl -fsS http://127.0.0.1:8765/api/system/instance | tee instance.json; echo
+          grep -q "\"root\": *\"$T\"" instance.json || { echo "wrong instance"; ok=false; }
+          # 2) clicking again: same instance (no second server)
+          pid1=$(python3 -c "import json; print(json.load(open('instance.json'))['pid'])")
+          "$APP/Contents/MacOS/ReviewHunter" --no-browser || ok=false
+          pid2=$(curl -fsS http://127.0.0.1:8765/api/system/instance | python3 -c "import json,sys; print(json.load(sys.stdin)['pid'])")
+          [ "$pid1" = "$pid2" ] || { echo "second click started another server"; ok=false; }
+          curl -fsS -X POST http://127.0.0.1:8765/api/system/shutdown; echo; sleep 3
+          # 3) through LaunchServices, exactly like a double-click in Finder
+          open -a "$APP" --args --no-browser
+          up=false
+          for i in $(seq 1 90); do curl -fsS http://127.0.0.1:8765/api/system/instance >/dev/null 2>&1 && { up=true; break; }; sleep 1; done
+          $up || { echo "open -a did not start the app"; tail -30 "$HOME/ReviewHunter/logs/server.log"; ok=false; }
+          curl -fsS -X POST http://127.0.0.1:8765/api/system/shutdown; echo; sleep 2
+          seconds=$(( $(date +%s) - start ))
+          mkdir -p result
+          printf '{"platform":"macos-latest","scenario":"%s","method":"installer","success":%s,"seconds":%s,"python":"%s","run_id":"%s"}\n' \
+            "${{ matrix.python }}" "$ok" "$seconds" "$("$T/.venv/bin/python" -c 'import platform; print(platform.python_version())' 2>/dev/null || echo none)" "${{ github.run_id }}" \
+            | tee result/result.json
+          echo "ok=$ok" >> "$GITHUB_OUTPUT"
+
+      - name: Uninstall keeps the library and removes the program and the app
+        if: steps.run.outputs.ok == 'true'
+        shell: bash
+        run: |
+          mkdir -p "$HOME/ReviewHunter" && echo keep > "$HOME/ReviewHunter/marker.txt"
+          "$HOME/Library/ReviewHunter/.venv/bin/python" installer/reviewhunter_installer.py --uninstall --yes --target "$HOME/Library/ReviewHunter"
+          test ! -d "$HOME/Library/ReviewHunter"
+          test ! -e "$HOME/Applications/ReviewHunter.app"
+          test ! -L "$HOME/Desktop/ReviewHunter.app"
+          test -f "$HOME/ReviewHunter/marker.txt"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-macos-installer-${{ matrix.python }}
+          path: result/result.json
+          if-no-files-found: ignore
+
+      - name: Require successful installation
+        if: always()
+        shell: bash
+        run: test '${{ steps.run.outputs.ok }}' = true

@@ -15,6 +15,11 @@ window.settingsPart = function settingsPart() {
     backups: [],
     remoteBackups: [],
     system: null,
+    /** /api/system/instance and /api/system/shortcuts (Settings > Advanced > Application). */
+    appInstance: null,
+    appShortcuts: null,
+    appStopped: false,
+    appRestarting: false,
     fulltextStats: null,
     /** "Test the sources" panel (Settings > PDF Sources). */
     sourcesTest: { doi: '', running: false, result: null },
@@ -212,6 +217,58 @@ window.settingsPart = function settingsPart() {
 
     async loadSystem() {
       try { this.system = await api.get('/api/system/info'); } catch (e) { this.system = null; }
+      await this.loadAppInstance();
+    },
+
+    // ------------------------------------------------------------ application (launcher, shortcuts)
+
+    /** Running instance (version, folder, pid) and the shortcuts that should start it. */
+    async loadAppInstance() {
+      try {
+        const [instance, shortcuts] = await Promise.all([api.get('/api/system/instance'), api.get('/api/system/shortcuts')]);
+        this.appInstance = instance;
+        this.appShortcuts = shortcuts;
+      } catch (e) { this.appInstance = null; this.appShortcuts = null; }
+    },
+    shortcutLabel(s) {
+      const kind = { menu: navigator.platform.startsWith('Mac') ? 'Applications folder' : 'Start menu / app menu', desktop: 'Desktop' }[s.kind] || s.kind;
+      if (!s.exists) return `${kind}: none`;
+      return `${kind}: ${s.linked ? 'starts this installation' : 'points elsewhere'}`;
+    },
+    async repairShortcuts() {
+      try {
+        const r = await api.post('/api/system/shortcuts/repair', {});
+        if (r.skipped) this.toast(`Shortcuts are not managed here (${r.skipped})`, 'info', 6000);
+        else this.toast(r.ok ? `Shortcuts OK (${r.repaired.length} repaired, ${r.created.length} created)` : (r.errors || []).join('; '), r.ok ? 'ok' : 'error', 6000);
+        await this.loadAppInstance();
+      } catch (e) { this.toast(e.message, 'error', 6000); }
+    },
+    async restartApp() {
+      try {
+        await api.post('/api/system/restart', {});
+        this.appRestarting = true;
+        this.closeDialog();
+        this.toast('Restarting ReviewHunter...', 'info', 8000);
+        // The page reconnects by itself (WebSocket); reload once the new server answers.
+        const until = Date.now() + 90000;
+        const wait = async () => {
+          if (Date.now() > until) { this.appRestarting = false; return this.toast('ReviewHunter did not come back; open it from its shortcut', 'error', 10000); }
+          try {
+            const i = await api.get('/api/system/instance');
+            if (i.pid !== this.appInstance?.pid) return location.reload();
+          } catch (e) { /* still restarting */ }
+          setTimeout(wait, 800);
+        };
+        setTimeout(wait, 1500);
+      } catch (e) { this.toast(e.message, 'error', 8000); }
+    },
+    async quitApp() {
+      if (!confirm('Quit ReviewHunter?\n\nThe Chrome connector and Word add-in stop working until you open it again from its shortcut.')) return;
+      try {
+        await api.post('/api/system/shutdown', {});
+        this.closeDialog();
+        this.appStopped = true;
+      } catch (e) { this.toast(e.message, 'error', 8000); }
     },
     async openPath(path) {
       try { await api.post('/api/system/open-path', { path }); } catch (e) { this.toast(e.message, 'error'); }
