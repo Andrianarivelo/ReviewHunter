@@ -37,6 +37,7 @@
   <script src="/static/js/goal_views.js"></script>
   <script src="/static/js/analysis_views.js"></script>
   <script src="/static/js/insights.js"></script>
+  <script src="/static/js/collab.js"></script>
   <script src="/static/app.js"></script>
   <script defer src="/static/vendor/alpine.min.js"></script>
 </head>
@@ -135,6 +136,7 @@
           </button>
           <svg class="w-4 h-4 shrink-0" :style="c.color ? `color:${c.color}` : ''" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
           <span class="truncate" x-text="c.name"></span>
+          <svg x-show="c.icon==='shared'" class="w-3.5 h-3.5 shrink-0 text-accent-500" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" aria-label="Shared library"><title>Shared library (synced through Google Drive)</title><circle cx="9" cy="8" r="3"/><path d="M3 19a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2A5 5 0 0 1 21 19"/></svg>
           <span class="nav-count" x-text="c.count || ''"></span>
         </div>
       </template>
@@ -1223,13 +1225,13 @@
   <div x-show="dialog==='settings'" class="dialog w-[min(980px,97vw)] h-[min(760px,94vh)] flex overflow-hidden">
     <nav class="settings-nav">
       <div class="font-serif text-lg px-3 pt-4 pb-3">Settings</div>
-      <template x-for="t in [['general','General'],['citations','Citations'],['sources','PDF Sources'],['sync','Google Drive & Backup'],['connector','Browser Connector'],['word','Word Add-in'],['advanced','Advanced']]" :key="t[0]">
+      <template x-for="t in [['general','General'],['citations','Citations'],['sources','PDF Sources'],['zotero','Zotero'],['shared','Shared Libraries'],['sync','Google Drive & Backup'],['connector','Browser Connector'],['word','Word Add-in'],['advanced','Advanced']]" :key="t[0]">
         <button @click="settingsTab = t[0]" :class="settingsTab===t[0] ? 'nav-active' : 'nav-idle'" class="nav-row w-full" x-text="t[1]"></button>
       </template>
     </nav>
     <div class="flex-1 min-w-0 flex flex-col">
       <div class="flex items-center px-6 h-12 border-b border-ink-200 dark:border-ink-800">
-        <h3 class="font-serif text-lg" x-text="({general:'General', citations:'Citations', sources:'PDF Sources', sync:'Google Drive & Backup', connector:'Browser Connector', word:'Word Add-in', advanced:'Advanced'})[settingsTab]"></h3>
+        <h3 class="font-serif text-lg" x-text="({general:'General', citations:'Citations', sources:'PDF Sources', zotero:'Zotero Connector', shared:'Shared Libraries', sync:'Google Drive & Backup', connector:'Browser Connector', word:'Word Add-in', advanced:'Advanced'})[settingsTab]"></h3>
         <button @click="closeDialog()" class="ml-auto dlg-x">&#215;</button>
       </div>
       <div class="flex-1 min-h-0 overflow-y-auto px-6 py-5">
@@ -1336,6 +1338,147 @@
               </div>
             </template>
           </div>
+        </section>
+
+        <!-- Zotero connector -->
+        <section x-show="settingsTab==='zotero'" class="space-y-5 text-sm">
+          <div class="card p-4 flex items-center gap-3">
+            <span class="status-dot" :class="zoteroSummary().tone"></span>
+            <div class="min-w-0"><div class="font-semibold text-sm truncate" x-text="zoteroSummary().label"></div>
+              <div class="text-xs text-ink-500" x-text="zoteroLastLine()"></div>
+              <div x-show="zconn && zconn.error" class="text-xs text-rose-500" x-text="zconn ? zconn.error : ''"></div></div>
+            <button @click="loadZotero()" class="ml-auto action-secondary h-8 px-3 text-xs shrink-0">Re-detect</button>
+            <button @click="syncZoteroNow()" :disabled="zconnBusy || !zconn || !zconn.found" class="action-primary h-8 px-3 text-xs shrink-0" x-text="zconnBusy ? 'Syncing...' : 'Sync now'"></button>
+          </div>
+          <div x-show="zconnBusy && zconnProgress" class="-mt-2">
+            <div class="h-1.5 rounded-full bg-ink-100 dark:bg-ink-800 overflow-hidden"><div class="h-full bg-accent-500 transition-all" :style="`width:${zconnProgress ? Math.round(zconnProgress.index / Math.max(1, zconnProgress.total) * 100) : 0}%`"></div></div>
+            <div class="text-[11px] text-ink-400 mt-1" x-text="zconnProgress ? `${zconnProgress.stage}: ${zconnProgress.index} / ${zconnProgress.total}` : ''"></div>
+          </div>
+
+          <div class="card p-4 space-y-2" x-show="zconn && zconn.libraries.length">
+            <div class="font-semibold">Libraries to sync</div>
+            <p class="text-xs text-ink-500">Each Zotero library is mirrored with its collections. Choose a shared library as destination to share a Zotero group with people who do not use Zotero.</p>
+            <div class="divide-y divide-ink-100 dark:divide-ink-800">
+              <template x-for="lib in (zconn ? zconn.libraries : [])" :key="lib.key">
+                <div class="flex items-center gap-3 py-2 text-xs">
+                  <input type="checkbox" :checked="lib.enabled" @change="toggleZoteroLibrary(lib, $event.target.checked)" class="rounded">
+                  <div class="min-w-0 flex-1">
+                    <div class="font-medium text-sm truncate" x-text="lib.name"></div>
+                    <div class="text-ink-400" x-text="`${lib.type === 'group' ? 'Group library' : 'Personal library'} - ${lib.items} item${lib.items === 1 ? '' : 's'}, ${lib.collections} collection${lib.collections === 1 ? '' : 's'} - ${lib.linked_items} in ReviewHunter`"></div>
+                  </div>
+                  <label class="text-ink-500 shrink-0">into</label>
+                  <select @change="setZoteroTarget(lib, $event.target.value)" class="dlg-input !w-56 !h-8 text-xs">
+                    <option value="" :selected="lib.target_collection_id == null" x-text="lib.type === 'group' ? 'New collection named after the group' : 'Library root (like Zotero)'"></option>
+                    <template x-for="c in collections" :key="c.id"><option :value="c.id" :selected="c.id === lib.target_collection_id" x-text="(c.icon === 'shared' ? '[shared] ' : '') + collectionPath(c.id)"></option></template>
+                  </select>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <div class="card p-4 space-y-2.5" x-show="zconn">
+            <div class="font-semibold">Behaviour</div>
+            <div class="set-row"><input type="checkbox" :checked="zconn?.settings.zotero_auto_sync" @change="saveZoteroConfig({ auto_sync: $event.target.checked })" class="rounded">
+              <span>Sync automatically when Zotero changes, at most every
+                <input type="number" min="1" max="1440" :value="zconn?.settings.zotero_sync_interval_minutes" @change="saveZoteroConfig({ sync_interval_minutes: Number($event.target.value) })" class="dlg-input !w-16 !h-7 !inline-block text-xs"> minutes</span></div>
+            <label class="set-row"><input type="checkbox" :checked="zconn?.settings.zotero_mirror_deletions" @change="saveZoteroConfig({ mirror_deletions: $event.target.checked })" class="rounded"><span>Move items deleted in Zotero to the ReviewHunter trash <span class="text-ink-400">(restored automatically if you restore them in Zotero)</span></span></label>
+            <label class="set-row"><input type="checkbox" :checked="zconn?.settings.zotero_copy_files" @change="saveZoteroConfig({ copy_files: $event.target.checked })" class="rounded"><span>Copy PDFs and snapshots into ReviewHunter <span class="text-ink-400">(otherwise they are linked in place)</span></span></label>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-ink-500">When the same field was edited on both sides:</span>
+              <select @change="saveZoteroConfig({ conflict_policy: $event.target.value })" class="dlg-input !w-60 !h-8 text-xs">
+                <option value="zotero" :selected="zconn?.settings.zotero_conflict_policy !== 'local'">Zotero's value wins</option>
+                <option value="local" :selected="zconn?.settings.zotero_conflict_policy === 'local'">Keep my ReviewHunter edit</option>
+              </select>
+            </div>
+          </div>
+
+          <details class="card p-4 text-xs">
+            <summary class="font-semibold text-sm cursor-pointer">Folders and how the sync works</summary>
+            <div class="grid grid-cols-[130px_1fr] gap-2 items-center mt-3">
+              <span class="text-ink-500">Zotero program</span>
+              <input :value="zconn?.settings.zotero_install_dir || zconn?.install.dir" @change="saveZoteroConfig({ install_dir: $event.target.value.trim() })" placeholder="D:\Program Files\Zotero" class="dlg-input !h-8 text-xs font-mono">
+              <span class="text-ink-500">Zotero data folder</span>
+              <input :value="zconn?.settings.zotero_data_dir || zconn?.data_dir" @change="saveZoteroConfig({ data_dir: $event.target.value.trim() })" placeholder="C:\Users\you\Zotero (contains zotero.sqlite)" class="dlg-input !h-8 text-xs font-mono">
+            </div>
+            <ul class="list-disc pl-5 mt-3 space-y-1 text-ink-500 leading-relaxed">
+              <li>ReviewHunter reads a <b>copy</b> of <code>zotero.sqlite</code>; nothing is ever written to Zotero, so Zotero can stay open.</li>
+              <li>Each re-sync compares Zotero, ReviewHunter and the state at the previous sync, field by field: edits made in Zotero are applied, your edits to other fields are kept, and tags you add here are never removed.</li>
+              <li>The data folder is read from Zotero's own preferences; change it only if you moved it.</li>
+            </ul>
+          </details>
+        </section>
+
+        <!-- Shared libraries -->
+        <section x-show="settingsTab==='shared'" class="space-y-5 text-sm">
+          <p class="text-ink-600 dark:text-ink-300 leading-relaxed">A <b>shared library</b> is a collection that several people read and edit together. It lives in a <b>Google Drive folder</b> shared with your colleagues: everyone can add papers, notes, tags and PDFs, and edits made at the same time on different fields are all kept.</p>
+          <div x-show="shared && !shared.drive_roots.length" class="card p-3 text-xs flex items-center gap-2">
+            <span class="status-dot warn"></span>
+            <span>Google Drive for desktop was not found on this computer. Install it, or use any synced folder (OneDrive, Dropbox, a network share).</span>
+            <button @click="settingsTab='sync'" class="ml-auto action-secondary h-7 px-2.5 text-xs shrink-0">Set up Drive</button>
+          </div>
+
+          <div class="card p-4 grid sm:grid-cols-2 gap-2" x-show="shared">
+            <div class="sm:col-span-2 font-semibold">You appear to others as</div>
+            <input :value="shared?.member.name" @change="saveMember({ name: $event.target.value })" placeholder="Your name" class="dlg-input !h-8 text-xs">
+            <input :value="shared?.member.email" @change="saveMember({ email: $event.target.value })" placeholder="E-mail (optional)" class="dlg-input !h-8 text-xs">
+          </div>
+
+          <template x-for="lib in (shared ? shared.libraries : [])" :key="lib.library_id">
+            <div class="card p-4 space-y-2">
+              <div class="flex items-center gap-3">
+                <span class="status-dot" :class="sharedStatus(lib).tone"></span>
+                <div class="min-w-0"><div class="font-semibold truncate" x-text="lib.name"></div>
+                  <div class="text-xs text-ink-500" x-text="sharedStatus(lib).label"></div></div>
+                <button @click="syncShared(lib)" :disabled="sharedBusy === lib.library_id" class="ml-auto action-primary h-8 px-3 text-xs shrink-0" x-text="sharedBusy === lib.library_id ? 'Syncing...' : 'Sync now'"></button>
+                <button @click="openSharedFolder(lib)" class="action-secondary h-8 px-3 text-xs shrink-0" title="Open the folder, then right-click > Share (Google Drive)">Open folder</button>
+              </div>
+              <code class="block text-[11px] text-ink-400 truncate" x-text="lib.root_path"></code>
+              <div class="flex flex-wrap gap-1.5">
+                <template x-for="m in lib.members" :key="m.id"><span class="type-pill" :title="memberLine(m)" x-text="m.name + (m.id === shared.member.id ? ' (you)' : '')"></span></template>
+              </div>
+              <div class="flex items-center gap-3 text-xs pt-1">
+                <label class="set-row"><input type="checkbox" :checked="!!lib.auto_sync" @change="setSharedAuto(lib, $event.target.checked)" class="rounded"><span x-text="`Sync automatically (every ${shared.interval_seconds} s)`"></span></label>
+                <span x-show="lib.last_result && lib.last_result.files_pending" class="text-amber-600" x-text="lib.last_result ? `${lib.last_result.files_pending} PDFs still arriving from Drive` : ''"></span>
+                <button @click="leaveShared(lib)" class="ml-auto text-rose-600 dark:text-rose-300">Leave...</button>
+              </div>
+            </div>
+          </template>
+
+          <div class="grid md:grid-cols-2 gap-3">
+            <div class="card p-4 space-y-2">
+              <div class="font-semibold">Create a shared library</div>
+              <div x-show="shareForm.collectionId" class="text-xs text-accent-600 flex items-center gap-1"><span>Sharing the collection <b x-text="shareForm.collectionName"></b> and its sub-collections</span>
+                <button @click="shareForm.collectionId = null; shareForm.collectionName = ''" class="ml-auto text-ink-400" title="Create an empty library instead">&#10005;</button></div>
+              <input x-model="shareForm.name" placeholder="Name, e.g. Dopamine Lab" class="dlg-input !h-8 text-xs">
+              <input x-model="shareForm.parent" list="shared-roots" placeholder="Folder inside Google Drive, e.g. G:\My Drive\ReviewHunter Shared" class="dlg-input !h-8 text-xs font-mono">
+              <datalist id="shared-roots"><template x-for="r in (shared ? shared.drive_roots : [])" :key="r"><option :value="r + '\\ReviewHunter Shared'"></option></template></datalist>
+              <button @click="createShared()" :disabled="sharedBusy === 'create'" class="action-primary h-8 px-3 text-xs" x-text="sharedBusy === 'create' ? 'Creating...' : 'Create'"></button>
+            </div>
+            <div class="card p-4 space-y-2">
+              <div class="font-semibold">Join a colleague's library</div>
+              <div class="flex gap-2">
+                <input x-model="joinPath" placeholder="Folder of the shared library (optional)" class="dlg-input !h-8 text-xs font-mono flex-1">
+                <button @click="joinPath.trim() ? joinShared(joinPath.trim()) : discoverShared()" :disabled="!!sharedBusy" class="action-primary h-8 px-3 text-xs shrink-0" x-text="joinPath.trim() ? 'Join' : (sharedBusy === 'discover' ? 'Searching...' : 'Find in Drive')"></button>
+              </div>
+              <template x-for="d in sharedDiscovered" :key="d.library_id">
+                <div class="flex items-center gap-2 text-xs py-1">
+                  <div class="min-w-0 flex-1"><div class="font-medium truncate" x-text="d.name"></div>
+                    <div class="text-ink-400 truncate" x-text="`by ${d.created_by?.name || 'unknown'} - ${d.path}`"></div></div>
+                  <button @click="joinShared(d.path)" :disabled="!!sharedBusy" class="action-secondary h-7 px-2.5 text-xs shrink-0">Join</button>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <details class="card p-4 text-xs">
+            <summary class="font-semibold text-sm cursor-pointer">How to invite people</summary>
+            <ol class="list-decimal pl-5 mt-3 space-y-1.5 text-ink-600 dark:text-ink-300 leading-relaxed">
+              <li>Click <b>Open folder</b> on the library, right-click it and choose <b>Share</b> (Google Drive), or share it from drive.google.com. <b>Editor</b> = can add and edit papers, <b>Viewer</b> = read only.</li>
+              <li>Your colleague opens <b>Shared with me</b> on drive.google.com, right-clicks the folder and chooses <b>Organize &gt; Add shortcut</b> to <b>My Drive</b>, so that Drive for desktop syncs it.</li>
+              <li>In ReviewHunter they open <b>Settings &gt; Shared Libraries &gt; Find in Drive</b> and click <b>Join</b>.</li>
+            </ol>
+            <p class="text-ink-500 mt-3 leading-relaxed">Each person only writes files of their own inside the folder, so Drive never has two people saving the same file. Do not edit or move the files by hand. For large libraries, mark the folder <b>Available offline</b> in Drive so PDFs are already on disk.</p>
+          </details>
         </section>
 
         <!-- Sync -->

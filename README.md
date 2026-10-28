@@ -11,6 +11,35 @@ collect papers and books, find legal PDFs, organise them in nested collections a
 PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Everything runs on your computer
 (SQLite + your files); Google Drive is optional for storage and backups.
 
+### Zotero connector and shared libraries (2.8)
+
+**Zotero connector** (Settings > Zotero). ReviewHunter finds Zotero by itself (for example
+`D:\Program Files\Zotero`, version read from the installation) and the data folder Zotero really uses
+(from Zotero's own preferences). It lists *My Library* and every *group library* separately (RSS feeds are
+ignored), and you choose which ones to sync and where each one goes. A group lands in its own collection
+by default, or in a shared library (see below) to share it with people who do not use Zotero.
+
+* Re-syncing is incremental and field by field. Edits made in Zotero are applied, your ReviewHunter edits
+  to other fields are kept, and tags you added here are never removed. When both sides changed the same
+  field, you choose who wins (Zotero by default).
+* Items you delete in Zotero go to the ReviewHunter trash, and come back if you restore them in Zotero.
+* *Sync automatically* re-syncs when `zotero.sqlite` changes. An unchanged database costs well under 1 ms.
+* Zotero can stay open. ReviewHunter only reads a verified copy of its database and never writes to Zotero
+  (Zotero forbids other programs from modifying `zotero.sqlite`). The sync is therefore one-way.
+
+**Shared libraries** (Settings > Shared Libraries, or right-click a collection > *Share via Google Drive...*).
+A shared library is a collection that several people read and edit together through a Google Drive folder
+(any synced folder works: OneDrive, Dropbox, a network share). Everyone can add papers, notes, tags and PDFs.
+Drive's *Viewer* access gives a read-only member. To invite someone, share the folder in Drive. They add it
+to *My Drive* (Shared with me > Organize > Add shortcut) and click *Find in Drive > Join* in ReviewHunter.
+
+How it stays consistent without a server: each member only writes files of its own
+(`records/<member>/<paper>.json`), so Drive never sees two people saving the same file. Every computer merges
+everyone's files with a per-field last-writer-wins rule and a hybrid logical clock, so all members converge
+to the same library. Two people editing *different* fields of a paper at the same time both keep their edit.
+PDFs are stored once under their SHA-256 (`files/`). A PDF that Drive has not delivered yet is fetched on
+a later sync. A deleted paper goes to everyone's trash, and restoring it anywhere restores it for everyone.
+
 ### Bulk publication import (2.7)
 
 Open **Import** in the library toolbar, or right-click a collection and choose **Import
@@ -141,10 +170,11 @@ detections. Reporting checks distinguish unavailable text from an assessed paper
 ### First steps
 
 1. Double-click the **ReviewHunter** shortcut (or `ReviewHunter.bat`). The app opens at `http://127.0.0.1:8765`.
-2. **Coming from Zotero?** Import (toolbar) > *Migrate from Zotero* > Detect > Import. Zotero's files are only read.
+2. **Coming from Zotero?** Settings > Zotero: tick the libraries to sync and click *Sync now* (or Import > *Migrate from Zotero* for a one-time copy). Zotero's files are only read.
 3. **Chrome connector:** Settings > Browser Connector shows the folder to load in `chrome://extensions` (Developer mode > Load unpacked).
 4. **Word add-in:** Settings > Word Add-in > *Set up Word add-in...* opens a script you run once (it trusts ReviewHunter's local certificate and registers the add-in), then restart Word: References tab > ReviewHunter.
 5. **Google Drive:** Settings > Google Drive & Backup. Desktop mode needs only Google Drive for desktop; API mode walks you through creating a Desktop OAuth client.
+6. **Working with colleagues:** right-click a top-level collection > *Share via Google Drive...*, then share the folder in Drive (Settings > Shared Libraries explains the three steps).
 
 ### How "Find PDF" works (v2.2)
 
@@ -193,6 +223,9 @@ it then takes priority everywhere and applies to every item in that journal at o
 `benchmarks/benchmark_v1_v2.py` compares v1 and v2 (PDF availability, API latency, feature coverage); results and
 figures are in `benchmarks/results/`. `benchmarks/benchmark_pdf_acquisition.py` (Benchmark G) measures how many
 PDFs the server really downloads, previous resolver vs current, with paired statistics.
+`benchmarks/benchmark_zotero_shared.py` (Benchmarks J and K) compares the previous one-shot Zotero importer with the
+connector, and shared-library concurrency against single-file and per-paper alternatives (`measure` with the app
+venv, `plot` with a Python that has matplotlib and SciPy; launcher `benchmarks/Run_Zotero_Shared_Benchmark.cmd`).
 `tools/extension_e2e.py` runs the browser hand-off in a real headless Chrome with the extension loaded.
 
 ## Easy install (Windows and Linux)

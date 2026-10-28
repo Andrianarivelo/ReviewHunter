@@ -58,7 +58,8 @@ window.settingsPart = function settingsPart() {
     async openSettings(tab = 'general') {
       this.settingsTab = tab;
       this.openDialog('settings');
-      await Promise.all([this.loadSettings(), this.loadStyles(), this.loadDrive(), this.loadBackups(), this.loadSystem()]);
+      await Promise.all([this.loadSettings(), this.loadStyles(), this.loadDrive(), this.loadBackups(), this.loadSystem(),
+                         this.loadZotero(), this.loadShared()]);
       this.fulltextStats = await api.get('/api/fulltext/stats').catch(() => null);
     },
 

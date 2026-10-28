@@ -169,13 +169,25 @@ function app() {
             case 'zotero_progress':
               this.zotero.running = true;
               this.zotero.progress = m;
+              this.onZoteroEvent(m);
               break;
             case 'zotero_done':
               this.zotero.running = false;
               this.zotero.progress = null;
               this.zotero.report = m;
-              this.toast(`Zotero import finished: ${m.items} items, ${m.files} files, ${m.notes} notes`, 'ok', 8000);
+              this.onZoteroEvent(m);
               scheduleRefresh();
+              break;
+            case 'zotero_failed':
+              this.zotero.running = false;
+              this.onZoteroEvent(m);
+              break;
+            case 'library_changed':
+              scheduleRefresh();
+              if (this.dialog === 'settings' && this.settingsTab === 'shared') this.loadShared();
+              break;
+            case 'shared_synced':
+              if (this.dialog === 'settings' && this.settingsTab === 'shared') this.loadShared();
               break;
             case 'batch_start':
               this.batch = { active: true, index: 0, total: m.total, query: '' };
@@ -217,5 +229,6 @@ function app() {
     settingsPart(),
     discoverPart(),
     insightsPart(),
+    collabPart(),
   );
 }

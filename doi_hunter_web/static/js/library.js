@@ -622,6 +622,9 @@ window.libraryPart = function libraryPart() {
           { label: 'Create Bibliography from Collection...', action: () => this.openBibliography({ collection_id: t.id, label: t.name }) },
           { label: 'Generate Report from Collection', action: () => window.open(`/api/report?collection_id=${t.id}`, '_blank') },
           sep,
+          t.icon === 'shared'
+            ? { label: 'Sync Shared Library Now', action: () => this.syncSharedByCollection(t.id) }
+            : { label: 'Share via Google Drive...', action: () => this.startShareCollection(t), disabled: !!t.parent_id, hint: t.parent_id ? 'top level only' : '' },
           { label: 'Move to Top Level', action: () => this.moveCollection(t.id, null), disabled: !t.parent_id },
           { label: 'Delete Collection...', action: () => this.deleteCollection(t), danger: true },
         ];

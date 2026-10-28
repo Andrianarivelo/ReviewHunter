@@ -17,7 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import __version__
-from . import api_v2, books, bulk_api, catalog, config, connector, gdrive, library
+from . import api_v2, books, bulk_api, catalog, config, connector, gdrive, library, sync_api
 from .config import default_google_drive_root, library_root, papers_dir
 from .security import LocalOriginGuard, NoStoreApi
 
@@ -79,6 +79,16 @@ async def _startup() -> None:
     threading.Thread(target=_impact_factor_loop, args=(_scheduler_stop,), daemon=True, name="impact-factor-loop").start()
     threading.Thread(target=gdrive.scheduler_loop, args=(_scheduler_stop,), daemon=True,
                      name="backup-scheduler").start()
+    # Zotero connector (auto-sync when zotero.sqlite changes) and shared libraries (synced folders).
+    from . import shared_library, zotero_sync
+
+    def _library_changed(source: str):
+        return lambda _result: bus.publish("library_changed", {"source": source})
+
+    threading.Thread(target=zotero_sync.scheduler_loop, args=(_scheduler_stop,),
+                     kwargs={"on_change": _library_changed("zotero")}, daemon=True, name="zotero-sync").start()
+    threading.Thread(target=shared_library.scheduler_loop, args=(_scheduler_stop,),
+                     kwargs={"on_change": _library_changed("shared")}, daemon=True, name="shared-sync").start()
     # First-run nicety: if the user has the legacy ./downloads/ folder, adopt those PDFs.
     # Opt-in only: the repository ships a sample downloads/ folder that must not pollute new libraries.
     legacy = Path.cwd() / "downloads"
@@ -183,6 +193,7 @@ def _impact_factor_loop(stop: threading.Event, interval_s: int = IMPACT_FACTOR_P
 
 app.include_router(api_v2.router)
 app.include_router(bulk_api.router)
+app.include_router(sync_api.router)
 app.include_router(connector.router)
 
 

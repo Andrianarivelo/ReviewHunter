@@ -149,6 +149,21 @@ DEFAULT_SETTINGS: dict = {
     # Checked every tick of the periodic backfill (server.py _impact_factor_loop), not just at startup, so
     # toggling it takes effect immediately; a paper added mid-session gets its value on the next tick.
     "auto_retrieve_impact_factor": True,
+    # ---- Zotero connector (zotero_sync.py)
+    "zotero_install_dir": "",                # empty = auto-detect (D:\Program Files\Zotero, Program Files...)
+    "zotero_data_dir": "",                   # empty = read from Zotero's prefs.js, else ~/Zotero
+    "zotero_libraries": {},                  # {"user": {"enabled": true, "target_collection_id": null}, "group:1": {...}}
+    "zotero_auto_sync": False,               # re-sync when zotero.sqlite changes
+    "zotero_sync_interval_minutes": 10,
+    "zotero_conflict_policy": "zotero",      # zotero: Zotero wins a field both sides changed | local: keep mine
+    "zotero_mirror_deletions": True,         # items deleted in Zotero go to the ReviewHunter trash
+    "zotero_copy_files": True,
+    "zotero_last_sync": {},                  # last report (shown in Settings)
+    # ---- Shared libraries (shared_library.py)
+    "member_id": "",                         # generated once per library; identifies this computer's writes
+    "member_name": "",
+    "member_email": "",
+    "shared_sync_interval_seconds": 60,
 }
 
 

@@ -221,6 +221,50 @@ CREATE TABLE IF NOT EXISTS journal_metrics (
 );
 CREATE INDEX IF NOT EXISTS idx_journal_metrics_issn ON journal_metrics(issn);
 
+-- Zotero connector (zotero_sync.py): one row per Zotero object mirrored locally. ``lib`` is "user" or
+-- "group:<groupID>" (Zotero keys are only unique inside one library). ``base`` is the JSON snapshot of
+-- both sides at the last sync, used for the three-way merge.
+CREATE TABLE IF NOT EXISTS zotero_links (
+    lib TEXT NOT NULL,
+    kind TEXT NOT NULL,                 -- item | note | attachment | annotation | collection
+    zkey TEXT NOT NULL,
+    local_id INTEGER NOT NULL,
+    zmodified TEXT,
+    base TEXT,
+    PRIMARY KEY (lib, kind, zkey)
+);
+CREATE INDEX IF NOT EXISTS idx_zotero_links_local ON zotero_links(kind, local_id);
+
+-- Shared libraries (shared_library.py): a synced folder (Google Drive...) mirrored into a local collection.
+CREATE TABLE IF NOT EXISTS shared_libraries (
+    library_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    root_path TEXT NOT NULL,
+    collection_id INTEGER REFERENCES collections(id) ON DELETE SET NULL,
+    role TEXT NOT NULL DEFAULT 'editor',   -- editor | viewer (detected: the folder is not writable)
+    hlc INTEGER NOT NULL DEFAULT 0,        -- highest logical clock seen (milliseconds)
+    auto_sync INTEGER NOT NULL DEFAULT 1,
+    last_sync_at TEXT,
+    last_result TEXT,
+    joined_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS shared_links (
+    library_id TEXT NOT NULL,
+    record_id TEXT NOT NULL,
+    kind TEXT NOT NULL,                    -- item | note | collection
+    local_id INTEGER NOT NULL,
+    origin TEXT NOT NULL DEFAULT 'local',  -- local | remote (created on this computer by a sync)
+    base TEXT,
+    PRIMARY KEY (library_id, record_id)
+);
+CREATE INDEX IF NOT EXISTS idx_shared_links_local ON shared_links(library_id, kind, local_id);
+CREATE TABLE IF NOT EXISTS shared_attachment_hash (
+    attachment_id INTEGER PRIMARY KEY REFERENCES attachments(id) ON DELETE CASCADE,
+    size INTEGER,
+    mtime REAL,
+    sha256 TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_items_deleted ON items(deleted_at);
 CREATE INDEX IF NOT EXISTS idx_items_citekey ON items(citation_key);
 CREATE INDEX IF NOT EXISTS idx_items_impact ON items(impact_factor);
