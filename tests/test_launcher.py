@@ -81,6 +81,11 @@ def test_classify():
     assert classify({"app": "ReviewHunter", "version": "2.7.0", "root": str(ROOT)}) == "stale"          # old code in memory
     assert classify({"app": "ReviewHunter", "version": __version__, "root": "C:/elsewhere"}) == "stale"  # other install
     assert classify({"app": "ReviewHunter", "version": __version__, "root": None, "legacy": True}) == "stale"
+    # In-place update (git pull, same version reinstalled): same folder and version, different code on disk.
+    from doi_hunter_web.instance import code_stamp
+    current = {"app": "ReviewHunter", "version": __version__, "root": str(ROOT)}
+    assert classify({**current, "code": code_stamp()}) == "same"
+    assert classify({**current, "code": "0123456789abcdef"}) == "stale"
 
 
 def test_single_instance_restart_and_quit(env):

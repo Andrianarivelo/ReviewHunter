@@ -96,15 +96,24 @@ def port_free(host: str, port: int) -> bool:
             return False
 
 
-def classify(found: Optional[dict], root: Path = ROOT, version: str = __version__) -> str:
-    """none | same | stale | foreign. Pure function (unit-tested)."""
+def classify(found: Optional[dict], root: Path = ROOT, version: str = __version__,
+             code: Optional[str] = None) -> str:
+    """none | same | stale | foreign. Pure function (unit-tested).
+
+    Same = same install folder, same version AND the same code on disk as when that server started
+    (``code``: see instance.code_stamp; an in-place update keeps the version but changes the code).
+    """
     if not found:
         return "none"
     if found.get("app") != "ReviewHunter":
         return "foreign"
     same_root = bool(found.get("root")) and os.path.normcase(os.path.abspath(found["root"])) == \
         os.path.normcase(os.path.abspath(str(root)))
-    return "same" if same_root and found.get("version") == version else "stale"
+    if code is None:
+        from .instance import code_stamp
+        code = code_stamp(root)
+    same_code = found.get("code") in (None, code)     # servers before the stamp existed: version decides
+    return "same" if same_root and found.get("version") == version and same_code else "stale"
 
 
 def _pid_on_port(port: int) -> Optional[int]:

@@ -18,13 +18,36 @@ from typing import Any
 from . import __version__
 
 ROOT = Path(__file__).resolve().parents[1]          # the install (or checkout) folder of this code
+
+
+def code_stamp(root: Path = ROOT) -> str:
+    """Fingerprint of the Python code on disk (paths, sizes, modification times).
+
+    The version number alone misses in-place updates (git pull, reinstalling the same version): the
+    launcher compares this stamp with the one the running server recorded when it started.
+    """
+    import hashlib
+
+    h = hashlib.sha1()
+    for f in sorted((Path(root) / "doi_hunter_web").rglob("*.py")):
+        if "__pycache__" in f.parts:
+            continue
+        try:
+            st = f.stat()
+        except OSError:
+            continue
+        h.update(f"{f.relative_to(root).as_posix()}|{st.st_size}|{st.st_mtime_ns}\n".encode())
+    return h.hexdigest()[:16]
+
+
+CODE_STAMP = code_stamp()                           # what this process is running
 STARTED_AT = datetime.now().isoformat(timespec="seconds")
 SERVERS: list[Any] = []                             # uvicorn.Server objects registered by __main__
 
 
 def info() -> dict:
     """What a launcher needs to decide whether this instance is the right one."""
-    return {"app": "ReviewHunter", "version": __version__, "root": str(ROOT), "pid": os.getpid(),
+    return {"app": "ReviewHunter", "version": __version__, "code": CODE_STAMP, "root": str(ROOT), "pid": os.getpid(),
             "started_at": STARTED_AT, "python": sys.executable,
             "launched_by": os.environ.get("REVIEWHUNTER_LAUNCHED_BY", "terminal"),
             "can_shutdown": bool(SERVERS)}
