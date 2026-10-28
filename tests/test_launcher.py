@@ -115,7 +115,13 @@ def test_stale_old_version_is_replaced(env, tmp_path):
     port = env["port"]
     fake = tmp_path / "old_doi_hunter_web_2_7.py"   # command line contains doi_hunter_web like the real thing
     fake.write_text(
-        "import http.server, json, sys\n"
+        "import http.server, json, socketserver, sys\n"
+        # HTTPServer.server_bind calls socket.getfqdn() between bind() and listen(), which can stall for
+        # seconds on macOS: the port then looks taken but nothing answers. Skip the name lookup.
+        "class S(http.server.ThreadingHTTPServer):\n"
+        "    def server_bind(self):\n"
+        "        socketserver.TCPServer.server_bind(self)\n"
+        "        self.server_name, self.server_port = 'localhost', self.server_address[1]\n"
         "class H(http.server.BaseHTTPRequestHandler):\n"
         "    def do_GET(self):\n"
         "        if self.path == '/connector/ping':\n"
@@ -126,12 +132,17 @@ def test_stale_old_version_is_replaced(env, tmp_path):
         "            self.send_response(404); self.end_headers()\n"
         "    do_POST = do_GET\n"
         "    def log_message(self, *a): pass\n"
-        "http.server.HTTPServer(('127.0.0.1', int(sys.argv[1])), H).serve_forever()\n", encoding="utf-8")
+        "S(('127.0.0.1', int(sys.argv[1])), H).serve_forever()\n", encoding="utf-8")
     old = subprocess.Popen([sys.executable, str(fake), str(port)])
     try:
-        end = time.time() + 10
-        while time.time() < end and _wait_free(port, 0.1):
-            time.sleep(0.1)
+        end = time.time() + 15                                      # wait until the old version ANSWERS
+        while time.time() < end:
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/connector/ping", timeout=2) as r:
+                    if json.loads(r.read()).get("version") == "2.7.0":
+                        break
+            except OSError:
+                time.sleep(0.2)
         result = _launch(env["env"])
         assert result.returncode == 0, result.stderr + result.stdout
         assert "Replacing" in result.stdout

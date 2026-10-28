@@ -403,6 +403,8 @@ def ensure(root: Path = ROOT, *, create: Iterable[str] = (), places: Optional[di
     repaired, created, errors = [], [], []
     # The application-menu entry first: on macOS the Desktop item links to it.
     for s in sorted(current, key=lambda s: s["kind"] != "menu"):
+        if IS_MAC and s["kind"] == "desktop" and s["exists"]:
+            s = describe("desktop", Path(s["path"]), root)   # links to the bundle repaired just before
         if s["exists"] and s["linked"]:
             continue
         if not s["exists"] and s["kind"] not in create:
