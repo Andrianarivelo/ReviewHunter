@@ -63,7 +63,8 @@ def test_mac_bundle_is_created_detected_and_repaired(places, monkeypatch, tmp_pa
     assert sc._mac_bundle_root(bundle) == str(root)
 
     # A bundle left by an old install in another folder is detected and rewritten.
-    files = sc.mac_bundle_files(PurePosixPath("/Users/old/Library/Review'Hunter"))  # quote in the path survives
+    old_root = PurePosixPath("/Users/old/Library/Review'Hunter")                     # quote in the path survives
+    files = sc.mac_bundle_files(old_root, old_root / ".venv" / "bin" / "python", "")
     (bundle / "Contents" / "MacOS" / "ReviewHunter").write_text(files["Contents/MacOS/ReviewHunter"], encoding="utf-8")
     assert sc._mac_bundle_root(bundle) == "/Users/old/Library/Review'Hunter"
     assert not sc.describe("menu", bundle, root)["linked"]
@@ -101,3 +102,22 @@ def test_windows_links_repaired_and_one_always_kept(places):
     old.unlink()                                                                          # none left at all:
     report = sc.ensure(ROOT, places=places)                                               # the Start menu one returns
     assert report["created"] == [str(places["menu"] / "ReviewHunter.lnk")]
+
+
+def test_mac_bundle_runs_python_in_the_architecture_of_its_packages(tmp_path):
+    """Rosetta guard: the bundle pins the CPU type read from a compiled module of the environment."""
+    arm = tmp_path / "arm.so"
+    arm.write_bytes((0xFEEDFACF).to_bytes(4, "little") + (0x0100000C).to_bytes(4, "little") + b"\0" * 24)
+    intel = tmp_path / "intel.so"
+    intel.write_bytes((0xFEEDFACF).to_bytes(4, "little") + (0x01000007).to_bytes(4, "little") + b"\0" * 24)
+    fat = tmp_path / "fat.so"
+    fat.write_bytes(b"\xca\xfe\xba\xbe" + b"\0" * 28)
+    assert (sc.macho_arch(arm), sc.macho_arch(intel), sc.macho_arch(fat)) == ("arm64", "x86_64", None)
+
+    script = sc.mac_bundle_files(PurePosixPath("/Users/me/Library/ReviewHunter"),
+                                 PurePosixPath("/Users/me/Library/ReviewHunter/.venv/bin/python"), "arm64")
+    text = script["Contents/MacOS/ReviewHunter"]
+    assert "RH_ARCH='arm64'" in text and 'exec /usr/bin/arch -"$RH_ARCH" "$RH_PY" -m doi_hunter_web.launcher' in text
+    assert "LSRequiresNativeExecution" in script["Contents/Info.plist"]
+    universal = sc.mac_bundle_files(PurePosixPath("/x"), PurePosixPath("/x/.venv/bin/python"), "")
+    assert "RH_ARCH=''" in universal["Contents/MacOS/ReviewHunter"]     # universal packages: no pinning

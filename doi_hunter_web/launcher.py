@@ -44,13 +44,18 @@ _NO_PROXY = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 # Talking to a running instance
 # ======================================================================================
 
+_last_probe_error = ""        # why the port did not answer like ReviewHunter (shown in the error dialog)
+
+
 def _get_json(url: str, timeout: float = 2.0) -> Optional[dict]:
+    global _last_probe_error
     try:
         with _NO_PROXY.open(url, timeout=timeout) as r:
             return json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         return {"_http_error": e.code}
-    except (OSError, ValueError):
+    except (OSError, ValueError) as e:
+        _last_probe_error = f"{url.split('/', 3)[-1]}: {e.__class__.__name__}: {e}"
         return None
 
 
@@ -319,7 +324,8 @@ def _run(args: argparse.Namespace) -> int:
     if state == "foreign":
         notify_error("ReviewHunter cannot start",
                      f"Port {port} is used by another program. Close that program, or set the environment "
-                     f"variable REVIEWHUNTER_PORT to another port.")
+                     f"variable REVIEWHUNTER_PORT to another port."
+                     + (f"\n\n(Details: {_last_probe_error})" if _last_probe_error else ""))
         return 1
     if state in ("same", "stale"):
         print(f"Replacing the running ReviewHunter {found.get('version')} ({found.get('root') or 'unknown folder'})")
