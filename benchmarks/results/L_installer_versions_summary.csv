@@ -1,0 +1,4 @@
+version,cells_run,cells_success,platform_families,median_seconds
+2.8.0,8,8,4,34.0
+2.9.0,11,11,5,22.0
+paired cells,8,median duration change -10 s,,sign test p = 0.125 (descriptive)
