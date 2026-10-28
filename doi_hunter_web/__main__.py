@@ -25,12 +25,10 @@ from . import config
 
 
 def _port_free(host: str, port: int) -> bool:
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.bind((host, port))
-            return True
-        except OSError:
-            return False
+    """Same rule as the launcher (SO_REUSEADDR on POSIX, so TIME_WAIT after a quit is not "busy")."""
+    from .launcher import port_free
+
+    return port_free(host, port)
 
 
 def _open_when_ready(url: str, host: str, port: int) -> None:

@@ -72,9 +72,18 @@ def probe(host: str, port: int) -> Optional[dict]:
 
 
 def port_free(host: str, port: int) -> bool:
+    """Could a server listen on this port now?
+
+    POSIX: SO_REUSEADDR, exactly as uvicorn binds. Without it a port whose last connections are in
+    TIME_WAIT (up to a minute after a server quits) looks busy, and "Quit then reopen" on macOS/Linux
+    reported "used by another program". Not on Windows, where SO_REUSEADDR would allow binding over
+    a port that another program really is listening on.
+    """
     import socket
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        if not IS_WINDOWS:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
             s.bind((host, port))
             return True

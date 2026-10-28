@@ -346,6 +346,14 @@ jobs:
             | tee result/result.json
           echo "ok=$ok" >> "$GITHUB_OUTPUT"
 
+      - name: Launcher and shortcut tests on macOS (TIME_WAIT, stale instances, real .app bundle)
+        if: always() && matrix.python == 'system'
+        shell: bash
+        run: |
+          PY="$HOME/Library/ReviewHunter/.venv/bin/python"
+          "$PY" -m pip install -q pytest
+          "$PY" -m pytest tests/test_launcher.py tests/test_shortcuts.py -q -p no:cacheprovider
+
       - name: Uninstall keeps the library and removes the program and the app
         if: steps.run.outputs.ok == 'true'
         shell: bash

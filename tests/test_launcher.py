@@ -150,3 +150,22 @@ def test_foreign_program_is_never_killed(env):
         env["env"]["REVIEWHUNTER_LAUNCHER_SETTLE"] = "1"
         result = _launch(env["env"], timeout=60)
     assert result.returncode == 1 and "another program" in (result.stderr + result.stdout)
+
+
+def test_port_in_time_wait_after_quit_counts_as_free():
+    """Quit then reopen at once: the server's closed connections leave the port in TIME_WAIT, which must
+    not be reported as "used by another program" (it was on macOS/Linux before SO_REUSEADDR)."""
+    from doi_hunter_web.launcher import port_free
+
+    port = _free_port()
+    server = socket.socket()
+    if os.name != "nt":
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)   # as uvicorn binds
+    server.bind(("127.0.0.1", port))
+    server.listen()
+    client = socket.create_connection(("127.0.0.1", port))
+    conn, _ = server.accept()
+    conn.close()          # the server side closes first -> its end of the connection enters TIME_WAIT
+    server.close()
+    client.close()
+    assert port_free("127.0.0.1", port)
