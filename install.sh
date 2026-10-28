@@ -111,7 +111,7 @@ install_system_packages() {         # Linux fallback when uv cannot be used (off
 }
 
 if ! find_python; then
-    info "Python $MIN_MINOR+ was not found: installing a private Python (no administrator password needed)."
+    info "Python 3.$MIN_MINOR+ was not found: installing a private Python (no administrator password needed)."
     if ! private_python; then
         [[ $OS == Darwin ]] && die "Could not install Python automatically. Install it from https://www.python.org/downloads/macos/ and run this script again."
         info "The private Python could not be installed: using your distribution's packages instead."

@@ -129,12 +129,14 @@ jobs:
         shell: bash
         run: |
           mkdir -p "$HOME/ReviewHunter" && echo keep > "$HOME/ReviewHunter/marker.txt"
-          python3 installer/reviewhunter_installer.py --uninstall --yes
+          # the program's own Python: a "bare" machine has no other one (it got a private Python from uv)
+          "$HOME/.local/share/reviewhunter/.venv/bin/python" installer/reviewhunter_installer.py --uninstall --yes --target "$HOME/.local/share/reviewhunter"
           test ! -d "$HOME/.local/share/reviewhunter"
           test ! -f "$HOME/.local/share/applications/reviewhunter.desktop"
           test -f "$HOME/ReviewHunter/marker.txt"
 
       - name: Artifact name
+        if: always()
         id: name
         shell: bash
         run: echo "v=result-$(echo '${{ matrix.image }}-${{ matrix.method }}-${{ matrix.scenario }}' | tr ':/' '--')" >> "$GITHUB_OUTPUT"
@@ -328,7 +330,14 @@ jobs:
           open -a "$APP" --args --no-browser
           up=false
           for i in $(seq 1 90); do curl -fsS http://127.0.0.1:8765/api/system/instance >/dev/null 2>&1 && { up=true; break; }; sleep 1; done
-          $up || { echo "open -a did not start the app"; tail -30 "$HOME/ReviewHunter/logs/server.log"; ok=false; }
+          if ! $up; then
+            echo "open -a did not start the app"; ok=false
+            echo "--- launcher.log"; cat "$HOME/ReviewHunter/logs/launcher.log" 2>/dev/null
+            echo "--- server.log"; tail -20 "$HOME/ReviewHunter/logs/server.log"
+            echo "--- processes"; ps -axo pid,ppid,command | grep -i -E "reviewhunter|doi_hunter" | grep -v grep
+            echo "--- gatekeeper"; spctl --assess --type execute -vv "$APP" 2>&1; xattr -lr "$APP" 2>&1 | head
+            echo "--- system log"; log show --last 3m --style compact --predicate 'eventMessage CONTAINS[c] "reviewhunter"' 2>/dev/null | tail -40
+          fi
           curl -fsS -X POST http://127.0.0.1:8765/api/system/shutdown; echo; sleep 2
           seconds=$(( $(date +%s) - start ))
           mkdir -p result

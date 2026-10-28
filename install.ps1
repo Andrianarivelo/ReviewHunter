@@ -18,6 +18,9 @@ $PrivatePython = '3.12'
 function Say($text) { Write-Host "  $text" }
 function Test-Python($exe) {
     # Python >= 3.10 with venv; the Microsoft Store stub "python.exe" prints nothing and fails here.
+    # 'Continue' in this scope: in Windows PowerShell 5.1, a native program writing to stderr while the
+    # preference is 'Stop' raises a terminating error even though the program succeeded.
+    $ErrorActionPreference = 'Continue'
     if (-not $exe) { return $false }
     try {
         & $exe -c "import sys, venv, ensurepip; sys.exit(0 if sys.version_info[:2] >= (3, 10) else 1)" 2>$null | Out-Null
@@ -38,6 +41,7 @@ function Find-Python {
     return $null
 }
 function Install-PrivatePython {
+    $ErrorActionPreference = 'Continue'   # uv reports progress on stderr (see Test-Python); exit codes are checked
     $uv = (Get-Command uv -ErrorAction SilentlyContinue).Source
     if (-not $uv) { $uv = Join-Path $env:USERPROFILE '.local\bin\uv.exe' }
     if (-not (Test-Path $uv)) {
@@ -48,8 +52,9 @@ function Install-PrivatePython {
     if (-not (Test-Path $uv)) { throw 'uv could not be installed' }
     Say "Installing a private Python $PrivatePython (one time, about 30 MB)..."
     & $uv python install $PrivatePython 2>&1 | Out-Null
-    $py = (& $uv python find $PrivatePython).Trim()
-    if (-not (Test-Python $py)) { throw 'the private Python does not work' }
+    if ($LASTEXITCODE -ne 0) { throw "uv python install failed (exit code $LASTEXITCODE)" }
+    $py = "$(& $uv python find $PrivatePython 2>$null)".Trim()
+    if (-not (Test-Python $py)) { throw "the private Python does not work ($py)" }
     return $py
 }
 
@@ -89,6 +94,7 @@ if (-not $installer) {
 $options = @($args)
 if ($env:RH_ARGS) { $options += $env:RH_ARGS -split '\s+' | Where-Object { $_ } }
 Say 'Opening the installer (follow the progress there)...'
+$ErrorActionPreference = 'Continue'      # the installer's own messages may use stderr; its exit code decides
 & $py $installer @options
 if ($LASTEXITCODE -ne 0) {
     Say "Setup did not finish (code $LASTEXITCODE). Log: $env:TEMP\reviewhunter-install.log"
