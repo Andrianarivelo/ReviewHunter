@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/Andrianarivelo/ReviewHunter)
+[![Version](https://img.shields.io/badge/version-2.11.0-blue)](https://github.com/Andrianarivelo/ReviewHunter)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Issues](https://img.shields.io/github/issues/Andrianarivelo/ReviewHunter)](https://github.com/Andrianarivelo/ReviewHunter/issues)
 [![Size](https://img.shields.io/github/repo-size/Andrianarivelo/ReviewHunter.svg)](https://github.com/Andrianarivelo/ReviewHunter)
@@ -10,6 +10,41 @@
 collect papers and books, find legal PDFs, organise them in nested collections and tags, read and annotate
 PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Everything runs on your computer
 (SQLite + your files); Google Drive is optional for storage and backups.
+
+### Firefox, Safari and Word in one click (2.11)
+
+**One shortcut per add-on.** The installer (and, for existing installs, the first launch of 2.11) adds a
+**ReviewHunter Add-ons** folder to the Start menu (Windows) or to `~/Applications` (macOS), with one
+shortcut for each browser found on the computer and for Word. The same buttons are in
+**Settings > Browser Connector** and **Settings > Word Add-in**. What one double-click does:
+
+| Shortcut | What happens | What you still do (and why) |
+|---|---|---|
+| **ReviewHunter for Firefox** | downloads the connector of the latest release and opens it in Firefox | click **Add**. Without a Mozilla-signed build (see below) Firefox loads it until it restarts: `about:debugging` opens with the file path copied |
+| **ReviewHunter for Safari** (macOS) | downloads the connector app of the latest release to `~/Applications` and opens it | tick **ReviewHunter Connector** in Safari > Settings > Extensions. Until it is signed by Apple, also Develop > **Allow Unsigned Extensions** |
+| **ReviewHunter for Chrome / Edge / Brave** | opens the browser's extensions page and the connector folder, path copied | Developer mode > **Load unpacked** > paste. Chromium browsers accept no other way outside their stores |
+| **ReviewHunter for Word** | Windows: trusts the local certificate and registers the add-in, no console, then a dialog says what to do. macOS: keychain trust (asks your password) and add-in sideloading | click **Yes** on the Windows certificate warning, restart Word, **References > ReviewHunter** |
+
+The Firefox connector is the Chrome connector with a Firefox manifest (`tools/build_extensions.py`), so
+saving, PDF capture in the browser, *Open in ReviewHunter* in the same window and **starting ReviewHunter
+from Firefox** (native messaging, registered for Firefox too) behave the same. Safari has no native
+messaging to other programs, so the Safari connector starts ReviewHunter through a `reviewhunter://start`
+link, which the app registers at every launch (Windows, macOS, Linux).
+
+**Word, like the Zotero plugin.** The add-in pane searches your library: **Cite** inserts a live citation
+(several references, page, prefix and suffix), **Bibliography** inserts the reference section, and the
+**style menu** switches every citation of the document between the 25 bundled styles (APA, Nature, Cell,
+IEEE, Chicago author-date and notes, Harvard, NLM/Vancouver, ...) and any style added in Settings >
+Citations; numbering and the bibliography update after every change. The certificate Word needs is now
+limited by X.509 *name constraints* to `localhost`, `127.0.0.0/8` and `::1`: even if its key leaked it
+could not impersonate a real website (proved by a TLS test, `tests/test_addin_ca.py`); older certificates
+are replaced automatically.
+
+**Honest limits.** Firefox installs add-ons permanently only when Mozilla signed them: signing is free
+and the add-on stays out of the store, but it needs the maintainer's AMO API key as GitHub secrets
+(`AMO_JWT_ISSUER`, `AMO_JWT_SECRET`); the `connectors` workflow then signs every release. A permanent
+Safari install without the developer toggle needs an Apple Developer ID (paid). Word's certificate
+warning is a Windows security decision that only you can confirm.
 
 ### Start and open ReviewHunter from Chrome; refreshed interface (2.10)
 
@@ -192,8 +227,8 @@ detections. Reporting checks distinguish unavailable text from an assessed paper
 
 1. Open **ReviewHunter** from its shortcut (Start menu or Desktop on Windows, Launchpad or Applications on macOS, the application menu on Linux). The app opens at `http://127.0.0.1:8765`; clicking again just brings it back.
 2. **Coming from Zotero?** Settings > Zotero: tick the libraries to sync and click *Sync now* (or Import > *Migrate from Zotero* for a one-time copy). Zotero's files are only read.
-3. **Chrome connector:** Settings > Browser Connector shows the folder to load in `chrome://extensions` (Developer mode > Load unpacked).
-4. **Word add-in:** Settings > Word Add-in > *Set up Word add-in...* opens a script you run once (it trusts ReviewHunter's local certificate and registers the add-in), then restart Word: References tab > ReviewHunter.
+3. **Browser connector:** Start menu / Applications > ReviewHunter Add-ons > **ReviewHunter for Firefox** (or Chrome, Edge, Brave, Safari), or the *Add to ...* buttons in Settings > Browser Connector.
+4. **Word add-in:** **ReviewHunter for Word** (or Settings > Word Add-in > *Add to Word*): click **Yes** on the Windows certificate warning, then restart Word: References tab > ReviewHunter.
 5. **Google Drive:** Settings > Google Drive & Backup. Desktop mode needs only Google Drive for desktop; API mode walks you through creating a Desktop OAuth client.
 6. **Working with colleagues:** right-click a top-level collection > *Share via Google Drive...*, then share the folder in Drive (Settings > Shared Libraries explains the three steps).
 
@@ -248,6 +283,10 @@ PDFs the server really downloads, previous resolver vs current, with paired stat
 connector, and shared-library concurrency against single-file and per-paper alternatives (`measure` with the app
 venv, `plot` with a Python that has matplotlib and SciPy; launcher `benchmarks/Run_Zotero_Shared_Benchmark.cmd`).
 `tools/extension_e2e.py` runs the browser hand-off in a real headless Chrome with the extension loaded.
+`benchmarks/benchmark_addons.py` (Benchmark N, 2.10 vs 2.11): certificates forged for 20 real websites with the
+Word add-in CA were accepted 20/20 with the 2.10 CA and 0/20 with the name-constrained 2.11 CA (Fisher exact
+p = 1.5e-11); in a real Firefox the 2.10 connector code passed 7/9 checks in each of 3 runs (no tab reuse, no
+Referer on PDF requests) and 2.11 passed 9/9 in each run; Chromium 2.11 9/9 (`N_addons.png`, CSVs beside it).
 
 ## Easy install (Windows, macOS, Linux)
 
@@ -286,6 +325,18 @@ connector. At the end it opens Chrome's extensions page and the extension folder
 the clipboard on Windows and macOS). Enable **Developer mode**, click **Load unpacked**, and select that
 folder: Chrome requires this final manual step for extensions distributed outside the Chrome Web Store.
 For an existing connector loaded from the same folder, click **Reload** instead.
+
+**Add-on shortcuts.** The *ReviewHunter Add-ons* folder (Start menu, `~/Applications`, or
+`reviewhunter-<name>.desktop` entries on Linux) holds *ReviewHunter for Firefox / Safari / Chrome / Edge /
+Brave / Word* for what is installed on the computer. They run `python -m doi_hunter_web.integrations <name>`
+and are repaired at every launch like the main shortcut; ones you delete stay deleted. The uninstaller
+removes them, the browser helper registrations and the `reviewhunter://` link handler.
+
+```bash
+python -m doi_hunter_web.integrations status                     # browsers found, Word add-in state
+python -m doi_hunter_web.integrations firefox                    # same as the "ReviewHunter for Firefox" shortcut
+python tools/build_extensions.py                                 # Firefox .xpi + Safari web extension in dist/connectors
+```
 
 ```bash
 bash install.sh --cli --yes --no-launch                            # unattended install, no app/browser launch

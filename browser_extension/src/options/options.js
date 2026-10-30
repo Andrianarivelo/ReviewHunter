@@ -8,6 +8,9 @@
 import * as api from "../api.js";
 import { getSettings, setSettings, normalizeServerUrl } from "../settings.js";
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** Shorthand for getElementById. @param {string} id @returns {HTMLElement} */
 const $ = (id) => document.getElementById(id);
 

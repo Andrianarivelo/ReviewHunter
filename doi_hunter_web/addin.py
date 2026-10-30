@@ -17,6 +17,7 @@ import datetime as dt
 import ipaddress
 import os
 import subprocess
+import sys
 import uuid
 from pathlib import Path
 from typing import Optional
@@ -57,7 +58,15 @@ def ensure_certificates(force: bool = False) -> dict[str, Path]:
         cert = x509.load_pem_x509_certificate(cert_path.read_bytes())
         return cert.not_valid_after_utc - now < dt.timedelta(days=30)
 
-    if force or expiring(p["ca_cert"]) or not p["ca_key"].exists():
+    def unconstrained(cert_path: Path) -> bool:
+        """CAs made before 2.11 could sign certificates for any site: replace them (see NameConstraints below)."""
+        try:
+            x509.load_pem_x509_certificate(cert_path.read_bytes()).extensions.get_extension_for_class(x509.NameConstraints)
+            return False
+        except (OSError, ValueError, x509.ExtensionNotFound):
+            return True
+
+    if force or expiring(p["ca_cert"]) or not p["ca_key"].exists() or unconstrained(p["ca_cert"]):
         ca_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         ca_name = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, CA_NAME),
                              x509.NameAttribute(NameOID.ORGANIZATION_NAME, "ReviewHunter (local only)")])
@@ -70,6 +79,13 @@ def ensure_certificates(force: bool = False) -> dict[str, Path]:
                                          content_commitment=False, key_encipherment=False, data_encipherment=False,
                                          key_agreement=False, encipher_only=False, decipher_only=False), critical=True)
             .add_extension(x509.SubjectKeyIdentifier.from_public_key(ca_key.public_key()), critical=False)
+            # Name constraints: this CA can only vouch for localhost / 127.0.0.1 / ::1. Even if its key file
+            # leaked, it could not impersonate any real website to the account that trusts it.
+            .add_extension(x509.NameConstraints(
+                permitted_subtrees=[x509.DNSName("localhost"),
+                                    x509.IPAddress(ipaddress.ip_network("127.0.0.0/8")),
+                                    x509.IPAddress(ipaddress.ip_network("::1/128"))],
+                excluded_subtrees=None), critical=True)
             .sign(ca_key, hashes.SHA256())
         )
         p["ca_key"].write_bytes(ca_key.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8,
@@ -213,10 +229,25 @@ def _ca_thumbprint() -> Optional[str]:
     return x509.load_pem_x509_certificate(p.read_bytes()).fingerprint(hashes.SHA1()).hex().upper()
 
 
+def _mac_wef() -> Path:
+    """Folder Word for Mac reads sideloaded (developer) add-in manifests from."""
+    return Path.home() / "Library" / "Containers" / "com.microsoft.Word" / "Data" / "Documents" / "wef"
+
+
 def ca_trusted() -> bool:
-    """Is our CA in the current user's Trusted Root store?"""
+    """Is our CA in the current user's Trusted Root store (Windows) or trusted by the keychain (macOS)?"""
     thumb = _ca_thumbprint()
-    if not thumb or os.name != "nt":
+    if not thumb:
+        return False
+    if sys.platform == "darwin":
+        # verify-cert succeeds only when the keychain trust settings make this root valid.
+        try:
+            out = subprocess.run(["security", "verify-cert", "-c", str(paths()["ca_cert"])],
+                                 capture_output=True, text=True, timeout=10)
+            return out.returncode == 0
+        except (OSError, subprocess.SubprocessError):
+            return False
+    if os.name != "nt":
         return False
     try:
         out = subprocess.run(["certutil", "-user", "-store", "Root", thumb], capture_output=True, text=True,
@@ -227,6 +258,8 @@ def ca_trusted() -> bool:
 
 
 def manifest_registered() -> bool:
+    if sys.platform == "darwin":
+        return (_mac_wef() / f"{ADDIN_ID}.manifest.xml").exists()
     if os.name != "nt":
         return False
     import winreg
@@ -251,20 +284,44 @@ def status() -> dict:
     }
 
 
-def prepare_and_launch_setup() -> dict:
-    """Generate cert + manifest, then open the setup script in a visible PowerShell window."""
+def prepare_and_launch_setup(quiet: bool = True) -> dict:
+    """Generate cert + manifest, then run the setup script.
+
+    quiet (default, the "ReviewHunter for Word" shortcut and Settings button): hidden console, no questions;
+    the only interaction is Windows' own certificate warning, then a dialog says what to do next.
+    """
     p = ensure_certificates()
     manifest = write_manifest()
     script = REPO_ROOT / "scripts" / "setup_word_addin.ps1"
     launched = False
     if os.name == "nt" and script.exists():
-        subprocess.Popen(
-            ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-NoExit", "-File", str(script),
-             "-CaCert", str(p["ca_cert"]), "-Manifest", str(manifest), "-AddinId", ADDIN_ID],
-            creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0),
-        )
+        args = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(script),
+                "-CaCert", str(p["ca_cert"]), "-Manifest", str(manifest), "-AddinId", ADDIN_ID]
+        if quiet:
+            subprocess.Popen(args[:1] + ["-WindowStyle", "Hidden"] + args[1:] + ["-Quiet"],
+                             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        else:
+            subprocess.Popen(args[:1] + ["-NoExit"] + args[1:], creationflags=getattr(subprocess, "CREATE_NEW_CONSOLE", 0))
         launched = True
     return {"ok": True, "launched": launched, **status()}
+
+
+def install_mac() -> dict:
+    """Word for Mac: trust the CA in the login keychain (macOS asks for the password) and sideload the manifest.
+
+    Word for Mac reads developer manifests from ~/Library/Containers/com.microsoft.Word/Data/Documents/wef.
+    NOT tested on a Mac with Word (no such machine during development).
+    """
+    p = ensure_certificates()
+    manifest = write_manifest()
+    wef = _mac_wef()
+    wef.mkdir(parents=True, exist_ok=True)
+    (wef / f"{ADDIN_ID}.manifest.xml").write_bytes(manifest.read_bytes())
+    keychain = Path.home() / "Library" / "Keychains" / "login.keychain-db"
+    trust = subprocess.run(["security", "add-trusted-cert", "-r", "trustRoot", "-k", str(keychain), str(p["ca_cert"])],
+                           capture_output=True, text=True, timeout=300)
+    return {"ok": trust.returncode == 0, "manifest": str(wef / f"{ADDIN_ID}.manifest.xml"),
+            "trusted": trust.returncode == 0, "error": trust.stderr.strip()[:300]}
 
 
 def new_guid() -> str:  # helper kept for manual manifest variants

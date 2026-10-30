@@ -13,6 +13,9 @@
 import { detectPdf } from "../extract/index.js";
 import { isLikelyPdfUrl } from "../shared/identifiers.js";
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** URL schemes where injection is impossible or pointless. */
 const UNSUPPORTED = /^(chrome|chrome-extension|edge|about|devtools|view-source|data|blob|javascript|file):/i;
 

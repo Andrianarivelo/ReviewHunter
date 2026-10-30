@@ -61,6 +61,9 @@ MAC_DIRS = {"chrome": "Google/Chrome", "edge": "Microsoft Edge", "brave": "Brave
             "chromium": "Chromium"}
 LINUX_DIRS = {"chrome": "google-chrome", "edge": "microsoft-edge", "brave": "BraveSoftware/Brave-Browser",
               "chromium": "chromium"}
+# Firefox: one registration for every Firefox edition; the extension is named by its add-on ID.
+GECKO_ID = "connector@reviewhunter.app"          # browser_specific_settings.gecko.id of the Firefox build
+FIREFOX_WINDOWS_KEYS = {"firefox": r"Software\Mozilla\NativeMessagingHosts"}
 
 
 # ======================================================================================
@@ -200,10 +203,19 @@ def remember_extension_id(extension_id: str, root: Path = ROOT) -> dict:
     return {"ok": True, "added": True, "registration": register(root)}
 
 
-def host_manifest(root: Path = ROOT) -> dict:
-    return {"name": HOST_NAME, "description": "Starts ReviewHunter for its browser extension",
-            "path": str(host_program(root)), "type": "stdio",
-            "allowed_origins": [f"chrome-extension://{i}/" for i in allowed_ids(root)]}
+def host_manifest(root: Path = ROOT, family: str = "chromium") -> dict:
+    """Chrome, Edge, Brave, Chromium name allowed extensions by origin; Firefox by add-on ID."""
+    manifest = {"name": HOST_NAME, "description": "Starts ReviewHunter for its browser extension",
+                "path": str(host_program(root)), "type": "stdio"}
+    if family == "firefox":
+        manifest["allowed_extensions"] = [GECKO_ID]
+    else:
+        manifest["allowed_origins"] = [f"chrome-extension://{i}/" for i in allowed_ids(root)]
+    return manifest
+
+
+def manifest_file(root: Path = ROOT, family: str = "chromium") -> Path:
+    return host_dir(root) / (f"{HOST_NAME}.json" if family == "chromium" else f"{HOST_NAME}.firefox.json")
 
 
 def _program_text(root: Path) -> str:
@@ -230,31 +242,54 @@ def _manifest_dirs(home: Optional[Path] = None) -> dict[str, Path]:
     return {b: base / d / "NativeMessagingHosts" for b, d in LINUX_DIRS.items()}
 
 
-def _write_files(root: Path) -> Path:
-    """Host program + manifest inside the install (the manifest is copied / referenced per browser)."""
+def _firefox_dirs(home: Optional[Path] = None) -> dict[str, Path]:
+    home = home or Path.home()
+    if IS_MAC:
+        return {"firefox": home / "Library" / "Application Support" / "Mozilla" / "NativeMessagingHosts"}
+    return {"firefox": home / ".mozilla" / "native-messaging-hosts"}
+
+
+def _firefox_present(folder: Path) -> bool:
+    """macOS keeps Firefox profiles in .../Firefox, the host folder lives in .../Mozilla; Linux in ~/.mozilla."""
+    if IS_MAC:
+        return (folder.parents[1] / "Firefox").exists() or folder.parent.exists()
+    return folder.parent.exists()
+
+
+def _targets(keys=None, dirs=None, ff_keys=None, ff_dirs=None) -> list[tuple[str, str, object]]:
+    """(browser, family, registry key or folder). Explicit arguments (tests) replace the defaults."""
+    if any(x is not None for x in (keys, dirs, ff_keys, ff_dirs)):
+        chromium = (keys or {}) if IS_WINDOWS else (dirs or {})
+        firefox = (ff_keys or {}) if IS_WINDOWS else (ff_dirs or {})
+    else:
+        chromium = WINDOWS_KEYS if IS_WINDOWS else _manifest_dirs()
+        firefox = FIREFOX_WINDOWS_KEYS if IS_WINDOWS else _firefox_dirs()
+    return [(b, "chromium", loc) for b, loc in chromium.items()] + [(b, "firefox", loc) for b, loc in firefox.items()]
+
+
+def _write_files(root: Path) -> None:
+    """Host program + one manifest per family inside the install (referenced or copied per browser)."""
     folder = host_dir(root)
     folder.mkdir(parents=True, exist_ok=True)
     program = host_program(root)
     program.write_bytes(_program_text(root).encode("utf-8"))
     if not IS_WINDOWS:
         program.chmod(0o755)
-    manifest = folder / f"{HOST_NAME}.json"
-    manifest.write_text(json.dumps(host_manifest(root), indent=2), encoding="utf-8")
-    return manifest
+    for family in ("chromium", "firefox"):
+        manifest_file(root, family).write_text(json.dumps(host_manifest(root, family), indent=2), encoding="utf-8")
 
 
-def status(root: Path = ROOT, *, keys: Optional[dict] = None, dirs: Optional[dict] = None) -> list[dict]:
+def status(root: Path = ROOT, **where) -> list[dict]:
     """Per browser: is the host registered, and for this install?"""
     out = []
-    expected = host_manifest(root)
     program_ok = host_program(root).exists() and host_program(root).read_bytes() == _program_text(root).encode("utf-8")
-    if IS_WINDOWS:
-        import winreg
+    for browser, family, loc in _targets(**where):
+        expected = host_manifest(root, family)
+        if IS_WINDOWS:
+            import winreg
 
-        own = host_dir(root) / f"{HOST_NAME}.json"
-        for browser, key in (keys or WINDOWS_KEYS).items():
             try:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, rf"{key}\{HOST_NAME}") as k:
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, rf"{loc}\{HOST_NAME}") as k:
                     value = winreg.QueryValueEx(k, "")[0]
             except OSError:
                 value = ""
@@ -262,22 +297,23 @@ def status(root: Path = ROOT, *, keys: Optional[dict] = None, dirs: Optional[dic
                 content = json.loads(Path(value).read_text(encoding="utf-8")) if value else None
             except (OSError, ValueError):
                 content = None
-            out.append({"browser": browser, "where": rf"HKCU\{key}\{HOST_NAME}", "registered": bool(value),
+            own = manifest_file(root, family)
+            out.append({"browser": browser, "family": family, "where": rf"HKCU\{loc}\{HOST_NAME}",
+                        "registered": bool(value),
                         "linked": bool(value) and os.path.normcase(value) == os.path.normcase(str(own))
                         and content == expected and program_ok})
-        return out
-    for browser, folder in (dirs or _manifest_dirs()).items():
-        f = folder / f"{HOST_NAME}.json"
+            continue
+        f = Path(loc) / f"{HOST_NAME}.json"
         try:
             content = json.loads(f.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             content = None
-        out.append({"browser": browser, "where": str(f), "registered": content is not None,
+        out.append({"browser": browser, "family": family, "where": str(f), "registered": content is not None,
                     "linked": content == expected and program_ok})
     return out
 
 
-def register(root: Path = ROOT, *, keys: Optional[dict] = None, dirs: Optional[dict] = None) -> dict:
+def register(root: Path = ROOT, **where) -> dict:
     """Write / repair the registration for every supported browser. Idempotent."""
     from .shortcuts import skip_reason
 
@@ -285,57 +321,50 @@ def register(root: Path = ROOT, *, keys: Optional[dict] = None, dirs: Optional[d
     reason = skip_reason(root)
     if reason:
         return {"skipped": reason, "browsers": []}
-    if all(s["linked"] for s in status(root, keys=keys, dirs=dirs)):
-        return {"ok": True, "changed": [], "browsers": status(root, keys=keys, dirs=dirs)}
-    manifest = _write_files(root)
+    current = status(root, **where)
+    if all(s["linked"] for s in current):
+        return {"ok": True, "changed": [], "browsers": current}
+    _write_files(root)
     changed, errors = [], []
-    if IS_WINDOWS:
-        import winreg
+    for browser, family, loc in _targets(**where):
+        try:
+            if IS_WINDOWS:
+                import winreg
 
-        for browser, key in (keys or WINDOWS_KEYS).items():
-            try:
-                with winreg.CreateKey(winreg.HKEY_CURRENT_USER, rf"{key}\{HOST_NAME}") as k:
-                    winreg.SetValueEx(k, "", 0, winreg.REG_SZ, str(manifest))
-                changed.append(browser)
-            except OSError as e:
-                errors.append(f"{browser}: {e}")
-    else:
-        text = json.dumps(host_manifest(root), indent=2)
-        for browser, folder in (dirs or _manifest_dirs()).items():
-            # Only browsers that exist (their profile folder): do not create folders for the others.
-            if not folder.parent.exists():
-                continue
-            try:
+                with winreg.CreateKey(winreg.HKEY_CURRENT_USER, rf"{loc}\{HOST_NAME}") as k:
+                    winreg.SetValueEx(k, "", 0, winreg.REG_SZ, str(manifest_file(root, family)))
+            else:
+                folder = Path(loc)
+                # Only browsers that exist (their profile folder): do not create folders for the others.
+                present = _firefox_present(folder) if family == "firefox" else folder.parent.exists()
+                if not present:
+                    continue
                 folder.mkdir(parents=True, exist_ok=True)
-                (folder / f"{HOST_NAME}.json").write_text(text, encoding="utf-8")
-                changed.append(browser)
-            except OSError as e:
-                errors.append(f"{browser}: {e}")
-    final = status(root, keys=keys, dirs=dirs)
-    return {"ok": not errors, "changed": changed, "errors": errors, "browsers": final}
+                (folder / f"{HOST_NAME}.json").write_text(json.dumps(host_manifest(root, family), indent=2),
+                                                          encoding="utf-8")
+            changed.append(browser)
+        except OSError as e:
+            errors.append(f"{browser}: {e}")
+    return {"ok": not errors, "changed": changed, "errors": errors, "browsers": status(root, **where)}
 
 
-def unregister(root: Path = ROOT, *, keys: Optional[dict] = None, dirs: Optional[dict] = None) -> list[str]:
+def unregister(root: Path = ROOT, **where) -> list[str]:
     """Remove the registrations that point to ``root`` (uninstaller)."""
     removed = []
-    for s in status(root, keys=keys, dirs=dirs):
+    locations = {(b, f): loc for b, f, loc in _targets(**where)}
+    for s in status(root, **where):
         if not s["registered"]:
             continue
-        if IS_WINDOWS:
-            import winreg
+        try:
+            if IS_WINDOWS:
+                import winreg
 
-            key = (keys or WINDOWS_KEYS)[s["browser"]]
-            try:
-                winreg.DeleteKey(winreg.HKEY_CURRENT_USER, rf"{key}\{HOST_NAME}")
-                removed.append(s["where"])
-            except OSError:
-                pass
-        else:
-            try:
+                winreg.DeleteKey(winreg.HKEY_CURRENT_USER, rf"{locations[(s['browser'], s['family'])]}\{HOST_NAME}")
+            else:
                 Path(s["where"]).unlink()
-                removed.append(s["where"])
-            except OSError:
-                pass
+            removed.append(s["where"])
+        except OSError:
+            pass
     return removed
 
 

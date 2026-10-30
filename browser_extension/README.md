@@ -1,4 +1,4 @@
-# ReviewHunter Connector (Chrome extension)
+# ReviewHunter Connector (Chrome, Edge, Brave, Firefox, Safari)
 
 Save references, and their PDFs, from any web page into your local ReviewHunter
 library, like the Zotero Connector. Manifest V3, plain JavaScript ES modules, no
@@ -25,6 +25,30 @@ attaching them to the existing item (matched by DOI) or to a new one.
 
 After pulling new code, press the reload arrow on the extension card in
 `chrome://extensions`.
+
+## Install in Firefox or Safari (1.4)
+
+One source, one manifest per browser: `python tools/build_extensions.py` writes
+`dist/connectors/firefox/`, `ReviewHunter-Firefox.xpi` and `dist/connectors/safari/`. Every module
+reads its API through `const chrome = globalThis.browser ?? globalThis.chrome;`, so the same code runs
+on Chrome's `chrome.*` and on the promise-based `browser.*` of Firefox and Safari.
+
+* **Firefox 140+**: double-click **ReviewHunter for Firefox** (Start menu or Applications >
+  ReviewHunter Add-ons), or Settings > Browser Connector > *Add to Firefox*. It downloads the
+  release's `.xpi` and Firefox asks *Add ReviewHunter Connector?*. Firefox keeps only add-ons signed
+  by Mozilla: when the release has no signed build, `about:debugging` opens to load the locally built
+  one until Firefox restarts (path copied). Signing: `tools/sign_firefox.py` (AMO API key, free, the
+  add-on is not listed in the store), run by the `connectors` workflow when the secrets exist.
+  Starting ReviewHunter works as in Chrome: the native-messaging helper is also registered for
+  Firefox (`allowed_extensions: connector@reviewhunter.app`). Real-browser test:
+  `tools/extension_firefox_e2e.py`.
+* **Safari 17+ (macOS)**: double-click **ReviewHunter for Safari**. It installs the
+  *ReviewHunter Connector* app (built by the `connectors` workflow with Apple's
+  `safari-web-extension-converter`) in `~/Applications` and opens it; tick it in Safari > Settings >
+  Extensions and allow it on all websites. Built without an Apple Developer ID, so Safari lists it
+  only with Develop > **Allow Unsigned Extensions** (Safari > Settings > Advanced > *Show features for
+  web developers*), which Safari resets when it quits. Safari's native messaging only reaches the
+  wrapper app, so the connector starts ReviewHunter by opening `reviewhunter://start`.
 
 ## Starting ReviewHunter from the browser (1.3)
 

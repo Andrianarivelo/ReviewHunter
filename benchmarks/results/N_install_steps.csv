@@ -1,0 +1,13 @@
+target,version,group,user_actions,available,console_window,procedure,method
+Chrome / Edge / Brave,2.10,previous,5,True,False,"type chrome://extensions, Developer mode, Load unpacked, paste path, Select",counted from the documented procedure (not a user study)
+Chrome / Edge / Brave,2.11,current,5,True,False,"shortcut, Developer mode, Load unpacked, paste path (copied), Select",counted from the documented procedure (not a user study)
+Firefox (signed release),2.10,previous,,False,False,no Firefox build,counted from the documented procedure (not a user study)
+Firefox (signed release),2.11,current,2,True,False,"shortcut, Add",counted from the documented procedure (not a user study)
+Firefox (no signed build),2.10,previous,,False,False,no Firefox build,counted from the documented procedure (not a user study)
+Firefox (no signed build),2.11,current,4,True,False,"shortcut, Load Temporary Add-on, paste path, Open (again after each Firefox restart)",counted from the documented procedure (not a user study)
+Safari (unsigned app),2.10,previous,,False,False,no Safari build,counted from the documented procedure (not a user study)
+Safari (unsigned app),2.11,current,7,True,False,"shortcut, Settings, Extensions, tick, allow websites, Advanced > web developer features, Allow Unsigned",counted from the documented procedure (not a user study)
+Word (Windows),2.10,previous,7,True,True,"Settings, Word tab, Set up, Windows Yes, cache Y, Enter, close console",counted from the documented procedure (not a user study)
+Word (Windows),2.11,current,3,True,False,"shortcut, Windows Yes, OK",counted from the documented procedure (not a user study)
+Word (macOS),2.10,previous,,False,False,Windows only,counted from the documented procedure (not a user study)
+Word (macOS),2.11,current,3,True,False,"shortcut, password, OK (untested on a Mac)",counted from the documented procedure (not a user study)

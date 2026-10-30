@@ -5,6 +5,9 @@
  * @module settings
  */
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** Default values for every user setting. */
 export const DEFAULTS = Object.freeze({
   serverUrl: "http://127.0.0.1:8765",

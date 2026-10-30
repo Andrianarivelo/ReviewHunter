@@ -21,6 +21,9 @@
 
 import { isPdfBytes, findPdfLinkInHtml } from "../shared/identifiers.js";
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** Maximum PDF size accepted (the server enforces the same limit). */
 export const MAX_PDF_BYTES = 200 * 1024 * 1024;
 
@@ -150,7 +153,7 @@ export async function withReferer(url, referer, fn) {
     id,
     priority: 1,
     action: { type: "modifyHeaders", requestHeaders: [{ header: "Referer", operation: "set", value: referer }] },
-    condition: { urlFilter: url.split("#")[0], initiatorDomains: [chrome.runtime.id], resourceTypes: ["xmlhttprequest"] },
+    condition: { urlFilter: url.split("#")[0], initiatorDomains: [new URL(chrome.runtime.getURL("")).host], resourceTypes: ["xmlhttprequest"] },
   };
   let installed = false;
   try {

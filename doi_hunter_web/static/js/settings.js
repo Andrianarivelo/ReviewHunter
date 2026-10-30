@@ -21,6 +21,11 @@ window.settingsPart = function settingsPart() {
     appStopped: false,
     appRestarting: false,
     browserLauncher: null,
+    /** /api/system/integrations: installed browsers + Word add-in state (one-click install buttons). */
+    integrations: null,
+    integrationBusy: '',
+    integrationMessage: '',
+    integrationFor: '',
     fulltextStats: null,
     /** "Test the sources" panel (Settings > PDF Sources). */
     sourcesTest: { doi: '', running: false, result: null },
@@ -218,7 +223,47 @@ window.settingsPart = function settingsPart() {
 
     async loadSystem() {
       try { this.system = await api.get('/api/system/info'); } catch (e) { this.system = null; }
-      await Promise.all([this.loadAppInstance(), this.loadBrowserLauncher()]);
+      await Promise.all([this.loadAppInstance(), this.loadBrowserLauncher(), this.loadIntegrations()]);
+    },
+
+    /** Installed browsers and the Word add-in state. */
+    async loadIntegrations() {
+      try { this.integrations = await api.get('/api/system/integrations'); } catch (e) { this.integrations = null; }
+    },
+    /** Browsers offered as one-click install buttons, installed ones first. */
+    integrationBrowsers() {
+      const names = { chrome: 'Chrome', edge: 'Edge', brave: 'Brave', firefox: 'Firefox', safari: 'Safari' };
+      const found = this.integrations?.browsers || {};
+      return Object.keys(names).filter(k => k in found)
+        .map(k => ({ key: k, label: names[k], present: !!found[k] }))
+        .sort((a, b) => b.present - a.present);
+    },
+    /**
+     * Same action as the "ReviewHunter for Firefox / Word" shortcuts: the server opens the browser, the
+     * download or the setup, and every security confirmation is made by the person in that window.
+     */
+    async installIntegration(name) {
+      this.integrationBusy = name;
+      this.integrationMessage = '';
+      try {
+        const r = await api.post(`/api/system/integrations/${name}`, {});
+        this.integrationMessage = r.message || '';
+        this.integrationFor = name;
+        this.toast(r.ok ? 'Follow the window that opened' : (r.message || 'Not available'), r.ok ? 'info' : 'error', 9000);
+        if (name === 'word') this.watchWordSetup();
+      } catch (e) { this.toast(e.message, 'error', 8000); }
+      this.integrationBusy = '';
+    },
+    /** The Word setup runs in its own process: refresh the status while the person answers Windows. */
+    watchWordSetup() {
+      const until = Date.now() + 180000;
+      const tick = async () => {
+        await this.loadSystem();
+        const w = this.system?.word_addin;
+        if ((w && w.ca_trusted && w.registered) || Date.now() > until) return;
+        setTimeout(tick, 3000);
+      };
+      setTimeout(tick, 3000);
     },
 
     /** Native-messaging registration that lets the extension start ReviewHunter. */
@@ -289,11 +334,13 @@ window.settingsPart = function settingsPart() {
     async openPath(path) {
       try { await api.post('/api/system/open-path', { path }); } catch (e) { this.toast(e.message, 'error'); }
     },
+    /** Detailed setup (PowerShell window that explains each step), kept for people who want to read it. */
     async setupWordAddin() {
       try {
         const r = await api.post('/api/system/word-addin/setup');
         this.system = { ...(this.system || {}), word_addin: r };
         this.toast(r.launched ? 'Setup window opened. Read each step and confirm the Windows prompts.' : 'Certificate and manifest prepared.', 'info', 9000);
+        if (r.launched) this.watchWordSetup();
       } catch (e) { this.toast(e.message, 'error'); }
     },
     async reindexFulltext(force) {

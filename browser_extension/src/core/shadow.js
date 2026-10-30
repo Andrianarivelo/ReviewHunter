@@ -17,6 +17,9 @@ import * as api from "../api.js";
 import { fetchInWorker, shortUrl } from "./pdf.js";
 import { findPdfLinkInHtml, isBotChallengeHtml } from "../shared/identifiers.js";
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** Per-request timeout for landing pages: dead mirrors must not stall a save for minutes. */
 const PAGE_TIMEOUT_MS = 20000;
 

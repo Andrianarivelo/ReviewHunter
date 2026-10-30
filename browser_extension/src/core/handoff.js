@@ -28,6 +28,9 @@ import { openForUser } from "./shadow.js";
 import { addPending } from "../settings.js";
 import { classifyWall, findPdfLinkInHtml } from "../shared/identifiers.js";
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** How long a JavaScript wall may take to clear in a background tab (ms). */
 export const WALL_WAIT_MS = 40000;
 /** Polling interval while a background tab loads (ms). */

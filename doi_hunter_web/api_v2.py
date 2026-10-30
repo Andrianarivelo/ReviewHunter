@@ -1185,7 +1185,8 @@ def system_instance() -> dict:
 
 def _no_extension(request: Request) -> None:
     """Quit / restart / shortcut changes: the app's own page or a local program, never an extension."""
-    if (request.headers.get("origin") or "").lower().startswith(("chrome-extension://", "moz-extension://")):
+    if (request.headers.get("origin") or "").lower().startswith(("chrome-extension://", "moz-extension://",
+                                                                  "safari-web-extension://")):
         raise HTTPException(403, "not allowed from a browser extension")
 
 
@@ -1290,7 +1291,33 @@ def open_path(body: OpenPathIn) -> dict:
 
 @router.post("/system/word-addin/setup")
 def word_addin_setup() -> dict:
-    """Prepare certificate + manifest and open the setup script for the user to run."""
+    """Prepare certificate + manifest and open the detailed setup (a console that explains each step)."""
     from . import addin
 
-    return addin.prepare_and_launch_setup()
+    return addin.prepare_and_launch_setup(quiet=False)
+
+
+@router.get("/system/integrations")
+def system_integrations() -> dict:
+    """Which browsers are installed, and the Word add-in state (for the one-click install buttons)."""
+    from . import integrations
+
+    return integrations.status()
+
+
+@router.post("/system/integrations/{name}")
+def system_integration_install(name: str, request: Request) -> dict:
+    """One-click install of a connector (firefox, safari, chrome, edge, brave) or of the Word add-in.
+
+    Same paths as the Start-menu shortcuts: every security decision stays with the person (browser
+    confirmation, Windows certificate warning, macOS password).
+    """
+    from . import integrations
+
+    _no_extension(request)
+    if name not in integrations.INSTALLERS:
+        raise HTTPException(404, f"unknown integration {name!r}")
+    try:
+        return integrations.install(name)
+    except Exception as e:   # surfaced in the Settings page, never a silent 500
+        return {"ok": False, "message": f"{type(e).__name__}: {e}"}

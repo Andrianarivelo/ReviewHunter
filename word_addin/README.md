@@ -6,17 +6,32 @@ the Zotero Word plugin. Plain browser JavaScript (no build step), served by Revi
 
 ## Install (Windows, Microsoft 365 / Word 2016+)
 
-1. Start ReviewHunter. On start it creates the local certificates
-   (`<library>\certs`) and the manifest (`<library>\word_addin\manifest.xml`).
-2. Run the setup: from ReviewHunter (Word add-in setup), or double-click
-   `scripts\setup_word_addin.cmd`. The script explains each step:
-   * trusts "ReviewHunter Local CA" for your Windows account (Windows asks you to confirm),
-   * registers the manifest under `HKCU\Software\Microsoft\Office\16.0\WEF\Developer`,
-   * optionally clears the Office add-in cache (only when Word is closed).
-3. Restart Word, open a document, click **References > ReviewHunter**
-   (or **Home > Add-ins > Developer Add-ins > ReviewHunter**).
+**One click:** Start menu > ReviewHunter Add-ons > **ReviewHunter for Word** (or Settings > Word
+Add-in > *Add to Word*). No console: Windows shows its own warning about installing the
+"ReviewHunter Local CA" certificate (click **Yes**), then a dialog says what to do next. Restart
+Word, open a document, click **References > ReviewHunter** (or **Home > Add-ins > Developer
+Add-ins > ReviewHunter**).
+
+What it does (`scripts\setup_word_addin.ps1 -Quiet`; *Detailed setup...* runs the same script in a
+console that explains each step):
+* trusts "ReviewHunter Local CA" for your Windows account only (no administrator rights),
+* registers the manifest under `HKCU\Software\Microsoft\Office\16.0\WEF\Developer`,
+* clears the Office add-in cache when Word is closed (it only holds copies of add-in files).
+
+The CA certificate carries critical X.509 **name constraints**: it can only vouch for `localhost`,
+`127.0.0.0/8` and `::1`, so even a leaked key could not impersonate a real website. A CA made by a
+version before 2.11 (without constraints) is replaced automatically; run *ReviewHunter for Word*
+once more to trust the new one. `tests/test_addin_ca.py` proves it with real TLS handshakes.
 
 Remove everything with `scripts\setup_word_addin.cmd -Uninstall`.
+
+## Install (macOS, Word for Mac 16+)
+
+**ReviewHunter for Word** in `~/Applications/ReviewHunter Add-ons` trusts the CA in your login keychain
+(macOS asks for your password) and copies the manifest to
+`~/Library/Containers/com.microsoft.Word/Data/Documents/wef`, where Word for Mac reads sideloaded
+add-ins. Restart Word: **Home > Add-ins > ReviewHunter**. Not yet tried on a Mac with Word: please
+report what you see.
 
 ## Using it
 

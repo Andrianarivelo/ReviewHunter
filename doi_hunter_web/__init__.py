@@ -1,2 +1,2 @@
 """ReviewHunter - a bibliographic review library app on top of the doi_hunter engine."""
-__version__ = "2.10.0"
+__version__ = "2.11.0"

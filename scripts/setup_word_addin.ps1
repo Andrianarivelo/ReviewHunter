@@ -38,7 +38,8 @@ param(
     [string]$CaCert = "",
     [string]$Manifest = "",
     [string]$AddinId = "6f1f2a57-4c1b-4a0e-9d6e-7e0c5b1a9a01",
-    [switch]$Uninstall
+    [switch]$Uninstall,
+    [switch]$Quiet
 )
 
 # ------------------------------------------------------------------ configuration
@@ -100,7 +101,8 @@ function Clear-OfficeAddinCache {
         Write-Warn "Word is running, so the cache is left untouched. Close Word and run this script again to clear it."
         return
     }
-    $answer = Read-Host "   Clear the Office add-in cache now? This only removes cached copies (Y/N)"
+    # -Quiet (the "ReviewHunter for Word" shortcut): no question; the cache only holds copies, so clear it.
+    $answer = if ($Quiet) { "y" } else { Read-Host "   Clear the Office add-in cache now? This only removes cached copies (Y/N)" }
     if ($answer -match '^(y|yes|o|oui)$') {
         Get-ChildItem -LiteralPath $WefCache -Force | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
         Write-Ok "Cache cleared ($WefCache)."
@@ -219,6 +221,19 @@ function Invoke-Install {
     Write-Info "If the button is missing, use Home > Add-ins (or Insert > My Add-ins) > Developer Add-ins > ReviewHunter."
     Write-Info "The pane shows 'Online' when it can reach your library."
     Write-Host ""
+    if ($Quiet) {
+        # One-click install: the console is hidden, so finish with a plain dialog.
+        $trusted = Test-Path "Cert:\CurrentUser\Root\$thumb"
+        $restart = if (Test-WordRunning) { "Close every Word window and start Word again." } else { "Start Word." }
+        $text = if ($trusted) {
+            "ReviewHunter is now available in Word.`n`n$restart Then open a document and click References > ReviewHunter.`n`nKeep ReviewHunter running while you cite."
+        } else {
+            "Word is registered, but the ReviewHunter certificate was not accepted, so Word cannot open the pane.`n`nRun 'ReviewHunter for Word' again and click Yes in the Windows security warning."
+        }
+        Add-Type -AssemblyName System.Windows.Forms
+        [System.Windows.Forms.MessageBox]::Show($text, "ReviewHunter for Word", "OK",
+            $(if ($trusted) { "Information" } else { "Warning" })) | Out-Null
+    }
 }
 
 # ------------------------------------------------------------------ main

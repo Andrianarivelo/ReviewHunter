@@ -24,6 +24,9 @@ import { startServer, openAppInWindow } from "./core/launch.js";
 import { getSettings, setSettings, getPending, matchPending, removePending } from "./settings.js";
 import { identifiersInText, isLikelyPdfUrl, fileNameFromUrl, doiFromUrl, shadowLibraryKind } from "./shared/identifiers.js";
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** How long a ping result is trusted (ms). */
 const STATUS_TTL = 20000;
 
@@ -193,10 +196,14 @@ async function showSavedBadge(tabId, saved) {
  */
 function notify(title, message) {
   if (!chrome.notifications) return;
-  chrome.notifications.create(
-    { type: "basic", iconUrl: chrome.runtime.getURL("icons/icon-128.png"), title, message: String(message).slice(0, 250), priority: 0 },
-    () => void chrome.runtime.lastError,
-  );
+  // Promise form without "priority": Firefox rejects a callback argument and does not know that option.
+  try {
+    Promise.resolve(chrome.notifications.create({
+      type: "basic", iconUrl: chrome.runtime.getURL("icons/icon-128.png"), title, message: String(message).slice(0, 250),
+    })).catch(() => {});
+  } catch (_) {
+    /* notifications unavailable */
+  }
 }
 
 /**
@@ -491,8 +498,10 @@ async function ensureRunning() {
   if (status.online) return status;
   const res = await startServer();
   if (!res.ok) return { ...status, missing: !!res.missing, error: res.error };
-  // The helper answers once the server is up; the ping confirms it from the extension's side.
-  for (let i = 0; i < 20 && !status.online; i++) {
+  // The helper answers once the server is up; through the reviewhunter:// link the user first confirms the
+  // browser's "Open ReviewHunter?" question, so wait longer. The ping confirms it from the extension's side.
+  const tries = res.viaLink ? 120 : 20;
+  for (let i = 0; i < tries && !status.online; i++) {
     status = await getStatus({ force: true });
     if (!status.online) await new Promise((r) => setTimeout(r, 500));
   }
@@ -523,7 +532,7 @@ async function openApp(itemId, windowId) {
  * @returns {void}
  */
 function createMenus() {
-  chrome.contextMenus.removeAll(() => {
+  Promise.resolve(chrome.contextMenus.removeAll()).catch(() => {}).then(() => {
     chrome.contextMenus.create({ id: "rh-page", title: "Save page to ReviewHunter", contexts: ["page", "frame"] });
     chrome.contextMenus.create({ id: "rh-link", title: "Save link to ReviewHunter", contexts: ["link"] });
     chrome.contextMenus.create({ id: "rh-selection", title: "Add selection as identifiers to ReviewHunter", contexts: ["selection"] });

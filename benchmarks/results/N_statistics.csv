@@ -1,0 +1,7 @@
+measure,previous,current,test,p_value,assumption
+A forged certificates accepted,20/20,0/20,"Fisher exact, two-sided",1.4508889103849688e-11,independent observations: one forged certificate per domain (met)
+A genuine localhost certificate accepted (control),True,True,control,,
+B Firefox e2e checks passed (all runs),21/27,27/27,"Fisher exact, two-sided (descriptive)",0.02292237649776891,checks within a run are NOT independent: p is descriptive
+B Firefox checks passed per run (2.10),7 7 7,,out of 9 planned checks,,
+B Firefox checks passed per run (2.11),,9 9 9,out of 9 planned checks,,
+B Chromium e2e 2.11 (regression check),,9/9,single run,,

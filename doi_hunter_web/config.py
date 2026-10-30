@@ -166,6 +166,8 @@ DEFAULT_SETTINGS: dict = {
     "shared_sync_interval_seconds": 60,
     # ---- Browser launcher (native_host.py): connector IDs reported by the app page (other folders)
     "connector_extension_ids": [],
+    # ---- "ReviewHunter for Firefox / Word ..." shortcuts (shortcuts.py): created once, then only repaired
+    "addon_shortcuts_created": False,
 }
 
 

@@ -1,0 +1,10 @@
+browser,version,group,run,check,passed,detail
+chromium,2.11,current,1,extension loaded with the ID computed from its folder,True,bkebefckpemehhgjpidnimcfidplkbap
+chromium,2.11,current,1,server stopped before the test,True,
+chromium,2.11,current,1,startApp starts ReviewHunter,True,"17.0 s, {""online"": true, ""info"": {""app"": ""ReviewHunter"", ""version"": ""2.11.0"", ""library"": {""items"": 0}}, ""at"": 1793372141684, ""se"
+chromium,2.11,current,1,the server runs this install and outlives the helper,True,launcher
+chromium,2.11,current,1,openApp opens one app tab in the same window,True,1 tab(s)
+chromium,2.11,current,1,the app shows the saved paper,True,selected 1
+chromium,2.11,current,1,second open reuses the tab and switches item without reload,True,"1 tab(s), selected 2, same page True"
+chromium,2.11,current,1,the deep link is removed from the address bar,True,http://127.0.0.1:63270/
+chromium,2.11,current,1,the popup starts ReviewHunter by itself,True,"16.1 s, state state-none, header '2 items'"

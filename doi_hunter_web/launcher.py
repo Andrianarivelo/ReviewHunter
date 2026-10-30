@@ -293,11 +293,28 @@ def _heal_shortcuts() -> None:
     except Exception as e:   # a shortcut problem must never prevent the app from starting
         print(f"shortcut check skipped: {e}", file=sys.stderr)
     try:
+        # "ReviewHunter for Firefox / Word ...": created once (installs older than 2.11 get them at their
+        # first launch), afterwards only repaired, so ones the user deleted stay deleted.
+        from . import config, shortcuts
+
+        first = not config.get_settings().get("addon_shortcuts_created")
+        report = shortcuts.ensure_addons(create=first)
+        if first and report.get("ok") and not report.get("skipped"):
+            config.update_settings({"addon_shortcuts_created": True})
+    except Exception as e:
+        print(f"add-on shortcut check skipped: {e}", file=sys.stderr)
+    try:
         from . import native_host
 
         native_host.register()
     except Exception as e:
         print(f"browser launcher registration skipped: {e}", file=sys.stderr)
+    try:
+        from . import url_scheme
+
+        url_scheme.register()
+    except Exception as e:
+        print(f"reviewhunter:// link registration skipped: {e}", file=sys.stderr)
 
 
 # ======================================================================================
@@ -311,7 +328,14 @@ def main(argv: Optional[list[str]] = None) -> int:
     parser.add_argument("--foreground", action="store_true", help="run the server in this terminal")
     parser.add_argument("--no-shortcuts", action="store_true", help="do not check the shortcuts")
     parser.add_argument("--wait-pid", type=int, help=argparse.SUPPRESS)   # restart requested by the app itself
+    parser.add_argument("--url", default="", help="a reviewhunter:// link (start, open, open?item=<id>)")
     args = parser.parse_args(argv)
+    if args.url:
+        from .url_scheme import parse
+
+        link = parse(args.url)
+        args.no_browser = args.no_browser or link["action"] == "start"
+        args.item = link["item"]
     try:
         return _run(args)
     finally:
@@ -323,6 +347,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 def _run(args: argparse.Namespace) -> int:
     host, port = config.HOST, config.PORT
     url = f"http://{host}:{port}"
+    page = f"{url}/#item={args.item}" if getattr(args, "item", None) else url   # reviewhunter://open?item=12
     found = probe(host, port)
     state = classify(found)
     settle = time.time() + float(os.environ.get("REVIEWHUNTER_LAUNCHER_SETTLE", "12"))
@@ -334,7 +359,7 @@ def _run(args: argparse.Namespace) -> int:
         state = "stale"   # the app asked to be restarted: wait for it to go, then start fresh
     if state == "same" and not args.restart:
         if not args.no_browser:
-            webbrowser.open(url)
+            webbrowser.open(page)
         print(f"ReviewHunter {__version__} is already running at {url}")
         return 0
     if state == "foreign":
@@ -365,7 +390,7 @@ def _run(args: argparse.Namespace) -> int:
                      f"ReviewHunter could not start: {why}.\n\nLast lines of {log_path()}:\n{_log_tail()}")
         return 1
     if not args.no_browser:
-        webbrowser.open(url)
+        webbrowser.open(page)
     print(f"ReviewHunter {__version__} is running at {url} (log: {log_path()})")
     return 0
 

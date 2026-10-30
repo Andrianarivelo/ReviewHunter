@@ -41,7 +41,7 @@ REQUIRED_MODULES = ("fastapi", "uvicorn", "requests", "bs4", "pydantic", "libgen
 # Files and folders never copied into the install folder (dev artefacts, secrets, local data).
 COPY_EXCLUDE = {".git", ".venv", "venv", "secret", "build", "dist", "downloads", "__pycache__", ".pytest_cache",
                 "certs", "PROJECT_MEMORY.md", "error.log", "failed_downloads.txt", "paper_titles.txt",
-                ".claude", "shots", "node_modules", "native_host"}
+                ".claude", ".codex", "shots", "node_modules", "native_host"}
 COPY_EXCLUDE_SUFFIXES = (".egg-info", ".pyc", ".log", ".pem")
 # Program sub-folders replaced on upgrade (so files deleted upstream do not linger). .venv is kept.
 CODE_DIRS = ("doi_hunter_web", "doi_hunter", "browser_extension", "word_addin", "scripts", "tools", "installer")
@@ -545,7 +545,9 @@ class Installer:
         # rules, so installer-made and repaired shortcuts can never disagree.
         kinds = [k for k, wanted in (("menu", self.o.menu_shortcut), ("desktop", self.o.desktop_shortcut)) if wanted]
         lines: list[str] = []
-        self.run_cmd([str(venv_python(self.o.target)), "-m", "doi_hunter_web.shortcuts", "--create", *kinds],
+        # --addons: "ReviewHunter for Firefox / Word ..." (one double-click installs a connector or the add-in)
+        addons = ["--addons"] if self.o.menu_shortcut else []
+        self.run_cmd([str(venv_python(self.o.target)), "-m", "doi_hunter_web.shortcuts", "--create", *kinds, *addons],
                      cwd=self.o.target, on_line=lines.append, timeout=180)
         try:
             report = json.loads("\n".join(lines[lines.index("{"):] if "{" in lines else lines))
@@ -554,7 +556,8 @@ class Installer:
         if report.get("skipped"):
             self.warnings.append(f"Shortcuts were not created ({report['skipped']}).")
             return f"skipped ({report['skipped']})"
-        self.created_shortcuts += [s["path"] for s in report.get("shortcuts", []) if s.get("exists")]
+        self.created_shortcuts += [s["path"] for s in report.get("shortcuts", []) + report.get("addons", [])
+                                   if s.get("exists")]
         if report.get("errors"):
             self.warnings.append("Some shortcuts could not be written: " + "; ".join(report["errors"]))
         if IS_WINDOWS:
@@ -762,12 +765,15 @@ def uninstall(target: Optional[Path], confirm: Callable[[str], bool], say: Calla
         return False
     stop_running_app(target)
     py = venv_python(target)
-    if py.exists():   # browser launcher registrations (registry keys / manifest files outside the folder)
-        try:
-            subprocess.run([str(py), "-m", "doi_hunter_web.native_host", "--unregister"], cwd=str(target),
-                           capture_output=True, timeout=60, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-        except (OSError, subprocess.SubprocessError):
-            pass
+    if py.exists():   # registrations outside the folder: browser launcher, reviewhunter:// links, add-on shortcuts
+        for args in (["-m", "doi_hunter_web.native_host", "--unregister"],
+                     ["-c", "from doi_hunter_web import url_scheme; url_scheme.unregister()"],
+                     ["-m", "doi_hunter_web.shortcuts", "--remove-addons"]):
+            try:
+                subprocess.run([str(py), *args], cwd=str(target), capture_output=True, timeout=60,
+                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            except (OSError, subprocess.SubprocessError):
+                pass
     for s in manifest.get("shortcuts", []):
         try:
             p = Path(s)

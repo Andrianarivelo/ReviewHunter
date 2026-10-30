@@ -13,6 +13,8 @@
  * Plain script (content scripts are not ES modules).
  */
 (() => {
+  // Firefox and Safari: promise-based `browser.*`; Chrome and Edge: `chrome.*`.
+  const chrome = globalThis.browser || globalThis.chrome;
   const CONNECTOR = "reviewhunter-connector";
   const APP = "reviewhunter-app";
 
@@ -44,13 +46,14 @@
     }
     if (msg.type === "handoff" && msg.handoff) {
       const itemId = msg.handoff.item_id;
+      const ack = (accepted, error) =>
+        window.postMessage({ source: CONNECTOR, type: "handoff-ack", itemId, accepted, error: error || "" }, location.origin);
       try {
-        chrome.runtime.sendMessage({ type: "handoff", handoff: msg.handoff }, (res) => {
-          const err = chrome.runtime.lastError ? chrome.runtime.lastError.message : res && res.__rhError;
-          window.postMessage({ source: CONNECTOR, type: "handoff-ack", itemId, accepted: !!(res && res.accepted), error: err || "" }, location.origin);
-        });
+        Promise.resolve(chrome.runtime.sendMessage({ type: "handoff", handoff: msg.handoff }))
+          .then((res) => ack(!!(res && res.accepted), res && res.__rhError))
+          .catch((e) => ack(false, (e && e.message) || String(e)));
       } catch (e) {
-        window.postMessage({ source: CONNECTOR, type: "handoff-ack", itemId, accepted: false, error: (e && e.message) || String(e) }, location.origin);
+        ack(false, (e && e.message) || String(e));
       }
     }
   });

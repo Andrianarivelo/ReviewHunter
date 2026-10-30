@@ -1,0 +1,43 @@
+version,group,kind,name,accepted,reason
+2.10,previous,genuine,localhost,True,
+2.10,previous,forged,www.google.com,True,
+2.10,previous,forged,accounts.google.com,True,
+2.10,previous,forged,github.com,True,
+2.10,previous,forged,login.microsoftonline.com,True,
+2.10,previous,forged,www.paypal.com,True,
+2.10,previous,forged,www.bankofamerica.com,True,
+2.10,previous,forged,www.apple.com,True,
+2.10,previous,forged,outlook.office.com,True,
+2.10,previous,forged,www.amazon.com,True,
+2.10,previous,forged,www.facebook.com,True,
+2.10,previous,forged,www.wikipedia.org,True,
+2.10,previous,forged,mail.proton.me,True,
+2.10,previous,forged,www.nature.com,True,
+2.10,previous,forged,www.sciencedirect.com,True,
+2.10,previous,forged,pubmed.ncbi.nlm.nih.gov,True,
+2.10,previous,forged,scholar.google.com,True,
+2.10,previous,forged,www.unige.ch,True,
+2.10,previous,forged,drive.google.com,True,
+2.10,previous,forged,addons.mozilla.org,True,
+2.10,previous,forged,update.microsoft.com,True,
+2.11,current,genuine,localhost,True,
+2.11,current,forged,www.google.com,False,permitted subtree violation
+2.11,current,forged,accounts.google.com,False,permitted subtree violation
+2.11,current,forged,github.com,False,permitted subtree violation
+2.11,current,forged,login.microsoftonline.com,False,permitted subtree violation
+2.11,current,forged,www.paypal.com,False,permitted subtree violation
+2.11,current,forged,www.bankofamerica.com,False,permitted subtree violation
+2.11,current,forged,www.apple.com,False,permitted subtree violation
+2.11,current,forged,outlook.office.com,False,permitted subtree violation
+2.11,current,forged,www.amazon.com,False,permitted subtree violation
+2.11,current,forged,www.facebook.com,False,permitted subtree violation
+2.11,current,forged,www.wikipedia.org,False,permitted subtree violation
+2.11,current,forged,mail.proton.me,False,permitted subtree violation
+2.11,current,forged,www.nature.com,False,permitted subtree violation
+2.11,current,forged,www.sciencedirect.com,False,permitted subtree violation
+2.11,current,forged,pubmed.ncbi.nlm.nih.gov,False,permitted subtree violation
+2.11,current,forged,scholar.google.com,False,permitted subtree violation
+2.11,current,forged,www.unige.ch,False,permitted subtree violation
+2.11,current,forged,drive.google.com,False,permitted subtree violation
+2.11,current,forged,addons.mozilla.org,False,permitted subtree violation
+2.11,current,forged,update.microsoft.com,False,permitted subtree violation

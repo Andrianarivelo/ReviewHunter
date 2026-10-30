@@ -1614,20 +1614,33 @@
 
         <!-- Connector -->
         <section x-show="settingsTab==='connector'" class="space-y-4 text-sm">
-          <p class="text-ink-600 dark:text-ink-300 leading-relaxed">The <b>ReviewHunter Connector</b> saves the article, book or web page you are viewing in Chrome, with its PDF, straight into your library. It downloads PDFs <b>inside your browser</b>, so papers you can open through your institution or a publisher account are captured too (the server alone cannot pass publisher bot protection).</p>
+          <p class="text-ink-600 dark:text-ink-300 leading-relaxed">The <b>ReviewHunter Connector</b> saves the article, book or web page you are viewing in Chrome, Edge, Brave, Firefox or Safari, with its PDF, straight into your library. It downloads PDFs <b>inside your browser</b>, so papers you can open through your institution or a publisher account are captured too (the server alone cannot pass publisher bot protection).</p>
           <div class="card p-4 space-y-2">
-            <div class="font-semibold">Install (one time, about 1 minute)</div>
-            <ol class="list-decimal pl-5 space-y-1.5 text-ink-600 dark:text-ink-300">
-              <li>Open <code class="kbd">chrome://extensions</code> in Chrome (type it in the address bar).</li>
-              <li>Turn on <b>Developer mode</b> (top right).</li>
-              <li>Click <b>Load unpacked</b> and select the folder below.</li>
-              <li>Pin the ReviewHunter icon (puzzle icon, then the pin). Shortcut: <kbd class="kbd">Ctrl+Shift+Y</kbd>.</li>
-            </ol>
-            <div class="flex items-center gap-2 pt-1">
-              <code class="kbd truncate" x-text="system ? system.extension_dir : ''"></code>
-              <button @click="copyText(system.extension_dir, 'Folder path copied')" class="action-secondary h-7 px-2.5 text-xs">Copy path</button>
-              <button @click="openPath(system.extension_dir)" class="action-secondary h-7 px-2.5 text-xs">Open folder</button>
+            <div class="font-semibold">Add the connector to a browser</div>
+            <div class="flex flex-wrap gap-2">
+              <template x-for="b in integrationBrowsers()" :key="b.key">
+                <button @click="installIntegration(b.key)" :disabled="!!integrationBusy || !b.present"
+                        :class="b.present ? 'action-primary' : 'action-secondary opacity-60'" class="h-8 px-3 text-xs"
+                        :title="b.present ? `Install the connector in ${b.label}` : `${b.label} is not installed on this computer`"
+                        x-text="integrationBusy === b.key ? 'Opening...' : `Add to ${b.label}`"></button>
+              </template>
             </div>
+            <p x-show="integrationMessage && integrationFor !== 'word'" class="text-xs text-ink-600 dark:text-ink-300 leading-relaxed" x-text="integrationMessage"></p>
+            <p class="text-[11px] text-ink-500 leading-relaxed">The same buttons exist as Start menu shortcuts (<b>ReviewHunter for Firefox</b>, <b>ReviewHunter for Word</b>). Chrome, Edge and Brave only accept extensions from their stores or in Developer mode: the button opens the extensions page and the folder, with the path copied. Firefox installs the Mozilla-signed connector of the latest release in one click (or loads it until Firefox restarts when no signed build exists). Safari (macOS) installs a small connector app; tick it in Safari's Extensions settings.</p>
+            <details class="text-xs text-ink-600 dark:text-ink-300">
+              <summary class="cursor-pointer text-ink-500">Manual install in Chrome, Edge or Brave</summary>
+              <ol class="list-decimal pl-5 space-y-1.5 pt-1.5">
+                <li>Open <code class="kbd">chrome://extensions</code> (or <code class="kbd">edge://extensions</code>, <code class="kbd">brave://extensions</code>).</li>
+                <li>Turn on <b>Developer mode</b>.</li>
+                <li>Click <b>Load unpacked</b> and select the folder below.</li>
+                <li>Pin the ReviewHunter icon (puzzle icon, then the pin). Shortcut: <kbd class="kbd">Ctrl+Shift+Y</kbd>.</li>
+              </ol>
+              <div class="flex items-center gap-2 pt-1.5">
+                <code class="kbd truncate" x-text="system ? system.extension_dir : ''"></code>
+                <button @click="copyText(system.extension_dir, 'Folder path copied')" class="action-secondary h-7 px-2.5 text-xs">Copy path</button>
+                <button @click="openPath(system.extension_dir)" class="action-secondary h-7 px-2.5 text-xs">Open folder</button>
+              </div>
+            </details>
           </div>
           <div class="card p-3 flex items-center gap-2 text-xs">
             <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="connector.present ? 'bg-emerald-500' : 'bg-ink-300'"></span>
@@ -1657,17 +1670,20 @@
             <div class="font-semibold">Status</div>
             <div class="grid grid-cols-[18px_1fr] gap-y-1 text-xs">
               <span :class="system?.word_addin.certificate ? 'text-emerald-600' : 'text-ink-400'" x-text="system?.word_addin.certificate ? '\u2713' : '\u2715'"></span><span>Local HTTPS certificate created</span>
-              <span :class="system?.word_addin.ca_trusted ? 'text-emerald-600' : 'text-ink-400'" x-text="system?.word_addin.ca_trusted ? '\u2713' : '\u2715'"></span><span>Certificate trusted by Windows (current user)</span>
+              <span :class="system?.word_addin.ca_trusted ? 'text-emerald-600' : 'text-ink-400'" x-text="system?.word_addin.ca_trusted ? '\u2713' : '\u2715'"></span><span x-text="`Certificate trusted by ${integrations?.platform === 'macos' ? 'the macOS keychain' : 'Windows (current user)'}`"></span>
               <span :class="system?.word_addin.registered ? 'text-emerald-600' : 'text-ink-400'" x-text="system?.word_addin.registered ? '\u2713' : '\u2715'"></span><span>Add-in registered in Word</span>
             </div>
-            <div class="flex gap-2 pt-2">
-              <button @click="setupWordAddin()" class="action-primary h-8 px-3 text-xs">Set up Word add-in...</button>
+            <div class="flex flex-wrap gap-2 pt-2">
+              <button @click="installIntegration('word')" :disabled="!!integrationBusy || integrations?.platform === 'linux'" class="action-primary h-8 px-3 text-xs"
+                      x-text="integrationBusy === 'word' ? 'Opening...' : (system?.word_addin.ca_trusted && system?.word_addin.registered ? 'Repair Word add-in' : 'Add to Word')"></button>
+              <button x-show="integrations?.platform === 'windows'" @click="setupWordAddin()" class="action-secondary h-8 px-3 text-xs" title="A console window explains each step">Detailed setup...</button>
               <button @click="loadSystem()" class="action-secondary h-8 px-3 text-xs">Refresh status</button>
             </div>
+            <p x-show="integrationMessage && integrationFor === 'word'" class="text-xs text-ink-600 dark:text-ink-300" x-text="integrationMessage"></p>
           </div>
           <div class="text-xs text-ink-500 leading-relaxed space-y-1">
-            <p>Setup opens a PowerShell window that explains and performs two steps: trusting ReviewHunter's local certificate (Windows asks you to confirm) and registering the add-in for Word. Then restart Word: <b>References</b> tab, <b>ReviewHunter</b>.</p>
-            <p>Keep ReviewHunter running while you write. Documents keep a copy of each cited reference, so they still refresh offline.</p>
+            <p><b>Add to Word</b> (also the Start menu shortcut <b>ReviewHunter for Word</b>) needs one answer from you: Windows asks whether to trust the <i>ReviewHunter Local CA</i> certificate; click <b>Yes</b>. That certificate can only vouch for <code class="kbd">localhost</code> on this computer (X.509 name constraints), so it cannot be misused for real websites. On a Mac, macOS asks for your password instead. Then restart Word: <b>References</b> (Windows) or <b>Home</b> (Mac) &gt; <b>ReviewHunter</b>.</p>
+            <p>In the pane: search your library, <b>Cite</b> inserts a live citation, <b>Bibliography</b> inserts the reference list, and the style menu switches every citation in the document (25 bundled styles such as APA, Nature, Cell, IEEE, Chicago, Harvard and NLM/Vancouver, plus the styles you add in Citations). Keep ReviewHunter running while you write; documents keep a copy of each cited reference, so they still refresh offline.</p>
           </div>
         </section>
 

@@ -10,6 +10,9 @@ import * as api from "../api.js";
 import { getSettings } from "../settings.js";
 import { yearOf } from "../extract/normalize.js";
 
+
+// Firefox and Safari: their promise-based `browser.*` API; Chrome and Edge: `chrome.*` (also promises in MV3).
+const chrome = globalThis.browser ?? globalThis.chrome;
 /** Short labels for Zotero item types. */
 const TYPE_LABELS = {
   journalArticle: "Journal article", book: "Book", bookSection: "Book section", conferencePaper: "Conference paper",
