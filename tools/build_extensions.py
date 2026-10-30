@@ -88,10 +88,38 @@ def build(out: Path) -> dict:
     return results
 
 
+SAFARI_APP_ID = "org.reviewhunter.connector"   # the extension inside is SAFARI_APP_ID + ".Extension"
+
+
+def align_xcode_bundle_ids(pbxproj: Path, app_id: str = SAFARI_APP_ID) -> dict:
+    """Give the wrapper app the bundle ID its extension is prefixed with.
+
+    safari-web-extension-converter names the extension "<--bundle-identifier>.Extension" but derives the app's
+    ID from the app name (org.reviewhunter.ReviewHunter-Connector), and Xcode refuses to embed an extension
+    whose ID does not start with the app's ("Embedded binary's bundle identifier is not prefixed...").
+    """
+    import re
+
+    text = pbxproj.read_text(encoding="utf-8")
+    pattern = re.compile(r'(PRODUCT_BUNDLE_IDENTIFIER = )"?([^";]+)"?;')
+    before = sorted({m.group(2) for m in pattern.finditer(text)})
+    text = pattern.sub(lambda m: m.group(0) if m.group(2).endswith(".Extension") else f"{m.group(1)}{app_id};", text)
+    pbxproj.write_text(text, encoding="utf-8")
+    after = sorted({m.group(2) for m in pattern.finditer(text)})
+    ok = all(i == app_id or i.startswith(app_id + ".") for i in after)
+    return {"before": before, "after": after, "ok": ok}
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--out", type=Path, default=ROOT / "dist" / "connectors")
+    p.add_argument("--align-xcode", type=Path, metavar="PROJECT.pbxproj",
+                   help="after safari-web-extension-converter: align the app and extension bundle IDs")
     args = p.parse_args(argv)
+    if args.align_xcode:
+        result = align_xcode_bundle_ids(args.align_xcode)
+        print(json.dumps(result, indent=2))
+        return 0 if result["ok"] else 1
     print(json.dumps(build(args.out), indent=2))
     return 0
 

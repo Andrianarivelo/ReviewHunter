@@ -100,17 +100,22 @@ jobs:
             --no-open --no-prompt --force
       - name: Build (ad-hoc signature)
         run: |
+          set -o pipefail
           project="$(find build/safari -name '*.xcodeproj' -maxdepth 3 | head -1)"
           echo "project: $project"
+          # The converter derives the app ID from its name but the extension ID from --bundle-identifier.
+          python3 tools/build_extensions.py --align-xcode "$project/project.pbxproj"
           xcodebuild -project "$project" -alltargets -configuration Release SYMROOT="$PWD/build/sym" \
             CODE_SIGN_IDENTITY="-" CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" CODE_SIGNING_REQUIRED=NO \
-            ENABLE_HARDENED_RUNTIME=NO | tail -n 30
+            ENABLE_HARDENED_RUNTIME=NO 2>&1 | tail -n 40
       - name: Check and package the app
         run: |
           app="$(find build/sym/Release -maxdepth 1 -name '*.app' | head -1)"
           test -n "$app"
           appex="$(find "$app/Contents/PlugIns" -name '*.appex' | head -1)"
           test -f "$appex/Contents/Resources/manifest.json"
+          test "$(plutil -extract CFBundleIdentifier raw "$app/Contents/Info.plist")" = "org.reviewhunter.connector"
+          test "$(plutil -extract CFBundleIdentifier raw "$appex/Contents/Info.plist")" = "org.reviewhunter.connector.Extension"
           python3 -c "import json,sys; m=json.load(open(sys.argv[1])); assert 'nativeMessaging' not in m['permissions']; print('manifest', m['version'])" "$appex/Contents/Resources/manifest.json"
           codesign --verify --deep --verbose=2 "$app"
           mkdir -p dist/release

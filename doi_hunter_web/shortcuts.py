@@ -509,6 +509,25 @@ def ensure_addons(root: Path = ROOT, *, create: bool = False, places: Optional[d
             "ok": not errors and all(s["linked"] for s in final if s["exists"])}
 
 
+def heal_addons(root: Path = ROOT, places: Optional[dict[str, Path]] = None) -> dict:
+    """At every launch: repair existing add-on shortcuts, and create each one the first time its browser
+    (or Word) is seen, including installs older than 2.11 and browsers installed later. A shortcut the
+    user deleted stays deleted (settings "addon_shortcuts_offered")."""
+    from . import config
+
+    report = ensure_addons(root, places=places)
+    if report.get("skipped"):
+        return report
+    offered = set(config.get_settings().get("addon_shortcuts_offered") or [])
+    new = [n for n in addon_names() if n not in offered]
+    if new:
+        created = ensure_addons(root, create=True, places=places, names=new)
+        report["created"] = created.get("created", [])
+        if created.get("ok"):
+            config.update_settings({"addon_shortcuts_offered": sorted(offered | set(new))})
+    return report
+
+
 def remove_addons(places: Optional[dict[str, Path]] = None) -> list[str]:
     """Delete every add-on shortcut and their folder (uninstaller)."""
     menu = (places or default_places())["menu"]

@@ -65,6 +65,22 @@ def test_firefox_without_signed_build_loads_a_temporary_copy(sandbox, monkeypatc
     assert "until Firefox restarts" in r["message"]                      # honest about the limit
 
 
+def test_safari_project_bundle_ids_are_aligned(tmp_path):
+    """Converter output (seen in CI): app ID from the app name, extension ID from --bundle-identifier."""
+    import sys
+
+    sys.path.insert(0, str(ROOT / "tools"))
+    import build_extensions
+
+    pbx = tmp_path / "project.pbxproj"
+    pbx.write_text('A = { PRODUCT_BUNDLE_IDENTIFIER = "org.reviewhunter.ReviewHunter-Connector"; };\n'
+                   "B = { PRODUCT_BUNDLE_IDENTIFIER = org.reviewhunter.connector.Extension; };\n"
+                   'C = { PRODUCT_BUNDLE_IDENTIFIER = "org.reviewhunter.ReviewHunter-Connector"; };\n', encoding="utf-8")
+    r = build_extensions.align_xcode_bundle_ids(pbx)
+    assert r["ok"] and r["after"] == ["org.reviewhunter.connector", "org.reviewhunter.connector.Extension"]
+    assert "ReviewHunter-Connector" not in pbx.read_text(encoding="utf-8")
+
+
 def test_chromium_opens_extensions_page_and_folder(sandbox):
     r = ig.install_chromium("chrome")
     assert r["ok"] and ("chrome://extensions/", sandbox["exe"]) in sandbox["opened"]
@@ -118,6 +134,20 @@ def test_linux_addon_entries_created_repaired_removed(places, monkeypatch):
     report = sc.ensure_addons(ROOT, places=places, names=["firefox", "chrome"])
     assert report["repaired"] == [str(entry)] and report["created"] == []  # repaired; deleted stays deleted
     assert sorted(sc.remove_addons(places)) == [str(entry)]
+
+
+def test_launch_offers_each_addon_once_even_for_browsers_installed_later(library, places, monkeypatch):
+    _as(monkeypatch, "linux")
+    found = ["chrome"]
+    monkeypatch.setattr(sc, "addon_names", lambda: list(found))
+    assert len(sc.heal_addons(ROOT, places)["created"]) == 1               # first launch: Chrome
+    chrome = places["menu"] / "reviewhunter-chrome.desktop"
+    chrome.unlink()                                                         # the user deletes it
+    found.append("firefox")                                                 # and installs Firefox later
+    report = sc.heal_addons(ROOT, places)
+    assert report["created"] == [str(places["menu"] / "reviewhunter-firefox.desktop")]
+    assert not chrome.exists()                                              # deleted stays deleted
+    assert sc.heal_addons(ROOT, places)["created"] == []                    # nothing new: nothing created
 
 
 def test_mac_addon_bundles_do_not_claim_links(places, monkeypatch):

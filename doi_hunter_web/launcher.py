@@ -293,14 +293,9 @@ def _heal_shortcuts() -> None:
     except Exception as e:   # a shortcut problem must never prevent the app from starting
         print(f"shortcut check skipped: {e}", file=sys.stderr)
     try:
-        # "ReviewHunter for Firefox / Word ...": created once (installs older than 2.11 get them at their
-        # first launch), afterwards only repaired, so ones the user deleted stay deleted.
-        from . import config, shortcuts
+        from . import shortcuts
 
-        first = not config.get_settings().get("addon_shortcuts_created")
-        report = shortcuts.ensure_addons(create=first)
-        if first and report.get("ok") and not report.get("skipped"):
-            config.update_settings({"addon_shortcuts_created": True})
+        shortcuts.heal_addons()   # "ReviewHunter for Firefox / Word ...": new ones once, existing ones repaired
     except Exception as e:
         print(f"add-on shortcut check skipped: {e}", file=sys.stderr)
     try:
