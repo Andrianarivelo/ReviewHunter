@@ -41,7 +41,7 @@ REQUIRED_MODULES = ("fastapi", "uvicorn", "requests", "bs4", "pydantic", "libgen
 # Files and folders never copied into the install folder (dev artefacts, secrets, local data).
 COPY_EXCLUDE = {".git", ".venv", "venv", "secret", "build", "dist", "downloads", "__pycache__", ".pytest_cache",
                 "certs", "PROJECT_MEMORY.md", "error.log", "failed_downloads.txt", "paper_titles.txt",
-                ".claude", "shots", "node_modules"}
+                ".claude", "shots", "node_modules", "native_host"}
 COPY_EXCLUDE_SUFFIXES = (".egg-info", ".pyc", ".log", ".pem")
 # Program sub-folders replaced on upgrade (so files deleted upstream do not linger). .venv is kept.
 CODE_DIRS = ("doi_hunter_web", "doi_hunter", "browser_extension", "word_addin", "scripts", "tools", "installer")
@@ -523,6 +523,19 @@ class Installer:
                 '".venv\\Scripts\\python.exe" "installer\\reviewhunter_installer.py" --setup-chrome --target "%~dp0."\n'
                 'if errorlevel 1 pause\n', encoding="utf-8")
         self.log(f"Chrome connector {self.extension['version']} prepared in {self.extension['folder']}")
+        # Let the extension start ReviewHunter (Chrome native messaging helper, per user, no admin).
+        lines: list[str] = []
+        py = venv_python(self.o.target)
+        try:
+            if not py.exists():
+                raise InstallError("the program's Python environment is missing")
+            self.run_cmd([str(py), "-m", "doi_hunter_web.native_host", "--register"],
+                         cwd=self.o.target, on_line=lines.append, timeout=120)
+            report = json.loads("\n".join(lines[lines.index("{"):] if "{" in lines else lines) or "{}")
+            self.extension["can_start_app"] = bool(report.get("ok"))
+        except (InstallError, OSError, ValueError) as e:   # never fails the install: ReviewHunter repairs it at launch
+            self.extension["can_start_app"] = False
+            self.warnings.append(f"The extension cannot start ReviewHunter yet ({e}); it is set up at the first launch.")
         return f"v{self.extension['version']} ready; confirm in Chrome"
 
     def create_shortcuts(self) -> str:
@@ -748,6 +761,13 @@ def uninstall(target: Optional[Path], confirm: Callable[[str], bool], say: Calla
                    f"Your library (database, PDFs, settings) in\n{library}\nis kept."):
         return False
     stop_running_app(target)
+    py = venv_python(target)
+    if py.exists():   # browser launcher registrations (registry keys / manifest files outside the folder)
+        try:
+            subprocess.run([str(py), "-m", "doi_hunter_web.native_host", "--unregister"], cwd=str(target),
+                           capture_output=True, timeout=60, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except (OSError, subprocess.SubprocessError):
+            pass
     for s in manifest.get("shortcuts", []):
         try:
             p = Path(s)

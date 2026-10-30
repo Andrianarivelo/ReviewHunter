@@ -13,7 +13,7 @@
 <body>
   <!--
     Visual preview of the real popup (src/popup/popup.html + popup.js) with a mocked chrome.* API.
-    Usage: test/popup_preview.html?s=single,multi,pdf,offline,progress  (served by test/serve.py)
+    Usage: test/popup_preview.html?s=single,multi,pdf,offline,starting,progress  (served by test/serve.py)
     Extra scenarios: scihub-wall, saved-pdf, progress-watch
   -->
   <script type="module">
@@ -55,7 +55,10 @@
         window.chrome = {
           runtime: {
             sendMessage: async (msg) => {
-              if (msg.type === "status") return M.scenario === "offline" ? { online: false, error: "not reachable" } : { online: true, info: { app: "ReviewHunter", version: "2.0.0", library: { items: 128 } } };
+              const down = M.scenario === "offline" || M.scenario === "starting";
+              if (msg.type === "status") return down ? { online: false, error: "not reachable" } : { online: true, info: { app: "ReviewHunter", version: "2.0.0", library: { items: 128 } } };
+              // starting: the native helper is still starting ReviewHunter; offline: the helper is not registered yet.
+              if (msg.type === "startApp") return M.scenario === "starting" ? new Promise(() => {}) : { online: false, missing: true, error: "Specified native messaging host not found." };
               if (msg.type === "detect") return M.detection;
               if (msg.type === "pending") return M.scenario === "pdf" ? [{ itemId: 9, title: "Association of elevated ambient temperature with opioid overdose deaths", score: 2, at: Date.now() }, { itemId: 4, title: "Another paper waiting for its PDF", score: 0, at: Date.now() }] : [];
               return {};

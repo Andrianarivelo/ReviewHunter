@@ -1,0 +1,11 @@
+metric,previous_median,current_median,n_pairs,n_changed,sign_test_p
+sidebar_px,13.0,12.5,24,24,1.1920928955078125e-07
+list_px,13.0,12.5,24,24,1.1920928955078125e-07
+field_px,13.0,12.5,24,24,1.1920928955078125e-07
+title_px,19.2,17.0,24,24,1.1920928955078125e-07
+fields_shown,21.0,8.0,24,24,1.1920928955078125e-07
+citation_visible,0.0,1.0,24,24,1.1920928955078125e-07
+collections_visible,0.0,1.0,24,16,3.0517578125e-05
+rows_per_screen,22.0,24.0,24,24,1.1920928955078125e-07
+launch_cold_seconds,not possible,5.872,5,,
+launch_warm_seconds,not possible,0.221,5,,

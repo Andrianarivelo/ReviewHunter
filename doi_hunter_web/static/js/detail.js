@@ -53,6 +53,29 @@ window.detailPart = function detailPart() {
       const t = this.typeById[item?.item_type];
       return t ? t.fields.filter(f => f.id !== 'title' && f.id !== 'abstractNote') : [];
     },
+    /**
+     * Fields shown in the Info tab: everything that has a value, plus the few that are worth filling in
+     * (publication, date, DOI). The other empty fields (an article type has ~20) sit behind
+     * "Show N empty fields"; the choice is remembered in this browser.
+     */
+    showEmptyFields: JSON.parse(localStorage.getItem('rh.showEmptyFields') || 'false'),
+    essentialFields: ['publicationTitle', 'date', 'DOI'],
+    hasFieldValue(item, fid) {
+      const v = item?.field_values?.[fid];
+      return v !== undefined && v !== null && String(v).trim() !== '';
+    },
+    visibleFields(item) {
+      const all = this.fieldsFor(item);
+      if (this.showEmptyFields) return all;
+      return all.filter(f => this.hasFieldValue(item, f.id) || this.essentialFields.includes(f.id));
+    },
+    hiddenFieldCount(item) {
+      return this.fieldsFor(item).length - this.visibleFields(item).length;
+    },
+    toggleEmptyFields() {
+      this.showEmptyFields = !this.showEmptyFields;
+      localStorage.setItem('rh.showEmptyFields', JSON.stringify(this.showEmptyFields));
+    },
     creatorTypesFor(item) {
       const t = this.typeById[item?.item_type];
       return t ? t.creators : [{ id: 'author', label: 'Author' }];

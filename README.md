@@ -11,6 +11,27 @@ collect papers and books, find legal PDFs, organise them in nested collections a
 PDFs, write notes, and cite in Word or LaTeX with 10,000+ citation styles. Everything runs on your computer
 (SQLite + your files); Google Drive is optional for storage and backups.
 
+### Start and open ReviewHunter from Chrome; refreshed interface (2.10)
+
+**The Chrome connector can start ReviewHunter.** Click the toolbar button while ReviewHunter is closed:
+it starts in the background and the save form appears (a few seconds the first time). After saving,
+**Open in ReviewHunter** shows that paper in the *same* browser window: an app tab already in the
+window is reused (no reload), one from another window is moved here, otherwise a tab is opened.
+The library button in the popup header, or right-click the toolbar button > **Open ReviewHunter
+library**, opens the library the same way.
+
+How: browsers do not let extensions start programs, except a helper registered by the program itself
+(Chrome *native messaging*). ReviewHunter registers its helper for Chrome, Edge, Brave and Chromium (per
+user, no administrator rights) when it is installed and at every launch, and only its own extension may
+use it (it recognises the connector by its ID). After updating from an older connector, click
+**Reload** on its card in `chrome://extensions`, and open ReviewHunter once from its shortcut so the
+helper is registered.
+
+**Refreshed interface.** New logo, smaller and calmer text, a lighter sidebar and list, a pill search
+box, and an item pane that shows the fields that have a value (plus publication, date and DOI): the
+others are one click away (*Show N empty fields*, remembered). A new library opens on a welcome page
+with the three ways to start. Links of the form `http://127.0.0.1:8765/#item=<id>` open a paper.
+
 ### Zotero connector and shared libraries (2.8)
 
 **Zotero connector** (Settings > Zotero). ReviewHunter finds Zotero by itself (for example

@@ -204,3 +204,13 @@ main { padding: 12px 14px 4px; }
 .result.err { background: var(--err-soft); border-color: rgba(220, 38, 38, 0.25); }
 .result.err .r-icon { background: var(--err); }
 @keyframes pop-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+/* "Starting ReviewHunter..." */
+.spinner {
+  width: 28px; height: 28px; margin: 6px auto 12px; border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--brand) 20%, transparent);
+  border-top-color: var(--brand);
+  animation: rh-spin .8s linear infinite;
+}
+@keyframes rh-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }

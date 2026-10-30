@@ -164,6 +164,8 @@ DEFAULT_SETTINGS: dict = {
     "member_name": "",
     "member_email": "",
     "shared_sync_interval_seconds": 60,
+    # ---- Browser launcher (native_host.py): connector IDs reported by the app page (other folders)
+    "connector_extension_ids": [],
 }
 
 

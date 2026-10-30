@@ -40,6 +40,7 @@ IS_MAC = sys.platform == "darwin"
 LAUNCH_ARGS = ["-m", "doi_hunter_web.launcher"]
 BUNDLE_ID = "org.reviewhunter.app"
 ICON_PNG = Path("browser_extension") / "icons" / "icon-128.png"
+ICON_PNG_LARGE = Path("doi_hunter_web") / "static" / "icons" / "icon-512.png"   # sharp macOS app icon
 
 
 # ======================================================================================
@@ -337,8 +338,9 @@ def _write_mac_bundle(bundle: Path, root: Path) -> None:
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(text, encoding="utf-8", newline="\n")
     (tmp / "Contents" / "MacOS" / APP_NAME).chmod(0o755)
-    if (root / ICON_PNG).exists():
-        write_icns(root / ICON_PNG, tmp / "Contents" / "Resources" / f"{APP_NAME}.icns")
+    icon_src = next((root / p for p in (ICON_PNG_LARGE, ICON_PNG) if (root / p).exists()), None)
+    if icon_src:
+        write_icns(icon_src, tmp / "Contents" / "Resources" / f"{APP_NAME}.icns")
     if bundle.is_symlink():
         bundle.unlink()
     shutil.rmtree(bundle, ignore_errors=True)
@@ -396,6 +398,12 @@ def ensure(root: Path = ROOT, *, create: Iterable[str] = (), places: Optional[di
     if reason:
         return {"skipped": reason, "repaired": [], "created": [], "shortcuts": []}
     places = places or default_places()
+    if IS_WINDOWS:
+        # Linked .lnk files are not rewritten, but they show installer/reviewhunter.ico: keep that file in
+        # step with the logo (new logo, deleted file) so every existing shortcut shows the current icon.
+        png, ico = root / ICON_PNG, root / "installer" / "reviewhunter.ico"
+        if png.exists() and (not ico.exists() or ico.stat().st_mtime < png.stat().st_mtime):
+            write_ico(png, ico)
     current = status(root, places)
     create = set(create)
     if keep_one and not any(s["exists"] for s in current):

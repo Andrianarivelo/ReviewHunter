@@ -387,3 +387,115 @@ code { font: 11.5px ui-monospace, 'Cascadia Code', Consolas, monospace; }
   .bulk-result-actions { flex-direction: row; flex-wrap: wrap; align-items: center; text-align: left; }
   .bulk-source-tabs button { padding: 9px 6px; font-size: 12px; }
 }
+
+/* ================================================================== 2.10 visual refresh
+   Smaller, calmer type; lighter chrome; one accent. Everything here overrides the rules above, so the
+   previous look is one deletion away. Type scale: 15 px root (Tailwind rem sizes shrink ~6%), UI text
+   12-12.5 px, small-caps labels 10-10.5 px, item title 17 px serif. */
+html { font-size: 15px; }
+body { font-feature-settings: "cv11", "ss01"; letter-spacing: -.003em; background: #f5f6f8; }
+.dark body { background: #090b12; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(120, 130, 150, .22); border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: rgba(120, 130, 150, .42); background-clip: padding-box; }
+:focus-visible { outline: 2px solid rgba(2, 132, 199, .55); outline-offset: 1px; }
+
+/* ---- top bar */
+.topbar { height: 2.95rem; background: rgba(255, 255, 255, .78); border-bottom-color: rgba(221, 225, 234, .7);
+  backdrop-filter: saturate(1.4) blur(16px); }
+.dark .topbar { background: rgba(12, 14, 22, .8); border-bottom-color: rgba(39, 43, 60, .8); }
+.brand-logo { width: 26px; height: 26px; border-radius: 7px; box-shadow: 0 2px 8px rgba(11, 139, 209, .28); }
+.brand-word { font-size: 14.5px; font-weight: 650; letter-spacing: -.02em; color: rgb(15, 17, 28); }
+.brand-word span { color: #0b8bd1; }
+.dark .brand-word { color: white; }
+.dark .brand-word span { color: #5ab4f0; }
+.tb-btn { height: 1.95rem; font-size: 12px; font-weight: 550; color: rgb(80, 86, 106); border-radius: .55rem; }
+.search-input { height: 2rem; border-radius: 999px; background: rgba(238, 240, 244, .7); border-color: transparent;
+  box-shadow: none; transition: background .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.search-input:hover { background: rgba(232, 235, 240, .95); }
+.search-input:focus { background: white; border-color: rgba(2, 132, 199, .45); box-shadow: 0 0 0 4px rgba(2, 132, 199, .1); }
+.dark .search-input { background: rgba(30, 33, 48, .85); border-color: transparent; }
+.dark .search-input:focus { background: rgb(20, 23, 35); border-color: rgba(56, 189, 248, .45); }
+.search-kbd { position: absolute; right: 9.4rem; top: .45rem; font: 600 10px/1 Inter, "Segoe UI", sans-serif;
+  color: rgb(139, 148, 169); padding: .2rem .35rem; border-radius: .3rem; border: 1px solid rgba(188, 195, 210, .6);
+  background: rgba(255, 255, 255, .6); pointer-events: none; }
+.dark .search-kbd { border-color: rgba(63, 68, 88, .9); background: transparent; }
+.topbar select { border-radius: 999px !important; }
+
+/* ---- sidebar */
+.sidebar { background: rgba(240, 242, 246, .55); }
+.dark .sidebar { background: rgba(14, 16, 25, .6); }
+.sidebar .nav-row { min-height: 1.8rem; padding: .25rem .5rem; font-size: 12.5px; border-radius: .5rem; }
+.nav-idle { color: rgb(55, 60, 78); }
+.nav-active { color: rgb(3, 105, 161); background: white; font-weight: 550;
+  box-shadow: 0 1px 2px rgba(15, 17, 28, .06), 0 0 0 1px rgba(2, 132, 199, .12); }
+.dark .nav-active { background: rgba(14, 165, 233, .14); box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .16); }
+.rail-label { font-size: 10px; letter-spacing: .08em; }
+.nav-count { font-size: 10.5px; }
+
+/* ---- list */
+.pane-head { min-height: 2.5rem; background: rgba(255, 255, 255, .9); }
+.items-head { height: 1.75rem; background: rgba(250, 251, 252, .97); font-size: 10.5px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em; color: rgb(139, 148, 169); }
+.items-body { padding: 0 .35rem .5rem; }
+.item-row { min-height: 1.9rem; font-size: 12.5px; margin: 0; border-radius: .45rem;
+  border-bottom: 1px solid rgba(238, 240, 244, .9); }
+.dark .item-row { border-bottom-color: rgba(30, 33, 48, .7); }
+.item-row:nth-child(even), .dark .item-row:nth-child(even) { background: transparent; }
+.item-row:hover { background: rgba(240, 242, 246, .9); }
+.dark .item-row:hover { background: rgba(30, 33, 48, .6); }
+.item-row.selected { background: rgba(2, 132, 199, .09) !important; box-shadow: inset 2.5px 0 0 #0284c7;
+  border-bottom-color: transparent; }
+.dark .item-row.selected { background: rgba(56, 189, 248, .14) !important; box-shadow: inset 2.5px 0 0 #38bdf8; }
+.type-glyph { width: 1.4rem; height: 1.05rem; border-radius: .3rem; font-size: 7.5px; letter-spacing: .02em; }
+/* Dark mode: tinted labels instead of light boxes dimmed by a filter (glaring on dark rows). */
+.dark .type-glyph { filter: none; color: rgb(125, 211, 252); background: rgba(56, 189, 248, .14); }
+.dark .type-glyph[data-type="book"], .dark .type-glyph[data-type="chapter"] { color: rgb(252, 211, 77); background: rgba(245, 158, 11, .14); }
+.dark .type-glyph[data-type="conference"], .dark .type-glyph[data-type="preprint"] { color: rgb(196, 181, 253); background: rgba(139, 92, 246, .16); }
+.dark .type-glyph[data-type="web"], .dark .type-glyph[data-type="data"], .dark .type-glyph[data-type="code"] { color: rgb(110, 231, 183); background: rgba(16, 185, 129, .14); }
+@keyframes rh-row-flash { 0% { background: rgba(2, 132, 199, .32); } 100% { background: rgba(2, 132, 199, .09); } }
+.item-row.row-flash { animation: rh-row-flash 1.4s ease-out; }
+
+/* ---- detail pane */
+.detail-pane { background: rgba(255, 255, 255, .72); }
+.dark .detail-pane { background: rgba(12, 14, 22, .55); }
+.type-select { height: 1.45rem; border-radius: 999px; padding: 0 .55rem; font-size: 10px; letter-spacing: .06em; }
+.title-input { font-size: 17px; line-height: 1.38; font-weight: 600; letter-spacing: -.005em; }
+.tabs { gap: .2rem; margin: .35rem 0 -.55rem; }
+.tab { font-size: 12px; font-weight: 550; padding: .4rem .6rem; }
+.field-grid { grid-template-columns: 6.6rem minmax(0, 1fr); row-gap: 0; }
+.field-label, .field-label-select { font-size: 11px; color: rgb(150, 157, 176); }
+.field-input { font-size: 12.5px; height: 1.65rem; }
+.fields-toggle { margin: .15rem 0 0 7.1rem; font-size: 11px; font-weight: 550; color: #0284c7; }
+.fields-toggle:hover { text-decoration: underline; }
+.dark .fields-toggle { color: #5ab4f0; }
+.card { border-radius: .8rem; border-color: rgba(221, 225, 234, .75); background: rgba(255, 255, 255, .85); }
+.dark .card { border-color: rgba(39, 43, 60, .8); }
+
+/* ---- buttons */
+.action-primary { background: #0284c7; box-shadow: 0 1px 2px rgba(2, 132, 199, .25), inset 0 1px 0 rgba(255, 255, 255, .12); }
+.action-primary:hover { background: #0373ae; }
+.action-primary, .action-secondary { border-radius: .55rem; font-weight: 600; }
+
+/* ---- first-run welcome */
+.welcome { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 2.5rem 1.5rem; text-align: center; }
+.welcome-logo { border-radius: 14px; box-shadow: 0 10px 30px rgba(11, 139, 209, .3); }
+.welcome h2 { margin-top: 1rem; font-size: 20px; font-weight: 700; letter-spacing: -.02em; }
+.welcome h2 span { color: #0b8bd1; }
+.dark .welcome h2 span { color: #5ab4f0; }
+.welcome p { margin-top: .4rem; max-width: 30rem; font-size: 12.5px; line-height: 1.55; color: rgb(110, 117, 138); }
+.welcome-actions { margin-top: 1.4rem; display: grid; grid-template-columns: repeat(3, minmax(0, 11.5rem)); gap: .7rem; }
+@media (max-width: 1250px) { .welcome-actions { grid-template-columns: minmax(0, 15rem); } }
+.welcome-card { display: flex; flex-direction: column; align-items: flex-start; gap: .25rem; padding: .9rem .95rem;
+  text-align: left; border-radius: .8rem; background: white; border: 1px solid rgba(221, 225, 234, .9);
+  box-shadow: 0 1px 2px rgba(15, 17, 28, .04); transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.welcome-card:hover { transform: translateY(-1px); border-color: rgba(2, 132, 199, .4); box-shadow: 0 8px 22px rgba(15, 17, 28, .08); }
+.dark .welcome-card { background: rgba(20, 23, 35, .9); border-color: rgba(39, 43, 60, .9); }
+.welcome-card svg { width: 1.35rem; height: 1.35rem; margin-bottom: .25rem; fill: none; stroke: #0284c7; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round; }
+.welcome-card b { font-size: 12.5px; font-weight: 650; }
+.welcome-card span { font-size: 11.5px; line-height: 1.4; color: rgb(120, 127, 148); }
+.welcome-hint { font-size: 11px !important; margin-top: 1.1rem !important; }
+@media (prefers-reduced-motion: reduce) { .welcome-card, .item-row.row-flash { transition: none; animation: none; } }

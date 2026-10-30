@@ -285,12 +285,19 @@ def notify_error(title: str, message: str) -> None:
 
 
 def _heal_shortcuts() -> None:
+    """Shortcuts and the browser-extension launcher registration both follow this install."""
     try:
         from . import shortcuts
 
         shortcuts.ensure()
     except Exception as e:   # a shortcut problem must never prevent the app from starting
         print(f"shortcut check skipped: {e}", file=sys.stderr)
+    try:
+        from . import native_host
+
+        native_host.register()
+    except Exception as e:
+        print(f"browser launcher registration skipped: {e}", file=sys.stderr)
 
 
 # ======================================================================================

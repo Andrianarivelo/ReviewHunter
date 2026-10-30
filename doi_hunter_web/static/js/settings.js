@@ -20,6 +20,7 @@ window.settingsPart = function settingsPart() {
     appShortcuts: null,
     appStopped: false,
     appRestarting: false,
+    browserLauncher: null,
     fulltextStats: null,
     /** "Test the sources" panel (Settings > PDF Sources). */
     sourcesTest: { doi: '', running: false, result: null },
@@ -217,7 +218,22 @@ window.settingsPart = function settingsPart() {
 
     async loadSystem() {
       try { this.system = await api.get('/api/system/info'); } catch (e) { this.system = null; }
-      await this.loadAppInstance();
+      await Promise.all([this.loadAppInstance(), this.loadBrowserLauncher()]);
+    },
+
+    /** Native-messaging registration that lets the extension start ReviewHunter. */
+    async loadBrowserLauncher() {
+      try { this.browserLauncher = await api.get('/api/system/browser-launcher'); } catch (e) { this.browserLauncher = null; }
+    },
+    browserLauncherReady() {
+      return !!(this.browserLauncher?.browsers || []).some(b => b.browser === 'chrome' && b.linked);
+    },
+    async repairBrowserLauncher() {
+      try {
+        const r = await api.post('/api/system/browser-launcher/repair', {});
+        this.toast(r.skipped ? `Not managed here (${r.skipped})` : (r.ok ? 'The browser can start ReviewHunter' : (r.errors || []).join('; ')), r.ok ? 'ok' : 'error', 6000);
+        await this.loadBrowserLauncher();
+      } catch (e) { this.toast(e.message, 'error', 6000); }
     },
 
     // ------------------------------------------------------------ application (launcher, shortcuts)

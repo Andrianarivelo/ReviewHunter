@@ -5,7 +5,7 @@
  *   page  -> extension   {source: "reviewhunter-app", type: "handoff", handoff}   a PDF the server
  *                         could not fetch; the extension tries with the browser session
  *   page  -> extension   {source: "reviewhunter-app", type: "ping"}               "are you there?"
- *   extension -> page    {source: "reviewhunter-connector", type: "hello", version}
+ *   extension -> page    {source: "reviewhunter-connector", type: "hello", version, id}
  *   extension -> page    {source: "reviewhunter-connector", type: "handoff-ack", itemId, accepted, error}
  *
  * Only messages posted by the page itself (event.source === window) are relayed, and the service
@@ -19,12 +19,14 @@
   /** Tell the page which connector version is installed. */
   const announce = () => {
     let version = "";
+    let id = "";
     try {
       version = chrome.runtime.getManifest().version;
+      id = chrome.runtime.id; // lets ReviewHunter trust this connector to start it (native messaging)
     } catch (_) {
       /* extension reloaded: the page will ping again */
     }
-    window.postMessage({ source: CONNECTOR, type: "hello", version }, location.origin);
+    window.postMessage({ source: CONNECTOR, type: "hello", version, id }, location.origin);
     // Also a DOM marker, so a page that initialises after this script still sees the connector.
     try {
       document.documentElement.setAttribute("data-reviewhunter-connector", version || "unknown");

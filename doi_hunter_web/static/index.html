@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ReviewHunter</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%230284c7'/%3E%3Cstop offset='1' stop-color='%2314b8a6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='32' y='45' font-family='Arial' font-weight='800' font-size='38' text-anchor='middle' fill='white'%3ER%3C/text%3E%3C/svg%3E" />
+  <link rel="icon" href="/static/logo.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/static/icons/icon-180.png" />
 
   <!-- Vendored locally so the app works offline (no CDN at runtime). -->
   <script src="/static/vendor/tailwind.js"></script>
@@ -47,8 +48,8 @@
 <!-- ============================================================ TOP BAR -->
 <header class="topbar h-12 flex items-center gap-2 px-3 relative z-30">
   <button @click="selectVirtual('all')" class="flex items-center gap-2 pr-2" title="My Library">
-    <span class="brand-mark !w-7 !h-7 text-sm">R</span>
-    <span class="font-serif text-[17px] font-semibold tracking-tight hidden lg:inline">ReviewHunter</span>
+    <img src="/static/logo.svg" class="brand-logo" alt="" width="26" height="26">
+    <span class="brand-word hidden lg:inline">Review<span>Hunter</span></span>
   </button>
 
   <div class="flex items-center gap-1 ml-1">
@@ -81,8 +82,9 @@
     <div class="relative flex-1">
       <input x-ref="search" x-model="searchQuery" @input.debounce.250ms="isItemView() ? loadItems() : selectVirtual('all')"
              @keydown.enter="isItemView() ? loadItems() : null" @keydown.escape="searchQuery=''; loadItems(); $refs.search.blur()"
-             type="text" placeholder="Search library (Ctrl+K)"
-             class="search-input w-full h-8 pl-8 pr-40 rounded-lg text-[13px] outline-none" />
+             type="text" placeholder="Search your library" aria-label="Search library (Ctrl+K)"
+             class="search-input w-full h-8 pl-8 pr-48 text-[12.5px] outline-none" />
+      <kbd x-show="!searchQuery" class="search-kbd" aria-hidden="true">Ctrl K</kbd>
       <svg class="absolute left-2.5 top-2 w-4 h-4 text-ink-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <select x-model="searchMode" @change="localStorage.setItem('rh.searchMode', JSON.stringify(searchMode)); loadItems()"
               class="absolute right-1 top-1 h-6 text-[11px] rounded-md bg-ink-100 dark:bg-ink-800 px-1.5 outline-none text-ink-500">
@@ -581,7 +583,30 @@
       <div class="flex-1 min-h-0 overflow-y-auto relative" @dragover.prevent="if (!$event.dataTransfer.types.includes('application/x-rh-items')) dropping=true"
            @dragleave.self="dropping=false" @drop.prevent="onDropFiles($event)">
         <div x-show="dropping" class="drop-overlay">Drop PDFs, CSV, Word (.docx), text or bibliography files to import</div>
-        <template x-if="!items.length && !loading">
+        <!-- First run: an empty library gets a welcome with the three ways to start -->
+        <template x-if="!items.length && !loading && virtual==='all' && !searchQuery && !stats.items">
+          <div class="welcome">
+            <img src="/static/logo.svg" alt="" width="56" height="56" class="welcome-logo">
+            <h2>Welcome to Review<span>Hunter</span></h2>
+            <p>Collect papers and books, find their PDFs, read, annotate and cite them. Start in one of three ways:</p>
+            <div class="welcome-actions">
+              <button @click="openIdentify()" class="welcome-card">
+                <svg viewBox="0 0 24 24"><path d="m15 4-11 11 5 5 11-11-5-5Z"/><path d="M19 2v3M22 5h-3"/></svg>
+                <b>Add by identifier</b><span>Paste a DOI, ISBN, PMID or arXiv id</span>
+              </button>
+              <button @click="openImport()" class="welcome-card">
+                <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v3h16v-3"/></svg>
+                <b>Import</b><span>PDFs, a reference list, BibTeX, or your Zotero library</span>
+              </button>
+              <button @click="openSettings('connector')" class="welcome-card">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3v5.5M4.2 16.5 9 13.8M19.8 16.5 15 13.8"/></svg>
+                <b>Save from your browser</b><span>Set up the Chrome connector: one click per paper</span>
+              </button>
+            </div>
+            <p class="welcome-hint">Tip: drop PDF files anywhere on this list to import them.</p>
+          </div>
+        </template>
+        <template x-if="!items.length && !loading && !(virtual==='all' && !searchQuery && !stats.items)">
           <div class="h-full grid place-items-center p-10 text-center">
             <div class="result-empty compact max-w-md">
               <div class="font-semibold text-ink-700 dark:text-ink-200" x-text="searchQuery ? 'No matching items.' : (virtual==='trash' ? 'The Trash is empty.' : 'No items in this view.')"></div>
@@ -757,7 +782,7 @@
               <div class="contents"><div class="field-label">Creator</div><button @click="addCreator()" class="text-left text-xs text-accent-600 py-1">+ Add creator</button></div>
             </template>
 
-            <template x-for="f in fieldsFor(selectedItem)" :key="f.id">
+            <template x-for="f in visibleFields(selectedItem)" :key="f.id">
               <div class="contents">
                 <label class="field-label" x-text="f.label"></label>
                 <div class="min-w-0 flex items-center gap-1">
@@ -774,6 +799,8 @@
               </div>
             </template>
           </div>
+          <button x-show="showEmptyFields || hiddenFieldCount(selectedItem)" @click="toggleEmptyFields()" class="fields-toggle"
+                  x-text="showEmptyFields ? 'Hide empty fields' : `Show ${hiddenFieldCount(selectedItem)} empty field${hiddenFieldCount(selectedItem) === 1 ? '' : 's'}`"></button>
 
           <div x-show="(selectedItem.journal || selectedItem.issn) && selectedItem.item_type !== 'book'" class="flex items-center gap-2 text-xs">
             <span class="rail-label">Impact factor</span>
@@ -1606,7 +1633,21 @@
             <span class="w-2.5 h-2.5 rounded-full shrink-0" :class="connector.present ? 'bg-emerald-500' : 'bg-ink-300'"></span>
             <span x-text="connector.present ? `Connector ${connector.version} is active in this browser: failed downloads are retried in Chrome automatically.` : 'Connector not detected in this browser tab: install it (steps above) or reload this page after enabling it.'"></span>
           </div>
-          <p class="text-xs text-ink-500">ReviewHunter must be running for the connector to save (the icon turns grey otherwise). The server only accepts writes from the app itself and from browser extensions, never from ordinary websites.</p>
+          <div class="card p-4 space-y-2" x-show="browserLauncher">
+            <div class="flex items-center gap-2">
+              <span class="status-dot" :class="browserLauncherReady() ? 'on' : 'warn'"></span>
+              <span class="font-semibold">Start ReviewHunter from the browser</span>
+              <button x-show="browserLauncher?.managed" @click="repairBrowserLauncher()" class="ml-auto action-secondary h-7 px-2.5 text-xs">Repair</button>
+            </div>
+            <p class="text-xs text-ink-500 leading-relaxed">With connector 1.3 or newer, the toolbar button starts ReviewHunter when it is closed, and <b>Open in ReviewHunter</b> shows the saved paper in the same browser window. Right-click the toolbar button for <b>Open ReviewHunter library</b>.</p>
+            <div class="flex flex-wrap gap-1.5 text-[11px]" x-show="browserLauncher?.managed">
+              <template x-for="b in (browserLauncher?.browsers || [])" :key="b.browser">
+                <span class="type-pill" :class="b.linked ? '' : 'opacity-60'" x-text="`${({chrome: 'Chrome', edge: 'Edge', brave: 'Brave', chromium: 'Chromium'})[b.browser] || b.browser} ${b.linked ? '✓' : '-'}`"></span>
+              </template>
+            </div>
+            <div x-show="browserLauncher && !browserLauncher.managed" class="text-xs text-ink-400" x-text="`Not managed for this copy (${browserLauncher?.reason})`"></div>
+          </div>
+          <p class="text-xs text-ink-500">The server only accepts writes from the app itself and from browser extensions, never from ordinary websites.</p>
         </section>
 
         <!-- Word -->

@@ -28,6 +28,7 @@
     <img class="logo" src="../../icons/icon-32.png" alt="" width="22" height="22">
     <div class="brand">ReviewHunter</div>
     <span id="conn" class="conn" title="Connection status"><span class="dot"></span><span id="conn-text">Connecting</span></span>
+    <button id="btn-library" class="icon-btn" type="button" title="Open your library in this window"><svg><use href="#i-library"/></svg></button>
     <button id="btn-settings" class="icon-btn" type="button" title="Settings"><svg><use href="#i-gear"/></svg></button>
   </header>
 
@@ -43,15 +44,24 @@
       <p class="muted center">Reading this page...</p>
     </section>
 
-    <!-- ReviewHunter offline -->
+    <!-- Starting ReviewHunter through its helper -->
+    <section id="state-starting" class="state" hidden>
+      <div class="empty">
+        <div class="spinner" aria-hidden="true"></div>
+        <h2>Starting ReviewHunter...</h2>
+        <p class="muted">Your library opens in a few seconds.</p>
+      </div>
+    </section>
+
+    <!-- ReviewHunter offline (could not be started) -->
     <section id="state-offline" class="state" hidden>
       <div class="empty">
         <div class="empty-icon"><svg><use href="#i-plug"/></svg></div>
         <h2>ReviewHunter is not running</h2>
-        <p>Start it from the <strong>ReviewHunter</strong> desktop shortcut, wait for the library window to open, then retry.</p>
+        <p id="offline-reason">It could not be started from the browser.</p>
         <p class="muted small">Looking for it at <code id="offline-url"></code></p>
         <div class="row gap">
-          <button id="btn-retry" class="btn primary" type="button">Retry</button>
+          <button id="btn-retry" class="btn primary" type="button">Start ReviewHunter</button>
           <button id="btn-offline-settings" class="btn" type="button">Settings</button>
         </div>
       </div>

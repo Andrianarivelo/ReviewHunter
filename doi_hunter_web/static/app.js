@@ -38,11 +38,30 @@ function app() {
         }
         this.connectWS();
         this.restoreBulkImport();
+        // Deep link from the Chrome connector ("Open in ReviewHunter"): #item=<id>. The extension only
+        // changes the fragment of an open app tab, so the page does not reload.
+        addEventListener('hashchange', () => this.openFromLocation());
+        this.openFromLocation();
         addEventListener('click', () => { this.closeContextMenu(); });
         addEventListener('resize', () => this.closeContextMenu());
         addEventListener('keydown', (e) => this.onGlobalKey(e));
         addEventListener('dragover', (e) => e.preventDefault());
         addEventListener('drop', (e) => e.preventDefault());
+      },
+
+      /** Select and show the item named in the URL (#item=12 or legacy ?item=12), then clean the URL. */
+      async openFromLocation() {
+        const fromHash = new URLSearchParams(location.hash.replace(/^#/, '')).get('item');
+        const id = Number(fromHash || new URLSearchParams(location.search).get('item'));
+        if (!id) return;
+        history.replaceState(null, '', location.pathname);   // a reload must not reopen it
+        if (!this.isItemView() || this.virtual !== 'all') { this.selectVirtual('all'); await this.loadItems(); }
+        this.selectedIds = [id];
+        await this.openItem(id);
+        this.$nextTick(() => {
+          const row = document.querySelector(`[data-item-row="${id}"]`);
+          if (row) { row.scrollIntoView({ block: 'center' }); row.classList.add('row-flash'); setTimeout(() => row.classList.remove('row-flash'), 1600); }
+        });
       },
 
       /** Application-wide keyboard shortcuts (Zotero-compatible where possible). */
@@ -91,6 +110,12 @@ function app() {
           if (m.type === 'hello') {
             const wasPresent = this.connector.present;
             this.connector = { present: true, version: m.version || '' };
+            // Let this connector start ReviewHunter even if it was loaded from another folder (its ID
+            // comes from that folder's path). Once per page; the server ignores IDs it already trusts.
+            if (m.id && !this._connectorIdSent) {
+              this._connectorIdSent = true;
+              api.post('/api/system/browser-launcher/extension', { id: m.id }).catch(() => null);
+            }
             if (!wasPresent) this.flushPendingHandoffs();
           } else if (m.type === 'handoff-ack') {
             if (m.accepted) this.toast('Chrome is fetching the PDF with your browser session...', 'info', 4000);

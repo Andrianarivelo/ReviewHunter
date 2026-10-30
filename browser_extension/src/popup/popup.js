@@ -140,11 +140,20 @@ async function init(opts = {}) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   state.tab = tab;
 
-  let status = await send({ type: "status", force: !!opts.force });
-  if (!status.online && !opts.force) status = await send({ type: "status", force: true });
+  // Always a fresh ping (a few ms locally): the 20 s cache that keeps the toolbar badge cheap could
+  // still say "online" just after ReviewHunter was quit, and the popup would then not start it.
+  let status = await send({ type: "status", force: true });
+  if (!status.online && !opts.noStart) {
+    // Not running: start it through the ReviewHunter helper (native messaging), then carry on.
+    showState("starting");
+    status = await send({ type: "startApp" }).catch((e) => ({ online: false, error: e.message }));
+  }
   setConnection(status);
   if (!status.online) {
     $("offline-url").textContent = state.settings.serverUrl;
+    $("offline-reason").textContent = status.missing
+      ? "The browser cannot start it yet: open ReviewHunter once from its desktop or Start menu shortcut (or reinstall it). From then on this button starts it for you."
+      : `It could not be started${status.error ? `: ${status.error}` : "."}`;
     showState("offline");
     return;
   }
@@ -690,10 +699,20 @@ function bindEvents() {
   $("btn-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
   $("btn-offline-settings").addEventListener("click", () => chrome.runtime.openOptionsPage());
   $("btn-retry").addEventListener("click", () => init({ force: true }));
+  $("btn-library").addEventListener("click", async () => {
+    // Opens (starting it if needed) the library in THIS window, next to the page being read.
+    $("btn-library").disabled = true;
+    const res = await send({ type: "openApp", windowId: state.tab && state.tab.windowId });
+    if (res && res.ok) window.close();
+    else {
+      $("btn-library").disabled = false;
+      init({ force: true, noStart: true });
+    }
+  });
   $("btn-save").addEventListener("click", startSave);
   $("btn-done").addEventListener("click", () => window.close());
   $("btn-open-app").addEventListener("click", async () => {
-    await send({ type: "openApp", itemId: state.savedIds[0] });
+    await send({ type: "openApp", itemId: state.savedIds[0], windowId: state.tab && state.tab.windowId });
     window.close();
   });
 

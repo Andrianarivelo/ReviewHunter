@@ -1229,6 +1229,46 @@ def system_shortcuts_repair(request: Request) -> dict:
     return shortcuts.ensure(keep_one=True)
 
 
+@router.get("/system/browser-launcher")
+def system_browser_launcher() -> dict:
+    """Can the Chrome extension start ReviewHunter (native messaging registration per browser)?"""
+    from . import native_host, shortcuts
+
+    reason = shortcuts.skip_reason()
+    return {"managed": reason is None, "reason": reason or "", "extension_ids": native_host.allowed_ids(),
+            "browsers": [] if reason else native_host.status()}
+
+
+@router.post("/system/browser-launcher/repair")
+def system_browser_launcher_repair(request: Request) -> dict:
+    from . import native_host
+
+    _no_extension(request)
+    return native_host.register()
+
+
+class ConnectorIdIn(BaseModel):
+    id: str
+
+
+@router.post("/system/browser-launcher/extension")
+def system_browser_launcher_extension(body: ConnectorIdIn, request: Request) -> dict:
+    """The app page relays the connector's own ID (from its content-script bridge): trust it for launching.
+
+    Needed when the connector was loaded from another folder than this install's browser_extension
+    (its ID is derived from that folder). Web pages cannot call this (origin guard); a different
+    extension could, but the helper it would gain can only start ReviewHunter.
+    """
+    from . import native_host, shortcuts
+
+    if shortcuts.skip_reason():
+        return {"ok": True, "added": False, "skipped": shortcuts.skip_reason()}
+    try:
+        return native_host.remember_extension_id(body.id)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
+
+
 @router.post("/system/open-path")
 def open_path(body: OpenPathIn) -> dict:
     """Open a folder in Explorer. Restricted to ReviewHunter's own folders."""

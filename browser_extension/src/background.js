@@ -3,6 +3,8 @@
  *
  * Responsibilities:
  * - answer popup messages (detect, status, pending attachments, open app);
+ * - start ReviewHunter when it is not running (native messaging helper, see core/launch.js) and open
+ *   it in the user's current window;
  * - run saves through a long-lived port so they survive the popup closing;
  * - keep the toolbar icon in sync (item count badge, grey icon when offline, green / amber
  *   check when the page's reference is already saved with / without its PDF);
@@ -18,6 +20,7 @@ import { detectInTab } from "./core/detect.js";
 import { runSave, runAttachPending } from "./core/save.js";
 import { acquirePdf } from "./core/pdf.js";
 import { runHandoff } from "./core/handoff.js";
+import { startServer, openAppInWindow } from "./core/launch.js";
 import { getSettings, setSettings, getPending, matchPending, removePending } from "./settings.js";
 import { identifiersInText, isLikelyPdfUrl, fileNameFromUrl, doiFromUrl, shadowLibraryKind } from "./shared/identifiers.js";
 
@@ -431,8 +434,10 @@ async function handleMessage(msg, sender) {
       const list = await getPending();
       return list.map((p) => ({ ...p, score: matchPending(p, msg.url || "", doi) })).sort((a, b) => b.score - a.score || b.at - a.at);
     }
+    case "startApp":
+      return ensureRunning();
     case "openApp":
-      return openApp(msg.itemId);
+      return openApp(msg.itemId, msg.windowId);
     default:
       throw new Error(`unknown message ${msg && msg.type}`);
   }
@@ -476,16 +481,36 @@ chrome.runtime.onConnect.addListener((port) => {
  * @param {number} [itemId]  Item to reveal (passed as ?item= for future deep links).
  * @returns {Promise<{ok: boolean}>}
  */
-async function openApp(itemId) {
-  const { serverUrl } = await getSettings();
-  const tabs = await chrome.tabs.query({ url: [`${serverUrl}/*`] }).catch(() => []);
-  if (tabs.length) {
-    await chrome.tabs.update(tabs[0].id, { active: true });
-    await chrome.windows.update(tabs[0].windowId, { focused: true }).catch(() => {});
-  } else {
-    await chrome.tabs.create({ url: `${serverUrl}/${itemId ? `?item=${encodeURIComponent(itemId)}` : ""}` });
+/**
+ * Make sure ReviewHunter answers: if not, ask the native helper to start it and wait for it.
+ *
+ * @returns {Promise<{online: boolean, started?: boolean, missing?: boolean, error?: string}>}
+ */
+async function ensureRunning() {
+  let status = await getStatus({ force: true });
+  if (status.online) return status;
+  const res = await startServer();
+  if (!res.ok) return { ...status, missing: !!res.missing, error: res.error };
+  // The helper answers once the server is up; the ping confirms it from the extension's side.
+  for (let i = 0; i < 20 && !status.online; i++) {
+    status = await getStatus({ force: true });
+    if (!status.online) await new Promise((r) => setTimeout(r, 500));
   }
-  return { ok: true };
+  return { ...status, started: status.online };
+}
+
+/**
+ * Open the ReviewHunter app in a window (the popup's window by default), on an item if given,
+ * starting ReviewHunter first when needed.
+ *
+ * @param {number|string} [itemId]  Item to show.
+ * @param {number} [windowId]  Window to use.
+ * @returns {Promise<object>} {ok, tabId} or {ok: false, error, missing}.
+ */
+async function openApp(itemId, windowId) {
+  const status = await ensureRunning();
+  if (!status.online) return { ok: false, error: status.error, missing: !!status.missing };
+  return openAppInWindow({ itemId, windowId });
 }
 
 // ------------------------------------------------------------------------------------------
@@ -502,6 +527,7 @@ function createMenus() {
     chrome.contextMenus.create({ id: "rh-page", title: "Save page to ReviewHunter", contexts: ["page", "frame"] });
     chrome.contextMenus.create({ id: "rh-link", title: "Save link to ReviewHunter", contexts: ["link"] });
     chrome.contextMenus.create({ id: "rh-selection", title: "Add selection as identifiers to ReviewHunter", contexts: ["selection"] });
+    chrome.contextMenus.create({ id: "rh-open", title: "Open ReviewHunter library", contexts: ["action"] });
   });
 }
 
@@ -539,8 +565,13 @@ async function menuDefaults() {
  */
 async function handleMenu(info, tab) {
   const tabId = tab && tab.id;
-  const status = await getStatus({ force: true });
-  if (!status.online) throw new Error("ReviewHunter is not running");
+  if (info.menuItemId === "rh-open") {
+    const opened = await openApp(undefined, tab && tab.windowId);
+    if (!opened.ok) throw new Error(opened.error || "ReviewHunter could not be started");
+    return;
+  }
+  const status = await ensureRunning();
+  if (!status.online) throw new Error(status.missing ? "start ReviewHunter once from its shortcut" : "ReviewHunter is not running");
   const d = await menuDefaults();
   await flashBadge(tabId, "...", "#0284c7", "ReviewHunter: saving");
 

@@ -1,0 +1,11 @@
+repeat,kind,seconds,ok,state
+0,cold,5.962,True,started
+0,warm,0.221,True,running
+1,cold,5.309,True,started
+1,warm,0.181,True,running
+2,cold,5.273,True,started
+2,warm,0.191,True,running
+3,cold,5.872,True,started
+3,warm,0.305,True,running
+4,cold,6.08,True,started
+4,warm,0.259,True,running

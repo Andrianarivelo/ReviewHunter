@@ -26,6 +26,19 @@ attaching them to the existing item (matched by DOI) or to a new one.
 After pulling new code, press the reload arrow on the extension card in
 `chrome://extensions`.
 
+## Starting ReviewHunter from the browser (1.3)
+
+You do not need to start ReviewHunter first: when it is not running, the popup starts it
+through ReviewHunter's native-messaging helper (`org.reviewhunter.launcher`, registered by
+ReviewHunter for Chrome, Edge, Brave and Chromium at install and at every launch). The
+helper only accepts this extension, recognised by its ID: for an unpacked extension Chrome
+derives it from the folder path, which ReviewHunter computes the same way; a connector loaded
+from another folder is trusted once it has talked to the app page. There is deliberately no
+`key` in `manifest.json` (a key would turn an update into a second, separate extension).
+**Open in ReviewHunter** and the library button open the app in the current window,
+reusing an open app tab. Updating from 1.2: click Reload on the extension card, then open
+ReviewHunter once from its shortcut. Real-browser test: `tools/extension_launch_e2e.py`.
+
 ## Using it
 
 | Where you are | What happens |
